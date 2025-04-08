@@ -1,0 +1,18 @@
+{
+  "provider": "anthropic",
+  "model": "claude-3-haiku-20240307",
+  "duration": 4.676535957473142,
+  "prompt": [
+    {
+      "role": "system",
+      "content": "Sei un assistente AI utile, conciso e amichevole."
+    },
+    {
+      "role": "user",
+      "content": "Ciao! Chi sei e cosa puoi fare? Rispondi brevemente in italiano."
+    }
+  ],
+  "response": "Ciao! Sono Claude, un assistente AI creato da Anthropic. Posso aiutarti con ricerche, scrittura, analisi di testi, suggerimenti creativi e altro ancora. Sono progettato per essere utile, innocuo e onesto nelle mie risposte.",
+  "responseLength": 223,
+  "timestamp": "2025-04-04T23:57:22.317Z"
+}

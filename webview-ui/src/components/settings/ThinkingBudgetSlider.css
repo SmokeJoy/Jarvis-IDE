@@ -1,0 +1,48 @@
+.thinking-budget-slider {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 4px;
+  background-color: var(--vscode-editor-background);
+}
+
+.thinking-budget-slider label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--vscode-editor-foreground);
+}
+
+.thinking-budget-slider .slider-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.thinking-budget-slider input[type="range"] {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  background: var(--vscode-input-border);
+  border-radius: 2px;
+  outline: none;
+}
+
+.thinking-budget-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--vscode-button-background);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.thinking-budget-slider input[type="range"]::-webkit-slider-thumb:hover {
+  background: var(--vscode-button-hoverBackground);
+}
+
+.thinking-budget-slider .slider-value {
+  min-width: 3rem;
+  text-align: right;
+  color: var(--vscode-editor-foreground);
+} 

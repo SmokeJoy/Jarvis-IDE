@@ -1,0 +1,17 @@
+{
+  "provider": "openai",
+  "model": "gpt-3.5-turbo",
+  "duration": 3.4714947362553294,
+  "prompt": [
+    {
+      "role": "system",
+      "content": "Sei un assistente AI utile, conciso e amichevole."
+    },
+    {
+      "role": "user",
+      "content": "Ciao! Chi sei e cosa puoi fare? Rispondi brevemente in italiano."
+    }
+  ],
+  "response": "Ciao! Sono GPT, un assistente AI sviluppato da OpenAI. Posso aiutarti con informazioni, spiegazioni, suggerimenti creativi, e molto altro. Sono qui per rispondere alle tue domande in modo chiaro e utile.",
+  "timestamp": "2025-04-04T23:52:57.011Z"
+}

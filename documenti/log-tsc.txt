@@ -1,0 +1,57 @@
+# Log errori TypeScript - 2025-04-08
+
+## Primi 10 errori di compilazione
+
+1. `src/types/extension.types.ts:3:33 - error TS2307: Cannot find module './provider.types' or its corresponding type declarations.`
+   ```typescript
+   import type { AIProvider } from './provider.types';
+   ```
+
+2. `src/types/global.test.ts:8:8 - error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean './global.js'?`
+   ```typescript
+   } from './global'
+   ```
+
+3. `src/types/global.ts:12:3 - error TS2460: Module '"../shared/types/api.types.js"' declares 'ChatCompletionContentPartText' locally, but it is exported as 'TelemetrySetting'.`
+   ```typescript
+   ChatCompletionContentPartText,
+   ```
+
+4. `src/types/global.ts:13:3 - error TS2460: Module '"../shared/types/api.types.js"' declares 'ChatCompletionContentPartImage' locally, but it is exported as 'TelemetrySetting'.`
+   ```typescript
+   ChatCompletionContentPartImage,
+   ```
+
+5. `src/types/messages.ts:7:1 - error TS6133: 'ApiConfiguration' is declared but its value is never read.`
+   ```typescript
+   import type { ApiConfiguration } from '../shared/types/api.types.js'
+   ```
+
+6. `src/utils/chatExport.ts:1:34 - error TS2307: Cannot find module '../shared/types.js' or its corresponding type declarations.`
+   ```typescript
+   import type { ChatMessage } from '../shared/types.js';
+   ```
+
+7. `src/utils/chatExport.ts:2:1 - error TS6133: 'ApiConfiguration' is declared but its value is never read.`
+   ```typescript
+   import type { ApiConfiguration } from '../shared/types/api.types.js';
+   ```
+
+8. `src/utils/chatExport.ts:3:1 - error TS6133: 'ExtensionMessage' is declared but its value is never read.`
+   ```typescript
+   import type { ExtensionMessage } from '../shared/ExtensionMessage.js';
+   ```
+
+9. `src/utils/cost.ts:1:10 - error TS1484: 'ModelInfo' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.`
+   ```typescript
+   import { ModelInfo } from "../shared/types/api.types.js"
+   ```
+
+10. `src/utils/logger.ts:89:23 - error TS2345: Argument of type '"jarvis-ide.log"' is not assignable to parameter of type '"DEBUG" | "INFO" | "WARN" | "ERROR"'.`
+    ```typescript
+    appendLogToFile('jarvis-ide.log', formattedMessage + '\n')
+    ```
+
+## Totale errori
+
+Trovati 2179 errori in 306 file. 

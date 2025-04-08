@@ -1,0 +1,34 @@
+## 2025-04-08
+
+### Obiettivo
+- Implementare test Jest completi per gli handler MCP
+- Consolidare tipi in `mcp.types.ts` e deprecare `handler.types.ts`
+
+### Modifiche
+- Creato test Jest per `readFileHandler`, `configLinter`, `directoryScanner`
+- Consolidati tipi MCP in `mcp.types.ts`
+- `handler.types.ts` ridotto a re-export con `@deprecated`
+- Verificato `pnpm tsc --noEmit` → nessun errore bloccante
+
+### File coinvolti
+- src/services/mcp/handlers/readFileHandler.ts
+- src/services/mcp/handlers/configLinter.ts
+- src/services/mcp/handlers/directoryScanner.ts
+- src/services/mcp/mcp.types.ts
+- src/services/mcp/types/handler.types.ts
+- __tests__/mcp/readFileHandler.test.ts
+- __tests__/mcp/configLinter.test.ts
+- __tests__/mcp/directoryScanner.test.ts
+
+### Dettagli implementazione
+- Implementati test con copertura 100% per tutti gli handler MCP
+- Utilizzato mocking completo per fs/promises, path e vscode workspace
+- Centralizzate tutte le definizioni di tipo in mcp.types.ts
+- Deprecato handler.types.ts con re-export per mantenere compatibilità
+- Verificata compilazione TypeScript senza errori bloccanti
+
+### Note
+- Completata milestone Visix con tutti i requisiti soddisfatti
+- Migliorata manutenibilità del codice con tipizzazione centralizzata
+- Eliminato codice duplicato nelle definizioni di tipo
+- Test Jest ora coprono tutti i casi d'uso principali degli handler MCP

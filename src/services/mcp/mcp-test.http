@@ -1,0 +1,967 @@
+### Esporta tutti i contesti in JSON
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.export",
+  "args": {
+    "format": "json"
+  }
+}
+
+### Esporta contesti di progetto in CSV
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.export",
+  "args": {
+    "format": "csv",
+    "scope": "project",
+    "includeMetadata": true
+  }
+}
+
+### Esporta contesti con tag specifici in Markdown
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.export",
+  "args": {
+    "format": "markdown",
+    "tags": ["architettura", "performance"],
+    "includeMetadata": true
+  }
+}
+
+### Esporta contesti recenti in JSON
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.export",
+  "args": {
+    "format": "json",
+    "sinceTimestamp": 1672527600000,
+    "includeMetadata": false
+  }
+}
+
+### Esporta con formato non valido
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.export",
+  "args": {
+    "format": "xml"
+  }
+}
+
+### Importa contesti da JSON
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.import",
+  "args": {
+    "format": "json",
+    "content": "[{\"text\":\"Nuovo contesto JSON\",\"tags\":[\"test\",\"import\"]}]"
+  }
+}
+
+### Importa contesti da CSV
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.import",
+  "args": {
+    "format": "csv",
+    "content": "text,scope,tags\n\"Nuovo contesto CSV\",project,\"test,import\""
+  }
+}
+
+### Importa contesti da Markdown
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.import",
+  "args": {
+    "format": "markdown",
+    "content": "### ID: ctx-789\n- **Scope**: project\n- **Timestamp**: 2023-01-01T12:00:00.000Z\n- **Tags**: `test`, `import`\n\nNuovo contesto Markdown\n---"
+  }
+}
+
+### Importa con rilevamento automatico del formato
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.import",
+  "args": {
+    "format": "auto",
+    "content": "[{\"text\":\"Contesto con formato auto\",\"tags\":[\"test\"]}]"
+  }
+}
+
+### Importa con scope specifico
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.import",
+  "args": {
+    "format": "json",
+    "content": "[{\"text\":\"Contesto con scope specifico\"}]",
+    "scope": "project"
+  }
+}
+
+### Importa con merge dei tag disabilitato
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.import",
+  "args": {
+    "format": "json",
+    "content": "[{\"text\":\"Contesto senza merge tag\",\"tags\":[\"test\"]}]",
+    "mergeTags": false
+  }
+}
+
+### Importa con formato non valido
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.import",
+  "args": {
+    "format": "xml",
+    "content": "<context><text>Contesto XML</text></context>"
+  }
+}
+
+### Modifica testo di un contesto
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.edit",
+  "args": {
+    "id": "ctx-123",
+    "text": "Testo modificato del contesto"
+  }
+}
+
+### Modifica tag di un contesto
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.edit",
+  "args": {
+    "id": "ctx-123",
+    "tags": ["nuovo-tag", "aggiornato"]
+  }
+}
+
+### Modifica scope di un contesto
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.edit",
+  "args": {
+    "id": "ctx-123",
+    "scope": "project"
+  }
+}
+
+### Modifica multipla di un contesto
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.edit",
+  "args": {
+    "id": "ctx-123",
+    "text": "Testo completamente nuovo",
+    "tags": ["completamente", "nuovo"],
+    "scope": "agent"
+  }
+}
+
+### Modifica contesto non esistente
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.edit",
+  "args": {
+    "id": "ctx-non-esistente",
+    "text": "Questo non dovrebbe funzionare"
+  }
+}
+
+### Modifica senza ID
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.edit",
+  "args": {
+    "text": "Questo non dovrebbe funzionare"
+  }
+}
+
+### Crea relazione unidirezionale
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.link",
+  "args": {
+    "sourceId": "ctx-123",
+    "targetId": "ctx-456",
+    "relation": "supports"
+  }
+}
+
+### Crea relazione bidirezionale
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.link",
+  "args": {
+    "sourceId": "ctx-123",
+    "targetId": "ctx-456",
+    "relation": "is_similar_to",
+    "bidirectional": true
+  }
+}
+
+### Crea relazione con forza e metadati
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.link",
+  "args": {
+    "sourceId": "ctx-123",
+    "targetId": "ctx-456",
+    "relation": "explains",
+    "strength": 0.8,
+    "metadata": {
+      "confidence": 0.9,
+      "source": "user"
+    }
+  }
+}
+
+### Crea relazione con contesto non esistente
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.link",
+  "args": {
+    "sourceId": "ctx-non-esistente",
+    "targetId": "ctx-456",
+    "relation": "supports"
+  }
+}
+
+### Crea relazione senza parametri obbligatori
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.link",
+  "args": {
+    "sourceId": "ctx-123"
+  }
+}
+
+### context.linksOf
+
+# Recupera tutte le relazioni di un contesto
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.linksOf",
+  "args": {
+    "id": "ctx-123"
+  }
+}
+
+# Recupera solo le relazioni in uscita
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.linksOf",
+  "args": {
+    "id": "ctx-123",
+    "direction": "outgoing"
+  }
+}
+
+# Recupera relazioni con forza minima
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.linksOf",
+  "args": {
+    "id": "ctx-123",
+    "minStrength": 0.7
+  }
+}
+
+# Recupera relazioni con confidenza minima
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.linksOf",
+  "args": {
+    "id": "ctx-123",
+    "minConfidence": 0.8
+  }
+}
+
+# Recupera relazioni di un tipo specifico
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.linksOf",
+  "args": {
+    "id": "ctx-123",
+    "relation": "supports"
+  }
+}
+
+# Errore: contesto non esistente
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.linksOf",
+  "args": {
+    "id": "ctx-non-esistente"
+  }
+}
+
+# Errore: ID mancante
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.linksOf",
+  "args": {}
+}
+
+### context.graph - Grafo base
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.graph",
+  "args": {
+    "rootId": "ctx-123"
+  }
+}
+
+### context.graph - Grafo con profondità
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.graph",
+  "args": {
+    "rootId": "ctx-123",
+    "depth": 2
+  }
+}
+
+### context.graph - Grafo con direzione
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.graph",
+  "args": {
+    "rootId": "ctx-123",
+    "direction": "outgoing"
+  }
+}
+
+### context.graph - Grafo con filtro relazione
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.graph",
+  "args": {
+    "rootId": "ctx-123",
+    "relation": "supports"
+  }
+}
+
+### context.graph - Grafo con filtri avanzati
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.graph",
+  "args": {
+    "rootId": "ctx-123",
+    "minStrength": 0.7,
+    "minConfidence": 0.8
+  }
+}
+
+### context.graph - Grafo completo
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.graph",
+  "args": {
+    "rootId": "ctx-123",
+    "depth": 2,
+    "direction": "both",
+    "relation": "supports",
+    "minStrength": 0.7,
+    "minConfidence": 0.8,
+    "includeRoot": true,
+    "includeIsolated": false
+  }
+}
+
+### context.graph - Contesto non trovato
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.graph",
+  "args": {
+    "rootId": "ctx-non-esistente"
+  }
+}
+
+### context.unlink - Rimuovi relazione specifica
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.unlink",
+  "args": {
+    "sourceId": "ctx-123",
+    "targetId": "ctx-456",
+    "relation": "supports"
+  }
+}
+
+### context.unlink - Rimuovi tutte le relazioni
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.unlink",
+  "args": {
+    "sourceId": "ctx-123",
+    "targetId": "ctx-456"
+  }
+}
+
+### context.unlink - Rimuovi relazione bidirezionale
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.unlink",
+  "args": {
+    "sourceId": "ctx-123",
+    "targetId": "ctx-456",
+    "bidirectional": true
+  }
+}
+
+### context.unlink - Contesto non trovato
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.unlink",
+  "args": {
+    "sourceId": "ctx-non-esistente",
+    "targetId": "ctx-456"
+  }
+}
+
+### context.unlink - Relazione non esistente
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.unlink",
+  "args": {
+    "sourceId": "ctx-123",
+    "targetId": "ctx-456",
+    "relation": "non-esistente"
+  }
+}
+
+### Esporta grafo in formato DOT
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.graph.export",
+  "args": {
+    "rootId": "ctx-123",
+    "format": "dot",
+    "depth": 2,
+    "direction": "both",
+    "includeNodeText": true,
+    "includeNodeTags": true,
+    "includeEdgeMetadata": true
+  }
+}
+
+### Esporta grafo in formato Mermaid
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.graph.export",
+  "args": {
+    "rootId": "ctx-123",
+    "format": "mermaid",
+    "depth": 1,
+    "direction": "outgoing",
+    "relation": "supports",
+    "minStrength": 0.5,
+    "includeNodeText": true
+  }
+}
+
+### Esporta grafo in formato GraphML
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.graph.export",
+  "args": {
+    "rootId": "ctx-123",
+    "format": "graphml",
+    "depth": 3,
+    "direction": "incoming",
+    "minConfidence": 0.7,
+    "includeNodeTags": true,
+    "includeEdgeMetadata": true
+  }
+}
+
+### Esporta grafo in formato JSON-LD
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.graph.export",
+  "args": {
+    "rootId": "ctx-123",
+    "format": "json-ld",
+    "depth": 2,
+    "direction": "both",
+    "includeRoot": false,
+    "includeIsolated": true,
+    "includeNodeText": true,
+    "includeNodeTags": true,
+    "includeEdgeMetadata": true
+  }
+}
+
+### Esporta grafo con contesto non esistente
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.graph.export",
+  "args": {
+    "rootId": "ctx-non-esistente",
+    "format": "dot"
+  }
+}
+
+### Esporta grafo con formato non supportato
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.graph.export",
+  "args": {
+    "rootId": "ctx-123",
+    "format": "formato-non-supportato"
+  }
+}
+
+### Naviga tra contesti (modalità shortest)
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-123",
+    "targetId": "ctx-789",
+    "mode": "shortest",
+    "includeContent": true,
+    "includeMetadata": true
+  }
+}
+
+### Naviga tra contesti con strategia
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-123",
+    "targetId": "ctx-789",
+    "mode": "shortest",
+    "strategy": {
+      "preferredRelations": ["supports", "explains"],
+      "minStrength": 0.5,
+      "minConfidence": 0.7,
+      "maxSteps": 5
+    },
+    "includeContent": true,
+    "includeMetadata": true
+  }
+}
+
+### Naviga tra contesti non esistenti
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-non-esistente",
+    "targetId": "ctx-789",
+    "mode": "shortest"
+  }
+}
+
+### Naviga tra contesti senza target
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-123",
+    "mode": "shortest"
+  }
+}
+
+### context.navigate (weighted)
+# Navigazione pesata tra contesti esistenti
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-123",
+    "targetId": "ctx-789",
+    "mode": "weighted",
+    "includeContent": true,
+    "includeMetadata": true
+  }
+}
+
+### context.navigate (weighted con preferredRelations)
+# Navigazione pesata con relazioni preferite
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-123",
+    "targetId": "ctx-789",
+    "mode": "weighted",
+    "strategy": {
+      "preferredRelations": ["supports", "explains"],
+      "minStrength": 0.5,
+      "minConfidence": 0.7
+    },
+    "includeContent": true,
+    "includeMetadata": true
+  }
+}
+
+### context.navigate (weighted con contesto non connesso)
+# Tentativo di navigazione tra contesti non connessi
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-123",
+    "targetId": "ctx-999",
+    "mode": "weighted"
+  }
+}
+
+### context.navigate (weighted con contesto inesistente)
+# Tentativo di navigazione con contesto inesistente
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-999",
+    "targetId": "ctx-123",
+    "mode": "weighted"
+  }
+}
+
+### context.navigate (weighted con parametri non validi)
+# Tentativo di navigazione con parametri non validi
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-123",
+    "mode": "weighted"
+  }
+}
+
+### context.navigate (semantic)
+# Navigazione semantica tra contesti esistenti
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-123",
+    "targetId": "ctx-789",
+    "mode": "semantic",
+    "includeContent": true,
+    "includeMetadata": true
+  }
+}
+
+### context.navigate (semantic con tag richiesti)
+# Navigazione semantica con tag richiesti e relazioni preferite
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-123",
+    "targetId": "ctx-789",
+    "mode": "semantic",
+    "strategy": {
+      "requireTags": ["architettura", "performance"],
+      "excludeTags": ["deprecato"],
+      "preferredRelations": ["supports", "explains"],
+      "minStrength": 0.5,
+      "minConfidence": 0.7
+    },
+    "includeContent": true,
+    "includeMetadata": true
+  }
+}
+
+### context.navigate (semantic con tag esclusi)
+# Navigazione semantica con tag esclusi
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-123",
+    "targetId": "ctx-789",
+    "mode": "semantic",
+    "strategy": {
+      "excludeTags": ["deprecato", "legacy"],
+      "minStrength": 0.3,
+      "minConfidence": 0.5
+    }
+  }
+}
+
+### context.navigate (semantic con relazioni preferite)
+# Navigazione semantica con sole relazioni preferite
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-123",
+    "targetId": "ctx-789",
+    "mode": "semantic",
+    "strategy": {
+      "preferredRelations": ["supports", "explains", "extends"],
+      "minStrength": 0.6,
+      "minConfidence": 0.8
+    }
+  }
+}
+
+### context.navigate (semantic con soglie alte)
+# Navigazione semantica con soglie di forza e confidenza alte
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-123",
+    "targetId": "ctx-789",
+    "mode": "semantic",
+    "strategy": {
+      "minStrength": 0.9,
+      "minConfidence": 0.9
+    }
+  }
+}
+
+### context.navigate (semantic con contesto non connesso semanticamente)
+# Tentativo di navigazione tra contesti non connessi semanticamente
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-123",
+    "targetId": "ctx-999",
+    "mode": "semantic",
+    "strategy": {
+      "requireTags": ["architettura"],
+      "minStrength": 0.5
+    }
+  }
+}
+
+### context.navigate (exploratory base)
+# Navigazione esplorativa base
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-123",
+    "mode": "exploratory",
+    "includeContent": true,
+    "includeMetadata": true
+  }
+}
+
+### context.navigate (exploratory con maxSteps)
+# Navigazione esplorativa con limite di profondità
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-123",
+    "mode": "exploratory",
+    "strategy": {
+      "maxSteps": 2,
+      "minStrength": 0.5,
+      "minConfidence": 0.7
+    }
+  }
+}
+
+### context.navigate (exploratory con tag)
+# Navigazione esplorativa con filtri per tag
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-123",
+    "mode": "exploratory",
+    "strategy": {
+      "requireTags": ["architettura", "performance"],
+      "excludeTags": ["deprecato"],
+      "maxSteps": 3
+    }
+  }
+}
+
+### context.navigate (exploratory tree)
+# Navigazione esplorativa in formato albero
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-123",
+    "mode": "exploratory",
+    "format": "tree",
+    "strategy": {
+      "maxSteps": 2,
+      "preferredRelations": ["supports", "explains"]
+    }
+  }
+}
+
+### context.navigate (exploratory con relazioni preferite)
+# Navigazione esplorativa con relazioni preferite
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-123",
+    "mode": "exploratory",
+    "strategy": {
+      "preferredRelations": ["supports", "explains", "extends"],
+      "minStrength": 0.6,
+      "minConfidence": 0.8
+    }
+  }
+}
+
+### context.navigate (exploratory con contesto inesistente)
+# Tentativo di navigazione esplorativa con contesto inesistente
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.navigate",
+  "args": {
+    "startId": "ctx-999",
+    "mode": "exploratory"
+  }
+} 

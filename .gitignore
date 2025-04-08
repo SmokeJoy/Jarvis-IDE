@@ -1,0 +1,28 @@
+out
+dist
+node_modules
+.vscode-test/
+*.vsix
+.DS_Store
+coverage
+*.log
+.env
+.env.*
+!.env.example
+
+
+.jarvisignore
+
+# Logs & error snapshots
+typescript_errors*.txt
+error-report*.txt
+full-error-log*.txt
+
+# Build artifacts
+*.tsbuildinfo
+*.js.map
+*.d.ts.map
+
+# Backup files
+*.bak
+*~

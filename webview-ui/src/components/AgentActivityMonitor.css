@@ -1,0 +1,269 @@
+.agent-activity-monitor {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--vscode-editor-background);
+  border-radius: 6px;
+  border: 1px solid var(--vscode-panel-border);
+  padding: 16px;
+  margin-bottom: 20px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.monitor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.monitor-header h3 {
+  margin: 0;
+  color: var(--vscode-foreground);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.loading-indicator {
+  height: 16px;
+  width: 16px;
+  margin-left: 8px;
+}
+
+.agents-counter {
+  margin-left: auto;
+  background-color: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
+}
+
+.no-agents-message {
+  padding: 16px;
+  color: var(--vscode-descriptionForeground);
+  font-style: italic;
+  text-align: center;
+}
+
+.agents-table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.agents-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  color: var(--vscode-foreground);
+}
+
+.agents-table thead {
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.agents-table th {
+  text-align: left;
+  padding: 8px 12px;
+  font-weight: 600;
+  color: var(--vscode-foreground);
+  position: sticky;
+  top: 0;
+  background-color: var(--vscode-editor-background);
+  z-index: 1;
+}
+
+.agents-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--vscode-editorIndentGuide-background);
+}
+
+.agent-row {
+  transition: background-color 0.2s;
+  position: relative;
+}
+
+.agent-row:hover {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+.agent-col {
+  width: 25%;
+}
+
+.status-col {
+  width: 15%;
+}
+
+.mode-col {
+  width: 20%;
+}
+
+.activity-col {
+  width: 20%;
+}
+
+.actions-col {
+  width: 15%;
+}
+
+.agent-name {
+  font-weight: 500;
+  position: relative;
+}
+
+.agent-tooltip {
+  position: absolute;
+  z-index: 100;
+  top: 100%;
+  left: 0;
+  min-width: 200px;
+  max-width: 300px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background-color: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-panel-border);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  font-weight: normal;
+  font-size: 12px;
+  white-space: normal;
+  color: var(--vscode-foreground);
+}
+
+.agent-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.agent-status.success .status-indicator {
+  background-color: var(--vscode-debugTokenExpression-name);
+}
+
+.agent-status.warning .status-indicator {
+  background-color: var(--vscode-editorWarning-foreground);
+}
+
+.agent-status.error .status-indicator {
+  background-color: var(--vscode-errorForeground);
+}
+
+.agent-status.inactive .status-indicator {
+  background-color: var(--vscode-editorIndentGuide-background);
+}
+
+.agent-mode {
+  color: var(--vscode-foreground);
+}
+
+.agent-last-activity {
+  color: var(--vscode-descriptionForeground);
+}
+
+.agent-actions {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.agent-details-row {
+  background-color: var(--vscode-editor-inactiveSelectionBackground);
+}
+
+.agent-details {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-section strong {
+  color: var(--vscode-foreground);
+  font-size: 12px;
+}
+
+.detail-value {
+  padding: 6px 10px;
+  background-color: var(--vscode-editor-background);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--vscode-foreground);
+  word-break: break-word;
+}
+
+.dependencies-list, .warnings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dependency-item {
+  padding: 4px 8px;
+  background-color: var(--vscode-inputValidation-infoBackground);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--vscode-inputValidation-infoForeground);
+}
+
+.warning-item {
+  padding: 4px 8px;
+  background-color: var(--vscode-inputValidation-warningBackground);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--vscode-inputValidation-warningForeground);
+}
+
+/* Per dispositivi mobile e tablet */
+@media (max-width: 768px) {
+  .agent-col {
+    width: 25%;
+  }
+  
+  .status-col {
+    width: 20%;
+  }
+  
+  .mode-col {
+    width: 20%;
+  }
+  
+  .activity-col {
+    display: none;
+  }
+  
+  .actions-col {
+    width: 35%;
+  }
+  
+  .agent-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .mode-col {
+    display: none;
+  }
+  
+  .agent-col {
+    width: 40%;
+  }
+  
+  .status-col {
+    width: 25%;
+  }
+  
+  .actions-col {
+    width: 35%;
+  }
+} 

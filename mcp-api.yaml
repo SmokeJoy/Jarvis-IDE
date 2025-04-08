@@ -1,0 +1,272 @@
+openapi: 3.0.0
+info:
+  title: "MCP (Model Context Protocol) API"
+  description: "API per il Model Context Protocol (MCP), che consente ai modelli linguistici di interagire con strumenti e servizi esterni."
+  version: "1.0.0"
+  contact:
+    name: "AI Developer Panel"
+servers:
+  - url: http://localhost:3030
+    description: Server MCP locale
+
+paths:
+  /tools/list:
+    get:
+      summary: "Lista di strumenti disponibili"
+      description: "Restituisce la lista completa di strumenti MCP disponibili nel server con i loro parametri e descrizioni."
+      operationId: "listTools"
+      responses:
+        '200':
+          description: "Lista di strumenti disponibili"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ToolsListResponse"
+        '500':
+          description: "Errore interno del server"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  
+  /tools/call:
+    post:
+      summary: "Chiama uno strumento MCP"
+      description: "Esegue una chiamata a uno strumento MCP specificato con i parametri forniti."
+      operationId: "callTool"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ToolCallRequest"
+      responses:
+        '200':
+          description: "Risultato dell'esecuzione dello strumento"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ToolCallResponse"
+        '400':
+          description: "Parametri di richiesta non validi o strumento non supportato"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        '500':
+          description: "Errore interno del server"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  
+  /:
+    get:
+      summary: "Pagina informativa"
+      description: "Restituisce una pagina HTML con informazioni sull'API MCP e esempi d'uso."
+      operationId: "getInfoPage"
+      responses:
+        '200':
+          description: "Pagina informativa HTML"
+          content:
+            text/html:
+              schema:
+                type: string
+
+components:
+  schemas:
+    ToolsListResponse:
+      type: object
+      required:
+        - schema_version
+        - tools
+      properties:
+        schema_version:
+          type: string
+          description: "Versione dello schema MCP"
+          example: "1.0"
+        tools:
+          type: array
+          description: "Lista degli strumenti disponibili"
+          items:
+            $ref: "#/components/schemas/ToolDefinition"
+    
+    ToolDefinition:
+      type: object
+      required:
+        - name
+        - description
+        - parameters
+      properties:
+        name:
+          type: string
+          description: "Nome identificativo dello strumento"
+          example: "code.generate"
+        description:
+          type: string
+          description: "Descrizione dello scopo dello strumento"
+          example: "Genera snippet di codice partendo da una descrizione naturale"
+        parameters:
+          type: object
+          description: "Schema JSON dei parametri dello strumento"
+          properties:
+            type:
+              type: string
+              enum: [object]
+            properties:
+              type: object
+              additionalProperties:
+                $ref: "#/components/schemas/ParameterDefinition"
+            required:
+              type: array
+              items:
+                type: string
+    
+    ParameterDefinition:
+      type: object
+      required:
+        - type
+        - description
+      properties:
+        type:
+          type: string
+          description: "Tipo di dato del parametro"
+          enum: [string, number, boolean, array, object]
+        description:
+          type: string
+          description: "Descrizione del parametro"
+        enum:
+          type: array
+          description: "Valori possibili per il parametro (opzionale)"
+          items:
+            type: string
+        default:
+          description: "Valore di default per il parametro (opzionale)"
+        minimum:
+          type: number
+          description: "Valore minimo per parametri numerici (opzionale)"
+        maximum:
+          type: number
+          description: "Valore massimo per parametri numerici (opzionale)"
+        items:
+          type: object
+          description: "Definizione degli elementi per parametri di tipo array"
+    
+    ToolCallRequest:
+      type: object
+      required:
+        - tool
+      properties:
+        tool:
+          type: string
+          description: "Nome dello strumento da chiamare"
+          example: "code.generate"
+        args:
+          type: object
+          description: "Parametri per la chiamata dello strumento"
+          example:
+            language: "TypeScript"
+            description: "Funzione per validare un indirizzo email"
+        requestId:
+          type: string
+          description: "ID opzionale per tracciare la richiesta"
+          example: "550e8400-e29b-41d4-a716-446655440000"
+    
+    ToolCallResponse:
+      type: object
+      required:
+        - status
+        - result
+      properties:
+        status:
+          type: string
+          enum: [success]
+          description: "Stato della chiamata"
+        result:
+          type: string
+          description: "Risultato dell'esecuzione dello strumento (formato JSON come stringa)"
+          example: "{\"success\":true,\"output\":\"// Codice TypeScript...\"}"
+        requestId:
+          type: string
+          description: "ID della richiesta, uguale a quello fornito o generato automaticamente"
+          example: "550e8400-e29b-41d4-a716-446655440000"
+    
+    ErrorResponse:
+      type: object
+      required:
+        - status
+        - error
+      properties:
+        status:
+          type: string
+          enum: [error]
+          description: "Stato di errore"
+        error:
+          type: string
+          description: "Messaggio di errore"
+          example: "Strumento non supportato: invalid_tool"
+        requestId:
+          type: string
+          description: "ID della richiesta, se disponibile"
+          example: "550e8400-e29b-41d4-a716-446655440000"
+
+# Definizioni specifiche degli strumenti
+  schemas:
+    CodeGenerateParams:
+      type: object
+      required:
+        - language
+        - description
+      properties:
+        language:
+          type: string
+          description: "Linguaggio di programmazione desiderato"
+          example: "TypeScript"
+        description:
+          type: string
+          description: "Descrizione naturale di ciò che il codice deve fare"
+          example: "Funzione per validare un indirizzo email"
+        contextFile:
+          type: string
+          description: "File di contesto a cui ancorare il codice (opzionale)"
+          example: "src/utils/validators.ts"
+    
+    ReadFileParams:
+      type: object
+      required:
+        - path
+      properties:
+        path:
+          type: string
+          description: "Percorso del file da leggere, relativo alla root del workspace"
+          example: "README.md"
+    
+    SearchDocsParams:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          description: "Testo o pattern regex da cercare"
+          example: "McpDispatcher"
+        regex:
+          type: boolean
+          default: false
+          description: "Se interpretare la query come espressione regolare"
+        caseInsensitive:
+          type: boolean
+          default: false
+          description: "Se la ricerca deve ignorare maiuscole/minuscole"
+        maxResults:
+          type: number
+          default: 10
+          minimum: 1
+          maximum: 50
+          description: "Numero massimo di risultati da restituire"
+        directories:
+          type: array
+          items:
+            type: string
+          description: "Directory specifiche in cui cercare (opzionale)"
+          example: ["src/services", "src/shared"] 

@@ -1,0 +1,300 @@
+/**
+ * Script TypeScript per correggere automaticamente gli errori di import in progetti ESM
+ * 
+ * Risolve:
+ * - TS2835: Relative import paths need explicit file extensions in EcmaScript imports
+ * - TS1484: 'X' is a type and must be imported using a type-only import
+ * - TS2307: Import paths with duplicate `.js.js` extensions
+ * 
+ * Uso:
+ * ```
+ * pnpm fix-imports           # Esecuzione standard
+ * pnpm fix-imports --dry-run # Solo anteprima modifiche
+ * pnpm fix-imports --dir=./libs # Specificare cartella diversa
+ * ```
+ */
+
+import fs from 'fs';
+import path from 'path';
+import { promisify } from 'util';
+
+// Tipi
+interface ProgramOptions {
+  dryRun: boolean;
+  rootDir: string;
+  extensions: string[];
+  excludeDirs: string[];
+  verbose: boolean;
+  fixDoubleJs: boolean;
+}
+
+interface FileResult {
+  path: string;
+  modified: boolean;
+  importFixCount: number;
+  typeImportFixCount: number;
+  doubleJsFixCount: number;
+  error?: string;
+}
+
+interface Stats {
+  filesScanned: number;
+  filesModified: number;
+  errorCount: number;
+  importFixCount: number;
+  typeImportFixCount: number;
+  doubleJsFixCount: number;
+}
+
+// Parser argomenti CLI
+function parseArgs(): ProgramOptions {
+  const args = process.argv.slice(2);
+  
+  const options: ProgramOptions = {
+    dryRun: args.includes('--dry-run'),
+    rootDir: './src',
+    extensions: ['.ts', '.tsx'],
+    excludeDirs: ['node_modules', 'dist', 'build', '.git', '.vscode'],
+    verbose: args.includes('--verbose'),
+    fixDoubleJs: args.includes('--fix-double-js') || !args.includes('--no-fix-double-js')
+  };
+  
+  // Parsing del parametro --dir=
+  const dirArg = args.find(arg => arg.startsWith('--dir='));
+  if (dirArg) {
+    options.rootDir = dirArg.split('=')[1];
+  }
+  
+  return options;
+}
+
+// Funzioni promisify
+const readdir = promisify(fs.readdir);
+const stat = promisify(fs.stat);
+const readFile = promisify(fs.readFile);
+const writeFile = promisify(fs.writeFile);
+
+// Regex pattern per trovare problemi di import
+const IMPORT_REGEX = /from\s+['"]([^'"]*?)(?:\.js)?['"]/g;
+const TYPE_IMPORT_REGEX = /import\s+(?!type)({[^}]*})\s+from\s+['"]/g;
+const DOUBLE_JS_REGEX = /from\s+['"]([^'"]*?)\.js\.js['"]/g;
+
+/**
+ * Processa un singolo file correggendo gli import
+ */
+async function processFile(filePath: string, options: ProgramOptions): Promise<FileResult> {
+  try {
+    const content = await readFile(filePath, 'utf-8');
+    let newContent = content;
+    let importFixCount = 0;
+    let typeImportFixCount = 0;
+    let doubleJsFixCount = 0;
+    
+    // Corregge gli import con doppio .js.js
+    if (options.fixDoubleJs) {
+      newContent = newContent.replace(DOUBLE_JS_REGEX, (match, importPath) => {
+        doubleJsFixCount++;
+        return match.replace(`${importPath}.js.js`, `${importPath}.js`);
+      });
+    }
+    
+    // Corregge gli import senza estensione .js
+    newContent = newContent.replace(IMPORT_REGEX, (match, importPath) => {
+      // Aggiungi .js solo se è un import relativo e non ha già un'estensione
+      if ((importPath.startsWith('./') || importPath.startsWith('../')) && 
+          !importPath.match(/\.(js|jsx|ts|tsx|json|css|scss|less|svg|png|jpg|jpeg|gif)$/)) {
+        importFixCount++;
+        return match.replace(importPath, `${importPath}.js`);
+      }
+      return match;
+    });
+
+    // Migliora imports di tipi
+    const typeIndicators = [
+      'Type', 'Interface', 'Enum', 'Props', 'State', 'Config', 'Options', 
+      'Settings', 'Args', 'Params', 'Result'
+    ];
+    
+    function shouldBeTypeImport(importContent: string): boolean {
+      const items = importContent.split(',').map(i => i.trim());
+      return items.some(item => 
+        typeIndicators.some(indicator => item.includes(indicator))
+      );
+    }
+    
+    // Trasforma gli import normali in import type quando appropriato
+    newContent = newContent.replace(TYPE_IMPORT_REGEX, (match, importContent) => {
+      if (shouldBeTypeImport(importContent)) {
+        typeImportFixCount++;
+        return match.replace('import {', 'import type {');
+      }
+      return match;
+    });
+    
+    // Scrivi modifiche solo se ci sono state effettivamente modifiche e non siamo in modalità dry-run
+    if (content !== newContent) {
+      if (!options.dryRun) {
+        await writeFile(filePath, newContent, 'utf-8');
+      }
+      return { 
+        path: filePath,
+        modified: true,
+        importFixCount,
+        typeImportFixCount,
+        doubleJsFixCount
+      };
+    }
+    
+    return { 
+      path: filePath,
+      modified: false,
+      importFixCount: 0,
+      typeImportFixCount: 0,
+      doubleJsFixCount: 0
+    };
+  } catch (error) {
+    return { 
+      path: filePath,
+      modified: false,
+      importFixCount: 0,
+      typeImportFixCount: 0,
+      doubleJsFixCount: 0,
+      error: error instanceof Error ? error.message : String(error)
+    };
+  }
+}
+
+/**
+ * Scansiona ricorsivamente una directory per trovare file TypeScript
+ */
+async function walkDir(dir: string, options: ProgramOptions): Promise<string[]> {
+  const results: string[] = [];
+  
+  try {
+    const items = await readdir(dir);
+    
+    for (const item of items) {
+      const itemPath = path.join(dir, item);
+      
+      if (options.excludeDirs.includes(item)) continue;
+      
+      const itemStat = await stat(itemPath);
+      
+      if (itemStat.isDirectory()) {
+        const subResults = await walkDir(itemPath, options);
+        results.push(...subResults);
+      } else if (options.extensions.includes(path.extname(itemPath))) {
+        results.push(itemPath);
+      }
+    }
+  } catch (error) {
+    console.error(`Errore nella lettura della directory ${dir}:`, 
+      error instanceof Error ? error.message : String(error));
+  }
+  
+  return results;
+}
+
+/**
+ * Funzione principale
+ */
+async function main(): Promise<void> {
+  const options = parseArgs();
+  const stats: Stats = {
+    filesScanned: 0,
+    filesModified: 0,
+    errorCount: 0,
+    importFixCount: 0,
+    typeImportFixCount: 0,
+    doubleJsFixCount: 0
+  };
+
+  console.log(`📂 Scansione file TypeScript in ${options.rootDir}...`);
+  if (options.dryRun) {
+    console.log('🔍 Modalità DRY-RUN: nessun file verrà modificato');
+  }
+  
+  try {
+    // Trova tutti i file TypeScript/TSX nella directory specificata
+    const files = await walkDir(options.rootDir, options);
+    stats.filesScanned = files.length;
+    console.log(`🔍 Trovati ${files.length} file da processare`);
+    
+    // Processa ogni file
+    const results: FileResult[] = [];
+    let completed = 0;
+    
+    for (const file of files) {
+      const result = await processFile(file, options);
+      results.push(result);
+      
+      if (result.error) {
+        stats.errorCount++;
+      }
+      
+      if (result.modified) {
+        stats.filesModified++;
+        stats.importFixCount += result.importFixCount;
+        stats.typeImportFixCount += result.typeImportFixCount;
+        stats.doubleJsFixCount += result.doubleJsFixCount;
+      }
+      
+      completed++;
+      if (completed % 10 === 0 || completed === files.length) {
+        process.stdout.write(`\r⏳ Processati ${completed}/${files.length} file (${Math.round(completed/files.length*100)}%)`);
+      }
+      
+      if (result.modified) {
+        if (options.verbose || result.importFixCount > 0 || result.typeImportFixCount > 0 || result.doubleJsFixCount > 0) {
+          console.log(`\n✅ ${options.dryRun ? '[ANTEPRIMA] ' : ''}Modificato: ${result.path}`);
+          if (result.importFixCount > 0) {
+            console.log(`   → Import .js aggiunti: ${result.importFixCount}`);
+          }
+          if (result.typeImportFixCount > 0) {
+            console.log(`   → Import type migliorati: ${result.typeImportFixCount}`);
+          }
+          if (result.doubleJsFixCount > 0) {
+            console.log(`   → Correzioni .js.js: ${result.doubleJsFixCount}`);
+          }
+        }
+      } else if (result.error && (options.verbose || stats.filesScanned < 100)) {
+        console.error(`\n❌ Errore in ${result.path}: ${result.error}`);
+      }
+    }
+    
+    // Mostra un riepilogo
+    console.log('\n\n📊 RIEPILOGO:');
+    console.log(`- File scansionati: ${stats.filesScanned}`);
+    console.log(`- File ${options.dryRun ? 'che sarebbero modificati' : 'modificati'}: ${stats.filesModified}`);
+    
+    if (stats.importFixCount > 0) {
+      console.log(`- Import .js ${options.dryRun ? 'che sarebbero aggiunti' : 'aggiunti'}: ${stats.importFixCount}`);
+    }
+    
+    if (stats.typeImportFixCount > 0) {
+      console.log(`- Import type ${options.dryRun ? 'che sarebbero migliorati' : 'migliorati'}: ${stats.typeImportFixCount}`);
+    }
+    
+    if (stats.doubleJsFixCount > 0) {
+      console.log(`- Correzioni .js.js ${options.dryRun ? 'che sarebbero applicate' : 'applicate'}: ${stats.doubleJsFixCount}`);
+    }
+    
+    console.log(`- Errori: ${stats.errorCount}`);
+    
+    if (options.dryRun) {
+      console.log('\n✅ Anteprima completata! Per applicare le modifiche esegui senza --dry-run');
+    } else {
+      console.log('\n✅ Correzione completata! Esegui "pnpm tsc --noEmit" per verificare gli errori rimanenti');
+    }
+    
+  } catch (error) {
+    console.error('❌ Errore generale:', error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
+}
+
+// Esecuzione
+main().catch(error => {
+  console.error('Fatal error:', error instanceof Error ? error.message : String(error));
+  process.exit(1);
+}); 
