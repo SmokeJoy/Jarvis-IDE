@@ -16,8 +16,12 @@ import {
   resetPromptSlot,
   resetAllPrompts,
   initializePrompts,
+  getActiveProfile,
+  type PromptProfile,
   type PromptSlotType
 } from '../../data/contextPromptManager';
+import { ProfileSelector } from './ProfileSelector';
+import { ProfileManagerModal } from './ProfileManagerModal';
 import { webviewBridge } from '../../utils/WebviewBridge';
 import { WebviewMessageType } from '../../../src/shared/types/webview.types';
 
@@ -214,6 +218,9 @@ export const SystemPromptEditor: React.FC<SystemPromptEditorProps> = ({ onClose 
   
   const [loading, setLoading] = useState(true);
   const [statusMessage, setStatusMessage] = useState<{text: string, isSuccess: boolean} | null>(null);
+  
+  const [activeProfile, setActiveProfile] = useState<PromptProfile | null>(null);
+  const [showProfileManager, setShowProfileManager] = useState(false);
 
   useEffect(() => {
     async function loadPrompts() {
@@ -231,6 +238,10 @@ export const SystemPromptEditor: React.FC<SystemPromptEditorProps> = ({ onClose 
         
         setContent(initialContent);
         setOriginalContent({...initialContent});
+        
+        const profile = getActiveProfile();
+        setActiveProfile(profile);
+        
         setLoading(false);
       } catch (error) {
         console.error('Errore nel caricamento dei prompt:', error);
@@ -249,95 +260,94 @@ export const SystemPromptEditor: React.FC<SystemPromptEditorProps> = ({ onClose 
     }, 3000);
   };
 
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContent({
-      ...content,
-      [activeTab]: e.target.value
-    });
+  const handleProfileChange = (profile: PromptProfile) => {
+    try {
+      setLoading(true);
+      
+      setActiveProfile(profile);
+      
+      const newContent: Record<PromptSlotType, string> = {
+        system: getContextPromptSlot('system'),
+        user: getContextPromptSlot('user'),
+        persona: getContextPromptSlot('persona'),
+        context: getContextPromptSlot('context')
+      };
+      
+      setContent(newContent);
+      setOriginalContent({...newContent});
+      
+      showStatusMessage(`Profilo cambiato: ${profile.name}`, true);
+      setLoading(false);
+    } catch (error) {
+      console.error('Errore nel cambio di profilo:', error);
+      showStatusMessage('Errore nel cambio di profilo', false);
+      setLoading(false);
+    }
   };
 
-  const handleSave = () => {
+  const handleManageProfiles = () => {
+    setShowProfileManager(true);
+  };
+
+  const handleTabChange = (e: Event) => {
+    const target = e.target as HTMLElement;
+    const newTab = target.getAttribute('aria-controls') as PromptSlotType;
+    if (newTab) {
+      setActiveTab(newTab);
+    }
+  };
+
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newContent = e.target.value;
+    setContent({...content, [activeTab]: newContent});
+  };
+
+  const handleSaveChanges = async () => {
     try {
-      setContextPromptSlot(activeTab, content[activeTab]);
+      await setContextPromptSlot(activeTab, content[activeTab]);
       
-      setOriginalContent({
-        ...originalContent,
-        [activeTab]: content[activeTab]
-      });
+      setOriginalContent({...originalContent, [activeTab]: content[activeTab]});
       
-      showStatusMessage(`Prompt "${activeTab}" salvato con successo`, true);
+      showStatusMessage('Modifiche salvate', true);
     } catch (error) {
       console.error('Errore nel salvataggio del prompt:', error);
       showStatusMessage('Errore nel salvataggio', false);
     }
   };
 
-  const handleSaveAll = () => {
+  const handleResetToDefault = async () => {
     try {
-      Object.entries(content).forEach(([key, value]) => {
-        setContextPromptSlot(key as PromptSlotType, value);
-      });
+      await resetPromptSlot(activeTab);
       
-      setOriginalContent({...content});
+      const newContent = getContextPromptSlot(activeTab);
+      setContent({...content, [activeTab]: newContent});
+      setOriginalContent({...originalContent, [activeTab]: newContent});
       
-      showStatusMessage('Tutti i prompt salvati con successo', true);
-    } catch (error) {
-      console.error('Errore nel salvataggio dei prompt:', error);
-      showStatusMessage('Errore nel salvataggio', false);
-    }
-  };
-
-  const handleReset = () => {
-    setContent({
-      ...content,
-      [activeTab]: originalContent[activeTab]
-    });
-    showStatusMessage('Modifiche annullate', true);
-  };
-
-  const handleResetToDefault = () => {
-    try {
-      resetPromptSlot(activeTab);
-      
-      const resetContent = getContextPromptSlot(activeTab);
-      
-      setContent({
-        ...content,
-        [activeTab]: resetContent
-      });
-      
-      setOriginalContent({
-        ...originalContent,
-        [activeTab]: resetContent
-      });
-      
-      showStatusMessage(`Prompt "${activeTab}" ripristinato ai valori predefiniti`, true);
+      showStatusMessage('Ripristinato il valore predefinito', true);
     } catch (error) {
       console.error('Errore nel ripristino del prompt:', error);
       showStatusMessage('Errore nel ripristino', false);
     }
   };
 
-  const handleResetAllToDefault = () => {
-    if (window.confirm('Sei sicuro di voler ripristinare TUTTI i prompt ai valori predefiniti?')) {
-      try {
-        resetAllPrompts();
-        
-        const resetContent = {
-          system: getContextPromptSlot('system'),
-          user: getContextPromptSlot('user'),
-          persona: getContextPromptSlot('persona'),
-          context: getContextPromptSlot('context')
-        };
-        
-        setContent(resetContent);
-        setOriginalContent({...resetContent});
-        
-        showStatusMessage('Tutti i prompt ripristinati ai valori predefiniti', true);
-      } catch (error) {
-        console.error('Errore nel ripristino dei prompt:', error);
-        showStatusMessage('Errore nel ripristino', false);
-      }
+  const handleResetAll = async () => {
+    try {
+      await resetAllPrompts();
+      
+      const newContent: Record<PromptSlotType, string> = {
+        system: getContextPromptSlot('system'),
+        user: getContextPromptSlot('user'),
+        persona: getContextPromptSlot('persona'),
+        context: getContextPromptSlot('context')
+      };
+      
+      setContent(newContent);
+      setOriginalContent({...newContent});
+      
+      showStatusMessage('Tutti i prompt sono stati ripristinati', true);
+    } catch (error) {
+      console.error('Errore nel ripristino di tutti i prompt:', error);
+      showStatusMessage('Errore nel ripristino', false);
     }
   };
 
@@ -352,132 +362,115 @@ export const SystemPromptEditor: React.FC<SystemPromptEditorProps> = ({ onClose 
     });
   };
 
-  const handleTabChange = (e: CustomEvent) => {
-    const newActiveTab = e.detail.id as PromptSlotType;
-    setActiveTab(newActiveTab);
-  };
-
-  const handleTogglePreview = () => {
-    setShowPreview(!showPreview);
-  };
-
-  const hasChanges = content[activeTab] !== originalContent[activeTab];
+  const isDirty = content[activeTab] !== originalContent[activeTab];
   
-  const hasAnyChanges = Object.keys(content).some(key => 
-    content[key as PromptSlotType] !== originalContent[key as PromptSlotType]
-  );
-
+  if (loading) {
+    return <LoadingMessage>Caricamento degli editor di prompt...</LoadingMessage>;
+  }
+  
   return (
     <EditorContainer>
       <Header>
-        <Title>Editor Prompt</Title>
+        <Title>Editor Prompt di Sistema</Title>
+        {onClose && (
+          <VSCodeButton onClick={onClose}>
+            Chiudi
+          </VSCodeButton>
+        )}
+      </Header>
+      
+      <Description>
+        Personalizza i prompt utilizzati dall'assistente AI per definire il suo comportamento, contesto e personalità.
+      </Description>
+      
+      <ProfileSelector 
+        onManageClick={handleManageProfiles}
+        onProfileChange={handleProfileChange}
+      />
+      
+      <VSCodePanels activeid={activeTab} onTabChange={handleTabChange}>
+        <VSCodeTabs>
+          <VSCodeTab id="system" aria-controls="system">Sistema</VSCodeTab>
+          <VSCodeTab id="user" aria-controls="user">Utente</VSCodeTab>
+          <VSCodeTab id="persona" aria-controls="persona">Personalità</VSCodeTab>
+          <VSCodeTab id="context" aria-controls="context">Contesto</VSCodeTab>
+        </VSCodeTabs>
+        
+        <VSCodeTabPanel id="system">
+          <Description>{promptDescriptions.system}</Description>
+        </VSCodeTabPanel>
+        <VSCodeTabPanel id="user">
+          <Description>{promptDescriptions.user}</Description>
+        </VSCodeTabPanel>
+        <VSCodeTabPanel id="persona">
+          <Description>{promptDescriptions.persona}</Description>
+        </VSCodeTabPanel>
+        <VSCodeTabPanel id="context">
+          <Description>{promptDescriptions.context}</Description>
+        </VSCodeTabPanel>
+      </VSCodePanels>
+      
+      <VSCodeDivider style={{ margin: '1rem 0' }} />
+      
+      <Header>
         <CheckboxContainer>
-          <VSCodeCheckbox checked={showPreview} onChange={handleTogglePreview}>
+          <VSCodeCheckbox
+            checked={showPreview}
+            onChange={() => setShowPreview(!showPreview)}
+          >
             Anteprima Markdown
           </VSCodeCheckbox>
         </CheckboxContainer>
       </Header>
       
-      <Description>
-        Personalizza i prompt che definiscono il comportamento dell'assistente AI.
-        Utilizza i diversi tipi di prompt per configurare il sistema, il contesto utente,
-        la personalità dell'assistente e il contesto del progetto.
-      </Description>
-      
-      <VSCodeDivider />
-      
-      {loading ? (
-        <LoadingMessage>Caricamento prompt...</LoadingMessage>
+      {!showPreview ? (
+        <TextareaContainer>
+          <Textarea
+            value={content[activeTab]}
+            onChange={handleContentChange}
+            placeholder={promptPlaceholders[activeTab]}
+          />
+        </TextareaContainer>
       ) : (
-        <>
-          <VSCodeTabs onTabChange={handleTabChange as any}>
-            <VSCodeTab id="system">System</VSCodeTab>
-            <VSCodeTab id="user">User</VSCodeTab>
-            <VSCodeTab id="persona">Persona</VSCodeTab>
-            <VSCodeTab id="context">Context</VSCodeTab>
-          </VSCodeTabs>
-          
-          <Description>
-            {promptDescriptions[activeTab]}
-          </Description>
-          
-          <VSCodePanels>
-            <VSCodeTabPanel>
-              <TextareaContainer>
-                {showPreview ? (
-                  <MarkdownPreview>
-                    <ReactMarkdown>{content[activeTab]}</ReactMarkdown>
-                  </MarkdownPreview>
-                ) : (
-                  <Textarea 
-                    value={content[activeTab]}
-                    onChange={handleContentChange}
-                    placeholder={promptPlaceholders[activeTab]}
-                  />
-                )}
-              </TextareaContainer>
-            </VSCodeTabPanel>
-          </VSCodePanels>
-          
-          <Actions>
-            {statusMessage && (
-              <StatusMessage isSuccess={statusMessage.isSuccess}>
-                {statusMessage.text}
-              </StatusMessage>
-            )}
-            <VSCodeButton 
-              appearance="secondary" 
-              onClick={handleOpenInVSCode}
-            >
-              Apri in VS Code
-            </VSCodeButton>
-            <VSCodeButton 
-              appearance="secondary" 
-              onClick={handleResetToDefault}
-            >
-              Reset di default
-            </VSCodeButton>
-            <VSCodeButton 
-              appearance="secondary" 
-              onClick={handleReset} 
-              disabled={!hasChanges}
-            >
-              Annulla modifiche
-            </VSCodeButton>
-            <VSCodeButton 
-              onClick={handleSave} 
-              disabled={!hasChanges}
-            >
-              Salva
-            </VSCodeButton>
-            <VSCodeButton 
-              appearance="primary"
-              onClick={handleSaveAll} 
-              disabled={!hasAnyChanges}
-            >
-              Salva tutti
-            </VSCodeButton>
-            {onClose && (
-              <VSCodeButton 
-                appearance="secondary" 
-                onClick={onClose}
-              >
-                Chiudi
-              </VSCodeButton>
-            )}
-          </Actions>
-          
-          <VSCodeDivider />
-          
-          <Actions>
-            <VSCodeButton 
-              appearance="secondary"
-              onClick={handleResetAllToDefault}
-            >
-              Reset globale (tutti i prompt)
-            </VSCodeButton>
-          </Actions>
-        </>
+        <MarkdownPreview>
+          <ReactMarkdown>{content[activeTab] || '*Nessun contenuto*'}</ReactMarkdown>
+        </MarkdownPreview>
+      )}
+      
+      <Actions>
+        {statusMessage && (
+          <StatusMessage isSuccess={statusMessage.isSuccess}>
+            {statusMessage.text}
+          </StatusMessage>
+        )}
+        
+        <VSCodeButton
+          appearance="secondary"
+          onClick={handleResetToDefault}
+        >
+          Ripristina Default
+        </VSCodeButton>
+        
+        <VSCodeButton
+          appearance="secondary"
+          onClick={handleResetAll}
+        >
+          Ripristina Tutti
+        </VSCodeButton>
+        
+        <VSCodeButton
+          disabled={!isDirty}
+          onClick={handleSaveChanges}
+        >
+          Salva Modifiche
+        </VSCodeButton>
+      </Actions>
+      
+      {showProfileManager && (
+        <ProfileManagerModal 
+          onClose={() => setShowProfileManager(false)}
+          onProfileChange={handleProfileChange}
+        />
       )}
     </EditorContainer>
   );

@@ -471,3 +471,73 @@ Ho implementato i test di integrazione per il ciclo completo di comunicazione tr
 - Copertura `>90%` per i mock critici
 - Creare test per `dispose`, `off`, `isExtensionConnected`
 - Verificare mismatch tra mock e codice reale in `WebviewBridge.ts`
+
+## Implementazione Interfaccia PromptProfile Manager (MCP-F6)
+
+**Data**: 2025-04-17
+
+Ho completato l'implementazione dell'interfaccia utente per la gestione dei profili di prompt (MCP-F6), creando un sistema completo per la creazione, modifica, eliminazione e selezione di profili.
+
+### Componenti Principali Sviluppati
+
+1. **ProfileSelector.tsx**:
+   - Dropdown per selezionare il profilo attivo
+   - Visualizzazione di nome, descrizione e indicatore di profilo predefinito (⭐)
+   - Integrazione con `contextPromptManager` per cambio profilo
+   - UI responsive e conforme allo stile VS Code
+
+2. **ProfileManagerModal.tsx**:
+   - Interfaccia modale per la gestione completa dei profili
+   - Funzionalità CRUD (Create, Read, Update, Delete)
+   - Form per modifica nome, descrizione e stato predefinito
+   - Conferma prima dell'eliminazione di un profilo
+   - Visualizzazione informazioni aggiuntive (data creazione/modifica)
+
+3. **Integrazione in SystemPromptEditor.tsx**:
+   - Aggiunto ProfileSelector nella parte superiore
+   - Gestione eventi di cambio profilo per aggiornare editor
+   - Sincronizzazione bidirezionale tra profili e editor prompt
+
+### Caratteristiche dell'Implementazione
+
+- **Design UI conforme**: Utilizzo di componenti `@vscode/webview-ui-toolkit` con stile VS Code nativo
+- **Feedback utente**: Messaggi di stato temporanei per conferma azioni
+- **Gestione errori**: Robusta gestione di casi eccezionali
+- **UX migliorata**: Badge per profilo predefinito, descrizioni, conferme per azioni distruttive
+- **Integrazione BaaS**: Comunicazione bidirezionale con extension tramite WebviewBridge
+
+### Meccanismo di Sincronizzazione
+
+L'interfaccia utente comunica con il backend attraverso il `contextPromptManager` che offre:
+- `getAllProfiles()`: Recupero di tutti i profili disponibili
+- `getActiveProfile()`: Recupero del profilo attualmente attivo
+- `switchProfile(id)`: Cambio del profilo attivo
+- `createProfile(data)`: Creazione di un nuovo profilo
+- `updateProfile(id, data)`: Aggiornamento di un profilo esistente
+- `deleteProfile(id)`: Eliminazione di un profilo
+- `setProfileAsDefault(id)`: Impostazione di un profilo come predefinito
+
+### Test e Validazione
+
+- Verificato il roundtrip completo:
+  1. UI cambia profilo → `switchProfile(id)` → WebviewBridge send → Extension
+  2. Extension processa → Salva in `settings.json` → Risponde a WebviewBridge
+  3. WebviewBridge riceve → Aggiorna `promptCache` → Aggiorna UI
+
+- Verificata persistenza:
+  - Profili salvati correttamente in localStorage
+  - Recupero al riavvio dell'applicazione
+  - Sincronizzazione con extension tramite messaggi
+
+### Vantaggi dell'Implementazione
+
+- **Esperienza utente migliorata**: Interfaccia intuitiva per gestire contesti diversi
+- **Flessibilità**: Facilità nel passare tra diversi set di prompt
+- **Produttività**: Possibilità di salvare configurazioni per diversi scenari
+- **Estensibilità**: Struttura modulare pronta per future estensioni
+
+### Prossimi Passi
+
+- Implementare diff visuale tra profili per confronto
+- Aggiungere funzionalità di import/export profili
+- Migliorare l'anteprima con rendering avanzato Markdown
