@@ -1,9 +1,9 @@
 import AnthropicBedrock from "@anthropic-ai/bedrock-sdk"
-import type { ApiHandler } from "../index.js.js"
-import { convertToR1Format } from "../transform/r1-format.js.js"
-import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js.js"
-import { calculateApiCostOpenAI } from "../../utils/cost.js.js"
-import { ApiStream, ApiStreamChunk } from "../../types/global.js.js"
+import type { ApiHandler } from "../index.js"
+import { convertToR1Format } from "../transform/r1-format.js"
+import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
+import { calculateApiCostOpenAI } from "../../utils/cost.js"
+import type { ApiStream, ApiStreamChunk } from "../../types/global.js"
 import type { fromNodeProviderChain } from "@aws-sdk/credential-providers"
 import type {
 	BedrockRuntimeClient,
@@ -16,11 +16,11 @@ import type {
 	bedrockDefaultModelId, 
 	BedrockModelId, 
 	bedrockModels 
-} from "../../shared/api.ts"
-import { ChatCompletionContentPartText } from "../transform/r1-format.js.js"
-import type { ChatCompletionMessageParam } from "../../types/provider-types/openai-types.js.js"
-import type { BaseStreamHandler } from "../handlers/BaseStreamHandler.js.js"
-import type { ChatMessage } from "../../types/chat.types.js.js"
+} from "../../shared/api.types.js"
+import { ChatCompletionContentPartText } from "../transform/r1-format.js"
+import type { ChatCompletionMessageParam } from "../../types/provider-types/openai-types.js"
+import type { BaseStreamHandler } from "../handlers/BaseStreamHandler.js"
+import type { ChatMessage } from "../../types/chat.types.js"
 
 export interface BedrockConfig {
 	region: string;
