@@ -1,0 +1,805 @@
+### Lista dei tool disponibili
+GET http://localhost:3030/tools/list
+Accept: application/json
+
+###
+
+### Generazione codice in TypeScript
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "code.generate",
+  "args": {
+    "language": "TypeScript",
+    "description": "Funzione per validare un indirizzo email"
+  }
+}
+
+###
+
+### Generazione codice in Python
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "code.generate",
+  "args": {
+    "language": "Python",
+    "description": "Funzione per calcolare la sequenza di Fibonacci fino a N"
+  }
+}
+
+###
+
+### Generazione codice - errore (parametri mancanti)
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "code.generate",
+  "args": {
+    "language": "Python"
+  }
+}
+
+###
+
+### Lettura di un file
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "read_file",
+  "args": {
+    "path": "README.md"
+  }
+}
+
+###
+
+### Ricerca nel codice sorgente
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "search_docs",
+  "args": {
+    "query": "McpDispatcher",
+    "maxResults": 5,
+    "regex": false
+  }
+}
+
+###
+
+### Ricerca con regex
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "search_docs",
+  "args": {
+    "query": "export function \\w+\\(",
+    "maxResults": 5,
+    "regex": true
+  }
+}
+
+###
+
+### Query di memoria
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "memory.query",
+  "args": {
+    "scope": "chat",
+    "limit": 3
+  }
+}
+
+###
+
+### Generazione summary di progetto
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "project.summary",
+  "args": {
+    "depth": 2,
+    "includeFiles": true
+  }
+}
+
+###
+
+### Scrittura di un nuovo file
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "fs.write",
+  "args": {
+    "path": "temp-test-output.txt",
+    "content": "Questo è un file di test creato tramite fs.write.\nSeconda linea di test."
+  }
+}
+
+###
+
+### Scrittura di un file (modalità anteprima)
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "fs.write",
+  "args": {
+    "path": "temp-test-preview.ts",
+    "content": "export function testPreview() {\n  console.log('Questo è un file di anteprima');\n  return true;\n}",
+    "previewOnly": true
+  }
+}
+
+###
+
+### Sovrascrittura di un file esistente
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "fs.write",
+  "args": {
+    "path": "temp-test-output.txt",
+    "content": "Questo contenuto sovrascrive il file precedente.",
+    "overwrite": true
+  }
+}
+
+###
+
+### Tentativo di sovrascrittura senza flag overwrite (errore)
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "fs.write",
+  "args": {
+    "path": "temp-test-output.txt",
+    "content": "Questo non dovrebbe sovrascrivere il file.",
+    "overwrite": false
+  }
+}
+
+###
+
+### Refactoring di codice JavaScript
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "refactor.snippet",
+  "args": {
+    "language": "JavaScript",
+    "code": "function calculateSum(arr) { var result = 0; for (var i = 0; i < arr.length; i++) { result = result + arr[i]; } return result; }",
+    "objective": "Modernizzare con ES6, migliorare leggibilità e performance"
+  }
+}
+
+###
+
+### Refactoring di codice Python
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "refactor.snippet",
+  "args": {
+    "language": "Python",
+    "code": "def process_data(data):\n  results = []\n  for item in data:\n    if item > 0:\n      results.append(item * 2)\n  return results",
+    "objective": "Migliorare la performance utilizzando list comprehension"
+  }
+}
+
+###
+
+### Refactoring senza spiegazione
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "refactor.snippet",
+  "args": {
+    "language": "TypeScript",
+    "code": "function fetchData(url: string, callback: (data: any) => void): void {\n  fetch(url)\n    .then(response => response.json())\n    .then(data => callback(data))\n    .catch(err => console.error(err));\n}",
+    "objective": "Convertire in una funzione async/await più moderna",
+    "explanation": false
+  }
+}
+
+###
+
+### Interrogazione della documentazione
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "ask.docs",
+  "args": {
+    "question": "Come funziona McpDispatcher?"
+  }
+}
+
+###
+
+### Interrogazione con filtro
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "ask.docs",
+  "args": {
+    "question": "Qual è lo scopo del progetto?",
+    "filter": "README"
+  }
+}
+
+###
+
+### Interrogazione con pochi file sorgente e senza snippet di codice
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "ask.docs",
+  "args": {
+    "question": "Come implementare un nuovo tool MCP?",
+    "maxSourceFiles": 2,
+    "includeCode": false
+  }
+}
+
+###
+
+### Interrogazione con filtro di file specifico
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "ask.docs",
+  "args": {
+    "question": "Come funziona il server MCP?",
+    "filter": "file:toolsListServer.ts"
+  }
+}
+
+###
+
+### Lint di file JavaScript
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "project.lint",
+  "args": {
+    "path": "src/services/mcp/McpDispatcher.ts",
+    "language": "typescript"
+  }
+}
+
+###
+
+### Lint con auto-rilevamento linguaggio
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "project.lint",
+  "args": {
+    "path": "src/services/mcp/handlers/projectLintHandler.ts"
+  }
+}
+
+###
+
+### Lint con correzioni automatiche
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "project.lint",
+  "args": {
+    "path": "mcp-test.http",
+    "language": "javascript",
+    "fix": true
+  }
+}
+
+###
+
+### Lint con path non valido
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "project.lint",
+  "args": {
+    "path": "file-non-esistente.js",
+    "language": "javascript"
+  }
+}
+
+###
+
+### Formattazione JavaScript (solo anteprima)
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "fs.format",
+  "args": {
+    "path": "src/services/mcp/McpDispatcher.ts",
+    "language": "typescript",
+    "write": false
+  }
+}
+
+###
+
+### Formattazione con auto-rilevamento linguaggio
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "fs.format",
+  "args": {
+    "path": "README.md",
+    "write": false
+  }
+}
+
+###
+
+### Formattazione con scrittura file
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "fs.format",
+  "args": {
+    "path": "temp-test-format.json",
+    "language": "json",
+    "write": true
+  }
+}
+
+###
+
+### Formattazione file non esistente (errore)
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "fs.format",
+  "args": {
+    "path": "file-non-esistente.txt",
+    "language": "markdown"
+  }
+}
+
+###
+
+### Esegui tutti i test Jest
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "test.run",
+  "args": {}
+}
+
+###
+
+### Esegui test Jest in un percorso specifico
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "test.run",
+  "args": {
+    "path": "src/services/mcp/__tests__",
+    "framework": "jest"
+  }
+}
+
+###
+
+### Esegui test Jest con filtro
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "test.run",
+  "args": {
+    "framework": "jest",
+    "filter": "MCP Server"
+  }
+}
+
+###
+
+### Esegui test Jest con copertura
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "test.run",
+  "args": {
+    "path": "src/services/mcp/__tests__",
+    "framework": "jest",
+    "coverage": true
+  }
+}
+
+###
+
+### Esegui test con framework non supportato (errore)
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "test.run",
+  "args": {
+    "framework": "framework-non-esistente"
+  }
+}
+
+###
+
+### Genera grafo di dipendenze in formato JSON
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "project.depgraph",
+  "args": {
+    "entryPoint": "src/services/mcp",
+    "format": "json"
+  }
+}
+
+###
+
+### Genera grafo limitato in profondità
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "project.depgraph",
+  "args": {
+    "entryPoint": "src/services/mcp/McpDispatcher.ts",
+    "depth": 2,
+    "format": "json"
+  }
+}
+
+###
+
+### Genera grafo in formato DOT
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "project.depgraph",
+  "args": {
+    "entryPoint": "src",
+    "format": "dot"
+  }
+}
+
+###
+
+### Genera grafo in formato ad albero
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "project.depgraph",
+  "args": {
+    "entryPoint": "src/components",
+    "format": "tree"
+  }
+}
+
+###
+
+### Iniezione contesto in scope chat
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.inject",
+  "args": {
+    "scope": "chat",
+    "text": "Questo progetto utilizza TypeScript e segue un'architettura a microservizi. Tutte le nuove implementazioni dovrebbero seguire il pattern Repository per l'accesso ai dati."
+  }
+}
+
+###
+
+### Iniezione contesto in scope project
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.inject",
+  "args": {
+    "scope": "project",
+    "text": "Regole del progetto: 1) Usa sempre TypeScript strict. 2) Ogni modifica deve avere test. 3) Non usare any. 4) Documenta le API pubbliche con JSDoc."
+  }
+}
+
+###
+
+### Iniezione contesto in scope agent
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.inject",
+  "args": {
+    "scope": "agent",
+    "text": "Sei un assistente specializzato nell'ottimizzazione delle prestazioni. Identifica opportunità di miglioramento e suggerisci implementazioni più efficienti."
+  }
+}
+
+###
+
+### Iniezione contesto senza specificare uno scope (default: chat)
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.inject",
+  "args": {
+    "text": "Quando generi codice, assicurati di includere commenti esplicativi e di seguire le best practice di sicurezza."
+  }
+}
+
+###
+
+### Elenca tutti i contesti memorizzati
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.list",
+  "args": {}
+}
+
+###
+
+### Elenca contesti in uno scope specifico
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.list",
+  "args": {
+    "scope": "chat"
+  }
+}
+
+###
+
+### Elenca contesti con filtro testo
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.list",
+  "args": {
+    "filterText": "TypeScript"
+  }
+}
+
+###
+
+### Elenca contesti con limite di risultati
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.list",
+  "args": {
+    "limit": 3
+  }
+}
+
+###
+
+### Cancella un contesto specifico per ID
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.clear",
+  "args": {
+    "id": "INSERISCI_QUI_UN_ID_VALIDO"
+  }
+}
+
+###
+
+### Cancella tutti i contesti in uno scope specifico
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.clear",
+  "args": {
+    "scope": "chat",
+    "all": true
+  }
+}
+
+###
+
+### Cancella tutti i contesti in tutti gli scope
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.clear",
+  "args": {
+    "all": true
+  }
+}
+
+###
+
+### Errore: tentativo di cancellazione senza id o all
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.clear",
+  "args": {
+    "scope": "chat"
+  }
+}
+
+###
+
+### Aggiungi tags a un contesto esistente
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.tag",
+  "args": {
+    "id": "INSERISCI_QUI_UN_ID_VALIDO",
+    "tags": ["architettura", "performance", "best-practice"]
+  }
+}
+
+###
+
+### Sostituisci tags a un contesto esistente
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.tag",
+  "args": {
+    "id": "INSERISCI_QUI_UN_ID_VALIDO",
+    "tags": ["documentazione", "tutorial"],
+    "replace": true
+  }
+}
+
+###
+
+### Errore: tentativo di taggare con ID non valido
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.tag",
+  "args": {
+    "id": "id-non-esistente",
+    "tags": ["test"]
+  }
+}
+
+###
+
+### Elenca contesti filtrando per tag
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.list",
+  "args": {
+    "tags": ["architettura", "performance"]
+  }
+}
+
+###
+
+### Elenca contesti filtrando per tag in uno scope specifico
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.list",
+  "args": {
+    "scope": "project",
+    "tags": ["best-practice"]
+  }
+}
+
+###
+
+### Ricerca contesti per tag esatti
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.searchByTags",
+  "args": {
+    "tags": ["architettura", "performance"],
+    "scope": "project"
+  }
+}
+
+### Ricerca contesti per tag con similarità
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.searchByTags",
+  "args": {
+    "tags": ["arch", "perf"],
+    "similarityThreshold": 0.6
+  }
+}
+
+### Ricerca contesti per tag con limite
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.searchByTags",
+  "args": {
+    "tags": ["best-practice"],
+    "limit": 3
+  }
+}
+
+### Ricerca contesti per tag non esistenti
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.searchByTags",
+  "args": {
+    "tags": ["tag-non-esistente"]
+  }
+}
+
+### Ricerca contesti per tag con scope non valido
+POST http://localhost:3030/tools/call
+Content-Type: application/json
+
+{
+  "tool": "context.searchByTags",
+  "args": {
+    "tags": ["test"],
+    "scope": "scope-non-valido"
+  }
+}
+
+### 

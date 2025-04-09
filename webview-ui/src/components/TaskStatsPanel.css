@@ -1,0 +1,159 @@
+.task-stats-panel {
+  background-color: var(--vscode-editor-background);
+  border-radius: 4px;
+  border: 1px solid var(--vscode-panel-border);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.task-stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.task-stats-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--vscode-editor-foreground);
+}
+
+.task-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.task-stats-card {
+  background-color: var(--vscode-editor-inactiveSelectionBackground);
+  border-radius: 4px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.task-stats-card-title {
+  font-weight: bold;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+  color: var(--vscode-editor-foreground);
+  border-bottom: 1px solid var(--vscode-panel-border);
+  padding-bottom: 0.5rem;
+}
+
+.task-stats-card-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  flex: 1;
+}
+
+.task-stats-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 60px;
+}
+
+.task-stats-metric-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.task-stats-metric-label {
+  font-size: 0.8rem;
+  color: var(--vscode-descriptionForeground);
+  text-align: center;
+}
+
+.task-stats-priority-bars {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.task-stats-priority-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.task-stats-priority-label {
+  font-size: 0.8rem;
+  color: var(--vscode-descriptionForeground);
+  width: 60px;
+}
+
+.task-stats-priority-bar-container {
+  flex: 1;
+  height: 8px;
+  background-color: var(--vscode-editor-background);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.task-stats-priority-bar-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.task-stats-priority-bar-fill.priority-high {
+  background-color: var(--vscode-terminal-ansiRed);
+}
+
+.task-stats-priority-bar-fill.priority-normal {
+  background-color: var(--vscode-terminal-ansiBlue);
+}
+
+.task-stats-priority-bar-fill.priority-low {
+  background-color: var(--vscode-terminal-ansiGreen);
+}
+
+.task-stats-priority-value {
+  font-size: 0.8rem;
+  min-width: 20px;
+  text-align: right;
+}
+
+.task-stats-agents-list {
+  width: 100%;
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.task-stats-agent-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  padding: 0.25rem;
+  border-radius: 2px;
+}
+
+.task-stats-agent-item:hover {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+.task-stats-agent-status {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.task-stats-agent-status.active {
+  background-color: var(--vscode-terminal-ansiGreen);
+}
+
+.task-stats-agent-status.inactive {
+  background-color: var(--vscode-disabledForeground);
+}
+
+.task-stats-agent-name {
+  flex: 1;
+} 

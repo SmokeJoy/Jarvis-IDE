@@ -1,0 +1,16 @@
+{
+  "llm_model": "deepseek-coder:6.7b-kexer",
+  "use_project_docs": true,
+  "use_docs": false,
+  "contextPrompt": "You are a helpful AI assistant. Please help me with my coding tasks.",
+  "model": "deepseek-coder",
+  "coderMode": true,
+  "systemPrompt": "",
+  "apiKey": "your-api-key-here",
+  "temperature": 0.7,
+  "maxTokens": 2000,
+  "documentation": {
+    "enabled": true,
+    "path": "./docs"
+  }
+} 

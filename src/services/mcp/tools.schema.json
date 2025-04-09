@@ -1,0 +1,895 @@
+{
+  "schema_version": "1.0",
+  "tools": [
+    {
+      "name": "memory.query",
+      "description": "Recupera ricordi recenti dalla memoria contestuale",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "enum": ["chat", "project", "agent", "all"],
+            "description": "Ambito della memoria da interrogare"
+          },
+          "filter": {
+            "type": "string",
+            "description": "Parola o frase da cercare nel testo delle memorie"
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 5,
+            "description": "Numero massimo di risultati da restituire"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "project.summary",
+      "description": "Genera una panoramica del progetto corrente",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "depth": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5,
+            "default": 2,
+            "description": "Livello massimo di profondità delle directory da esplorare"
+          },
+          "includeFiles": {
+            "type": "boolean",
+            "default": true,
+            "description": "Se includere l'analisi dei file chiave"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "read_file",
+      "description": "Legge il contenuto di un file nel workspace",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Percorso del file da leggere, relativo alla root del workspace"
+          }
+        },
+        "required": ["path"]
+      }
+    },
+    {
+      "name": "search_docs",
+      "description": "Cerca nel codice sorgente del progetto usando testo o regex",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Testo o pattern regex da cercare"
+          },
+          "regex": {
+            "type": "boolean",
+            "default": false,
+            "description": "Se interpretare la query come espressione regolare"
+          },
+          "caseInsensitive": {
+            "type": "boolean",
+            "default": false,
+            "description": "Se la ricerca deve ignorare maiuscole/minuscole"
+          },
+          "maxResults": {
+            "type": "number",
+            "default": 10,
+            "minimum": 1,
+            "maximum": 50,
+            "description": "Numero massimo di risultati da restituire"
+          },
+          "directories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Directory specifiche in cui cercare (opzionale)"
+          }
+        },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "code.generate",
+      "description": "Genera snippet di codice partendo da una descrizione naturale",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "description": "Linguaggio di programmazione desiderato (es: TypeScript, Python, JavaScript)"
+          },
+          "description": {
+            "type": "string",
+            "description": "Descrizione naturale di ciò che il codice deve fare"
+          },
+          "contextFile": {
+            "type": "string",
+            "description": "File di contesto a cui ancorare il codice (opzionale)"
+          }
+        },
+        "required": ["language", "description"]
+      }
+    },
+    {
+      "name": "fs.write",
+      "description": "Scrive un file nel filesystem, utile per salvare codice generato o aggiornato",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Percorso del file da scrivere (relativo alla root del workspace)"
+          },
+          "content": {
+            "type": "string",
+            "description": "Contenuto testuale da salvare nel file"
+          },
+          "overwrite": {
+            "type": "boolean",
+            "default": false,
+            "description": "Se sovrascrivere file già esistenti"
+          },
+          "previewOnly": {
+            "type": "boolean",
+            "default": false,
+            "description": "Se restituire solo un'anteprima senza scrivere"
+          }
+        },
+        "required": ["path", "content"]
+      }
+    },
+    {
+      "name": "refactor.snippet",
+      "description": "Esegue un refactoring su uno snippet di codice specificato",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "description": "Linguaggio di programmazione dello snippet"
+          },
+          "code": {
+            "type": "string",
+            "description": "Codice sorgente da rifattorizzare"
+          },
+          "objective": {
+            "type": "string",
+            "description": "Obiettivo del refactoring (es: migliorare leggibilità, ridurre complessità, ecc.)"
+          },
+          "explanation": {
+            "type": "boolean",
+            "default": true,
+            "description": "Se includere una spiegazione delle modifiche apportate"
+          }
+        },
+        "required": ["language", "code", "objective"]
+      }
+    },
+    {
+      "name": "ask.docs",
+      "description": "Interroga la documentazione o il codice esistente con domande in linguaggio naturale",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "description": "Domanda in linguaggio naturale sulla codebase"
+          },
+          "filter": {
+            "type": "string",
+            "description": "Contesto o parola chiave su cui filtrare la documentazione (es: AuthService, file:utils.ts)"
+          },
+          "maxSourceFiles": {
+            "type": "number",
+            "default": 5,
+            "minimum": 1,
+            "maximum": 20,
+            "description": "Numero massimo di file sorgente da considerare nella risposta"
+          },
+          "includeCode": {
+            "type": "boolean",
+            "default": true,
+            "description": "Se includere nel risultato gli snippet di codice rilevanti"
+          }
+        },
+        "required": ["question"]
+      }
+    },
+    {
+      "name": "project.lint",
+      "description": "Analizza la codebase o un file specifico e restituisce problemi di linting",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Percorso del file o directory da analizzare (relativo alla root)"
+          },
+          "language": {
+            "type": "string",
+            "description": "Linguaggio del file da analizzare (necessario per strumenti specifici)"
+          },
+          "fix": {
+            "type": "boolean",
+            "default": false,
+            "description": "Se applicare automaticamente i fix (se supportati dallo strumento)"
+          }
+        },
+        "required": ["path"]
+      }
+    },
+    {
+      "name": "fs.format",
+      "description": "Formatta il contenuto di uno o più file secondo gli standard del linguaggio",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Percorso del file o directory da formattare (relativo alla root)"
+          },
+          "language": {
+            "type": "string",
+            "description": "Linguaggio di programmazione (es: typescript, python, json...)"
+          },
+          "write": {
+            "type": "boolean",
+            "default": false,
+            "description": "Se scrivere direttamente i file (true) o restituire l'output formattato (false)"
+          }
+        },
+        "required": ["path"]
+      }
+    },
+    {
+      "name": "test.run",
+      "description": "Esegue i test specificati utilizzando framework di test come Jest o PyTest",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Percorso del file o directory di test da eseguire (relativo alla root)",
+            "default": "."
+          },
+          "framework": {
+            "type": "string",
+            "description": "Framework di test da utilizzare (es: jest, pytest, mocha)",
+            "default": "jest",
+            "enum": ["jest", "pytest", "mocha", "vitest"]
+          },
+          "filter": {
+            "type": "string",
+            "description": "Filtro per eseguire solo test specifici (es: nome del test o pattern)"
+          },
+          "coverage": {
+            "type": "boolean",
+            "default": false,
+            "description": "Se generare report di copertura dei test"
+          },
+          "watch": {
+            "type": "boolean",
+            "default": false,
+            "description": "Se eseguire i test in modalità watch (riavvio automatico)"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "project.depgraph",
+      "description": "Genera una mappa delle dipendenze tra i moduli o file del progetto",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "entryPoint": {
+            "type": "string",
+            "description": "Punto di ingresso o directory da cui iniziare l'analisi",
+            "default": "."
+          },
+          "depth": {
+            "type": "number",
+            "description": "Livello massimo di profondità delle dipendenze da esplorare",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "format": {
+            "type": "string",
+            "description": "Formato di output del grafo delle dipendenze",
+            "default": "json",
+            "enum": ["json", "dot", "tree"]
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "context.inject",
+      "description": "Aggiunge contesto personalizzato alla memoria corrente del modello",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "enum": ["chat", "project", "agent"],
+            "description": "Ambito della memoria in cui iniettare il contesto",
+            "default": "chat"
+          },
+          "text": {
+            "type": "string",
+            "description": "Contenuto testuale da aggiungere alla memoria"
+          }
+        },
+        "required": ["text"]
+      }
+    },
+    {
+      "name": "context.list",
+      "description": "Elenca i contesti memorizzati in un determinato ambito o in tutti gli ambiti",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "enum": ["chat", "project", "agent"],
+            "description": "Ambito della memoria da elencare (opzionale, se omesso elenca tutti gli ambiti)"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 50,
+            "description": "Numero massimo di contesti da restituire"
+          },
+          "filterText": {
+            "type": "string",
+            "description": "Testo da utilizzare per filtrare i contesti (restituisce solo quelli che contengono il testo)"
+          },
+          "sinceTimestamp": {
+            "type": "integer",
+            "description": "Timestamp unix da cui iniziare a elencare i contesti (restituisce solo quelli più recenti del timestamp)"
+          },
+          "tags": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Lista di tag per filtrare i contesti (restituisce solo quelli che hanno tutti i tag specificati)"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "context.clear",
+      "description": "Cancella contesti memorizzati in base ai criteri specificati",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "enum": ["chat", "project", "agent"],
+            "description": "Ambito della memoria da cui rimuovere i contesti (opzionale, se omesso con all=true rimuove da tutti gli ambiti)"
+          },
+          "id": {
+            "type": "string",
+            "description": "ID specifico del contesto da rimuovere"
+          },
+          "all": {
+            "type": "boolean",
+            "description": "Se true, rimuove tutti i contesti nell'ambito specificato (o in tutti gli ambiti se scope non è specificato)"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "context.tag",
+      "description": "Aggiunge tag semantici a contesti memorizzati",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID del contesto da taggare"
+          },
+          "tags": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Lista di tag da associare al contesto"
+          },
+          "replace": {
+            "type": "boolean",
+            "default": false,
+            "description": "Se true, sostituisce i tag esistenti anziché aggiungerli"
+          }
+        },
+        "required": ["id", "tags"]
+      }
+    },
+    {
+      "name": "context.searchByTags",
+      "description": "Ricerca contesti memorizzati per tag con supporto fuzzy matching",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tag da cercare (ricerca fuzzy se similarityThreshold < 1.0)"
+          },
+          "scope": {
+            "type": "string",
+            "enum": ["chat", "project", "agent"],
+            "description": "Ambito della memoria da cercare (opzionale)"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 50,
+            "description": "Numero massimo di risultati da restituire"
+          },
+          "similarityThreshold": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "default": 0.7,
+            "description": "Soglia di similarità per la ricerca fuzzy (1.0 = match esatto)"
+          }
+        },
+        "required": ["tags"]
+      }
+    },
+    {
+      "name": "context.export",
+      "description": "Esporta contesti memorizzati in formato JSON, CSV o Markdown",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": ["json", "csv", "markdown"],
+            "default": "json",
+            "description": "Formato di esportazione"
+          },
+          "scope": {
+            "type": "string",
+            "enum": ["chat", "project", "agent"],
+            "description": "Ambito della memoria da esportare (opzionale)"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Filtra per contesti che contengono tutti i tag specificati"
+          },
+          "sinceTimestamp": {
+            "type": "integer",
+            "description": "Filtra solo i contesti più recenti del timestamp specificato"
+          },
+          "includeMetadata": {
+            "type": "boolean",
+            "default": true,
+            "description": "Se true, include metadati come ID, tag, timestamp"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "context.import",
+      "description": "Importa contesti da file JSON, CSV o Markdown nella memoria del modello",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": ["auto", "json", "csv", "markdown"],
+            "description": "Formato del file da importare",
+            "default": "auto"
+          },
+          "content": {
+            "type": "string",
+            "description": "Contenuto del file da importare"
+          },
+          "scope": {
+            "type": "string",
+            "enum": ["chat", "project", "agent"],
+            "description": "Ambito in cui importare i contesti"
+          },
+          "mergeTags": {
+            "type": "boolean",
+            "description": "Se unire i tag esistenti con quelli importati",
+            "default": true
+          }
+        },
+        "required": ["content"]
+      }
+    },
+    {
+      "name": "context.edit",
+      "description": "Modifica un contesto esistente tramite ID",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID del contesto da modificare"
+          },
+          "text": {
+            "type": "string",
+            "description": "Nuovo contenuto testuale"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Nuova lista di tag da sovrascrivere"
+          },
+          "scope": {
+            "type": "string",
+            "enum": ["chat", "project", "agent"],
+            "description": "Nuovo scope del contesto"
+          }
+        },
+        "required": ["id"]
+      }
+    },
+    {
+      "name": "context.link",
+      "description": "Crea relazioni semantiche tra contesti",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "sourceId": {
+            "type": "string",
+            "description": "ID del contesto sorgente"
+          },
+          "targetId": {
+            "type": "string",
+            "description": "ID del contesto target"
+          },
+          "relation": {
+            "type": "string",
+            "enum": ["supports", "contradicts", "explains", "is_similar_to", "depends_on", "references"],
+            "description": "Tipo di relazione semantica"
+          },
+          "bidirectional": {
+            "type": "boolean",
+            "default": false,
+            "description": "Se creare anche la relazione inversa"
+          },
+          "strength": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.5,
+            "description": "Forza della relazione (0-1)"
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "confidence": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "default": 1.0,
+                "description": "Confidenza nella relazione (0-1)"
+              },
+              "source": {
+                "type": "string",
+                "enum": ["user", "ai"],
+                "default": "user",
+                "description": "Origine della relazione"
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Timestamp della creazione"
+              }
+            }
+          }
+        },
+        "required": ["sourceId", "targetId", "relation"]
+      }
+    },
+    {
+      "name": "context.linksOf",
+      "description": "Recupera tutte le relazioni di un contesto specifico",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID del contesto di cui recuperare le relazioni"
+          },
+          "direction": {
+            "type": "string",
+            "enum": ["incoming", "outgoing", "both"],
+            "default": "both",
+            "description": "Direzione delle relazioni da recuperare"
+          },
+          "relation": {
+            "type": "string",
+            "enum": ["supports", "contradicts", "explains", "is_similar_to", "depends_on", "references"],
+            "description": "Filtra per tipo di relazione"
+          },
+          "minStrength": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0,
+            "description": "Forza minima della relazione (0-1)"
+          },
+          "minConfidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0,
+            "description": "Confidenza minima nella relazione (0-1)"
+          }
+        },
+        "required": ["id"]
+      }
+    },
+    {
+      "name": "context.graph",
+      "description": "Genera un grafo delle relazioni semantiche tra contesti",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "rootId": {
+            "type": "string",
+            "description": "ID del contesto radice da cui partire"
+          },
+          "depth": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5,
+            "default": 1,
+            "description": "Profondità massima di esplorazione del grafo"
+          },
+          "direction": {
+            "type": "string",
+            "enum": ["incoming", "outgoing", "both"],
+            "default": "both",
+            "description": "Direzione delle relazioni da esplorare"
+          },
+          "relation": {
+            "type": "string",
+            "enum": ["supports", "contradicts", "explains", "is_similar_to", "depends_on", "references"],
+            "description": "Filtra per tipo di relazione"
+          },
+          "minStrength": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0,
+            "description": "Forza minima della relazione (0-1)"
+          },
+          "minConfidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0,
+            "description": "Confidenza minima nella relazione (0-1)"
+          },
+          "includeRoot": {
+            "type": "boolean",
+            "default": true,
+            "description": "Se includere il contesto radice nel grafo"
+          },
+          "includeIsolated": {
+            "type": "boolean",
+            "default": false,
+            "description": "Se includere contesti isolati (senza relazioni)"
+          }
+        },
+        "required": ["rootId"]
+      }
+    },
+    {
+      "name": "context.unlink",
+      "description": "Rimuove relazioni semantiche tra contesti",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "sourceId": {
+            "type": "string",
+            "description": "ID del contesto sorgente"
+          },
+          "targetId": {
+            "type": "string",
+            "description": "ID del contesto target"
+          },
+          "relation": {
+            "type": "string",
+            "enum": ["supports", "contradicts", "explains", "is_similar_to", "depends_on", "references"],
+            "description": "Tipo di relazione da rimuovere (opzionale, se omesso rimuove tutte le relazioni tra i contesti)"
+          },
+          "bidirectional": {
+            "type": "boolean",
+            "default": false,
+            "description": "Se rimuovere anche la relazione inversa"
+          }
+        },
+        "required": ["sourceId", "targetId"]
+      }
+    },
+    {
+      "name": "context.graph.export",
+      "description": "Esporta un grafo di contesti in formati interoperabili",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "rootId": {
+            "type": "string",
+            "description": "ID del contesto radice da cui partire"
+          },
+          "format": {
+            "type": "string",
+            "enum": ["dot", "mermaid", "graphml", "json-ld"],
+            "default": "dot",
+            "description": "Formato di esportazione del grafo"
+          },
+          "depth": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5,
+            "default": 1,
+            "description": "Profondità massima di esplorazione del grafo"
+          },
+          "direction": {
+            "type": "string",
+            "enum": ["incoming", "outgoing", "both"],
+            "default": "both",
+            "description": "Direzione delle relazioni da esplorare"
+          },
+          "relation": {
+            "type": "string",
+            "enum": ["supports", "contradicts", "explains", "is_similar_to", "depends_on", "references"],
+            "description": "Filtra per tipo di relazione"
+          },
+          "minStrength": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0,
+            "description": "Forza minima della relazione (0-1)"
+          },
+          "minConfidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0,
+            "description": "Confidenza minima nella relazione (0-1)"
+          },
+          "includeRoot": {
+            "type": "boolean",
+            "default": true,
+            "description": "Se includere il contesto radice nel grafo"
+          },
+          "includeIsolated": {
+            "type": "boolean",
+            "default": false,
+            "description": "Se includere contesti isolati (senza relazioni)"
+          },
+          "includeNodeText": {
+            "type": "boolean",
+            "default": true,
+            "description": "Se includere il testo dei contesti nei nodi"
+          },
+          "includeNodeTags": {
+            "type": "boolean",
+            "default": true,
+            "description": "Se includere i tag dei contesti nei nodi"
+          },
+          "includeEdgeMetadata": {
+            "type": "boolean",
+            "default": true,
+            "description": "Se includere metadati (strength, confidence) negli archi"
+          }
+        },
+        "required": ["rootId"]
+      }
+    },
+    {
+      "name": "context.navigate",
+      "description": "Naviga il grafo dei contesti in modo intelligente usando euristiche o guida AI",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "startId": {
+            "type": "string",
+            "description": "ID del contesto di partenza"
+          },
+          "targetId": {
+            "type": "string",
+            "description": "ID del contesto di destinazione (opzionale per navigazione euristica)"
+          },
+          "mode": {
+            "type": "string",
+            "enum": ["shortest", "semantic", "weighted", "exploratory"],
+            "default": "semantic",
+            "description": "Modalità di navigazione: percorso più breve, semantico, pesato o esplorativo"
+          },
+          "strategy": {
+            "type": "object",
+            "properties": {
+              "preferredRelations": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["supports", "contradicts", "explains", "is_similar_to", "depends_on", "references"]
+                },
+                "description": "Relazioni da preferire durante la navigazione"
+              },
+              "minStrength": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "default": 0.5,
+                "description": "Forza minima delle relazioni da considerare"
+              },
+              "minConfidence": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "default": 0.5,
+                "description": "Confidenza minima delle relazioni da considerare"
+              },
+              "maxSteps": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10,
+                "default": 5,
+                "description": "Numero massimo di passi di navigazione"
+              },
+              "requireTags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Tag che i contesti attraversati devono avere"
+              },
+              "excludeTags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Tag che i contesti attraversati non devono avere"
+              }
+            }
+          },
+          "includeContent": {
+            "type": "boolean",
+            "default": true,
+            "description": "Se includere il contenuto dei contesti nel risultato"
+          },
+          "includeMetadata": {
+            "type": "boolean",
+            "default": true,
+            "description": "Se includere i metadati delle relazioni nel risultato"
+          },
+          "format": {
+            "type": "string",
+            "enum": ["path", "tree", "graph"],
+            "default": "path",
+            "description": "Formato del risultato: percorso lineare, albero di esplorazione o grafo completo"
+          }
+        },
+        "required": ["startId"]
+      }
+    }
+  ]
+} 

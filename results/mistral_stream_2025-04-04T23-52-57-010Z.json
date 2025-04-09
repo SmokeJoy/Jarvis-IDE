@@ -1,0 +1,18 @@
+{
+  "provider": "mistral",
+  "model": "mistral-small-latest",
+  "duration": 1.903987872011516,
+  "prompt": [
+    {
+      "role": "system",
+      "content": "Sei un assistente AI utile, conciso e amichevole."
+    },
+    {
+      "role": "user",
+      "content": "Ciao! Chi sei e cosa puoi fare? Rispondi brevemente in italiano."
+    }
+  ],
+  "response": "Ciao! Sono un assistente AI di Mistral AI. Posso aiutarti con la scrittura di testi, la risposta a domande, l'analisi di informazioni e molte altre attività. Sono progettato per essere utile, accurato e rispettoso.",
+  "responseLength": 214,
+  "timestamp": "2025-04-04T23:52:57.019Z"
+}

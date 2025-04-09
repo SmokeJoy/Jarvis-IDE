@@ -1,0 +1,41 @@
+graph TB
+    subgraph VSCode Extension Host
+        subgraph Core Extension
+            ExtensionEntry[Extension Entry<br/>src/extension.ts]
+            JarvisIdeProvider[JarvisIdeProvider<br/>src/core/webview/JarvisProvider.ts]
+            JarvisIdeClass[JarvisIde Class<br/>src/core/JarvisIde.ts]
+            GlobalState[VSCode Global State]
+            SecretsStorage[VSCode Secrets Storage]
+        end
+
+        subgraph Webview UI
+            WebviewApp[React App<br/>webview-ui/src/App.tsx]
+            ExtStateContext[ExtensionStateContext<br/>webview-ui/src/context/ExtensionStateContext.tsx]
+            ReactComponents[React Components]
+        end
+
+        subgraph Storage
+            TaskStorage[Task Storage<br/>Per-Task Files & History]
+            CheckpointSystem[Git-based Checkpoints]
+        end
+    end
+
+    %% Core Extension Data Flow
+    ExtensionEntry --> JarvisIdeProvider
+    JarvisIdeProvider --> JarvisIdeClass
+    JarvisIdeClass --> GlobalState
+    JarvisIdeClass --> SecretsStorage
+    JarvisIdeClass --> TaskStorage
+    JarvisIdeClass --> CheckpointSystem
+
+    %% Webview Data Flow
+    WebviewApp --> ExtStateContext
+    ExtStateContext --> ReactComponents
+
+    %% Bidirectional Communication
+    JarvisIdeProvider <-->|postMessage| ExtStateContext
+
+    style GlobalState fill:#ff0066,stroke:#333,stroke-width:2px,color:#ffffff
+    style SecretsStorage fill:#ff0066,stroke:#333,stroke-width:2px,color:#ffffff
+    style ExtStateContext fill:#0066ff,stroke:#333,stroke-width:2px,color:#ffffff
+    style JarvisIdeProvider fill:#00cc66,stroke:#333,stroke-width:2px,color:#ffffff

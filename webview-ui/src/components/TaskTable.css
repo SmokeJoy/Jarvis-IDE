@@ -1,0 +1,212 @@
+.task-table-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  background-color: var(--vscode-editor-background);
+  border-radius: 4px;
+  border: 1px solid var(--vscode-panel-border);
+  margin-top: 1rem;
+}
+
+.task-table-filters {
+  display: flex;
+  padding: 0.75rem;
+  gap: 1rem;
+  background-color: var(--vscode-editor-inactiveSelectionBackground);
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-group label {
+  font-size: 0.9rem;
+  color: var(--vscode-descriptionForeground);
+}
+
+.filter-group select {
+  background-color: var(--vscode-dropdown-background);
+  color: var(--vscode-dropdown-foreground);
+  border: 1px solid var(--vscode-dropdown-border);
+  border-radius: 2px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.filter-group select:focus {
+  border-color: var(--vscode-focusBorder);
+}
+
+.task-table-scroll {
+  flex: 1;
+  overflow: auto;
+}
+
+.task-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--vscode-font-family);
+  font-size: 0.9rem;
+}
+
+.task-table th {
+  background-color: var(--vscode-editor-inactiveSelectionBackground);
+  color: var(--vscode-editor-foreground);
+  text-align: left;
+  padding: 0.75rem;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  user-select: none;
+  cursor: pointer;
+}
+
+.task-table th:hover {
+  background-color: var(--vscode-editor-selectionBackground);
+}
+
+.task-table th.sorted-ascending,
+.task-table th.sorted-descending {
+  background-color: var(--vscode-editor-selectionBackground);
+}
+
+.task-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.task-table tbody tr:hover {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+.task-table tbody tr.task-active {
+  background-color: var(--vscode-list-activeSelectionBackground);
+  color: var(--vscode-list-activeSelectionForeground);
+}
+
+.task-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.task-content {
+  max-width: 300px;
+}
+
+.task-content-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-icon {
+  margin-right: 0.25rem;
+}
+
+.status-active {
+  color: var(--vscode-terminal-ansiYellow);
+}
+
+.status-pending {
+  color: var(--vscode-terminal-ansiBlue);
+}
+
+.status-completed {
+  color: var(--vscode-terminal-ansiGreen);
+}
+
+.status-failed {
+  color: var(--vscode-terminal-ansiRed);
+}
+
+.status-aborted {
+  color: var(--vscode-terminal-ansiMagenta);
+}
+
+.priority-badge {
+  display: inline-block;
+  padding: 0.15rem 0.4rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.priority-high {
+  background-color: rgba(255, 100, 100, 0.2);
+  color: var(--vscode-terminal-ansiRed);
+}
+
+.priority-normal {
+  background-color: rgba(100, 100, 255, 0.2);
+  color: var(--vscode-terminal-ansiBlue);
+}
+
+.priority-low {
+  background-color: rgba(100, 200, 100, 0.2);
+  color: var(--vscode-terminal-ansiGreen);
+}
+
+.task-actions {
+  display: flex;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.task-action-button {
+  background-color: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: none;
+  padding: 0.2rem 0.4rem;
+  border-radius: 2px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.task-action-button:hover {
+  background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+.abort-button {
+  background-color: var(--vscode-errorForeground);
+  color: var(--vscode-button-foreground);
+}
+
+.abort-button:hover {
+  background-color: color-mix(in srgb, var(--vscode-errorForeground) 80%, black);
+}
+
+.rerun-button {
+  background-color: var(--vscode-terminal-ansiYellow);
+  color: var(--vscode-editor-background);
+}
+
+.rerun-button:hover {
+  background-color: color-mix(in srgb, var(--vscode-terminal-ansiYellow) 80%, black);
+}
+
+.task-table-empty {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  background-color: var(--vscode-editor-background);
+  border-radius: 4px;
+  border: 1px solid var(--vscode-panel-border);
+  margin-top: 1rem;
+}
+
+.no-tasks-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 2rem;
+  text-align: center;
+  color: var(--vscode-descriptionForeground);
+} 

@@ -1,0 +1,135 @@
+.coder-agent-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background-color: var(--vscode-editor-background);
+  border-radius: 6px;
+  border: 1px solid var(--vscode-panel-border);
+  margin-bottom: 20px;
+}
+
+.prompt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.prompt-header h3 {
+  margin: 0;
+  color: var(--vscode-foreground);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.agent-status {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.agent-status.active {
+  background-color: var(--vscode-debugTokenExpression-name);
+  color: var(--vscode-editor-background);
+}
+
+.agent-status.inactive {
+  background-color: var(--vscode-editorIndentGuide-background);
+  color: var(--vscode-foreground);
+}
+
+.prompt-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.instruction-input {
+  width: 100%;
+  min-height: 100px;
+  background-color: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  resize: vertical;
+}
+
+.prompt-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.prompt-options {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.prompt-options label {
+  font-size: 12px;
+  color: var(--vscode-foreground);
+  margin-right: 4px;
+}
+
+.prompt-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.status-message {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.status-message.info {
+  background-color: var(--vscode-notificationsInfoIcon-foreground);
+  color: var(--vscode-editor-background);
+}
+
+.status-message.error {
+  background-color: var(--vscode-errorForeground);
+  color: var(--vscode-editor-background);
+}
+
+.prompt-templates {
+  margin-top: 8px;
+}
+
+.prompt-templates h4 {
+  font-size: 14px;
+  margin: 0 0 8px 0;
+  color: var(--vscode-foreground);
+  font-weight: 500;
+}
+
+.template-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.template-item {
+  background-color: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.template-item:hover:not(:disabled) {
+  background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+.template-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+} 

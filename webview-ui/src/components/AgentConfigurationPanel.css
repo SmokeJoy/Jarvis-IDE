@@ -1,0 +1,218 @@
+.agent-configuration-panel {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--vscode-editor-background);
+  border-radius: 6px;
+  border: 1px solid var(--vscode-panel-border);
+  padding: 16px;
+  margin-bottom: 20px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.config-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.config-header h3 {
+  margin: 0;
+  color: var(--vscode-foreground);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.loading-indicator {
+  height: 16px;
+  width: 16px;
+  margin-left: 8px;
+}
+
+.system-config-section {
+  margin-bottom: 20px;
+}
+
+.system-config-section h4 {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 12px 0;
+  color: var(--vscode-foreground);
+}
+
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.config-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.config-item label {
+  color: var(--vscode-foreground);
+  font-size: 12px;
+}
+
+.agents-config-section {
+  margin-bottom: 20px;
+}
+
+.agents-config-section h4 {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 12px 0;
+  color: var(--vscode-foreground);
+}
+
+.no-agents-message {
+  padding: 16px;
+  color: var(--vscode-descriptionForeground);
+  font-style: italic;
+  text-align: center;
+}
+
+.agents-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.agent-config-card {
+  background-color: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 4px;
+  padding: 12px;
+  transition: box-shadow 0.2s ease;
+}
+
+.agent-config-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.agent-config-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.agent-name {
+  font-weight: 500;
+  color: var(--vscode-foreground);
+  font-size: 14px;
+}
+
+.agent-config-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.config-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.config-row label {
+  color: var(--vscode-foreground);
+  font-size: 12px;
+}
+
+.agent-config-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.config-summary-item {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.config-summary-item strong {
+  color: var(--vscode-foreground);
+}
+
+.mode-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.mode-badge.autonomous {
+  background-color: var(--vscode-debugTokenExpression-name);
+  color: var(--vscode-editor-background);
+}
+
+.mode-badge.supervised {
+  background-color: var(--vscode-editorWarning-foreground);
+  color: var(--vscode-editor-background);
+}
+
+.mode-badge.inactive {
+  background-color: var(--vscode-editorIndentGuide-background);
+  color: var(--vscode-foreground);
+}
+
+.agent-config-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.config-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.save-message {
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+.save-message.success {
+  background-color: var(--vscode-debugTokenExpression-name);
+  color: var(--vscode-editor-background);
+}
+
+.save-message.error {
+  background-color: var(--vscode-errorForeground);
+  color: var(--vscode-editor-background);
+}
+
+.config-info {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  border-top: 1px solid var(--vscode-panel-border);
+  padding-top: 12px;
+  margin-top: 8px;
+}
+
+.config-info p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Responsive layout */
+@media (max-width: 768px) {
+  .config-grid,
+  .agents-list {
+    grid-template-columns: 1fr;
+  }
+} 

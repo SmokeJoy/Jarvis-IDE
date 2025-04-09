@@ -1,0 +1,1 @@
+See [https://jarvis-ide.com/privacy](https://jarvis-ide.com/privacy) for our privacy policy.

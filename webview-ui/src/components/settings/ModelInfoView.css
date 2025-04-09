@@ -1,0 +1,44 @@
+.model-info-view {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 4px;
+  background-color: var(--vscode-editor-background);
+}
+
+.model-info-view h3 {
+  margin: 0 0 1rem 0;
+  color: var(--vscode-editor-foreground);
+}
+
+.model-info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.model-info-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.model-info-row .label {
+  min-width: 150px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.model-info-row .value {
+  color: var(--vscode-editor-foreground);
+}
+
+.model-info-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--vscode-input-border);
+}
+
+.model-info-section h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--vscode-editor-foreground);
+} 
