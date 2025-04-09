@@ -589,3 +589,41 @@ I problemi erano principalmente causati da:
 - Parametri di funzioni senza tipo esplicito che causavano errori `noImplicitAny`
 
 La maggior parte degli errori di compilazione erano concentrati nei moduli MCP (Model Control Protocol), in particolare negli handler delle varie funzionalità e nel dispatcher che gestisce le richieste.
+
+## MCP-FINAL: Correzioni finali TypeScript
+
+### Data: 2023-04-18
+
+### Problemi risolti
+
+Ho eseguito una serie di correzioni finali sul codice TypeScript per migliorare la qualità e la sicurezza:
+
+1. **Accesso sicuro a variabili d'ambiente**: Ho modificato tutti gli accessi a `process.env` per utilizzare la sintassi `process.env['VARIABLE']` invece di `process.env.VARIABLE`. Questo approccio è più sicuro contro possibili problemi con nomi di variabili che potrebbero contenere caratteri speciali.
+
+2. **Import ESM coerenti**: Ho corretto l'importazione di Express da `import * as express from 'express'` a `import express from 'express'` per mantenere coerenza con le best practice ESM.
+
+3. **Parametri tipizzati esplicitamente**: Ho aggiunto tipi espliciti a parametri di funzioni arrow che utilizzavano `any` implicito, come `searchDocsHandlerOld` e `codeGenerateHandler`.
+
+### File modificati
+
+| File | Modifica |
+|------|----------|
+| `src/services/mcp/run-server.ts` | Accesso sicuro a `process.env` |
+| `src/services/mcp/toolsListServer.ts` | Correzione importazione Express e accesso a `process.env` |
+| `webview-ui/vite.config.ts` | Accesso sicuro a `process.env` |
+| `src/core/webview/JarvisProvider.js` | Accesso sicuro a `process.env` |
+| `src/utils/logger.js` | Accesso sicuro a `process.env` |
+| `scripts/test-providers.ts` | Accesso sicuro a `process.env` |
+| `src/storage/benchmark/BenchmarkStorage.ts` | Accesso sicuro a `process.env` |
+| `src/webview/WebviewManager.ts` | Accesso sicuro a `process.env` |
+| `src/test/shell.test.ts` | Accesso sicuro a `process.env` |
+| `src/services/mcp/handlers/searchDocsHandler.ts` | Aggiunto tipo esplicito al parametro |
+| `src/services/mcp/handlers/codeGenerateHandler.ts` | Aggiunto tipo esplicito al parametro |
+
+### Motivazioni tecniche
+
+1. **Sicurezza**: L'utilizzo di `process.env['VARIABLE']` è più sicuro in quanto evita problemi con variabili d'ambiente che contengono caratteri speciali o che potrebbero interferire con la notazione dot.
+
+2. **Coerenza**: L'adozione coerente di `import express from 'express'` segue le best practice per i moduli ESM.
+
+3. **Manutenibilità**: L'aggiunta di tipi espliciti ai parametri migliora la leggibilità e aiuta a prevenire errori durante lo sviluppo.
