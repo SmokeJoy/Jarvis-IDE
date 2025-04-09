@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.8.5]
+
+- Add multi-profile support for system prompts with UI for creating, editing and switching between profiles
+- Implement profile management with persistent storage in settings.json and localStorage
+- Add visual indicators for default profiles and profile switching
+- Improve SystemPromptEditor with better Markdown preview and tab navigation
+- Ensure backward compatibility with existing prompt systems
+
 ## [3.8.4]
 
 -   Add Sambanova Deepseek-V3-0324
