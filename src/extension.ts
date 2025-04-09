@@ -1,38 +1,80 @@
+/**
+ * @file extension.ts
+ * @description Punto di ingresso principale dell'estensione Jarvis IDE
+ */
+
+// Importazioni di base
 import { setTimeout as setTimeoutPromise } from "node:timers/promises"
 import * as vscode from "vscode"
-import { JarvisProvider } from "./core/webview/JarvisProvider.js.js"
-import { Logger } from "./utils/logger.js.js"
-import { createJarvisAPI } from "./exports.js.js"
+import { JarvisProvider } from "./core/webview/JarvisProvider.js"
+import { Logger } from "./utils/logger.js"
 import "./utils/path.js" // necessary to have access to String.prototype.toPosix
-import { DIFF_VIEW_URI_SCHEME } from "./integrations/editor/DiffViewProvider.js.js"
+import { DIFF_VIEW_URI_SCHEME } from "./integrations/editor/DiffViewProvider.js"
 import assert from 'node:assert';
-import type { OpenRouterHandler } from './api/providers/openrouter.js.js'
-import type { ChatMessage } from './shared/types/chat.types.js.js'
-import type { WebviewMessage, WebviewMessageType, ExtensionMessage, castAs } from './shared/types/webview.types.js.js'
-import type { saveChatMessage, loadChatHistory, clearChatHistory } from './utils/chatHistory.js.js'
 import { v4 as uuidv4 } from 'uuid'
-import type { loadModels } from './data/modelLoader.js.js'
-import type { SettingsManager } from './services/settings/SettingsManager.js.js'
-import { TelemetryService } from "./services/TelemetryService.js.js"
-import * as pathModule from 'path'
-const path = pathModule;
-import { registerSystemPromptCommands } from './commands/systemPrompt.js.js'
-import { registerAgentCommands } from './commands/agentCommands.js.js'
-import { registerExportCommands } from './commands/exportCommands.js.js'
-import { JarvisAgent } from './agent/JarvisAgent.js.js'
-import { MasManager } from './mas/MasManager.js.js'
-import { registerMasCommands } from './mas/masCommands.js.js'
-import type { JarvisSettings } from '../types/settings.types.js.js'
-import { LLMProviderId } from './shared/types/api.types.js.js'
-import { registerTestCommand } from './services/mcp/test-script.js.js'
-import { logger, LogLevel } from './utils/logger.js.js';
-function setLogLevel(level: typeof LogLevel) {
+import { TelemetryService } from "./services/TelemetryService.js"
+import path from 'path'
+import { registerSystemPromptCommands } from './commands/systemPrompt.js'
+import { registerAgentCommands } from './commands/agentCommands.js'
+import { registerExportCommands } from './commands/exportCommands.js'
+import { JarvisAgent } from './agent/JarvisAgent.js'
+import { MasManager } from './mas/MasManager.js'
+import { registerMasCommands } from './mas/masCommands.js'
+import type { LLMProviderId } from './shared/types/api.types.js'
+import { registerTestCommand } from './services/mcp/test-script.js'
+import { logger } from './utils/logger.js';
+import { LogLevel } from './types/global.js';
+import { initLogFile } from './utils/logStorage.js'
+import { exportCurrentLog, openLogDirectory } from './utils/logExport.js'
+import { castAs } from './shared/types/webview.types.js';
+
+// Importazioni di tipo, lasciare così
+import type { OpenRouterHandler } from './api/providers/openrouter.js'
+import type { ChatMessage } from './shared/types/chat.types.js'
+import type { WebviewMessage, WebviewMessageType, ExtensionMessage } from './shared/types/webview.types.js'
+import type { JarvisSettings } from './types/settings.types.js'
+
+// Definizione della modalità sviluppo
+const isDevelopmentMode = process.env['NODE_ENV'] === 'development';
+
+// Predichiarazioni di variabili per importazioni dinamiche
+let saveChatMessage: any;
+let loadChatHistory: any;
+let clearChatHistory: any;
+let loadModels: any;
+let SettingsManager: any;
+let exportChatToMarkdown: any;
+let createJarvisAPI: any;
+
+// Importazione dei moduli a runtime
+async function loadDynamicModules() {
+	try {
+		const chatHistoryModule = await import('./utils/chatHistory.js');
+		saveChatMessage = chatHistoryModule.saveChatMessage;
+		loadChatHistory = chatHistoryModule.loadChatHistory;
+		clearChatHistory = chatHistoryModule.clearChatHistory;
+		
+		const modelLoaderModule = await import('./data/modelLoader.js');
+		loadModels = modelLoaderModule.loadModels;
+		
+		const settingsManagerModule = await import('./services/settings/SettingsManager.js');
+		SettingsManager = settingsManagerModule.SettingsManager;
+		
+		const exportChatModule = await import('./utils/exportChat.js');
+		exportChatToMarkdown = exportChatModule.exportChatToMarkdown;
+		
+		const exportsModule = await import('./exports.js');
+		createJarvisAPI = exportsModule.createJarvisAPI;
+		
+		logger.info("Moduli dinamici caricati con successo");
+	} catch (error) {
+		logger.error("Errore nel caricamento dei moduli dinamici", error as Error);
+	}
+}
+
+function setLogLevel(level: number) {
 	logger.setLevel(level);
 }
-import { initLogFile } from './utils/logStorage.js.js'
-import { exportCurrentLog, openLogDirectory } from './utils/logExport.js.js'
-import { exportChatToMarkdown } from './utils/exportChat.js.js'
-import { IS_DEV } from './constants.js.js'
 
 /*
 Built using https://github.com/microsoft/vscode-webview-ui-toolkit
@@ -62,12 +104,251 @@ async function handleSystemPrompt(_panel: vscode.WebviewPanel, _message: Webview
     // Implementazione gestione messaggi prompt che verrà aggiunta in seguito
 }
 
-async function handleSettingsUpdate(_panel: vscode.WebviewPanel, _message: WebviewMessage): Promise<void> {
-    // Implementazione gestione aggiornamento impostazioni che verrà aggiunta in seguito
+async function handleSettingsUpdate(panel: vscode.WebviewPanel, message: WebviewMessage): Promise<void> {
+    try {
+        // Ottieni il SettingsManager
+        const settingsManager = SettingsManager.getInstance();
+        
+        // Recupera le impostazioni correnti
+        const currentSettings = settingsManager.getSettings();
+        
+        // Aggiorna le impostazioni con quelle ricevute dal messaggio
+        if (message.payload) {
+            // Gestisci specificamente il contextPrompt che può essere stringa o oggetto
+            if (message.payload['contextPrompt'] !== undefined) {
+                // Se il contextPrompt è un oggetto, lo serializziamo in JSON
+                if (typeof message.payload['contextPrompt'] === 'object') {
+                    currentSettings['contextPrompt'] = JSON.stringify(message.payload['contextPrompt']);
+                } else {
+                    currentSettings['contextPrompt'] = message.payload['contextPrompt'];
+                }
+            }
+            
+            // Aggiorna altre impostazioni se presenti
+            if (message.payload['apiConfiguration']) {
+                currentSettings['apiConfiguration'] = message.payload['apiConfiguration'];
+            }
+            
+            if (message.payload['telemetryEnabled'] !== undefined) {
+                currentSettings['telemetrySetting'] = { 
+                    enabled: !!message.payload['telemetryEnabled'] 
+                };
+            }
+            
+            if (message.payload['customInstructions'] !== undefined) {
+                currentSettings['customInstructions'] = message.payload['customInstructions'];
+            }
+            
+            // Salva le impostazioni aggiornate
+            await settingsManager.updateSettings(currentSettings);
+            
+            // Invia una conferma alla webview
+            panel.webview.postMessage(castAs<ExtensionMessage>({
+                type: 'settingsSaved',
+                id: message.id // Restituisci lo stesso ID per il tracciamento delle richieste
+            }));
+            
+            console.log("Impostazioni salvate:", currentSettings);
+        }
+    } catch (error) {
+        console.error("Errore nell'aggiornamento delle impostazioni:", error);
+        // Invia un messaggio di errore alla webview
+        panel.webview.postMessage(castAs<ExtensionMessage>({
+            type: 'error',
+            message: `Errore nell'aggiornamento delle impostazioni: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`
+        }));
+    }
 }
 
-async function handleGetSettings(_panel: vscode.WebviewPanel): Promise<void> {
-    // Implementazione richiesta impostazioni che verrà aggiunta in seguito
+async function handleGetSettings(panel: vscode.WebviewPanel): Promise<void> {
+    try {
+        // Ottieni il SettingsManager
+        const settingsManager = SettingsManager.getInstance();
+        
+        // Carica le impostazioni dal disco
+        const settings = settingsManager.getSettings();
+        
+        // Prepara l'oggetto risposta con tutte le impostazioni, incluso contextPrompt
+        const response: ExtensionMessage = {
+            type: 'settings',
+            id: 'get-settings-response', // ID per la tracciabilità della risposta
+            settings: {
+                apiConfiguration: settings.apiConfiguration || {
+                    provider: "openai",
+                    apiKey: "",
+                    modelId: "",
+                    baseUrl: "",
+                    temperature: 0.7,
+                    maxTokens: 4096
+                },
+                telemetrySetting: settings.telemetrySetting || { enabled: true },
+                customInstructions: settings.customInstructions || "",
+                // Includi il contextPrompt nelle impostazioni
+                contextPrompt: settings.contextPrompt || ""
+            }
+        };
+        
+        // Invia la risposta alla webview
+        console.log("Invio impostazioni alla webview:", response);
+        panel.webview.postMessage(castAs<ExtensionMessage>(response));
+    } catch (error) {
+        console.error("Errore nel recupero delle impostazioni:", error);
+        // Invia un messaggio di errore alla webview
+        panel.webview.postMessage(castAs<ExtensionMessage>({
+            type: 'error',
+            message: `Errore nel recupero delle impostazioni: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`
+        }));
+    }
+}
+
+// Implement the handlers for the new message types
+async function handleGetPromptProfiles(panel: vscode.WebviewPanel): Promise<void> {
+    try {
+        // Ottieni il SettingsManager
+        const settingsManager = SettingsManager.getInstance();
+        
+        // Ottieni tutti i profili di prompt
+        const profiles = settingsManager.getPromptProfiles();
+        
+        // Invia i profili alla webview
+        panel.webview.postMessage(castAs<ExtensionMessage>({
+            type: 'promptProfiles',
+            id: 'get-prompt-profiles-response',
+            profiles: profiles
+        }));
+        
+        console.log("Profili di prompt inviati alla webview:", profiles);
+    } catch (error) {
+        console.error("Errore nel recupero dei profili di prompt:", error);
+        panel.webview.postMessage(castAs<ExtensionMessage>({
+            type: 'error',
+            error: `Errore nel recupero dei profili di prompt: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`
+        }));
+    }
+}
+
+async function handleCreatePromptProfile(panel: vscode.WebviewPanel, message: WebviewMessage): Promise<void> {
+    try {
+        if (!message.payload?.['profile']) {
+            throw new Error("Dati del profilo mancanti");
+        }
+        
+        // Ottieni il SettingsManager
+        const settingsManager = SettingsManager.getInstance();
+        
+        // Crea il nuovo profilo
+        const newProfile = await settingsManager.createPromptProfile(message.payload['profile']);
+        
+        // Invia conferma alla webview
+        panel.webview.postMessage(castAs<ExtensionMessage>({
+            type: 'promptProfileCreated',
+            profile: newProfile
+        }));
+        
+        console.log("Nuovo profilo di prompt creato:", newProfile);
+    } catch (error) {
+        console.error("Errore nella creazione del profilo di prompt:", error);
+        panel.webview.postMessage(castAs<ExtensionMessage>({
+            type: 'error',
+            error: `Errore nella creazione del profilo di prompt: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`
+        }));
+    }
+}
+
+async function handleUpdatePromptProfile(panel: vscode.WebviewPanel, message: WebviewMessage): Promise<void> {
+    try {
+        if (!message.payload?.['profile'] || !message.payload?.['profileId']) {
+            throw new Error("Dati del profilo o ID mancanti");
+        }
+        
+        // Ottieni il SettingsManager
+        const settingsManager = SettingsManager.getInstance();
+        
+        // Aggiorna il profilo esistente
+        const updatedProfile = await settingsManager.updatePromptProfile(
+            message.payload['profileId'],
+            message.payload['profile']
+        );
+        
+        // Invia conferma alla webview
+        panel.webview.postMessage(castAs<ExtensionMessage>({
+            type: 'promptProfileUpdated',
+            profile: updatedProfile
+        }));
+        
+        console.log("Profilo di prompt aggiornato:", updatedProfile);
+    } catch (error) {
+        console.error("Errore nell'aggiornamento del profilo di prompt:", error);
+        panel.webview.postMessage(castAs<ExtensionMessage>({
+            type: 'error',
+            error: `Errore nell'aggiornamento del profilo di prompt: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`
+        }));
+    }
+}
+
+async function handleDeletePromptProfile(panel: vscode.WebviewPanel, message: WebviewMessage): Promise<void> {
+    try {
+        if (!message.payload?.['profileId']) {
+            throw new Error("ID del profilo mancante");
+        }
+        
+        // Ottieni il SettingsManager
+        const settingsManager = SettingsManager.getInstance();
+        
+        // Elimina il profilo
+        await settingsManager.deletePromptProfile(message.payload['profileId']);
+        
+        // Ottieni i profili rimanenti dopo l'eliminazione
+        const remainingProfiles = settingsManager.getPromptProfiles();
+        
+        // Invia conferma alla webview
+        panel.webview.postMessage(castAs<ExtensionMessage>({
+            type: 'promptProfileDeleted',
+            profileId: message.payload['profileId'],
+            profiles: remainingProfiles
+        }));
+        
+        console.log("Profilo di prompt eliminato, ID:", message.payload['profileId']);
+    } catch (error) {
+        console.error("Errore nell'eliminazione del profilo di prompt:", error);
+        panel.webview.postMessage(castAs<ExtensionMessage>({
+            type: 'error',
+            error: `Errore nell'eliminazione del profilo di prompt: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`
+        }));
+    }
+}
+
+async function handleSwitchPromptProfile(panel: vscode.WebviewPanel, message: WebviewMessage): Promise<void> {
+    try {
+        if (!message.payload?.['profileId']) {
+            throw new Error("ID del profilo mancante");
+        }
+        
+        // Ottieni il SettingsManager
+        const settingsManager = SettingsManager.getInstance();
+        
+        // Imposta il profilo attivo
+        const activeProfile = await settingsManager.setActivePromptProfile(message.payload['profileId']);
+        
+        // Ottieni tutti i profili dopo lo switch
+        const allProfiles = settingsManager.getPromptProfiles();
+        
+        // Invia conferma alla webview
+        panel.webview.postMessage(castAs<ExtensionMessage>({
+            type: 'promptProfileSwitched',
+            profileId: message.payload['profileId'],
+            profile: activeProfile,
+            profiles: allProfiles
+        }));
+        
+        console.log("Profilo di prompt attivato:", activeProfile);
+    } catch (error) {
+        console.error("Errore nel cambio del profilo di prompt:", error);
+        panel.webview.postMessage(castAs<ExtensionMessage>({
+            type: 'error',
+            error: `Errore nel cambio del profilo di prompt: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`
+        }));
+    }
 }
 
 // This method is called when your extension is activated
@@ -139,7 +420,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	provider = new JarvisProvider(context, outputChannel, settings)
 
-	vscode.commands.executeCommand("setContext", "jarvis-ide.isDevMode", IS_DEV)
+	vscode.commands.executeCommand("setContext", "jarvis-ide.isDevMode", isDevelopmentMode)
 
 	// Registra i comandi del system prompt
 	registerSystemPromptCommands(context, provider)
@@ -156,7 +437,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	registerMasCommands(context, provider)
 
 	// Registra il comando di test per McpDispatcher (solo in modalità sviluppo)
-	if (IS_DEV) {
+	if (isDevelopmentMode) {
 		registerTestCommand(context)
 		logger.info("Comando di test McpDispatcher registrato")
 	}
@@ -288,6 +569,28 @@ export async function activate(context: vscode.ExtensionContext) {
 					break;
 				case WebviewMessageType.RESET_SETTINGS:
 					SettingsManager.getInstance().resetSettings();
+					break;
+				case WebviewMessageType.GET_PROMPT_PROFILES:
+					await handleGetPromptProfiles(panel);
+					break;
+				case WebviewMessageType.CREATE_PROMPT_PROFILE:
+					await handleCreatePromptProfile(panel, message);
+					break;
+				case WebviewMessageType.UPDATE_PROMPT_PROFILE:
+					await handleUpdatePromptProfile(panel, message);
+					break;
+				case WebviewMessageType.DELETE_PROMPT_PROFILE:
+					await handleDeletePromptProfile(panel, message);
+					break;
+				case WebviewMessageType.SWITCH_PROMPT_PROFILE:
+					await handleSwitchPromptProfile(panel, message);
+					break;
+				case WebviewMessageType.GET_SETTINGS:
+					await handleGetSettings(panel);
+					break;
+				case WebviewMessageType.UPDATE_SETTINGS:
+				case WebviewMessageType.UPDATE_SETTING:
+					await handleSettingsUpdate(panel, message);
 					break;
 				case WebviewMessageType.EXPORT_SETTINGS:
 					vscode.window.showSaveDialog({
@@ -438,12 +741,6 @@ export async function activate(context: vscode.ExtensionContext) {
 				case WebviewMessageType.GET_SYSTEM_PROMPT:
 				case WebviewMessageType.SAVE_SYSTEM_PROMPT:
 					await handleSystemPrompt(panel, message);
-					break;
-				case WebviewMessageType.UPDATE_SETTING:
-					await handleSettingsUpdate(panel, message);
-					break;
-				case WebviewMessageType.GET_SETTINGS:
-					await handleGetSettings(panel);
 					break;
 				case WebviewMessageType.RUN_AGENT:
 					try {
@@ -640,7 +937,7 @@ ${fileContent}
 	context.subscriptions.push(vscode.window.registerUriHandler({ handleUri }))
 
 	// Register size testing commands in development mode
-	if (IS_DEV) {
+	if (isDevelopmentMode) {
 		// Use dynamic import to avoid loading the module in production
 		import("./dev/commands/tasks")
 			.then((module) => {
