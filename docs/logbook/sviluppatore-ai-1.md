@@ -541,3 +541,51 @@ L'interfaccia utente comunica con il backend attraverso il `contextPromptManager
 - Implementare diff visuale tra profili per confronto
 - Aggiungere funzionalità di import/export profili
 - Migliorare l'anteprima con rendering avanzato Markdown
+
+## MCP-F7: Fix Compilazione TypeScript
+
+### Data: 2023-04-17
+
+### Problemi risolti
+Ho affrontato i seguenti errori di compilazione identificati durante l'analisi di `tsc-pre-release`:
+
+1. **Estensioni `.js.js` errate**: Ho corretto tutti i percorsi di import che contenevano l'estensione `.js.js` duplicata, sostituendola con `.js`.
+2. **Import type usati come valore**: Ho convertito gli `import type` in `import` regolari quando i valori importati venivano utilizzati non solo come tipi.
+3. **Import di vscode come tipo**: Ho modificato gli import di `vscode` da `import type * as vscode` a `import * as vscode` dove necessario.
+
+### Comandi eseguiti e approccio
+
+1. Ho analizzato i file problematici utilizzando la ricerca nel codice:
+   ```bash
+   grep -r "\.js\.js" --include="*.ts" ./src ./webview-ui
+   grep -r "import type" --include="*.ts" ./src ./webview-ui
+   ```
+
+2. Ho corretto manualmente ogni istanza di:
+   - Import errati con `.js.js` -> `.js`
+   - `import type { handler } from './path'` -> `import { handler } from './path'` quando il valore viene utilizzato
+   - `import type * as vscode` -> `import * as vscode` quando viene utilizzato il namespace
+
+### File modificati
+
+| File | Problema | Correzione |
+|------|----------|------------|
+| `src/services/mcp/handlers/searchDocsHandler.ts` | Import `vscode` come tipo ma usato come valore | Convertito in import normale |
+| `src/services/mcp/handlers/fsWriteHandler.ts` | Import `vscode` come tipo ma usato come valore | Convertito in import normale |
+| `src/services/mcp/handlers/askDocsHandler.ts` | Import `vscode` come tipo ma usato come valore | Convertito in import normale |
+| `src/services/mcp/handlers/projectLintHandler.ts` | Import `vscode` come tipo ma usato come valore | Convertito in import normale |
+| `src/services/mcp/handlers/fsFormatHandler.ts` | Import `vscode` come tipo ma usato come valore | Convertito in import normale |
+| `src/services/mcp/handlers/testRunHandler.ts` | Import `vscode` come tipo ma usato come valore | Convertito in import normale |
+| `src/services/mcp/handlers/projectDepGraphHandler.ts` | Import `vscode` come tipo ma usato come valore | Convertito in import normale |
+| `src/services/mcp/handlers/contextInjectHandler.ts` | Import `vscode` come tipo ma usato come valore | Convertito in import normale |
+| `src/services/mcp/McpDispatcher.ts` | Import di handler come tipo ma usati come valori | Convertiti tutti gli import type in import normali |
+| `src/services/mcp/McpDispatcher.ts` | Import type di funzioni usate come valori | Convertito `import type { isErrorMessage, isResponseMessage, safeCastAs }` in import normali |
+| `src/services/mcp/handlers/codeGenerateHandler.ts` | Parametro con tipo any implicito | Aggiunto tipo esplicito `input: any` |
+
+### Note tecniche
+I problemi erano principalmente causati da:
+- Incompatibilità tra come TypeScript tratta gli import type e come questi vengono utilizzati nel codice
+- Uso di librerie importate come tipo ma utilizzate come valori durante l'esecuzione
+- Parametri di funzioni senza tipo esplicito che causavano errori `noImplicitAny`
+
+La maggior parte degli errori di compilazione erano concentrati nei moduli MCP (Model Control Protocol), in particolare negli handler delle varie funzionalità e nel dispatcher che gestisce le richieste.
