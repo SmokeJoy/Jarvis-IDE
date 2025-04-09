@@ -1,5 +1,107 @@
 # Diario Operativo - Sviluppatore AI 2
 
+## 2025-04-16
+### Completamento del rebranding da cline a jarvis-ide
+
+**Data**: 16 Aprile 2025
+
+Ho completato il processo di rebranding del progetto da "cline" a "jarvis-ide", aggiornando tutti i riferimenti nei file di configurazione e documentazione:
+
+**File principali aggiornati:**
+- `package.json`: modificati nome, displayName, publisher e repository
+- `README.md`: aggiornato con nuova identità e riferimenti a jarvis-ide
+- File di configurazione: aggiornati prefissi delle impostazioni
+
+**Modifiche dettagliate:**
+- Sostituiti tutti i riferimenti attivi a `cline` con `jarvis-ide`
+- Aggiornati i comandi da `cline.*` a `jarvis-ide.*`
+- Modificati i percorsi di importazione nei file TypeScript
+- Aggiornati i riferimenti nelle stringhe di log e nei messaggi di errore
+- Modificati URL dei repository e della documentazione
+
+**Motivazioni:**
+- Allineamento con la nuova identità del progetto
+- Coerenza in tutta la codebase
+- Tracciabilità del cambio: "origine cline ⇒ progetto jarvis-ide"
+- Preparazione per il rilascio ufficiale
+
+**Vantaggi:**
+- Branding coerente in tutta l'applicazione
+- Migliore riconoscibilità del prodotto
+- Eliminazione di riferimenti misti che potrebbero confondere gli utenti
+- Base pulita per futuri sviluppi
+
+**Prossimi passi:**
+- Aggiornamento della documentazione utente
+- Creazione di nuovi asset grafici coerenti con il brand
+- Preparazione del primo rilascio ufficiale come jarvis-ide
+
+Firma: Sviluppatore AI 2
+
+## 2025-04-15
+### Correzione manuale importazioni TypeScript
+
+**Data**: 15 Aprile 2025
+
+Ho completato la correzione manuale delle importazioni nei file della directory `src/integrations/checkpoints`, in particolare:
+
+## 2025-04-09 – MCP-F5: Visual Prompt Editor Completato
+
+### Implementazione completata del Visual Prompt Editor multi-slot
+
+**File principali sviluppati:**
+- `webview-ui/src/data/contextPromptManager.ts`: gestore centralizzato per prompt multi-slot
+- `webview-ui/src/components/SystemPromptEditor.tsx`: interfaccia visuale con tab e preview Markdown
+- `src/components/settings/SettingsView.tsx`: integrazione del componente nella UI principale
+
+**Funzionalità implementate:**
+- **Gestore di prompt multi-slot**:
+  - Supporto completo per slot `system`, `user`, `persona` e `context`
+  - Persistenza in localStorage con fallback ai valori predefiniti
+  - Sincronizzazione bidirezionale con l'extension tramite WebviewBridge (MCP-compliant)
+  - API modulare con funzioni per get/set/reset di singoli slot o tutti i prompt
+
+- **Interfaccia utente avanzata**:
+  - UI con tab per ogni tipo di prompt (system, user, persona, context)
+  - Editor con descrizioni contestuali per ogni tipo di prompt
+  - Anteprima Markdown in tempo reale tramite `react-markdown`
+  - Pulsanti per salvare, ripristinare singoli prompt o tutti i prompt
+  - Feedback visuale temporaneo per le azioni dell'utente
+
+- **Integrazione MCP**:
+  - Utilizzo di `WebviewBridge` per comunicazione sicura e resiliente
+  - Aderenza al protocollo MCP con tipi di messaggi standardizzati
+  - Payload strutturati secondo specifica `WebviewMessageType.GET_SETTINGS/SAVE_SETTINGS`
+  - Timeout e gestione errori per comunicazione fallita
+
+**Correzioni collaterali:**
+- Risolto errore in `ChatContentHelpers.js.js` che bloccava i test:
+  - Corretto percorso di importazione a `ChatContentHelpers.ts`
+  - Sistemate altre importazioni errate `.js.js` nei file correlati
+  - Test del modulo ora funzionanti: 5/5 test passati
+
+**Test implementati:**
+- Test unitari per `contextPromptManager.ts`:
+  - Recupero da slot predefinito
+  - Set e get di prompt in uno slot
+  - Reset di uno slot ai valori predefiniti
+  - Reset di tutti i prompt
+  - Inizializzazione dei prompt dall'estensione
+
+**Note tecniche:**
+- Implementazione 100% TypeScript con completa tipizzazione
+- Struttura modulare per facilità di manutenzione e estensione
+- Caricamento asincrono con fallback per evitare blocchi UI
+- Supporto per estensibilità futura (aggiunta di nuovi slot)
+
+**MCP compliance:**
+- Uso di `WebviewMessageType.GET_SETTINGS` per richiedere i prompt
+- Uso di `WebviewMessageType.SAVE_SETTINGS` per salvare modifiche
+- Supporto per backward compatibility (prompt stringa → oggetto)
+- Gestione payload con ID univoci per identificare le richieste
+
+Firma: Sviluppatore AI 2
+
 ## 2025-04-15
 ### Correzione manuale importazioni TypeScript
 
@@ -406,3 +508,44 @@ Verificare il comportamento dell'implementazione reale `WebviewBridge.ts` in sce
 ```
 feat(test): resilienza WebviewBridge.ts implementazione reale
 ```
+
+## 2025-04-17 – MCP-F6: PromptProfile Manager – Supporto Profili Multipli
+
+### Estensione del gestore prompt per supportare più profili configurabili
+
+**File principali modificati:**
+- `src/services/settings/SettingsManager.ts`: aggiunta gestione CRUD profili
+- `webview-ui/src/data/contextPromptManager.ts`: caching locale + bridge con estensione
+- `src/extension.ts`: handler WebviewMessageType per operazioni `GET`, `SWITCH`, `CREATE`, `DELETE`, `UPDATE`
+- `src/shared/types/webview.types.ts`: nuove enumerazioni `WebviewMessageType` per MCP-F6
+
+**Funzionalità implementate:**
+- 🔁 Supporto completo a profili prompt multipli (`PromptProfile`)
+- 🧠 Salvataggio e lettura da `settings.json` + fallback a localStorage
+- 🧭 Switching profilo attivo con aggiornamento automatico
+- 🧩 Retrocompatibilità: `contextPrompt` legacy ↔ `PromptProfile`
+- 💬 Roundtrip WebviewBridge → Extension (completo e tracciabile)
+
+**Tipi di prompt supportati per ogni profilo:**
+- `system`, `user`, `persona`, `context`
+
+**Messaggi Webview implementati (MCP-F6):**
+- `GET_PROMPT_PROFILES`, `CREATE_PROMPT_PROFILE`, `UPDATE_PROMPT_PROFILE`, `DELETE_PROMPT_PROFILE`, `SWITCH_PROMPT_PROFILE`
+
+**Motivazioni:**
+- Permettere setup contestuali per ambienti differenti (es. progetti/workspace diversi)
+- Facilitare il testing e il confronto tra strategie di prompt
+- Abilitare la persistenza personalizzata multiprofilo conforme al protocollo MCP
+
+**Stato attuale:**
+✅ Backend completo  
+🛠️ Frontend in sviluppo (fase successiva)
+
+**Prossimi passi (MCP-F6 – Parte UI):**
+- Creazione `ProfileSelector.tsx`
+- Interfaccia visuale CRUD
+- Preview diff tra profili
+- Integrazione in `SystemPromptEditor.tsx`
+- Test Jest + validazione end-to-end
+
+Firma: Sviluppatore AI 1
