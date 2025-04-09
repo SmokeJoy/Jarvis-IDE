@@ -819,6 +819,9 @@ ${fileContent}
 				case WebviewMessageType.DELETE_BENCHMARK_SESSION:
 					vscode.commands.executeCommand('jarvis-ide.benchmarkDeleteSession', message.benchmarkSessionId);
 					break;
+				case 'fetch_models':
+					handleModelsFetch(message, panel.webview);
+					break;
 			}
 		})
 	}
@@ -1243,4 +1246,35 @@ function initializeMasSystem(context: vscode.ExtensionContext): void {
 	
 	// Log dell'inizializzazione
 	logger.info('Sistema MAS inizializzato');
+}
+
+/**
+ * Gestisce la richiesta di modelli dai componenti webview
+ * @param message Il messaggio ricevuto dalla webview
+ * @param webview La webview che ha inviato il messaggio
+ */
+async function handleModelsFetch(message: any, webview: vscode.Webview) {
+	const { provider, apiKey, requestId } = message;
+	
+	try {
+		// Importa dinamicamente per evitare dipendenze circolari
+		const { fetchModels } = await import('./data/modelLoader.js');
+		
+		// Recupera i modelli utilizzando modelLoader
+		const models = await fetchModels(provider, apiKey);
+		
+		// Invia la risposta alla webview
+		webview.postMessage({
+			models,
+			requestId
+		});
+	} catch (error) {
+		// Invia errore alla webview
+		webview.postMessage({
+			error: error instanceof Error ? error.message : 'Errore sconosciuto nel caricamento modelli',
+			requestId
+		});
+		
+		Logger.error(`Errore nel caricamento modelli per ${provider}:`, error);
+	}
 }
