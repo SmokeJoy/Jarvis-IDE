@@ -107,4 +107,15 @@ L'hook emette i seguenti eventi tramite l'EventBus:
 3. **Performance**
    - Il cleanup avviene ogni secondo
    - Ottimizza se necessario riducendo la frequenza
-   - Considera l'uso di `useMemo` per calcoli pesanti 
+   - Considera l'uso di `useMemo` per calcoli pesanti
+
+## 🔖 Integrazione UI
+
+### TimelineEntry.tsx
+- Badge `🚫 Bloccato` mostrato se il provider è in blacklist
+- Tooltip con `reason` se disponibile
+- Ordine badge configurabile:
+  1. 🛡️ Auto-Mitigation
+  2. 🚫 Bloccato
+  3. 🔮 Predictive
+  4. ♻️ Replay 
