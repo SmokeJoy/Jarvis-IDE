@@ -11,7 +11,7 @@ import {
   getDefaultProvider,
   unregisterProvider,
   LLMProviderHandler,
-  LLMRequestParams,
+  LLMRequestOptions,
   LLMResponse,
   Model
 } from '../provider-registry';
@@ -35,10 +35,10 @@ class MockProvider implements LLMProviderHandler {
   ];
   isAvailable = true;
 
-  async call(params: LLMRequestParams): Promise<LLMResponse> {
+  async call(options: LLMRequestOptions): Promise<LLMResponse> {
     return {
-      text: `Mock response for: ${params.input}`,
-      model: params.model || 'mock-model-1'
+      text: `Mock response for: ${options.prompt}`,
+      model: options.model || 'mock-model-1'
     };
   }
 
@@ -46,8 +46,8 @@ class MockProvider implements LLMProviderHandler {
     return this.models;
   }
 
-  validateRequest(request: LLMRequestParams): boolean {
-    return !!request.input;
+  validateRequest(options: LLMRequestOptions): boolean {
+    return !!options.prompt;
   }
 }
 
@@ -247,10 +247,8 @@ describe('Provider Registry', () => {
       registerProvider('mock', mockProvider);
       
       const provider = getProvider('mock');
-      const response = await provider.call({ input: 'Hello' });
-      
-      expect(response.text).toContain('Hello');
-      expect(response.model).toBe('mock-model-1');
+      const response = await provider.call({ prompt: 'Hello' });
+      expect(response.text).toBe('Mock response for: Hello');
     });
 
     test('Dovrebbe ottenere i modelli disponibili dal provider', async () => {
@@ -271,9 +269,9 @@ describe('Provider Registry', () => {
       
       const provider = getProvider('mock');
       
-      // Il metodo validateRequest del mock controlla se input è truthy
-      expect(provider.validateRequest?.({ input: 'Hello' })).toBe(true);
-      expect(provider.validateRequest?.({ input: '' })).toBe(false);
+      // Il metodo validateRequest del mock controlla se prompt è truthy
+      expect(provider.validateRequest?.({ prompt: 'Hello' })).toBe(true);
+      expect(provider.validateRequest?.({ prompt: '' })).toBe(false);
     });
   });
 }); 
