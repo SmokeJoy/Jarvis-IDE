@@ -1,12 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { AIDebuggerOverlayProps } from './AIDebuggerOverlay';
+import { MitigatorOverlayProps } from './MitigatorOverlay';
 import { TimelineFilterBar } from './TimelineFilterBar';
 import { useFilteredHistory } from '../hooks/useFilteredHistory';
 
 interface DebuggerTimelineProps {
-  history: AIDebuggerOverlayProps[];
-  onSelect: (entry: AIDebuggerOverlayProps) => void;
+  history: MitigatorOverlayProps[];
+  onSelect: (entry: MitigatorOverlayProps) => void;
   selectedIndex?: number;
 }
 

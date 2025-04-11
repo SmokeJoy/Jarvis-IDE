@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { AIDebuggerOverlay } from './AIDebuggerOverlay';
+import { MitigatorOverlay } from './MitigatorOverlay';
 import { DebuggerTimeline } from './DebuggerTimeline';
 import { SnapshotDetail } from './SnapshotDetail';
 import { useDebuggerOverlay } from '../hooks/useDebuggerOverlay';
@@ -49,7 +49,7 @@ export const DebugOverlay: React.FC<DebugOverlayProps> = ({ eventBus }) => {
               />
             )}
             {current && (
-              <AIDebuggerOverlay
+              <MitigatorOverlay
                 {...current}
                 onClose={() => setIsVisible(false)}
               />

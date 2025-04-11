@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { AIDebuggerOverlayProps } from '../components/AIDebuggerOverlay';
+import { MitigatorOverlayProps } from '../components/MitigatorOverlay';
 
 interface Node {
   id: string;
@@ -24,7 +24,7 @@ interface Edge {
   animated?: boolean;
 }
 
-export function useDecisionGraphData(entry: AIDebuggerOverlayProps) {
+export function useDecisionGraphData(entry: MitigatorOverlayProps) {
   return useMemo(() => {
     const nodes: Node[] = [];
     const edges: Edge[] = [];

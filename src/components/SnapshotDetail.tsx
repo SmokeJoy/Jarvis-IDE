@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { AIDebuggerOverlayProps } from './AIDebuggerOverlay';
+import { MitigatorOverlayProps } from './MitigatorOverlay';
 import { DecisionGraphView } from './DecisionGraphView';
 
 interface SnapshotDetailProps {
-  data: AIDebuggerOverlayProps;
+  data: MitigatorOverlayProps;
   onClose: () => void;
 }
 

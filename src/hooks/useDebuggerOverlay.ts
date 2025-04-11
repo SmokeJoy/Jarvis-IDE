@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { LLMEventBus } from '../lib/eventBus';
-import { AIDebuggerOverlayProps } from '../components/AIDebuggerOverlay';
+import { MitigatorOverlayProps } from '../components/MitigatorOverlay';
 
 interface DebuggerState {
-  current: AIDebuggerOverlayProps | null;
-  history: AIDebuggerOverlayProps[];
+  current: MitigatorOverlayProps | null;
+  history: MitigatorOverlayProps[];
 }
 
 export function useDebuggerOverlay(eventBus: LLMEventBus): DebuggerState {
@@ -15,7 +15,7 @@ export function useDebuggerOverlay(eventBus: LLMEventBus): DebuggerState {
 
   useEffect(() => {
     const handleStrategyChange = (event: any) => {
-      const newState: AIDebuggerOverlayProps = {
+      const newState: MitigatorOverlayProps = {
         timestamp: Date.now(),
         fallbackReason: event.reason || 'Strategy changed',
         strategyName: event.strategyName,
@@ -31,7 +31,7 @@ export function useDebuggerOverlay(eventBus: LLMEventBus): DebuggerState {
     };
 
     const handleProviderFailure = (event: any) => {
-      const newState: AIDebuggerOverlayProps = {
+      const newState: MitigatorOverlayProps = {
         timestamp: Date.now(),
         fallbackReason: `Provider ${event.providerId} failed: ${event.reason}`,
         strategyName: event.strategyName,
@@ -47,7 +47,7 @@ export function useDebuggerOverlay(eventBus: LLMEventBus): DebuggerState {
     };
 
     const handleProviderSuccess = (event: any) => {
-      const newState: AIDebuggerOverlayProps = {
+      const newState: MitigatorOverlayProps = {
         timestamp: Date.now(),
         fallbackReason: 'Provider restored',
         strategyName: event.strategyName,

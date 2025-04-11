@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { AIDebuggerOverlayProps } from '../components/AIDebuggerOverlay';
+import { MitigatorOverlayProps } from '../components/MitigatorOverlay';
 
 export type EventType = 'all' | 'provider:failure' | 'strategy:adaptive:change' | 'provider:success';
 export type ProviderFilter = 'all' | string;
@@ -10,7 +10,7 @@ interface FilterOptions {
   strategy: string;
 }
 
-export function useFilteredHistory(history: AIDebuggerOverlayProps[]) {
+export function useFilteredHistory(history: MitigatorOverlayProps[]) {
   const [filters, setFilters] = useState<FilterOptions>({
     eventType: 'all',
     provider: 'all',

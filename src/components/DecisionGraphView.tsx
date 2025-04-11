@@ -9,13 +9,13 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import { useDecisionGraphData } from '../hooks/useDecisionGraphData';
 import { useProviderBlacklist } from '../hooks/useProviderBlacklist';
-import { AIDebuggerOverlayProps } from './AIDebuggerOverlay';
+import { MitigatorOverlayProps } from './MitigatorOverlay';
 import { exportGraphAsPNG, exportGraphAsJSON, downloadFile } from '../lib/exportGraph';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tooltip } from '@radix-ui/react-tooltip';
 
 interface DecisionGraphViewProps {
-  entry: AIDebuggerOverlayProps;
+  entry: MitigatorOverlayProps;
 }
 
 const ProviderNode = React.memo(({ data }: { data: any }) => {
