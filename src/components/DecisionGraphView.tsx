@@ -8,6 +8,7 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useDecisionGraphData } from '../hooks/useDecisionGraphData';
+import { useProviderBlacklist } from '../hooks/useProviderBlacklist';
 import { AIDebuggerOverlayProps } from './AIDebuggerOverlay';
 import { exportGraphAsPNG, exportGraphAsJSON, downloadFile } from '../lib/exportGraph';
 import { motion } from 'framer-motion';
@@ -16,14 +17,26 @@ interface DecisionGraphViewProps {
   entry: AIDebuggerOverlayProps;
 }
 
-const nodeTypes = {
-  provider: ({ data }: { data: any }) => (
-    <div className={`px-4 py-2 rounded-lg shadow-lg ${
-      data.status === 'selected' ? 'bg-green-600' :
-      data.status === 'excluded' ? 'bg-red-600' :
-      'bg-gray-600'
-    }`}>
+const ProviderNode = React.memo(({ data }: { data: any }) => {
+  const { isBlocked } = useProviderBlacklist();
+  const isBlockedProvider = isBlocked(data.id);
+
+  return (
+    <div 
+      className={`px-4 py-2 rounded-lg shadow-lg ${
+        isBlockedProvider ? 'bg-red-800' :
+        data.status === 'selected' ? 'bg-green-600' :
+        data.status === 'excluded' ? 'bg-red-600' :
+        'bg-gray-600'
+      }`}
+      title={isBlockedProvider ? "Provider bloccato tramite auto-mitigation" : undefined}
+    >
       <div className="text-white font-medium">{data.label}</div>
+      {isBlockedProvider && (
+        <div className="text-xs font-bold text-red-300 bg-red-900/40 rounded px-1 mt-1">
+          🚫 Bloccato
+        </div>
+      )}
       {data.score && (
         <div className="text-xs text-gray-200">score: {data.score}</div>
       )}
@@ -34,7 +47,11 @@ const nodeTypes = {
         </div>
       )}
     </div>
-  ),
+  );
+});
+
+const nodeTypes = {
+  provider: ProviderNode,
   strategy: ({ data }: { data: any }) => (
     <div className="px-4 py-2 rounded-lg shadow-lg bg-blue-600">
       <div className="text-white font-medium">{data.label}</div>
@@ -122,6 +139,27 @@ export const DecisionGraphView: React.FC<DecisionGraphViewProps> = ({ entry }) =
         >
           Export JSON
         </motion.button>
+      </div>
+
+      {/* Legenda */}
+      <div className="absolute bottom-4 left-4 bg-gray-800/90 p-3 rounded-lg text-white text-sm">
+        <div className="font-bold mb-2">Legenda</div>
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-4 h-4 bg-green-600 rounded"></div>
+          <span>Provider selezionato</span>
+        </div>
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-4 h-4 bg-red-600 rounded"></div>
+          <span>Provider escluso</span>
+        </div>
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-4 h-4 bg-red-800 rounded"></div>
+          <span>Provider bloccato</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 bg-blue-600 rounded"></div>
+          <span>Strategia</span>
+        </div>
       </div>
     </div>
   );
