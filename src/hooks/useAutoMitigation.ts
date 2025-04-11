@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useEventBus } from './useEventBus';
 import { useFallbackAudit } from './useFallbackAudit';
 import { usePredictiveWarnings } from './usePredictiveWarnings';
+import { useProviderBlacklist } from './useProviderBlacklist';
 
 interface AutoMitigationState {
   isActive: boolean;
@@ -23,12 +24,19 @@ export const useAutoMitigation = () => {
   const { auditData } = useFallbackAudit();
   const { warnings } = usePredictiveWarnings();
   const eventBus = useEventBus();
+  const { isBlocked, block } = useProviderBlacklist();
 
   const evaluateMitigation = useCallback(() => {
     if (!warnings.length || !auditData.length) return;
 
     const latestWarning = warnings[0];
     const latestAudit = auditData[0];
+
+    // Verifica se il provider è già bloccato
+    if (isBlocked(latestAudit.currentProvider)) {
+      console.log(`Provider ${latestAudit.currentProvider} già bloccato, skip mitigazione`);
+      return;
+    }
 
     // Calcola la confidenza basata su:
     // 1. Trend di fallimento
@@ -37,11 +45,16 @@ export const useAutoMitigation = () => {
     const confidence = calculateConfidence(latestWarning, latestAudit);
 
     if (confidence > 0.8) { // Soglia di confidenza per auto-mitigation
+      const nextProvider = determineNextProvider(latestAudit);
+      
+      // Blocca il provider corrente
+      block(latestAudit.currentProvider, 'auto-mitigation', 120);
+
       setState(prev => ({
         ...prev,
         isActive: true,
         currentProvider: latestAudit.currentProvider,
-        nextProvider: determineNextProvider(latestAudit),
+        nextProvider,
         confidence,
         lastMitigation: new Date()
       }));
@@ -49,12 +62,12 @@ export const useAutoMitigation = () => {
       // Emetti evento di auto-mitigation
       eventBus.emit('auto-mitigation:triggered', {
         from: latestAudit.currentProvider,
-        to: determineNextProvider(latestAudit),
+        to: nextProvider,
         confidence,
         timestamp: new Date()
       });
     }
-  }, [warnings, auditData, eventBus]);
+  }, [warnings, auditData, eventBus, isBlocked, block]);
 
   useEffect(() => {
     const interval = setInterval(evaluateMitigation, 5000); // Valuta ogni 5 secondi

@@ -45,6 +45,34 @@ const CONFIDENCE_THRESHOLD = 0.8;
 const EVALUATION_INTERVAL = 5000;
 ```
 
+## 🔁 Integrazione con useProviderBlacklist
+
+### Panoramica
+Il sistema di Auto-Mitigation si integra con `useProviderBlacklist` per gestire i provider temporaneamente esclusi dal sistema.
+
+### Flusso di Integrazione
+1. Prima di attivare una mitigazione, verifica se il provider è già bloccato:
+   ```typescript
+   if (isBlocked(latestAudit.currentProvider)) {
+     console.log(`Provider ${latestAudit.currentProvider} già bloccato, skip mitigazione`);
+     return;
+   }
+   ```
+
+2. Al momento della mitigazione, blocca il provider:
+   ```typescript
+   block(latestAudit.currentProvider, 'auto-mitigation', 120);
+   ```
+
+3. Eventi correlati:
+   - `provider:blacklisted`: Emesso quando un provider viene bloccato
+   - `provider:restored`: Emesso quando un provider viene ripristinato
+
+### Best Practices
+- Monitorare la frequenza dei blocchi per ogni provider
+- Aggiustare il TTL in base alla criticità del provider
+- Loggare le decisioni di blocco per analisi post-mortem
+
 ## Best Practices
 1. Monitorare il log degli eventi per debug
 2. Aggiustare la soglia di confidenza in base al contesto
