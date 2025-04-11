@@ -169,6 +169,25 @@ Il sistema di fallback supporta diverse strategie per la selezione dei provider,
    });
    ```
 
+4. **CompositeFallbackStrategy**: Combina più strategie in sequenza, permettendo di creare logiche di fallback complesse e flessibili.
+
+   ```typescript
+   // Esempio di utilizzo
+   const fallbackManager = new LLMFallbackManager({
+     providers: [...],
+     strategy: new CompositeFallbackStrategy([
+       new PreferredFallbackStrategy('openai', true),
+       new ReliabilityFallbackStrategy(5)
+     ])
+   });
+   ```
+
+   Questa strategia permette di:
+   - Combinare più strategie in ordine di priorità
+   - Ottenere provider ordinati senza duplicati
+   - Propagare notifiche di successo/fallimento a tutte le strategie interne
+   - Gestire dinamicamente l'aggiunta e rimozione di strategie
+
 #### Configurazione tramite Factory
 
 Per semplificare la creazione e configurazione delle strategie, è disponibile una factory che permette di istanziare la strategia appropriata in base a un identificatore di tipo:
@@ -193,6 +212,28 @@ const fallbackManager = new LLMFallbackManager({
 const fallbackManager = new LLMFallbackManager({
   providers: [...],
   strategyType: 'roundRobin'  // Usa direttamente la factory
+});
+```
+
+È anche possibile creare strategie composite che combinano più strategie in sequenza:
+
+```typescript
+// Creazione di una strategia composita tramite factory
+const compositStrategy = FallbackStrategyFactory.create('composite', {
+  strategies: [
+    { type: 'preferred', options: { preferredProvider: 'openai' } },
+    { type: 'reliability', options: { minimumAttempts: 5 } }
+  ]
+});
+
+// Oppure direttamente nelle opzioni del LLMFallbackManager
+const fallbackManager = new LLMFallbackManager({
+  providers: [...],
+  strategyType: 'composite',
+  strategies: [
+    { type: 'preferred', options: { preferredProvider: 'openai' } },
+    { type: 'roundRobin' }
+  ]
 });
 ```
 

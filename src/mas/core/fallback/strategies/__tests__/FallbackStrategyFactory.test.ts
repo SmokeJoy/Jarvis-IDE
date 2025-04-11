@@ -78,6 +78,7 @@ describe('FallbackStrategyFactory', () => {
     expect(availableStrategies).toContain('preferred');
     expect(availableStrategies).toContain('roundRobin');
     expect(availableStrategies).toContain('reliability');
-    expect(availableStrategies.length).toBe(3);
+    expect(availableStrategies).toContain('composite');
+    expect(availableStrategies.length).toBe(4);
   });
 }); 

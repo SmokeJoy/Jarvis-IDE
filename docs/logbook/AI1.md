@@ -4,6 +4,45 @@
  * @version 2.0.0
  */
 
+## 2025-04-25 - Implementazione CompositeFallbackStrategy
+
+### Task
+Implementazione di una strategia di fallback composita per il LLMFallbackManager che permette di combinare più strategie in sequenza.
+
+### Implementazione
+- Creata la classe `CompositeFallbackStrategy` che implementa l'interfaccia `FallbackStrategy`
+- Implementato il metodo `selectProvider` che consulta sequenzialmente le strategie
+- Implementato il metodo `getProvidersInOrder` che combina i provider da tutte le strategie senza duplicati
+- Implementati i metodi `notifySuccess` e `notifyFailure` che propagano le notifiche a tutte le strategie
+- Aggiunti metodi di utilità per la gestione dinamica delle strategie (`addStrategy`, `removeStrategy`)
+- Aggiunta validazione per garantire che ci sia sempre almeno una strategia attiva
+
+### Test
+- Creati test completi in `__tests__/CompositeFallbackStrategy.test.ts`
+- Verificata l'unione corretta dei provider da diverse strategie
+- Testata la propagazione delle notifiche a tutte le strategie
+- Verificato il comportamento con strategie reali (Preferred + Reliability)
+- Testata la gestione degli errori (array di strategie vuoto)
+
+### Integrazione Factory
+- Aggiornata la `FallbackStrategyFactory` per supportare la creazione di strategie composite
+- Aggiunta logica di validazione e inizializzazione per le configurazioni composite
+- Supportata configurazione nidificata con `strategies[]`
+
+### Documentazione
+- Aggiornato `docs/architecture/orchestrator.md` con la documentazione della nuova strategia
+- Aggiunti esempi di utilizzo diretto e tramite factory
+
+### Vantaggi
+- Maggiore flessibilità nella configurazione dei fallback
+- Possibilità di combinare diverse logiche (es. provider preferito + affidabilità)
+- Mantenimento della type safety e conformità con l'interfaccia esistente
+
+### Commit
+```
+feat: aggiunta CompositeFallbackStrategy per fallback multi-strategia
+```
+
 ## 2025-04-09 - Correzione TS7006 in JarvisProvider.ts
 
 ### Task
