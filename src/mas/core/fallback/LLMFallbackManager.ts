@@ -413,32 +413,10 @@ export class LLMFallbackManager {
             // Altrimenti continua con il prossimo tentativo
           }
         }
-      } catch (error) {
-        console.error(`Provider ${provider.id} fallito:`, error);
-        errors.push(error as Error);
-        
-        // Aggiungi questo provider al set dei falliti
-        failedProviders.add(provider.id);
-        
-        // Trova un provider precedente non fallito per l'evento di fallback
-        const lastNonFailedProvider = orderedProviders
-          .filter(p => !failedProviders.has(p.id))
-          .find(p => true);
-        
-        // Emetti evento di fallback se c'è un provider successivo
-        const nextProvider = orderedProviders.find(p => 
-          p.isEnabled && !failedProviders.has(p.id) && !this.isProviderInCooldown(p.id)
-        );
-        
-        if (nextProvider) {
-          this.eventBus.emit('provider:fallback', {
-            providerId: nextProvider.id,
-            fromProviderId: provider.id,
-            reason: 'fallimento provider precedente'
-          });
-        }
-        
-        // Continua con il prossimo provider
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        console.error(`❌ Errore durante l'esecuzione del provider ${provider.id}: ${error.message}`);
+        throw error;
       }
     }
 

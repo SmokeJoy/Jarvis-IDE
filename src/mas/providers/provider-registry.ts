@@ -65,4 +65,10 @@ function validateProviderHandler(handler: any): handler is LLMProviderHandler {
   );
 }
 
-registerDefaultProviders();
+try {
+  registerDefaultProviders();
+} catch (err) {
+  const error = err instanceof Error ? err : new Error(String(err));
+  console.error(`❌ Errore nella registrazione dei provider predefiniti: ${error.message}`);
+  throw error;
+}

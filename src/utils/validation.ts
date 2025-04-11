@@ -1,6 +1,6 @@
 // import { anthropicModels } from "../shared/api.js"
 // import { ModelInfo } from '../types/models.js'
-import type { anthropicModels } from "../shared/api.js";
+import { anthropicModels } from "../shared/api.js";
 
 /**
  * Validates the thinking budget token value according to the specified rules:

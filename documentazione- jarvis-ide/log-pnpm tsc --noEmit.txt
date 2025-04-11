@@ -1,32 +1,4 @@
-55   private context: vscode.ExtensionContext;
-             ~~~~~~~
-
-src/mas/services/TaskQueueMessageHandler.ts:58:11 - error TS6133: 'updateTimer' is declared but its value is never read.
-
-58   private updateTimer: NodeJS.Timeout | undefined;
-             ~~~~~~~~~~~
-
-src/mas/services/TaskQueueMessageHandler.ts:142:11 - error TS6133: 'handleWebviewMessage' is declared but its value is never read.
-
-142   private handleWebviewMessage(message: any): void {
-              ~~~~~~~~~~~~~~~~~~~~
-
-src/mas/services/TaskQueueMessageHandler.ts:247:11 - error TS6133: 'startAutoUpdate' is declared but its value is never read.
-
-247   private startAutoUpdate(): void {
-              ~~~~~~~~~~~~~~~
-
-src/mas/services/TaskQueueService.ts:2:1 - error TS6133: 'fs' is declared but its value is never read.
-
-2 import * as fs from 'fs';
-  ~~~~~~~~~~~~~~~~~~~~~~~~~
-
-src/mas/services/TaskQueueService.ts:5:16 - error TS6133: 'TaskStatus' is declared but its value is never read.
-
-5 import { Task, TaskStatus } from '../../shared/types/mas.types.js';
-                 ~~~~~~~~~~
-
-src/mas/services/TaskQueueService.ts:6:10 - error TS2305: Module '"../../shared/types/webview.types.js"' has no exported member 'TaskQueueViewMessage'.
+ member 'TaskQueueViewMessage'.
 
 6 import { TaskQueueViewMessage } from '../../shared/types/webview.types.js';
            ~~~~~~~~~~~~~~~~~~~~
@@ -2239,46 +2211,76 @@ src/services/mcp/handlers/contextSearchByTagsHandler.ts:206:7 - error TS2322: Ty
           ~~~~~~
     The expected type comes from property 'output' which is declared here on type 'McpToolResult'
 
-src/services/mcp/handlers/contextTagHandler.ts:2:29 - error TS2307: Cannot find module '../types/ContextItem.js' or its corresponding type declarations.
+src/services/mcp/handlers/contextTagHandler.ts:2:29 - error TS2307: Cannot find module '../types/ContextItem' or its corresponding type declarations.
 
-2 import { ContextItem } from "../types/ContextItem.js";
-                              ~~~~~~~~~~~~~~~~~~~~~~~~~
+2 import { ContextItem } from '../types/ContextItem';
+                              ~~~~~~~~~~~~~~~~~~~~~~
 
-src/services/mcp/handlers/contextTagHandler.ts:4:24 - error TS2459: Module '"./contextInjectHandler.js"' declares 'persistMemoryToDisk' locally, but it is not exported.
+src/services/mcp/handlers/contextTagHandler.ts:4:30 - error TS2307: Cannot find module '../contextInjectHandler' or its corresponding type declarations.
 
-4 import { getAllMemory, persistMemoryToDisk, findContextById } from "./contextInjectHandler.js";
-                         ~~~~~~~~~~~~~~~~~~~
+4 import * as memoryUtils from '../contextInjectHandler';
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  src/services/mcp/handlers/contextInjectHandler.ts:79:16
-    79 async function persistMemoryToDisk(): Promise<void> {
-                      ~~~~~~~~~~~~~~~~~~~
-    'persistMemoryToDisk' is declared here.
+src/services/mcp/handlers/contextTagHandler.ts:83:39 - error TS6133: 'tags' is declared but its value is never read.
 
-src/services/mcp/handlers/contextTagHandler.ts:4:45 - error TS2305: Module '"./contextInjectHandler.js"' has no exported member 'findContextById'.
+83 function addTagsToContext(id: string, tags: string[], replace: boolean = false): TagOperationResult {
+                                         ~~~~
 
-4 import { getAllMemory, persistMemoryToDisk, findContextById } from "./contextInjectHandler.js";
-                                              ~~~~~~~~~~~~~~~
+src/services/mcp/handlers/contextTagHandler.ts:83:55 - error TS6133: 'replace' is declared but its value is never read.
 
-src/services/mcp/handlers/contextTagHandler.ts:165:54 - error TS18048: 'item.tags' is possibly 'undefined'.
+83 function addTagsToContext(id: string, tags: string[], replace: boolean = false): TagOperationResult {
+                                                         ~~~~~~~
 
-165       return normalizedSearchTags.every(searchTag => item.tags.includes(searchTag));
-                                                         ~~~~~~~~~
+src/services/mcp/handlers/contextTagHandler.ts:97:5 - error TS2304: Cannot find name 'result'.
 
-src/services/mcp/handlers/contextTagHandler.ts:180:14 - error TS2322: Type '(args: ContextTagArgs) => Promise<McpToolResult>' is not assignable to type 'McpToolHandler'.
+97     result = allMemory.filter(item => item.scope === contextInfo.scope);
+       ~~~~~~
+
+src/services/mcp/handlers/contextTagHandler.ts:97:31 - error TS7006: Parameter 'item' implicitly has an 'any' type.
+
+97     result = allMemory.filter(item => item.scope === contextInfo.scope);
+                                 ~~~~
+
+src/services/mcp/handlers/contextTagHandler.ts:99:5 - error TS2304: Cannot find name 'result'.
+
+99     result = allMemory;
+       ~~~~~~
+
+src/services/mcp/handlers/contextTagHandler.ts:103:3 - error TS1308: 'await' expressions are only allowed within async functions and at the top levels of modules.
+
+103   await memoryUtils.persistMemoryToDisk();
+      ~~~~~
+
+  src/services/mcp/handlers/contextTagHandler.ts:83:10
+    83 function addTagsToContext(id: string, tags: string[], replace: boolean = false): TagOperationResult {
+                ~~~~~~~~~~~~~~~~
+    Did you mean to mark this function as 'async'?
+
+src/services/mcp/handlers/contextTagHandler.ts:134:40 - error TS7006: Parameter 'item' implicitly has an 'any' type.
+
+134     const matchingItems = items.filter(item => {
+                                           ~~~~
+
+src/services/mcp/handlers/contextTagHandler.ts:145:47 - error TS7006: Parameter 'item' implicitly has an 'any' type.
+
+145     result = [...result, ...matchingItems.map(item => ({...item, scope}))];
+                                                  ~~~~
+
+src/services/mcp/handlers/contextTagHandler.ts:156:14 - error TS2322: Type '(args: ContextTagArgs) => Promise<McpToolResult>' is not assignable to type 'McpToolHandler'.
   Types of parameters 'args' and 'args' are incompatible.
     Type 'Record<string, unknown>' is missing the following properties from type 'ContextTagArgs': id, tags
 
-180 export const contextTagHandler: McpToolHandler = async (args: ContextTagArgs): Promise<McpToolResult> => {
+156 export const contextTagHandler: McpToolHandler = async (args: ContextTagArgs): Promise<McpToolResult> => {
                  ~~~~~~~~~~~~~~~~~
 
-src/services/mcp/handlers/contextTagHandler.ts:184:25 - error TS2339: Property 'replace' does not exist on type 'ContextTagArgs'.
+src/services/mcp/handlers/contextTagHandler.ts:160:25 - error TS2339: Property 'replace' does not exist on type 'ContextTagArgs'.
 
-184   const replace = args?.replace === true;
+160   const replace = args?.replace === true;
                             ~~~~~~~
 
-src/services/mcp/handlers/contextTagHandler.ts:236:7 - error TS2322: Type 'string' is not assignable to type 'Record<string, unknown>'.
+src/services/mcp/handlers/contextTagHandler.ts:212:7 - error TS2322: Type 'string' is not assignable to type 'Record<string, unknown>'.
 
-236       output: JSON.stringify(outputResult)
+212       output: JSON.stringify(outputResult)
           ~~~~~~
 
   src/shared/types/mcp.types.ts:173:3
@@ -7647,7 +7649,7 @@ webview-ui/src/utils/vscode.ts:3:1 - error TS6133: 'WebviewApi' is declared but 
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-Found 2549 errors in 397 files.
+Found 2549 errors in 398 files.
 
 Errors  Files
     50  src/api/index.ts:13
@@ -7709,7 +7711,7 @@ Errors  Files
      1  src/api/utils/logger.ts:1
      1  src/api/utils/stream.ts:1
      1  src/api/utils/test.ts:1
-    14  src/benchmark/BenchmarkStorage.ts:67
+     9  src/benchmark/BenchmarkStorage.ts:67
     14  src/commands/agentCommands.ts:2
     18  src/commands/exportCommands.ts:13
      3  src/commands/systemPrompt.ts:3
@@ -7802,11 +7804,12 @@ Errors  Files
      1  src/lib/simulateEvents.ts:1
      3  src/mas/agent/mas-dispatcher.ts:8
      9  src/mas/core/__tests__/MASOrchestrator.test.ts:11
+     1  src/mas/core/__tests__/MemoryManager.test.ts:6
      5  src/mas/core/fallback/__tests__/AdaptiveFallbackStrategy.e2e.test.ts:32
      2  src/mas/core/fallback/__tests__/LLMEventBus.test.ts:7
     17  src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:7
      1  src/mas/core/fallback/LLMEventBus.ts:33
-     5  src/mas/core/fallback/LLMFallbackManager.ts:424
+     3  src/mas/core/fallback/LLMFallbackManager.ts:444
     14  src/mas/core/fallback/strategies/__tests__/adaptive-conditions.test.ts:3
     15  src/mas/core/fallback/strategies/__tests__/AdaptiveFallbackStrategy.test.ts:9
      4  src/mas/core/fallback/strategies/__tests__/CompositeFallbackStrategy.test.ts:66
@@ -7885,7 +7888,7 @@ Errors  Files
      9  src/services/mcp/handlers/contextNavigateHandler.test.ts:1
     59  src/services/mcp/handlers/contextNavigateHandler.ts:8
     19  src/services/mcp/handlers/contextSearchByTagsHandler.ts:2
-     7  src/services/mcp/handlers/contextTagHandler.ts:2
+    13  src/services/mcp/handlers/contextTagHandler.ts:2
      4  src/services/mcp/handlers/contextUnlinkHandler.ts:1
      6  src/services/mcp/handlers/directoryScanner.test.ts:3
      3  src/services/mcp/handlers/directoryScanner.ts:1
@@ -8047,3 +8050,5 @@ Errors  Files
      3  tests/e2e/visix-embed.spec.ts:26
      3  tests/setup.ts:116
      2  webview-ui/src/utils/vscode.ts:2
+
+E:\cline-main>

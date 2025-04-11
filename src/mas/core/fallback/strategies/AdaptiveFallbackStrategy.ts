@@ -55,8 +55,14 @@ export class AdaptiveFallbackStrategy implements FallbackStrategy {
     stats: Map<string, ProviderStats>,
     failedProviders: Set<string> = new Set()
   ): LLMProviderHandler | null {
-    const activeStrategy = this.getActiveStrategy(stats);
-    return activeStrategy.selectProvider(providers, stats, failedProviders);
+    try {
+      const activeStrategy = this.getActiveStrategy(stats);
+      return activeStrategy.selectProvider(providers, stats, failedProviders);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error(`❌ Errore nella selezione della strategia: ${error.message}`);
+      throw error;
+    }
   }
 
   getProvidersInOrder(

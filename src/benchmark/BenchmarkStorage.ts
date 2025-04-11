@@ -68,7 +68,9 @@ export class BenchmarkStorage {
           await this.saveHistory();
           console.log(`✅ Inizializzata nuova storia benchmark in ${this.historyPath}`);
         } else {
-          throw err;
+          const error = err instanceof Error ? err : new Error(String(err));
+          console.error(`❌ Errore nella lettura del file: ${error.message}`);
+          throw error;
         }
       }
     } catch (err) {

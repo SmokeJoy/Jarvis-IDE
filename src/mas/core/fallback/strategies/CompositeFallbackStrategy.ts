@@ -31,21 +31,27 @@ export class CompositeFallbackStrategy implements FallbackStrategy {
     stats: Map<string, ProviderStats>,
     failedProviders: Set<string> = new Set()
   ): LLMProviderHandler | null {
-    // Filtra i provider validi (abilitati e non falliti)
-    const validProviders = providers.filter(
-      p => p.isEnabled && !failedProviders.has(p.id)
-    );
-    
-    if (validProviders.length === 0) return null;
-    
-    // Consulta ogni strategia in sequenza
-    for (const strategy of this.strategies) {
-      const provider = strategy.selectProvider(validProviders, stats, failedProviders);
-      if (provider) return provider;
+    try {
+      // Filtra i provider validi (abilitati e non falliti)
+      const validProviders = providers.filter(
+        p => p.isEnabled && !failedProviders.has(p.id)
+      );
+      
+      if (validProviders.length === 0) return null;
+      
+      // Consulta ogni strategia in sequenza
+      for (const strategy of this.strategies) {
+        const provider = strategy.selectProvider(validProviders, stats, failedProviders);
+        if (provider) return provider;
+      }
+      
+      // Se nessuna strategia ha restituito un provider valido, usa il primo disponibile
+      return validProviders[0];
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error(`❌ Errore nella selezione del provider: ${error.message}`);
+      throw error;
     }
-    
-    // Se nessuna strategia ha restituito un provider valido, usa il primo disponibile
-    return validProviders[0];
   }
   
   /**
