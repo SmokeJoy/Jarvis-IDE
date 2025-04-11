@@ -1689,45 +1689,45 @@ Ho identificato che quando un provider LLM fallisce, il sistema continuava a pro
 
 Ho progettato e implementato un meccanismo di cooldown che:
 1. Registra il timestamp dell'ultimo fallimento di ciascun provider
-2. Esclude temporaneamente i provider falliti per un periodo configurabile
-3. Notifica gli eventi di cooldown tramite il sistema di eventi esistente
-4. Permette il ripristino automatico dei provider al termine del periodo di cooldown
+2. Esclude temporaneamente i provider falliti per un periodo configurabile (default: 60 secondi)
+3. Emette eventi di cooldown per monitoraggio e diagnostica
+4. Reinserisce automaticamente i provider al termine del periodo di cooldown
 
-#### File modificati
+### Attività: Implementazione del Pattern Strategy per Fallback
 
-- `src/mas/core/fallback/LLMEventBus.ts`: Aggiunto il nuovo tipo di evento `provider:cooldown`
-- `src/mas/core/fallback/LLMFallbackManager.ts`:
-  - Aggiunto campo `lastFailureTimestamp` all'interfaccia `ProviderStats`
-  - Implementato metodo `isProviderInCooldown` per verificare lo stato
-  - Aggiunto parametro `cooldownMs` alle opzioni di configurazione
-  - Modificato `executeWithFallback` per gestire la logica di cooldown
-  - Aggiornato `recordAttempt` per registrare i timestamp dei fallimenti
-- `src/mas/core/fallback/__tests__/LLMEventBus.test.ts`: Aggiunti test per l'evento di cooldown
-- `src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts`: Aggiunti test per il meccanismo di cooldown
-- `docs/architecture/orchestrator.md`: Aggiornata documentazione con sezione sul cooldown
+Successivamente, ho implementato il pattern Strategy per rendere la logica di selezione dei provider completamente pluggable ed estendibile.
 
-#### Test implementati
+#### Problema affrontato
 
-Ho sviluppato test specifici per verificare che:
-- Un provider venga correttamente messo in cooldown dopo un fallimento
-- L'evento `provider:cooldown` venga emesso con il payload corretto
-- Il provider venga automaticamente ripristinato dopo il periodo di cooldown
-- La funzione `isProviderInCooldown` funzioni correttamente
+Il sistema di fallback aveva una logica fissa per selezionare i provider: prima il preferito, poi gli altri in ordine. Questo approccio non era abbastanza flessibile per tutti i casi d'uso, come:
+- Bilanciamento del carico tra provider
+- Selezione basata sulle prestazioni storiche
+- Strategie di selezione personalizzate per diversi contesti
 
-#### Risultato
+#### Soluzione implementata
 
-Il sistema ora è più resiliente e intelligente nella gestione dei fallimenti:
-- Riduce i tentativi inutili verso provider problematici
-- Diminuisce la latenza complessiva privilegiando provider funzionanti
-- Fornisce visibilità in tempo reale sullo stato di cooldown dei provider
-- Permette strategie avanzate di fallback basate sulla storia recente dei provider
+Ho progettato e implementato un'architettura Strategy che:
+1. Definisce un'interfaccia comune `FallbackStrategy` per tutte le strategie
+2. Implementa la strategia predefinita `PreferredFallbackStrategy` (compatibile con il comportamento precedente)
+3. Aggiunge due nuove strategie:
+   - `RoundRobinFallbackStrategy`: per distribuire il carico ciclicamente
+   - `ReliabilityFallbackStrategy`: per scegliere i provider più affidabili in base alle statistiche di successo
+4. Integra un sistema per cambiare strategia a runtime
+5. Aggiunge una completa suite di test per ogni strategia
+6. Documenta il sistema per futuri sviluppatori
+
+#### Benefici
+
+Questa implementazione offre diversi vantaggi:
+- **Flessibilità**: Possibilità di scegliere la strategia più adatta al contesto
+- **Estendibilità**: Facile aggiungere nuove strategie senza modificare il codice esistente
+- **Adattabilità**: Possibilità di cambiare strategia dinamicamente in base alle condizioni
+- **Testabilità**: Ogni strategia può essere testata indipendentemente
+- **Riusabilità**: Le strategie possono essere condivise tra diversi componenti
 
 #### Prossimi passi
 
-- Implementare lo Strategy Pattern per rendere la strategia di fallback intercambiabile
-- Creare un semplice dashboard in React per visualizzare gli eventi in tempo reale
-- Espandere i test di integrazione per verificare scenari di fallimento più complessi
-
-### Impatto sul sistema
-
-Questa implementazione migliora significativamente la resilienza e l'osservabilità del MASOrchestrator, contribuendo a renderlo più affidabile in scenari di produzione reale dove i provider LLM possono avere problemi temporanei di disponibilità.
+Per completare questa funzionalità, intendo:
+1. Aggiungere una factory di strategie per la creazione basata su configurazione
+2. Implementare una strategia "composite" che combina più strategie
+3. Creare una strategia adattiva che cambia comportamento in base alle condizioni del sistema
