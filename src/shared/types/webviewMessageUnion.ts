@@ -14,7 +14,9 @@ import type {
   StateMessage,
   InstructionMessage,
   InstructionCompletedMessage
-} from './webview.types.js.js';
+} from './webview.types.js';
+
+import { ZodSchemaMap } from '../../utils/validation';
 
 /**
  * Unione discriminata di tutti i tipi di messaggi WebView conosciuti.
@@ -118,4 +120,43 @@ export const validators = {
   isError: (d: any): d is ErrorMessage => d?.type === "error",
   isResponse: (d: any): d is ResponseMessage => d?.type === "response",
   isState: (d: any): d is StateMessage => d?.type === "state"
-}; 
+};
+
+export interface WebviewMessageUnion {
+  agentId: string;
+  payload: unknown;
+  type: string;
+}
+
+/**
+ * Verifica se un messaggio è un messaggio valido per la webview
+ * @param message Messaggio da verificare
+ * @param schema Schema di validazione
+ * @returns true se il messaggio è valido
+ */
+export function isWebviewMessage(message: unknown, schema: ZodSchemaMap): boolean {
+  if (!message || typeof message !== 'object') {
+    return false;
+  }
+  
+  const msg = message as Record<string, unknown>;
+  
+  if (!msg.type || typeof msg.type !== 'string') {
+    return false;
+  }
+  
+  if (!msg.agentId || typeof msg.agentId !== 'string') {
+    return false;
+  }
+  
+  if (!msg.payload) {
+    return false;
+  }
+  
+  const schemaForType = schema[msg.type as string];
+  if (!schemaForType) {
+    return false;
+  }
+  
+  return true;
+} 

@@ -1,6 +1,6 @@
-// import type { anthropicModels } from "../shared/api.js.js"
-// import type { ModelInfo } from '../types/models.js.js'
-import type { anthropicModels } from "../shared/api.js.js";
+// import type { anthropicModels } from "../shared/api.js"
+// import type { ModelInfo } from '../types/models.js'
+import type { anthropicModels } from "../shared/api.js";
 
 /**
  * Validates the thinking budget token value according to the specified rules:
@@ -48,3 +48,15 @@ export function validateModelInfo(modelInfo: ModelInfo): boolean {
 	)
 }
 */
+
+/**
+ * @file validation.ts
+ * @description Utility per la validazione dei dati
+ */
+
+/**
+ * Mappa di schemi di validazione per i vari tipi di messaggi
+ */
+export interface ZodSchemaMap {
+	[key: string]: any;
+}
