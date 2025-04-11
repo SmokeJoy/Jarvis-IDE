@@ -124,93 +124,84 @@ Il sistema di fallback dei provider LLM è progettato per garantire alta disponi
 
 ### Cooldown dei Provider
 
-Il sistema implementa un meccanismo di cooldown per evitare di sovraccaricare provider che falliscono frequentemente:
+Il sistema implementa un meccanismo di cooldown per evitare di sovraccaricare i provider che stanno avendo problemi. Quando un provider fallisce, viene messo in "pausa" per un periodo configurabile prima di essere ritentato. Questo aiuta a:
 
-1. **Rilevamento Fallimenti**: Quando un provider fallisce, viene registrato il timestamp del fallimento
-2. **Periodo di Cooldown**: Durante un periodo configurabile (default: 60 secondi), il provider viene temporaneamente escluso dalle richieste
-3. **Notifica Eventi**: Il sistema emette l'evento `provider:cooldown` quando un provider viene messo in cooldown, con dettagli sul periodo di esclusione
-4. **Autoripristino**: Al termine del periodo di cooldown, il provider viene automaticamente reinserito nel pool di disponibilità
+- Ridurre la latenza evitando tentativi su provider problematici
+- Dare tempo al provider di ripristinarsi
+- Distribuire il carico su provider alternativi
 
-Questo approccio permette di:
-- Ridurre il carico su provider instabili, dando loro tempo per riprendersi
-- Accelerare le risposte evitando tentativi verso provider con alta probabilità di fallimento
-- Implementare strategie di backoff esponenziale per gestire errori temporanei
+### Strategie di Fallback
 
-#### Configurazione del Cooldown
+Il sistema di fallback supporta diverse strategie per la selezione dei provider, implementando il pattern Strategy. Questo permette di personalizzare la logica di selezione in base alle esigenze specifiche dell'applicazione.
 
-Il periodo di cooldown può essere configurato durante l'inizializzazione del manager:
+#### Strategie Disponibili
+
+1. **PreferredFallbackStrategy**: La strategia predefinita che seleziona prima il provider preferito e poi gli altri in ordine. Può anche memorizzare l'ultimo provider che ha avuto successo per usarlo come preferito nelle richieste successive.
+
+   ```typescript
+   // Esempio di utilizzo
+   const fallbackManager = new LLMFallbackManager({
+     providers: [...],
+     strategy: new PreferredFallbackStrategy('openai', true)
+   });
+   ```
+
+2. **RoundRobinFallbackStrategy**: Distribuisce le richieste tra i provider in modo ciclico, utile per bilanciare il carico.
+
+   ```typescript
+   // Esempio di utilizzo
+   const fallbackManager = new LLMFallbackManager({
+     providers: [...],
+     strategy: new RoundRobinFallbackStrategy()
+   });
+   ```
+
+3. **ReliabilityFallbackStrategy**: Seleziona i provider in base alla loro affidabilità storica (tasso di successo), preferendo quelli con le migliori performance.
+
+   ```typescript
+   // Esempio di utilizzo
+   const fallbackManager = new LLMFallbackManager({
+     providers: [...],
+     strategy: new ReliabilityFallbackStrategy(5) // Minimo 5 tentativi per considerare affidabile
+   });
+   ```
+
+#### Implementare Strategie Personalizzate
+
+È possibile creare strategie personalizzate implementando l'interfaccia `FallbackStrategy`:
 
 ```typescript
-const fallbackManager = new LLMFallbackManager({
-  providers: [openaiProvider, anthropicProvider, mistralProvider],
-  cooldownMs: 120000 // 2 minuti di cooldown
-});
-```
+import { FallbackStrategy } from './strategies/FallbackStrategy';
 
-#### Verifica dello Stato di Cooldown
-
-È possibile verificare se un provider è attualmente in cooldown:
-
-```typescript
-// Verifica se OpenAI è in cooldown
-const isInCooldown = fallbackManager.isProviderInCooldown('openai');
-
-if (isInCooldown) {
-  console.log('OpenAI è temporaneamente non disponibile');
+class CustomStrategy implements FallbackStrategy {
+  selectProvider(providers, stats, failedProviders) {
+    // Logica personalizzata di selezione
+  }
+  
+  getProvidersInOrder(providers, stats, failedProviders) {
+    // Ordinamento personalizzato dei provider
+  }
+  
+  notifySuccess(providerId) {
+    // Azioni da eseguire in caso di successo
+  }
+  
+  notifyFailure(providerId) {
+    // Azioni da eseguire in caso di fallimento
+  }
 }
 ```
 
-#### Monitoraggio dei Cooldown
+#### Cambiare Strategia a Runtime
 
-Gli eventi di cooldown possono essere monitorati per tenere traccia dei provider problematici:
-
-```typescript
-fallbackManager.getEventBus().on('provider:cooldown', (payload) => {
-  console.log(`Provider ${payload.providerId} in cooldown fino a ${new Date(payload.cooldownUntil).toISOString()}`);
-  
-  // Aggiorna il dashboard con lo stato di cooldown
-  updateProviderStatus(payload.providerId, 'cooling');
-});
-```
-
-### Esempio Pratico
-
-Immaginiamo di avere tre provider LLM configurati: OpenAI, Anthropic e Mistral.
-
-1. **Primo Scenario**: Il sistema tenta di usare OpenAI, che risponde correttamente. Nelle chiamate successive, il sistema continuerà a usare OpenAI finché funziona.
-
-2. **Secondo Scenario**: Il sistema tenta di usare OpenAI, ma si verifica un errore (ad esempio, limite di rate superato). Il sistema passa automaticamente ad Anthropic, che risponde correttamente. Nelle chiamate successive, il sistema userà direttamente Anthropic finché non si verificheranno errori.
-
-3. **Terzo Scenario**: Tutti i provider falliscono. In questo caso, il sistema solleva un errore dettagliato che include informazioni su tutti i tentativi falliti.
-
-### Configurazione del Sistema di Fallback
-
-Il sistema di fallback può essere configurato con diverse opzioni:
-
-- **Provider Preferito**: È possibile specificare un provider preferito da utilizzare come prima scelta
-- **Tentativi Multipli**: È possibile configurare il numero di tentativi da effettuare per ciascun provider prima di passare al successivo
-- **Provider Personalizzati**: È possibile fornire un array di provider personalizzati anziché utilizzare quelli predefiniti
-
-### Esempio di Configurazione
+È possibile cambiare la strategia di fallback durante l'esecuzione:
 
 ```typescript
-// Inizializzazione dell'orchestratore con configurazione personalizzata
-const orchestrator = new MASOrchestrator({
-  // Configura i provider personalizzati
-  providers: [
-    // Provider OpenAI con chiave API personalizzata
-    new OpenAIProvider({ apiKey: 'abc123' }),
-    
-    // Provider Anthropic con timeout personalizzato
-    new AnthropicProvider({ timeout: 60000 }),
-    
-    // Provider Mistral
-    new MistralProvider()
-  ],
-  
-  // Imposta Anthropic come provider preferito iniziale
-  preferredProvider: 'anthropic'
-});
+// Passa a una strategia round robin quando necessario
+fallbackManager.setStrategy(new RoundRobinFallbackStrategy());
+
+// Passa a una strategia basata sull'affidabilità
+fallbackManager.setStrategy(new ReliabilityFallbackStrategy());
 ```
 
 ## Esecuzione Parallela
