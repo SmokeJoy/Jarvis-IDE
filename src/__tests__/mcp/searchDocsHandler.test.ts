@@ -1,5 +1,6 @@
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
 // src/__tests__/mcp/searchDocsHandler.test.ts
-import type { searchDocsHandler } from "../../../services/mcp/handlers/searchDocsHandler.js.js";
+import { searchDocsHandler } from "../../services/mcp/handlers/searchDocsHandler";
 import * as fs from "fs/promises";
 import * as path from "path";
 

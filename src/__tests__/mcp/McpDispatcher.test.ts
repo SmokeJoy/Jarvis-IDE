@@ -1,8 +1,10 @@
-import type { McpDispatcher } from "../../services/mcp/McpDispatcher.js.js";
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { McpDispatcher } from "../../services/mcp/McpDispatcher";
+import type { McpDispatcher as McpDispatcherType } from "../../services/mcp/McpDispatcher.js";
 
 describe("McpDispatcher", () => {
   it("should return error for unknown tool", async () => {
-    const sendResponse = jest.fn();
+    const sendResponse = vi.fn();
     const dispatcher = new McpDispatcher(sendResponse);
 
     await dispatcher.handleToolCall({
@@ -25,12 +27,12 @@ describe("McpDispatcher", () => {
   // Questo test sarà commentato finché non potremo mockare vscode
   /* 
   it("should handle read_file tool call", async () => {
-    const sendResponse = jest.fn();
+    const sendResponse = vi.fn();
     const dispatcher = new McpDispatcher(sendResponse);
     
     // Mock dell'handler
-    jest.mock("../../services/mcp/handlers/readFileHandler", () => ({
-      readFileHandler: jest.fn().mockResolvedValue("file content")
+    vi.mock("../../services/mcp/handlers/readFileHandler", () => ({
+      readFileHandler: vi.fn().mockResolvedValue("file content")
     }));
 
     await dispatcher.handleToolCall({
