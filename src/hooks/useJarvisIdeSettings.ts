@@ -1,6 +1,6 @@
-import type { useCallback, useState } from 'react';
-import type { JarvisSettings } from '../types/settings.types.js';
-import type { WebviewMessage } from '../types/webview.js';
+import { useCallback, useState } from 'react';
+import { JarvisSettings } from '../types/settings.types.js';
+import { WebviewMessage } from '../types/webview.js';
 
 declare const vscode: {
   postMessage: (message: WebviewMessage) => void;

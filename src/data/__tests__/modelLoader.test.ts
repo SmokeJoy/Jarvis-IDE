@@ -6,7 +6,7 @@
 import { fetchModels, getDefaultModel, loadModels } from '../modelLoader';
 import * as providerRegistry from '../providerRegistry';
 import { Logger } from '../../shared/logger';
-import type { OpenAiCompatibleModelInfo, LLMProviderId } from '../../shared/types/api.types';
+import { OpenAiCompatibleModelInfo, LLMProviderId } from '../../shared/types/api.types';
 
 // Mock del modulo providerRegistry
 jest.mock('../providerRegistry', () => ({

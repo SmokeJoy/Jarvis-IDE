@@ -1,8 +1,8 @@
-import type { ModelInfo } from "../../shared/api.js"
+import { ModelInfo } from "../../shared/api.js"
 import { OpenAITransformer } from "./openai-format.js"
 import { ApiStream } from "./stream.js"
 import OpenAI from "openai"
-import type { ChatMessage } from "../../types/ChatMessage.js"
+import { ChatMessage } from "../../types/ChatMessage.js"
 import { logger } from "../../utils/logger.js"
 
 export interface OpenRouterModel extends ModelInfo {

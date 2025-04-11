@@ -2,7 +2,7 @@ import * as fs from "fs/promises"
 import * as path from "path"
 import { listFiles } from "../glob/list-files.js"
 import { LanguageParser, loadRequiredLanguageParsers } from "./languageParser.js"
-import type { fileExistsAtPath } from "../../utils/fs.js"
+import { fileExistsAtPath } from "../../utils/fs.js"
 import { JarvisIdeIgnoreController } from "../../core/ignore/JarvisIdeIgnoreController.js"
 
 // TODO: implement caching behavior to avoid having to keep analyzing project for new tasks.

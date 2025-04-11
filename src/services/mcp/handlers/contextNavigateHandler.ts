@@ -1,11 +1,40 @@
-import type { ContextItem, getMemoryContexts } from "../../memory/context.js";
+/**
+ * @file contextNavigateHandler.ts
+ * @description Handler per la navigazione tra contesti
+ */
+
 import { readFile } from "fs/promises";
 import path from "path";
-import type { findSemanticPath } from '../core/navigation/semantic.js';
-import type { findExploratoryPath } from '../core/navigation/exploratory.js';
-import type { NavigationOptions } from '../utils/navigationGraph.js';
+import { getLogger } from "../../../shared/logging.js";
+import { getMemoryContexts, getContextById } from "../../memory/context.js";
+import { ContextItem } from "../../memory/context.js";
+import { findSemanticPath } from '../core/navigation/semantic.js';
+import { findExploratoryPath } from '../core/navigation/exploratory.js';
+import {
+  NavigationOptions,
+  NavigationMode,
+  NavigationFormat,
+  NavigationResult,
+  NavigationParams
+} from '../types/navigation.types';
 
-interface ContextLink {
+const logger = getLogger('contextNavigateHandler');
+
+// Costanti di configurazione
+const DEFAULT_MODE = 'semantic' as const;
+const DEFAULT_FORMAT = 'graph' as const;
+const SUPPORTED_MODES = ['shortest', 'weighted', 'semantic', 'exploratory'] as const;
+const SUPPORTED_FORMATS = ['path', 'tree', 'graph'] as const;
+const MIN_STRENGTH = 0;
+const MAX_STRENGTH = 1;
+const MIN_CONFIDENCE = 0;
+const MAX_CONFIDENCE = 1;
+const MAX_STEPS = 100;
+
+/**
+ * Interfaccia per i link tra contesti
+ */
+export interface ContextLink {
   id: string;
   sourceId: string;
   targetId: string;
@@ -19,48 +48,41 @@ interface ContextLink {
   };
 }
 
-interface NavigationOptions {
+/**
+ * Strategia di navigazione
+ */
+export interface NavigationStrategy {
+  preferredRelations?: string[];
+  minStrength?: number;
+  minConfidence?: number;
+  maxSteps?: number;
+  requireTags?: string[];
+  excludeTags?: string[];
+}
+
+/**
+ * Opzioni di navigazione
+ */
+export interface NavigationOptions {
   startId: string;
   targetId?: string;
-  mode?: "shortest" | "semantic" | "weighted" | "exploratory";
-  strategy?: {
-    preferredRelations?: string[];
-    minStrength?: number;
-    minConfidence?: number;
-    maxSteps?: number;
-    requireTags?: string[];
-    excludeTags?: string[];
-  };
+  mode?: typeof SUPPORTED_MODES[number];
+  strategy?: NavigationStrategy;
   includeContent?: boolean;
   includeMetadata?: boolean;
-  format?: "path" | "tree" | "graph";
+  format?: typeof SUPPORTED_FORMATS[number];
 }
 
-interface NavigationResult {
-  success: boolean;
-  path?: {
-    nodes: Array<{
-      id: string;
-      text?: string;
-      tags?: string[];
-    }>;
-    edges: Array<{
-      sourceId: string;
-      targetId: string;
-      relation: string;
-      strength?: number;
-      confidence?: number;
-    }>;
-  };
-  error?: string;
-}
-
+/**
+ * Recupera i link tra contesti dal file di persistenza
+ */
 async function getContextLinks(): Promise<ContextLink[]> {
   try {
     const linksPath = path.join(__dirname, "../../data/context_links.json");
-    const data = await readFile(linksPath, "utf-8");
-    return JSON.parse(data);
+    const data = await readFile(linksPath, { encoding: "utf-8" });
+    return JSON.parse(data) as ContextLink[];
   } catch (error) {
+    logger.error('Errore nel recupero dei link:', error);
     return [];
   }
 }
@@ -353,10 +375,10 @@ async function findSemanticPath(
   includeMetadata: boolean = true
 ): Promise<NavigationResult> {
   // Cache per i contesti
-  const contextCache = new Map<string, any>();
+  const contextCache = new Map<string, ContextItem>();
 
   // Funzione helper per ottenere contesti con caching
-  async function getCachedContext(id: string): Promise<any> {
+  async function getCachedContext(id: string): Promise<ContextItem> {
     if (!contextCache.has(id)) {
       const ctx = await getContextById(id);
       if (!ctx) {
@@ -388,7 +410,7 @@ async function findSemanticPath(
   queue.push({ id: startId, distance: 0 });
   
   // Funzione per calcolare il peso semantico di un link
-  const calculateSemanticScore = (link: ContextLink, context: any): number => {
+  const calculateSemanticScore = (link: ContextLink, context: ContextItem): number => {
     let score = 1; // Base
     
     // Punteggio per tag
@@ -536,10 +558,10 @@ async function findExploratoryPath(
   format: "tree" | "graph" = "graph"
 ): Promise<NavigationResult> {
   // Cache per i contesti
-  const contextCache = new Map<string, any>();
+  const contextCache = new Map<string, ContextItem>();
 
   // Funzione helper per ottenere contesti con caching
-  async function getCachedContext(id: string): Promise<any> {
+  async function getCachedContext(id: string): Promise<ContextItem> {
     if (!contextCache.has(id)) {
       const ctx = await getContextById(id);
       if (!ctx) {
@@ -691,28 +713,142 @@ async function findExploratoryPath(
   }
 }
 
-export async function contextNavigateHandler(
-  startId: string,
-  targetId: string | null,
-  mode: 'shortest' | 'weighted' | 'semantic' | 'exploratory',
-  options: NavigationOptions = {},
-  includeContent: boolean = false,
-  includeMetadata: boolean = false,
-  format: 'tree' | 'graph' = 'graph'
-) {
-  switch (mode) {
-    case 'shortest':
-    case 'weighted':
-    case 'semantic':
-      if (!targetId) {
-        throw new Error('ID del contesto di destinazione mancante');
-      }
-      return findSemanticPath(startId, targetId, options, includeContent, includeMetadata);
-    
-    case 'exploratory':
-      return findExploratoryPath(startId, options, includeContent, includeMetadata, format);
-    
-    default:
-      throw new Error(`Modalità di navigazione non supportata: ${mode}`);
+/**
+ * Risultato della navigazione
+ */
+export interface NavigationResult {
+  success: boolean;
+  path?: {
+    nodes: Array<{
+      id: string;
+      text?: string;
+      tags?: string[];
+    }>;
+    edges: Array<{
+      sourceId: string;
+      targetId: string;
+      relation: string;
+      strength?: number;
+      confidence?: number;
+    }>;
+  };
+  error?: string;
+}
+
+/**
+ * Valida le opzioni di navigazione
+ */
+function validateNavigationOptions(options: NavigationOptions): string | null {
+  if (!options.startId) {
+    return 'ID del contesto di partenza mancante';
   }
-} 
+
+  if (options.mode && !SUPPORTED_MODES.includes(options.mode)) {
+    return `Modalità di navigazione non supportata: ${options.mode}`;
+  }
+
+  if (options.format && !SUPPORTED_FORMATS.includes(options.format)) {
+    return `Formato non supportato: ${options.format}`;
+  }
+
+  if (options.strategy) {
+    if (options.strategy.minStrength && 
+        (options.strategy.minStrength < MIN_STRENGTH || options.strategy.minStrength > MAX_STRENGTH)) {
+      return `minStrength deve essere tra ${MIN_STRENGTH} e ${MAX_STRENGTH}`;
+    }
+
+    if (options.strategy.minConfidence && 
+        (options.strategy.minConfidence < MIN_CONFIDENCE || options.strategy.minConfidence > MAX_CONFIDENCE)) {
+      return `minConfidence deve essere tra ${MIN_CONFIDENCE} e ${MAX_CONFIDENCE}`;
+    }
+
+    if (options.strategy.maxSteps && options.strategy.maxSteps > MAX_STEPS) {
+      return `maxSteps non può essere maggiore di ${MAX_STEPS}`;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Handler principale per la navigazione tra contesti
+ */
+export async function contextNavigateHandler(
+  options: NavigationOptions
+): Promise<NavigationResult> {
+  try {
+    // Validazione input
+    const validationError = validateNavigationOptions(options);
+    if (validationError) {
+      return {
+        success: false,
+        error: validationError
+      };
+    }
+
+    // Verifica che il contesto di partenza esista
+    const contexts = await getMemoryContexts();
+    const startContext = contexts.find((ctx) => ctx.id === options.startId);
+    if (!startContext) {
+      return {
+        success: false,
+        error: `Contesto con ID ${options.startId} non trovato`
+      };
+    }
+
+    // Recupera i link
+    const links = await getContextLinks();
+
+    // Seleziona la modalità di navigazione
+    const mode = options.mode || DEFAULT_MODE;
+
+    switch (mode) {
+      case 'shortest':
+        if (!options.targetId) {
+          return {
+            success: false,
+            error: "La modalità 'shortest' richiede un targetId"
+          };
+        }
+        return await navigateShortest(options, contexts, links);
+
+      case 'weighted':
+      case 'semantic':
+        if (!options.targetId) {
+          return {
+            success: false,
+            error: `La modalità '${mode}' richiede un targetId`
+          };
+        }
+        return await findSemanticPath(
+          options.startId,
+          options.targetId,
+          options.strategy || {},
+          options.includeContent ?? false,
+          options.includeMetadata ?? false
+        );
+
+      case 'exploratory':
+        return await findExploratoryPath(
+          options.startId,
+          options.strategy || {},
+          options.includeContent ?? false,
+          options.includeMetadata ?? false,
+          options.format as "tree" | "graph" || DEFAULT_FORMAT
+        );
+
+      default:
+        return {
+          success: false,
+          error: `Modalità di navigazione non supportata: ${mode}`
+        };
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Errore sconosciuto';
+    logger.error('Errore durante la navigazione:', error);
+    return {
+      success: false,
+      error: `Errore durante la navigazione: ${errorMessage}`
+    };
+  }
+}

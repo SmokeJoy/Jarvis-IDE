@@ -11,7 +11,7 @@ import {
   notCondition,
   providerCostAbove
 } from '../adaptive-conditions';
-import type { ProviderStats } from '../../LLMFallbackManager';
+import { ProviderStats } from '../../LLMFallbackManager';
 
 describe('Adaptive Conditions', () => {
   const createMockStats = (overrides: Partial<ProviderStats> = {}): ProviderStats => ({

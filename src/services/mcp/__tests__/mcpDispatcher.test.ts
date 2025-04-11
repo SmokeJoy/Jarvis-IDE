@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { mcpDispatcher } from '../mcpDispatcher.js';
+import { mcpDispatcher } from '../mcpDispatcher.js';
 import * as typeGuards from '../../../shared/typeGuards.js';
 import { Logger } from '../../../shared/logger.js';
 

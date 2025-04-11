@@ -3,9 +3,9 @@
  * @description Transformer per il formato Anthropic
  */
 
-import type { ChatMessage, ContentPart, ContentType, TextContent, ImageContent, ToolUseContent, ToolResultContent } from '../../types/chat.types.js';
-import type { AnthropicMessage, AnthropicMessageOptions, AnthropicStreamChunk, AnthropicMessageResponse, AnthropicTextBlock, AnthropicImageBlock, AnthropicToolUseBlock, AnthropicToolResultBlock, AnthropicContentBlock, AnthropicURLImageSource, AnthropicBase64ImageSource } from '../../types/provider-types/anthropic-types.js';
-import type { BaseTransformer, TokenUsage, BaseRequestOptions, ContentUtils } from './BaseTransformer.js';
+import { ChatMessage, ContentPart, ContentType, TextContent, ImageContent, ToolUseContent, ToolResultContent } from '../../types/chat.types.js';
+import { AnthropicMessage, AnthropicMessageOptions, AnthropicStreamChunk, AnthropicMessageResponse, AnthropicTextBlock, AnthropicImageBlock, AnthropicToolUseBlock, AnthropicToolResultBlock, AnthropicContentBlock, AnthropicURLImageSource, AnthropicBase64ImageSource } from '../../types/provider-types/anthropic-types.js';
+import { BaseTransformer, TokenUsage, BaseRequestOptions, ContentUtils } from './BaseTransformer.js';
 import { logger } from '../../utils/logger.js';
 
 /**

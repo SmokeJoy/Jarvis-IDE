@@ -1,4 +1,4 @@
-import type { ChatCompletionMessageParam } from "openai";
+import { ChatCompletionMessageParam } from "openai";
 import { ChatCompletionContentPartText, ChatCompletionContentPartImage } from "../../types/global.js";
 
 export async function fetchOpenGraphData(url: string): Promise<{

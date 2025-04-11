@@ -1,6 +1,6 @@
 import type Parser from "web-tree-sitter"
 import { join } from "path"
-import type {
+import {
 	javascriptQuery,
 	typescriptQuery,
 	pythonQuery,

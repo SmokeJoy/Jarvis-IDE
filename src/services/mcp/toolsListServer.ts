@@ -10,8 +10,8 @@ import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import * as path from 'path';
-import type { fileURLToPath } from 'url';
-import type { McpDispatcher } from './McpDispatcher.js';
+import { fileURLToPath } from 'url';
+import { McpDispatcher } from './McpDispatcher.js';
 import { McpToolCall } from '../../shared/types/mcp.types.js';
 
 // Definisci __dirname equivalente per ES modules

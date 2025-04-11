@@ -2,7 +2,7 @@ import fs from "fs/promises"
 import { globby } from "globby"
 import * as path from "path"
 import { simpleGit, SimpleGit } from "simple-git";
-import type { fileExistsAtPath } from "../../utils/fs.js"
+import { fileExistsAtPath } from "../../utils/fs.js"
 import { getLfsPatterns, writeExcludesFile } from "./CheckpointExclusions.js"
 import { telemetryService } from "../../services/telemetry/TelemetryService.js"
 

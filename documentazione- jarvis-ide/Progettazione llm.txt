@@ -1,0 +1,1141 @@
+# Progettazione di LLMManager e ModelSelector per Jarvis-IDE: Gestione Avanzata di Modelli Linguistici con Fallback e Streaming
+
+La progettazione di un sistema efficiente per gestire modelli linguistici di grandi dimensioni (LLM) in un IDE richiede un'architettura robusta che supporti selezione dinamica, streaming reattivo e meccanismi di fallback. Questo report presenta un'analisi approfondita e soluzioni pratiche per implementare un modulo LLMManager con ModelSelector capace di orchestrare più provider LLM in base al contesto, gestire fallback dinamici e supportare streaming token per token verso un frontend WebView.
+
+## Architettura di Selezione Dinamica dei Modelli
+
+La selezione intelligente del modello più adatto per ogni task è fondamentale per ottimizzare le prestazioni e l'efficacia del sistema.
+
+### Strategie di Selezione Modello
+
+La progettazione di un selettore dinamico di modelli può seguire due approcci principali:
+
+#### 1. Catene Deterministiche vs Selezione Dinamica
+
+Un approccio deterministico si basa su una catena di passaggi predefiniti con workflow fissi:
+
+```typescript
+// Implementazione di una catena deterministica
+class DeterministicModelChain {
+  private models: LLMAdapter[] = [];
+  
+  constructor(models: LLMAdapter[]) {
+    this.models = models;
+  }
+  
+  async execute(prompt: string, task: TaskType): Promise<LLMResponse> {
+    // Sempre lo stesso flusso per tutti i task
+    const model = this.models.find(m => m.supportsTask(task));
+    return await model.generate(prompt);
+  }
+}
+```
+
+Questo approccio, sebbene prevedibile e facile da testare, manca di flessibilità[6]. Per contesti dinamici come un IDE, un selettore basato su metriche è più efficace:
+
+```typescript
+// ModelSelector basato su scoring dinamico
+class DynamicModelSelector {
+  private modelRegistry: Map<string, LLMAdapter> = new Map();
+  private telemetryCache: ModelTelemetryCache;
+  
+  constructor(telemetryCache: ModelTelemetryCache) {
+    this.telemetryCache = telemetryCache;
+  }
+  
+  registerModel(model: LLMAdapter): void {
+    this.modelRegistry.set(model.id, model);
+  }
+  
+  async selectModel(params: {
+    task: TaskType,
+    maxTokens: number,
+    maxLatencyMs?: number,
+    streamingRequired?: boolean
+  }): Promise<LLMAdapter> {
+    const candidates = Array.from(this.modelRegistry.values())
+      .filter(model => {
+        // Filtri di base per capacità
+        const canHandleTask = model.supportsTask(params.task);
+        const hasEnoughContext = model.maxContextLength >= params.maxTokens;
+        const supportsStreaming = !params.streamingRequired || model.supportsStreaming;
+        
+        // Controllo stato salute
+        const health = this.telemetryCache.getHealth(model.id);
+        const isHealthy = health.errorRate < 0.2 && !health.isCoolingDown;
+        
+        return canHandleTask && hasEnoughContext && supportsStreaming && isHealthy;
+      });
+    
+    // Scoring dei candidati rimasti
+    return this.scoreAndSelect(candidates, params);
+  }
+  
+  private scoreAndSelect(candidates: LLMAdapter[], params: any): LLMAdapter {
+    return candidates.sort((a, b) => {
+      const scoreA = this.calculateScore(a, params);
+      const scoreB = this.calculateScore(b, params);
+      return scoreB - scoreA; // Ordine decrescente
+    })[0];
+  }
+  
+  private calculateScore(model: LLMAdapter, params: any): number {
+    const metrics = this.telemetryCache.getMetrics(model.id);
+    const latencyScore = 1 / (metrics.avgLatencyMs + 1);
+    const successScore = metrics.successRate;
+    const taskFitScore = this.getTaskFitScore(model, params.task);
+    
+    // Pesi configurabili per diversi fattori
+    return (latencyScore * 0.3) + (successScore * 0.4) + (taskFitScore * 0.3);
+  }
+  
+  private getTaskFitScore(model: LLMAdapter, task: TaskType): number {
+    // Logica per valutare quanto il modello sia adatto al task specifico
+    // Potrebbe basarsi su dati storici o su configurazioni predefinite
+    return model.taskFitness[task] || 0.5; // Valore default
+  }
+}
+```
+
+#### 2. Raccolta di Metriche Runtime
+
+Per supportare decisioni informate, è essenziale implementare un sistema di raccolta metriche:
+
+```typescript
+// TelemetryCache per metriche runtime
+class ModelTelemetryCache {
+  private metricsMap: Map<string, ModelMetrics> = new Map();
+  private healthMap: Map<string, ModelHealth> = new Map();
+  
+  constructor() {
+    // Inizializzazione con valori default
+    this.resetAllMetrics();
+  }
+  
+  resetAllMetrics(): void {
+    // Reimpostazione delle metriche
+  }
+  
+  recordSuccess(modelId: string, latencyMs: number): void {
+    const metrics = this.getMetrics(modelId);
+    metrics.totalCalls++;
+    metrics.successCalls++;
+    metrics.latencies.push(latencyMs);
+    
+    // Aggiorna media latenza
+    metrics.avgLatencyMs = metrics.latencies.reduce((a, b) => a + b, 0) / metrics.latencies.length;
+    metrics.successRate = metrics.successCalls / metrics.totalCalls;
+    
+    this.metricsMap.set(modelId, metrics);
+  }
+  
+  recordError(modelId: string, errorType: string): void {
+    const metrics = this.getMetrics(modelId);
+    const health = this.getHealth(modelId);
+    
+    metrics.totalCalls++;
+    metrics.errorCalls++;
+    metrics.successRate = metrics.successCalls / metrics.totalCalls;
+    
+    // Aggiorna errorRate e imposta cooldown se necessario
+    health.errorRate = metrics.errorCalls / metrics.totalCalls;
+    if (health.errorRate > 0.5 || errorType === 'RATE_LIMIT') {
+      health.isCoolingDown = true;
+      health.cooldownUntil = Date.now() + 60000; // 1 minuto di cooldown
+    }
+    
+    this.metricsMap.set(modelId, metrics);
+    this.healthMap.set(modelId, health);
+  }
+  
+  getMetrics(modelId: string): ModelMetrics {
+    if (!this.metricsMap.has(modelId)) {
+      this.metricsMap.set(modelId, this.createDefaultMetrics());
+    }
+    return this.metricsMap.get(modelId)!;
+  }
+  
+  getHealth(modelId: string): ModelHealth {
+    if (!this.healthMap.has(modelId)) {
+      this.healthMap.set(modelId, this.createDefaultHealth());
+    }
+    
+    // Verifica se il cooldown è terminato
+    const health = this.healthMap.get(modelId)!;
+    if (health.isCoolingDown && Date.now() > health.cooldownUntil) {
+      health.isCoolingDown = false;
+      this.healthMap.set(modelId, health);
+    }
+    
+    return health;
+  }
+  
+  private createDefaultMetrics(): ModelMetrics {
+    return {
+      totalCalls: 0,
+      successCalls: 0,
+      errorCalls: 0,
+      successRate: 1.0,
+      avgLatencyMs: 0,
+      latencies: []
+    };
+  }
+  
+  private createDefaultHealth(): ModelHealth {
+    return {
+      errorRate: 0,
+      isCoolingDown: false,
+      cooldownUntil: 0
+    };
+  }
+}
+```
+
+Questo sistema di telemetria raccoglie dati cruciali come tasso di successo, latenza media e problemi specifici dei modelli, permettendo decisioni di selezione informate in tempo reale.
+
+## Implementazione dello Streaming LLM Reattivo
+
+Lo streaming token-by-token è fondamentale per ridurre la latenza percepita e migliorare l'esperienza utente nella comunicazione con LLM all'interno dell'IDE.
+
+### Architettura per Streaming Uniforme
+
+La sfida principale è uniformare il comportamento di streaming tra provider con implementazioni diverse (SSE, WebSocket, JSONL, ecc.).
+
+```typescript
+// LLMAdapter base con supporto streaming
+abstract class LLMAdapter {
+  abstract id: string;
+  abstract maxContextLength: number;
+  abstract supportsStreaming: boolean;
+  abstract taskFitness: Record<TaskType, number>;
+  
+  abstract generate(prompt: string, options?: GenerateOptions): Promise<LLMResponse>;
+  abstract stream(prompt: string, options?: StreamOptions): Promise<StreamingResponse>;
+}
+
+// Implementazione specifica per OpenAI
+class OpenAIAdapter extends LLMAdapter {
+  id = 'openai';
+  maxContextLength = 16384;
+  supportsStreaming = true;
+  taskFitness = {
+    code: 0.9,
+    general: 0.8,
+    summarize: 0.7
+  };
+  
+  async generate(prompt: string, options?: GenerateOptions): Promise<LLMResponse> {
+    // Implementazione standard per richieste non-streaming
+  }
+  
+  async stream(prompt: string, options?: StreamOptions): Promise<StreamingResponse> {
+    const { onToken, signal } = options || {};
+    
+    // Impostazione della connessione SSE con OpenAI
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4',
+        messages: [{ role: 'user', content: prompt }],
+        stream: true
+      }),
+      signal // Passa l'AbortSignal per supportare cancellazione
+    });
+    
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+    
+    // Crea una StreamingResponse
+    const streamingResponse = new StreamingResponse();
+    
+    // Elabora lo stream in background
+    (async () => {
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n').filter(line => line.trim() !== '' && line.trim() !== 'data: [DONE]');
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = JSON.parse(line.slice(6));
+              if (data.choices && data.choices[0].delta.content) {
+                const token = data.choices[0].delta.content;
+                fullText += token;
+                
+                // Callback per ogni token ricevuto
+                if (onToken) onToken(token);
+                
+                // Aggiorna il testo accumulato nella risposta streaming
+                streamingResponse.updateText(fullText);
+              }
+            }
+          }
+        }
+        streamingResponse.complete();
+      } catch (error) {
+        streamingResponse.error(error);
+      }
+    })();
+    
+    return streamingResponse;
+  }
+}
+
+// Classe generica per gestire le risposte streaming
+class StreamingResponse {
+  private _isComplete = false;
+  private _error: Error | null = null;
+  private _text = '';
+  
+  get isComplete(): boolean {
+    return this._isComplete;
+  }
+  
+  get error(): Error | null {
+    return this._error;
+  }
+  
+  get text(): string {
+    return this._text;
+  }
+  
+  updateText(newText: string): void {
+    this._text = newText;
+  }
+  
+  complete(): void {
+    this._isComplete = true;
+  }
+  
+  error(err: Error): void {
+    this._error = err;
+    this._isComplete = true;
+  }
+}
+```
+
+### Integrazione con WebView per Frontend React
+
+Per trasmettere lo streaming al frontend React in una WebView, possiamo implementare un sistema di comunicazione basato su postMessage[5]:
+
+```typescript
+// LLMStreamManager per coordinare lo streaming con il frontend
+class LLMStreamManager {
+  private webViewRef: WebView;
+  private activeStreams: Map<string, AbortController> = new Map();
+  
+  constructor(webViewRef: WebView) {
+    this.webViewRef = webViewRef;
+  }
+  
+  async streamToWebView(
+    requestId: string,
+    adapter: LLMAdapter,
+    prompt: string,
+    options?: StreamOptions
+  ): Promise<void> {
+    // Crea un AbortController per questa richiesta
+    const abortController = new AbortController();
+    this.activeStreams.set(requestId, abortController);
+    
+    try {
+      // Inizia lo streaming con l'adapter LLM
+      await adapter.stream(prompt, {
+        signal: abortController.signal,
+        onToken: (token: string) => {
+          // Invia ogni token alla WebView
+          this.webViewRef.postMessage(JSON.stringify({
+            type: 'llm-token',
+            requestId,
+            token
+          }));
+        }
+      });
+      
+      // Segnala completamento
+      this.webViewRef.postMessage(JSON.stringify({
+        type: 'llm-complete',
+        requestId
+      }));
+    } catch (error) {
+      // Gestione errori
+      this.webViewRef.postMessage(JSON.stringify({
+        type: 'llm-error',
+        requestId,
+        error: error.message
+      }));
+    } finally {
+      this.activeStreams.delete(requestId);
+    }
+  }
+  
+  cancelStream(requestId: string): void {
+    const controller = this.activeStreams.get(requestId);
+    if (controller) {
+      controller.abort();
+      this.activeStreams.delete(requestId);
+    }
+  }
+  
+  cancelAllStreams(): void {
+    for (const controller of this.activeStreams.values()) {
+      controller.abort();
+    }
+    this.activeStreams.clear();
+  }
+}
+```
+
+Sul frontend React, possiamo implementare un hook personalizzato per consumare lo stream:
+
+```typescript
+// Hook React per consumare lo streaming LLM
+function useStreamingLLM() {
+  const [streamingText, setStreamingText] = useState('');
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Gestisci i messaggi in arrivo dalla WebView
+    const handleMessage = (event) => {
+      const data = JSON.parse(event.data);
+      
+      switch (data.type) {
+        case 'llm-token':
+          setStreamingText(prev => prev + data.token);
+          setIsStreaming(true);
+          break;
+        case 'llm-complete':
+          setIsStreaming(false);
+          break;
+        case 'llm-error':
+          setError(data.error);
+          setIsStreaming(false);
+          break;
+      }
+    };
+    
+    // Aggiungi listener
+    document.addEventListener('message', handleMessage);
+    window.addEventListener('message', handleMessage);
+    
+    // Cleanup
+    return () => {
+      document.removeEventListener('message', handleMessage);
+      window.removeEventListener('message', handleMessage);
+    };
+  }, []);
+  
+  const requestLLMStream = useCallback((text, options = {}) => {
+    // Resetta lo stato
+    setStreamingText('');
+    setError(null);
+    setIsStreaming(true);
+    
+    // Invia richiesta al backend
+    window.ReactNativeWebView?.postMessage(JSON.stringify({
+      type: 'request-llm-stream',
+      prompt: text,
+      options
+    }));
+  }, []);
+  
+  return {
+    streamingText,
+    isStreaming,
+    error,
+    requestLLMStream
+  };
+}
+```
+
+## Resilienza e Fallback in Tempo Reale
+
+Un sistema robusto di gestione degli errori e meccanismi di fallback è cruciale per mantenere l'affidabilità del servizio, specialmente in un IDE dove l'interruzione del flusso può compromettere significativamente la produttività[1].
+
+### Implementazione di un Sistema di Fallback
+
+```typescript
+// FallbackPolicy per configurare comportamenti di fallback
+interface FallbackPolicy {
+  maxRetries: number;
+  retryIntervalMs: number;
+  timeoutMs: number;
+  fallbackIfNonStreaming: boolean;
+  cancelIfSlowMs?: number;
+}
+
+// Gestore centralizzato per fallback
+class LLMFallbackManager {
+  private modelSelector: DynamicModelSelector;
+  private telemetryCache: ModelTelemetryCache;
+  private defaultPolicy: FallbackPolicy = {
+    maxRetries: 1,
+    retryIntervalMs: 1000,
+    timeoutMs: 10000,
+    fallbackIfNonStreaming: true
+  };
+  
+  constructor(modelSelector: DynamicModelSelector, telemetryCache: ModelTelemetryCache) {
+    this.modelSelector = modelSelector;
+    this.telemetryCache = telemetryCache;
+  }
+  
+  async executeWithFallback(
+    prompt: string,
+    params: {
+      task: TaskType,
+      maxTokens: number,
+      streamingRequired?: boolean
+    },
+    policy?: Partial<FallbackPolicy>
+  ): Promise<LLMResponse | StreamingResponse> {
+    // Combina policy predefinita con override
+    const activePolicy = { ...this.defaultPolicy, ...policy };
+    
+    // Array di modelli già tentati, per evitare loop
+    const attemptedModels: string[] = [];
+    let attempts = 0;
+    
+    while (attempts <= activePolicy.maxRetries) {
+      attempts++;
+      
+      // Seleziona il miglior modello disponibile che non sia già stato tentato
+      const selectedModel = await this.modelSelector.selectModel({
+        ...params,
+        excludeModels: attemptedModels
+      });
+      
+      // Se non ci sono modelli disponibili, fallisci con errore
+      if (!selectedModel) {
+        throw new Error('No suitable models available after fallback attempts');
+      }
+      
+      attemptedModels.push(selectedModel.id);
+      
+      try {
+        // Esegui con timeout
+        const result = await this.executeWithTimeout(
+          selectedModel,
+          prompt,
+          params,
+          activePolicy.timeoutMs
+        );
+        
+        // Registra successo nella telemetria
+        this.telemetryCache.recordSuccess(selectedModel.id, result.latencyMs);
+        
+        return result.response;
+      } catch (error) {
+        console.error(`Error with model ${selectedModel.id}:`, error);
+        
+        // Registra errore nella telemetria
+        this.telemetryCache.recordError(selectedModel.id, error.type || 'UNKNOWN');
+        
+        // Se è l'ultimo tentativo, propaga l'errore
+        if (attempts > activePolicy.maxRetries) {
+          throw error;
+        }
+        
+        // Attendi prima del prossimo tentativo
+        await new Promise(resolve => setTimeout(resolve, activePolicy.retryIntervalMs));
+      }
+    }
+    
+    throw new Error('Exhausted all fallback attempts');
+  }
+  
+  private async executeWithTimeout(
+    model: LLMAdapter,
+    prompt: string,
+    params: any,
+    timeoutMs: number
+  ): Promise<{ response: LLMResponse | StreamingResponse; latencyMs: number }> {
+    const startTime = Date.now();
+    
+    // Crea un promise di timeout
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('LLM request timed out')), timeoutMs);
+    });
+    
+    // Esegui la richiesta LLM con supporto per streaming o meno
+    const executionPromise = params.streamingRequired && model.supportsStreaming
+      ? model.stream(prompt)
+      : model.generate(prompt);
+    
+    // Race tra timeout e esecuzione
+    const response = await Promise.race([executionPromise, timeoutPromise]);
+    const latencyMs = Date.now() - startTime;
+    
+    return { response, latencyMs };
+  }
+}
+```
+
+### Prevenzione di Output Incoerenti in Streaming Parziale
+
+Per gestire errori durante lo streaming ed evitare output incoerenti:
+
+```typescript
+// StreamingCoordinator per gestire fallback durante lo streaming
+class StreamingCoordinator {
+  private fallbackManager: LLMFallbackManager;
+  private onToken: (token: string) => void;
+  private activeStream: AbortController | null = null;
+  
+  constructor(fallbackManager: LLMFallbackManager) {
+    this.fallbackManager = fallbackManager;
+  }
+  
+  async streamWithFallback(
+    prompt: string,
+    params: {
+      task: TaskType,
+      maxTokens: number,
+      onToken: (token: string) => void,
+      onComplete: () => void,
+      onError: (error: Error) => void
+    },
+    policy?: Partial<FallbackPolicy>
+  ): Promise<void> {
+    // Salva il callback onToken
+    this.onToken = params.onToken;
+    
+    // Crea un AbortController per questa richiesta
+    const abortController = new AbortController();
+    this.activeStream = abortController;
+    
+    // Buffer per testo accumulato (utile in caso di fallback)
+    let accumulatedText = '';
+    let streamingFailed = false;
+    
+    try {
+      const response = await this.fallbackManager.executeWithFallback(
+        prompt,
+        {
+          task: params.task,
+          maxTokens: params.maxTokens,
+          streamingRequired: true
+        },
+        {
+          ...policy,
+          // Controlla se lo streaming viene interrotto o rallenta troppo
+          cancelIfSlowMs: 5000
+        }
+      );
+      
+      // Verifica che la risposta sia effettivamente uno stream
+      if (response instanceof StreamingResponse) {
+        // Gestione dello streaming riuscito
+        await this.handleStreamingResponse(response, params, accumulatedText);
+      } else {
+        // Fallback a risposta sincrona se lo streaming non è disponibile
+        this.handleSyncResponse(response.text, params);
+      }
+    } catch (error) {
+      streamingFailed = true;
+      console.error('Streaming failed with all fallbacks:', error);
+      params.onError(error);
+    } finally {
+      this.activeStream = null;
+    }
+  }
+  
+  private async handleStreamingResponse(
+    streamingResponse: StreamingResponse,
+    params: any,
+    accumulatedText: string
+  ): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      // Controlla periodicamente lo stato dello stream
+      const checkInterval = setInterval(() => {
+        if (streamingResponse.isComplete) {
+          clearInterval(checkInterval);
+          
+          if (streamingResponse.error) {
+            reject(streamingResponse.error);
+          } else {
+            params.onComplete();
+            resolve();
+          }
+        } else if (streamingResponse.text !== accumulatedText) {
+          // Estrai e invia solo i nuovi token
+          const newText = streamingResponse.text.substring(accumulatedText.length);
+          accumulatedText = streamingResponse.text;
+          params.onToken(newText);
+        }
+      }, 50);
+    });
+  }
+  
+  private handleSyncResponse(text: string, params: any): void {
+    // Simula lo streaming inviando caratteri singolarmente
+    for (const char of text) {
+      params.onToken(char);
+    }
+    params.onComplete();
+  }
+  
+  cancel(): void {
+    if (this.activeStream) {
+      this.activeStream.abort();
+      this.activeStream = null;
+    }
+  }
+}
+```
+
+## Architettura di Adapter e Pattern
+
+Per supportare molteplici provider LLM in modo flessibile, un'architettura plugin-like è l'approccio ideale.
+
+### Implementazione di Adapter per Provider Multipli
+
+```typescript
+// Interfaccia base per tutti gli adapter
+interface LLMAdapterConfig {
+  id: string;
+  apiKey?: string;
+  baseUrl?: string;
+  maxRetries?: number;
+  timeout?: number;
+}
+
+// Factory per creare adapter
+class LLMAdapterFactory {
+  static createAdapter(type: string, config: LLMAdapterConfig): LLMAdapter {
+    switch (type.toLowerCase()) {
+      case 'openai':
+        return new OpenAIAdapter(config);
+      case 'deepseek':
+        return new DeepSeekAdapter(config);
+      case 'mistral':
+        return new MistralAdapter(config);
+      default:
+        throw new Error(`Unsupported adapter type: ${type}`);
+    }
+  }
+}
+
+// Adapter per DeepSeek
+class DeepSeekAdapter extends LLMAdapter {
+  private config: LLMAdapterConfig;
+  
+  constructor(config: LLMAdapterConfig) {
+    super();
+    this.config = config;
+    this.id = config.id || 'deepseek';
+    this.maxContextLength = 8192;
+    this.supportsStreaming = true;
+    this.taskFitness = {
+      code: 0.95,  // Ottimo per codice
+      general: 0.75,
+      summarize: 0.7
+    };
+  }
+  
+  async generate(prompt: string, options?: GenerateOptions): Promise<LLMResponse> {
+    // Implementazione per DeepSeek API
+  }
+  
+  async stream(prompt: string, options?: StreamOptions): Promise<StreamingResponse> {
+    const { onToken, signal } = options || {};
+    const streamingResponse = new StreamingResponse();
+    
+    try {
+      // DeepSeek usa un formato JSONL per streaming
+      const response = await fetch(`${this.config.baseUrl || 'https://api.deepseek.com'}/v1/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.config.apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'deepseek-coder',
+          messages: [{ role: 'user', content: prompt }],
+          stream: true
+        }),
+        signal
+      });
+      
+      const reader = response.body!.getReader();
+      const decoder = new TextDecoder();
+      let fullText = '';
+      
+      // Elaborazione dello stream specifico per DeepSeek
+      (async () => {
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            const chunk = decoder.decode(value);
+            // Il formato di DeepSeek è leggermente diverso da OpenAI
+            // Adatta la logica di parsing al formato specifico
+            
+            // Esempio di elaborazione JSONL (ipotetico)
+            const lines = chunk.split('\n').filter(Boolean);
+            
+            for (const line of lines) {
+              const data = JSON.parse(line);
+              if (data.token) {
+                fullText += data.token;
+                if (onToken) onToken(data.token);
+                streamingResponse.updateText(fullText);
+              }
+            }
+          }
+          streamingResponse.complete();
+        } catch (error) {
+          streamingResponse.error(error);
+        }
+      })();
+      
+      return streamingResponse;
+    } catch (error) {
+      streamingResponse.error(error);
+      return streamingResponse;
+    }
+  }
+}
+
+// Registry per tutti gli adapter
+class StreamingAdapterRegistry {
+  private adapters: Map<string, LLMAdapter> = new Map();
+  
+  registerAdapter(adapter: LLMAdapter): void {
+    this.adapters.set(adapter.id, adapter);
+  }
+  
+  getAdapter(id: string): LLMAdapter | undefined {
+    return this.adapters.get(id);
+  }
+  
+  getAdaptersForTask(task: TaskType): LLMAdapter[] {
+    return Array.from(this.adapters.values())
+      .filter(adapter => adapter.supportsTask(task))
+      .sort((a, b) => b.taskFitness[task] - a.taskFitness[task]);
+  }
+  
+  getStreamingAdapters(): LLMAdapter[] {
+    return Array.from(this.adapters.values())
+      .filter(adapter => adapter.supportsStreaming);
+  }
+}
+```
+
+## LLMManager: Sintesi e Integrazione Completa
+
+Il modulo LLMManager integra tutti i componenti discussi in un'unica interfaccia coerente per l'intera applicazione.
+
+```typescript
+// LLMManager principale che integra tutti i componenti
+class LLMManager {
+  private registry: StreamingAdapterRegistry;
+  private modelSelector: DynamicModelSelector;
+  private fallbackManager: LLMFallbackManager;
+  private streamingCoordinator: StreamingCoordinator;
+  private telemetryCache: ModelTelemetryCache;
+  private webViewRef: WebView | null = null;
+  private streamManager: LLMStreamManager | null = null;
+  
+  constructor() {
+    this.telemetryCache = new ModelTelemetryCache();
+    this.registry = new StreamingAdapterRegistry();
+    this.modelSelector = new DynamicModelSelector(this.telemetryCache);
+    this.fallbackManager = new LLMFallbackManager(this.modelSelector, this.telemetryCache);
+    this.streamingCoordinator = new StreamingCoordinator(this.fallbackManager);
+  }
+  
+  // Inizializzazione con configurazione
+  initialize(config: {
+    adapters: Array<{ type: string; config: LLMAdapterConfig }>;
+    webView?: WebView;
+  }): void {
+    // Configura gli adapter
+    for (const adapterConfig of config.adapters) {
+      const adapter = LLMAdapterFactory.createAdapter(
+        adapterConfig.type,
+        adapterConfig.config
+      );
+      this.registry.registerAdapter(adapter);
+      this.modelSelector.registerModel(adapter);
+    }
+    
+    // Configura WebView se fornita
+    if (config.webView) {
+      this.connectWebView(config.webView);
+    }
+  }
+  
+  connectWebView(webView: WebView): void {
+    this.webViewRef = webView;
+    this.streamManager = new LLMStreamManager(webView);
+    
+    // Configura listener per messaggi dalla WebView
+    webView.addEventListener('message', (event) => {
+      const data = JSON.parse(event.data);
+      
+      if (data.type === 'request-llm-stream') {
+        this.handleWebViewStreamRequest(data);
+      } else if (data.type === 'cancel-llm-stream') {
+        this.streamManager?.cancelStream(data.requestId);
+      }
+    });
+  }
+  
+  private async handleWebViewStreamRequest(data: any): Promise<void> {
+    const { requestId, prompt, task, maxTokens } = data;
+    
+    if (!this.streamManager) return;
+    
+    try {
+      // Seleziona il modello appropriato per il task
+      const model = await this.modelSelector.selectModel({
+        task: task || 'general',
+        maxTokens: maxTokens || 2048,
+        streamingRequired: true
+      });
+      
+      if (!model) {
+        throw new Error('No suitable model found for the request');
+      }
+      
+      // Avvia lo streaming con fallback automatico
+      await this.streamManager.streamToWebView(
+        requestId,
+        model,
+        prompt,
+        {
+          task: task || 'general',
+          maxTokens: maxTokens || 2048
+        }
+      );
+    } catch (error) {
+      // Gestione errore
+      this.webViewRef?.postMessage(JSON.stringify({
+        type: 'llm-error',
+        requestId,
+        error: error.message
+      }));
+    }
+  }
+  
+  // API pubblica per generazione sincrona con selezione automatica modello
+  async generate(prompt: string, options?: {
+    task?: TaskType;
+    maxTokens?: number;
+  }): Promise<string> {
+    const response = await this.fallbackManager.executeWithFallback(
+      prompt,
+      {
+        task: options?.task || 'general',
+        maxTokens: options?.maxTokens || 2048,
+        streamingRequired: false
+      }
+    );
+    
+    return response.text;
+  }
+  
+  // API pubblica per streaming con callback
+  async streamWithCallbacks(prompt: string, callbacks: {
+    onToken: (token: string) => void;
+    onComplete: () => void;
+    onError: (error: Error) => void;
+  }, options?: {
+    task?: TaskType;
+    maxTokens?: number;
+  }): Promise<void> {
+    await this.streamingCoordinator.streamWithFallback(
+      prompt,
+      {
+        task: options?.task || 'general',
+        maxTokens: options?.maxTokens || 2048,
+        ...callbacks
+      }
+    );
+  }
+  
+  // API per ottenere statistiche sulla salute dei modelli
+  getModelHealthStatus(): Record<string, any> {
+    const result: Record<string, any> = {};
+    
+    for (const adapter of this.registry.getAdaptersForTask('general')) {
+      const metrics = this.telemetryCache.getMetrics(adapter.id);
+      const health = this.telemetryCache.getHealth(adapter.id);
+      
+      result[adapter.id] = {
+        successRate: metrics.successRate,
+        avgLatencyMs: metrics.avgLatencyMs,
+        errorRate: health.errorRate,
+        isCoolingDown: health.isCoolingDown,
+        cooldownRemaining: health.isCoolingDown ? 
+          Math.max(0, health.cooldownUntil - Date.now()) : 0
+      };
+    }
+    
+    return result;
+  }
+}
+```
+
+### Utilizzo nel Contesto di Jarvis-IDE
+
+Esempio di integrazione con il main dell'applicazione:
+
+```typescript
+// Utilizzo nel contesto Jarvis-IDE
+async function setupLLMInfrastructure() {
+  const llmManager = new LLMManager();
+  
+  // Inizializza con provider configurati
+  llmManager.initialize({
+    adapters: [
+      {
+        type: 'openai',
+        config: {
+          id: 'gpt4',
+          apiKey: process.env.OPENAI_API_KEY,
+          baseUrl: 'https://api.openai.com'
+        }
+      },
+      {
+        type: 'openai',
+        config: {
+          id: 'gpt35',
+          apiKey: process.env.OPENAI_API_KEY,
+          baseUrl: 'https://api.openai.com'
+        }
+      },
+      {
+        type: 'deepseek',
+        config: {
+          id: 'deepseek-coder',
+          apiKey: process.env.DEEPSEEK_API_KEY
+        }
+      },
+      {
+        type: 'mistral',
+        config: {
+          id: 'mistral-medium',
+          apiKey: process.env.MISTRAL_API_KEY
+        }
+      }
+    ]
+  });
+  
+  // Connetti alla WebView quando l'UI è pronta
+  vscode.window.onDidChangeActiveTextEditor(() => {
+    if (webViewPanel && webViewPanel.webview) {
+      llmManager.connectWebView(webViewPanel.webview);
+    }
+  });
+  
+  return llmManager;
+}
+```
+
+## Conclusione
+
+L'architettura proposta per i moduli `LLMManager` e `ModelSelector` offre un approccio robusto per gestire modelli linguistici all'interno di un IDE come Jarvis-IDE. Il sistema è capace di selezionare dinamicamente i modelli più adatti per compiti specifici, gestire errori e fallback in modo trasparente, e supportare lo streaming token-by-token verso un frontend WebView.
+
+I componenti chiave di questa architettura includono:
+
+1. **Selezione dinamica dei modelli** basata su metriche di prestazioni e adeguatezza al task
+2. **Sistema di raccolta telemetria** per informare decisioni di routing in tempo reale
+3. **Streaming uniforme** tra diversi provider con supporto per abort controllato
+4. **Meccanismi di fallback** per garantire la continuità del servizio anche in presenza di errori
+5. **Integrazione WebView** per comunicazione efficiente con il frontend React
+
+Questa implementazione non solo migliora l'esperienza utente riducendo la latenza percepita attraverso lo streaming, ma garantisce anche una maggiore affidabilità del sistema grazie ai meccanismi di fallback e recupero automatico. La struttura plugin-like facilita l'aggiunta di nuovi provider LLM, rendendo il sistema scalabile e adattabile all'evoluzione del panorama dei modelli linguistici.
+
+Per ulteriori miglioramenti, si potrebbe considerare l'implementazione di cache locali per ridurre le chiamate API ridondanti, un sistema più sofisticato di analisi degli errori per ottimizzare le strategie di fallback, e un meccanismo di feedback per migliorare continuamente la selezione dei modelli in base alle interazioni degli utenti.
+
+Fonti
+[1] LLM Fallback (Beta) - Cognigy Documentation https://docs.cognigy.com/ai/empower/llms/fallback/
+[2] aws-samples/build-an-automated-large-language-model-evaluation ... https://github.com/aws-samples/build-an-automated-large-language-model-evaluation-pipeline-on-aws
+[3] Streaming# https://docs.llamaindex.ai/en/stable/module_guides/deploying/query_engine/streaming/
+[4] Fast State Restoration in LLM Serving with HCache - arXiv https://arxiv.org/html/2410.05004v1
+[5] adamkdean/react-native-webviewhook - GitHub https://github.com/adamkdean/react-native-webviewhook
+[6] Agent system design patterns - Azure Databricks | Microsoft Learn https://learn.microsoft.com/en-us/azure/databricks/generative-ai/guide/agent-system-design-patterns
+[7] Developing a model plugin# https://llm.datasette.io/en/stable/plugins/tutorial-model-plugin.html
+[8] How do I dynamically assign properties to an object in TypeScript? https://stackoverflow.com/questions/12710905/how-do-i-dynamically-assign-properties-to-an-object-in-typescript/12711283
+[9] Building Intelligent LLM Applications with Conditional Chains https://dev.to/jamesli/building-intelligent-llm-applications-with-conditional-chains-a-deep-dive-430a
+[10] Can I get advice on how to work with streaming AI LLMs? https://discuss.yjs.dev/t/can-i-get-advice-on-how-to-work-with-streaming-ai-llms/2604
+[11] WritableStreamDefaultWriter: abort() method - Web APIs | MDN https://developer.mozilla.org/en-US/docs/Web/API/WritableStreamDefaultWriter/abort
+[12] Cluster health - OpenSearch Documentation https://opensearch.org/docs/latest/api-reference/cluster-api/cluster-health/
+[13] Langchain Typescript Streaming Overview - Restack https://www.restack.io/docs/langchain-knowledge-typescript-streaming-cat-ai
+[14] [PDF] Dynamic LLM Routing and Selection based on User Preferences https://ijcaonline.org/archives/volume186/number51/piskala-2024-ijca-924172.pdf
+[15] How to Build Real-World AI Workflows With AutoGen - HackerNoon https://hackernoon.com/how-to-build-real-world-ai-workflows-with-autogen-step-by-step-guide
+[16] Configure, Test & Deploy a Fallback LLM Provider with Freeplay https://www.linkedin.com/posts/freeplay-ai_configure-test-deploy-a-fallback-llm-provider-activity-7191533474850246658-4ef4
+[17] How do I dynamically assign properties to an object in TypeScript? https://stackoverflow.com/questions/12710905/how-do-i-dynamically-assign-properties-to-an-object-in-typescript
+[18] Why LlamaIndex introducing TypeScript support matters - Lumenalta https://lumenalta.com/insights/llamaindex-goes-typescript-boosting-llm-reliability
+[19] How to use tools with LLMs? - typescript - Stack Overflow https://stackoverflow.com/questions/79253601/how-to-use-tools-with-llms
+[20] [PDF] Automatic Tool Selection to Reduce Large Language Model Latency https://www.tdcommons.org/cgi/viewcontent.cgi?article=8702&context=dpubs_series
+[21] Cancelling requests | 🦜️🔗 Langchain https://js.langchain.com/docs/expression_language/how_to/cancellation
+[22] ‍  LLM Comparison/Test: DeepSeek-V3, QVQ-72B-Preview, Falcon3 ... https://huggingface.co/blog/wolfram/llm-comparison-test-2025-01-02
+[23] Build a Streaming API for a Large Language Model https://docs.jina.ai/tutorials/llm-serve/
+[24] [PDF] Fast State Restoration in LLM Serving with HCache - Youmin Chen https://chenyoumin1993.github.io/papers/eurosys25-hcache.pdf
+[25] Video Streaming in android using webview - Stack Overflow https://stackoverflow.com/questions/15790210/video-streaming-in-android-using-webview
+[26] Intercepting the output message in a callback handler before it is ... https://github.com/langchain-ai/langchain/issues/15830
+[27] The Power of Adapters in Fine-tuning LLMs https://medium.com/@zbabar/the-power-of-adapters-in-fine-tuning-llms-722c87c5bca6
+[28] How to create LLM fallback from Gemini Flash to GPT-4o? https://dev.to/portkey/how-to-create-llm-fallback-from-gemini-flash-to-gpt-4o-4nel
+[29] LLM Evaluation: Model-Based, Labeling & User Feedback - Langfuse https://langfuse.com/docs/scores/overview
+[30] How To Develop A Token Streaming UI For Your LLM With Go, FastAPI And JS https://nlpcloud.com/how-to-develop-a-token-streaming-ui-for-your-llm-with-go-fastapi-and-js.html
+[31] LLM Model Cache files · Issue #1519 · ollama/ollama - GitHub https://github.com/jmorganca/ollama/issues/1519
+[32] frida-android-hooks/hook_webview_frida_example.py at master https://github.com/antojoseph/frida-android-hooks/blob/master/hook_webview_frida_example.py
+[33] WritableStream: abort() method - Web APIs | MDN https://developer.mozilla.org/en-US/docs/Web/API/WritableStream/abort
+[34] [Bug]: Exception: This model isn't mapped yet. model=qwen2.5:32b ... https://github.com/BerriAI/litellm/issues/6322
+[35] Database Search: Text2SQL using dynamic few-shot prompting with ... https://adasci.org/database-search-text2sql-using-dynamic-few-shot-prompting-with-self-consistency-using-llm/
+[36] I can't use stream LLM tokens in my ts · Issue #1019 - GitHub https://github.com/langchain-ai/langgraphjs/issues/1019
+[37] Intent to Implement and Ship: WritableStream controller AbortSignal https://groups.google.com/a/chromium.org/g/blink-dev/c/T6B5czAke1I
+[38] InsightFinder Release Notes https://insightfinder.com/insightfinder-release-notes/
+[39] MixLLM: Dynamic Routing in Mixed Large Language Models - arXiv https://arxiv.org/abs/2502.18482
+[40] AI SDK - Vercel https://vercel.com/docs/ai-sdk
+[41] How to define type for object with dynamic properties in TypeScript https://stackoverflow.com/questions/53090630/how-to-define-type-for-object-with-dynamic-properties-in-typescript
+[42] Speed up your AI & LLM-integration with this simple trick - esveo https://www.esveo.com/en/blog/streaming-ai/
+[43] Local TypeScript Super SDK to Call 200 LLMs - Hacker News https://news.ycombinator.com/item?id=41844517
+[44] GPT4All + langchain typescript · Issue #2401 - GitHub https://github.com/hwchase17/langchain/issues/2401
+[45] Understanding LLM Observability - Key Insights, Best Practices ... https://signoz.io/blog/llm-observability/
+[46] WebView | API reference - Android Developers https://developer.android.com/reference/android/webkit/WebView
+[47] Error building my application · Issue #1414 · stackblitz-labs/bolt.diy ... https://github.com/stackblitz-labs/bolt.diy/issues/1414
+[48] Build Python, TypeScript, and Java SDKs with Streaming - liblab https://liblab.com/docs/tutorials/customizations/build-an-sdk-with-streaming
+[49] curious about the plans for supporting PEFT and LoRa. #482 - GitHub https://github.com/huggingface/text-generation-inference/issues/482
+[50] Monitor LLM Application Performance with Existing Observability Tools https://www.guardrailsai.com/blog/opentelemetry-llm-performance
+[51] "implement a WebViewClient class on the WebView" - Stack Overflow https://stackoverflow.com/questions/13608349/implement-a-webviewclient-class-on-the-webview
+[52] Conceptual guide - ️   LangChain https://python.langchain.com/v0.2/docs/concepts/
+[53] Model Context Protocol (MCP) Client Development Guide - GitHub https://github.com/cyanheads/model-context-protocol-resources/blob/main/guides/mcp-client-development-guide.md
+[54] Built a system for dynamic LLM selection with specialized prompts ... https://www.reddit.com/r/Rag/comments/1ibvsyq/built_a_system_for_dynamic_llm_selection_with/
+[55] LLM Observability: Challenges, Key Components & Best Practices https://coralogix.com/guides/aiops/llm-observability/
+[56] Override current Javascript functions with Android Webview https://stackoverflow.com/questions/20048914/override-current-javascript-functions-with-android-webview/32268192
+[57] awesome-ml/llm-tools.md at master - GitHub https://github.com/underlines/awesome-ml/blob/master/llm-tools.md
+[58] A component suspended while responding to synchronous input https://stackoverflow.com/questions/72167518/a-component-suspended-while-responding-to-synchronous-input
+[59] simonecorsi's Stars Awesome - GitHub https://github.com/simonecorsi/awesome
+[60] Scopri Chrome - Chrome for Developers https://developer.chrome.com/discover
+[61] All new Datasets, Experimentation and Evaluation documentation https://langfuse.com/changelog/2024-11-21-all-new-datasets-and-evals-documentation
+[62] API key passthrough missing for custom OpenAI-compatible models https://github.com/eclipse-theia/theia/issues/14288
+[63] Generative AI Scripting | GenAIScript - Microsoft Open Source https://microsoft.github.io/genaiscript
+[64] [Feature Request] Fallback from one provider to another · Issue #4230 https://github.com/hwchase17/langchain/issues/4230
+[65] \emojidizzyStarCoder 2 and The Stack v2: The Next Generation - arXiv https://arxiv.org/html/2402.19173v1
+[66] [PDF] ....... Signature redacted - DSpace@MIT https://dspace.mit.edu/bitstream/handle/1721.1/122497/1121184251-MIT.pdf?sequence=1&isAllowed=y
+[67] instructor-ai/instructor-js: structured extraction for llms - GitHub https://github.com/instructor-ai/instructor-js
+[68] [PDF] arXiv:2407.03856v4 [cs.LG] 3 Mar 2025 https://arxiv.org/pdf/2407.03856.pdf
+[69] The Definitive Guide to LLM Parameters and Model Evaluation https://www.galileo.ai/blog/llm-parameters-model-evaluation
+[70] Build web apps in WebView - Android Developers https://developer.android.com/develop/ui/views/layout/webapps/webview
+[71] [PDF] Exploratory Data Analysis of Live 5G Radio Access Network ... https://www.diva-portal.org/smash/get/diva2:1782725/FULLTEXT01.pdf
+[72] OpenAI-Compatible Server - vLLM https://docs.vllm.ai/en/latest/serving/openai_compatible_server.html
+[73] Extensions - Cognigy Documentation https://docs.cognigy.com/ai/build/extensions/
+[74] Use Palantir-provided language models within transforms https://palantir.com/docs/foundry/transforms-python/palantir-provided-models/
+[75] Implement Mendix Best Practices for Development https://docs.mendix.com/howto8/general/dev-best-practices/
+[76] Tools | GenAIScript - Microsoft Open Source https://microsoft.github.io/genaiscript/reference/scripts/tools/
+[77] Open Source Prompt Management - Langfuse https://langfuse.com/docs/prompts/get-started
+[78] Topics with Label: Centralized Model Registry - Databricks Community https://community.databricks.com/t5/forums/filteredbylabelpage/board-id/data-engineering/label-name/centralized%20model%20registry

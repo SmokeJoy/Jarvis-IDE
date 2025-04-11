@@ -3,7 +3,7 @@
  * https://docs.anthropic.com/claude/reference/complete_post
  */
 
-import type { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js';
+import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js';
 
 interface AnthropicChatRequest {
   model: string;

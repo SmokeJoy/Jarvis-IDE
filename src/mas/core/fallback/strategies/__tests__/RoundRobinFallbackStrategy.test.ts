@@ -5,8 +5,8 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { RoundRobinFallbackStrategy } from '../RoundRobinFallbackStrategy';
-import type { LLMProviderHandler } from '../../../../providers/provider-registry-stub';
-import type { ProviderStats } from '../../LLMFallbackManager';
+import { LLMProviderHandler } from '../../../../providers/provider-registry-stub';
+import { ProviderStats } from '../../LLMFallbackManager';
 
 describe('RoundRobinFallbackStrategy', () => {
   // Crea provider di test

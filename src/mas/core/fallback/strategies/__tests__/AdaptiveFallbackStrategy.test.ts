@@ -20,9 +20,9 @@ import {
   anyCondition,
   notCondition
 } from '../';
-import type { LLMProviderHandler } from '../../../../providers/provider-registry-stub';
-import type { ProviderStats } from '../../LLMFallbackManager';
-import type { FallbackStrategy } from '../FallbackStrategy';
+import { LLMProviderHandler } from '../../../../providers/provider-registry-stub';
+import { ProviderStats } from '../../LLMFallbackManager';
+import { FallbackStrategy } from '../FallbackStrategy';
 
 describe('AdaptiveFallbackStrategy', () => {
   // Utility per creare provider di test

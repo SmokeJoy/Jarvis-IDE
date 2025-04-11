@@ -1,30 +1,41 @@
-import { WebviewMessage } from './webview-message';
+import { WebviewMessage } from './webview-message.js';
 
 export enum PromptHistoryMessageType {
-  REQUEST_HISTORY = 'requestPromptHistory',
-  HISTORY_LOADED = 'promptHistoryLoaded',
-  SAVE_PROMPT = 'savePromptToHistory',
-  HISTORY_UPDATED = 'promptHistoryUpdated',
-  HISTORY_ERROR = 'promptHistoryError'
+  REQUEST_HISTORY = 'requestHistory',
+  HISTORY_LOADED = 'historyLoaded',
+  SAVE_PROMPT = 'savePrompt',
+  HISTORY_UPDATED = 'historyUpdated',
+  HISTORY_ERROR = 'historyError'
 }
 
-export type PromptHistoryMessageUnion = WebviewMessage<
-  PromptHistoryMessageType,
-  {
-    [PromptHistoryMessageType.REQUEST_HISTORY]: undefined,
-    [PromptHistoryMessageType.HISTORY_LOADED]: {
-      history: Array<{ id: string; prompt: string; timestamp: number }>;
-    },
-    [PromptHistoryMessageType.SAVE_PROMPT]: {
+export interface PromptHistoryMessage<T extends PromptHistoryMessageType> extends WebviewMessage<T> {
+  payload: T extends PromptHistoryMessageType.REQUEST_HISTORY ? void :
+    T extends PromptHistoryMessageType.HISTORY_LOADED ? Array<{
+      id: string;
       prompt: string;
-      agentId?: string;
-    },
-    [PromptHistoryMessageType.HISTORY_UPDATED]: {
-      newEntry: { id: string; prompt: string; timestamp: number };
-    },
-    [PromptHistoryMessageType.HISTORY_ERROR]: {
+      timestamp: number;
+    }> :
+    T extends PromptHistoryMessageType.SAVE_PROMPT ? {
+      prompt: string;
+    } :
+    T extends PromptHistoryMessageType.HISTORY_UPDATED ? Array<{
+      id: string;
+      prompt: string;
+      timestamp: number;
+    }> :
+    T extends PromptHistoryMessageType.HISTORY_ERROR ? {
       error: string;
-      errorCode: number;
-    }
-  }
->;
+    } :
+    never;
+}
+
+export type PromptHistoryMessageUnion = {
+  [K in PromptHistoryMessageType]: PromptHistoryMessage<K>;
+}[PromptHistoryMessageType];
+
+export function createPromptHistoryMessage<T extends PromptHistoryMessageType>(
+  type: T,
+  payload: PromptHistoryMessage<T>['payload']
+): PromptHistoryMessage<T> {
+  return { type, payload } as PromptHistoryMessage<T>;
+}

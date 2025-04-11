@@ -1,4 +1,15 @@
-import type { ContextLink } from '../types.js';
+/**
+ * 🛠️ Fix TypeScript – 2025-04-10
+ * - Importazioni corrette
+ * - Tipizzazione mock/test
+ * - Eliminazione impliciti
+ */
+
+import { ContextLink } from '../types.js';
+import {
+  NavigationOptions,
+  NavigationResult
+} from '../types/navigation.types';
 
 export interface NodeResult {
   id: string;
@@ -13,15 +24,6 @@ export interface EdgeResult {
   relation: string;
   strength?: number;
   confidence?: number;
-}
-
-export interface NavigationOptions {
-  maxSteps?: number;
-  requireTags?: string[];
-  excludeTags?: string[];
-  preferredRelations?: string[];
-  minStrength?: number;
-  minConfidence?: number;
 }
 
 export function calculateSemanticScore(

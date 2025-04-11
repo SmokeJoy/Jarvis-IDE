@@ -1,10 +1,10 @@
 /**
  * Definizioni comuni per i moduli di esportazione
  */
-import type { ChatMessage } from '../../shared/types.js';
-import type { ChatSettings } from '../../shared/types/settings.types.js';
-import type { ChatSession } from '../../shared/types/session.js';
-import type { SanitizeOptions } from './sanitize.js';
+import { ChatMessage } from '../../shared/types.js';
+import { ChatSettings } from '../../shared/types/settings.types.js';
+import { ChatSession } from '../../shared/types/session.js';
+import { SanitizeOptions } from './sanitize.js';
 
 /**
  * Definizione dei tipi per il sistema di esportazione

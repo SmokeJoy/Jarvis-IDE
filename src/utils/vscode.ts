@@ -1,4 +1,4 @@
-import type { WebviewApi } from 'vscode-webview'
+import { WebviewApi } from 'vscode-webview'
 
 declare const acquireVsCodeApi: () => {
   postMessage: (message: any) => void;

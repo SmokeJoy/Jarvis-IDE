@@ -1,4 +1,4 @@
-import type { ContextLink } from '../types.js';
+import { ContextLink } from '../types.js';
 export interface NodeResult {
     id: string;
     text?: string;

@@ -71,7 +71,12 @@
     "schema:all": "ts-node scripts/generate-schema-extended.ts",
     "test:payload": "ts-node scripts/test-payloads.ts",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "fix:imports": "ts-node scripts/codemods/fix-import-type.ts",
+    "test:codemods": "vitest run",
+    "test:codemods:watch": "vitest watch",
+    "changelog:imports": "ts-node scripts/codemods/generate-import-fix-changelog.ts",
+    "fix:imports:ast": "ts-node scripts/codemods/fix-import-type-ast.ts"
   },
   "contributes": {
     "viewsContainers": {

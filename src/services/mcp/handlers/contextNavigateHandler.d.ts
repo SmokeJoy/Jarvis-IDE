@@ -1,4 +1,4 @@
-import type { NavigationOptions } from '../utils/navigationGraph.js';
+import { NavigationOptions } from '../utils/navigationGraph.js';
 interface NavigationOptions {
     startId: string;
     targetId?: string;

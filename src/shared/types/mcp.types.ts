@@ -13,6 +13,22 @@
 export type McpMode = "off" | "minimal" | "full";
 
 /**
+ * Tipi di trasporto supportati
+ */
+export type McpTransportType = "stdio" | "sse";
+
+/**
+ * Interfaccia base per i trasporti MCP
+ */
+export interface McpTransport {
+  type: McpTransportType;
+  connect(): Promise<void>;
+  disconnect(): Promise<void>;
+  send(data: unknown): Promise<void>;
+  onMessage(callback: (data: unknown) => void): void;
+}
+
+/**
  * Rappresentazione di un server MCP
  */
 export interface McpServer {
@@ -31,8 +47,13 @@ export interface McpServer {
  */
 export interface McpConnection {
   server: McpServer;
-  client: any;
-  transport: any; // StdioClientTransport | SSEClientTransport
+  client: {
+    id: string;
+    name: string;
+    version: string;
+    capabilities: string[];
+  };
+  transport: McpTransport;
   connectionId: string;
   userId: string;
 }
@@ -43,7 +64,12 @@ export interface McpConnection {
 export interface McpTool {
   name: string;
   description: string;
-  parameters: Record<string, unknown>;
+  parameters: Record<string, {
+    type: string;
+    description?: string;
+    required?: boolean;
+    default?: unknown;
+  }>;
   autoApprove?: boolean;
 }
 
@@ -55,7 +81,7 @@ export interface McpResource {
   name: string;
   description?: string;
   type: string;
-  content: any;
+  content: Record<string, unknown>;
 }
 
 /**
@@ -66,7 +92,16 @@ export interface McpResourceTemplate {
   name: string;
   description: string;
   type: string;
-  schema: any;
+  schema: {
+    type: string;
+    properties: Record<string, {
+      type: string;
+      description?: string;
+      required?: boolean;
+      default?: unknown;
+    }>;
+    required?: string[];
+  };
 }
 
 /**
@@ -84,7 +119,7 @@ export interface McpResourceResponse {
 export interface McpToolCallResponse {
   id: string;
   success: boolean;
-  result?: any;
+  result?: Record<string, unknown>;
   error?: string;
 }
 
@@ -122,7 +157,7 @@ export interface McpDownloadResponse {
 export interface McpToolCall {
   requestId: string;
   tool: string;
-  args: Record<string, any>;
+  args: Record<string, unknown>;
 }
 
 export interface McpToolResponse {
@@ -135,11 +170,11 @@ export interface McpToolResponse {
  */
 export interface McpToolResult {
   success: boolean;
-  output: any | null;
+  output: Record<string, unknown> | null;
   error?: string;
 }
 
 /**
  * Firma per gli handler di tool MCP
  */
-export type McpToolHandler = (args: Record<string, any>) => Promise<McpToolResult>; 
+export type McpToolHandler = (args: Record<string, unknown>) => Promise<McpToolResult>; 

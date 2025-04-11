@@ -1,7 +1,7 @@
 import { findSemanticPath, findExploratoryPath } from './contextNavigateHandler.js';
-import type { ContextLink } from '../types.js';
-import type { getContextById } from '../../memory/context.js';
-import type { getContextLinks } from '../../memory/context_links.js';
+import { ContextLink } from '../types.js';
+import { getContextById } from '../../memory/context.js';
+import { getContextLinks } from '../../memory/context_links.js';
 
 // Mock dei contesti
 const mockContexts = {

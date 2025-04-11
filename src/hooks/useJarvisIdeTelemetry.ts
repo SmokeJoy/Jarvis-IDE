@@ -2,7 +2,7 @@
 declare const vscode: { postMessage: (message: any) => void };
 
 import { useCallback } from 'react';
-import type { TelemetrySetting } from '../types/settings.types.js';
+import { TelemetrySetting } from '../types/settings.types.js';
 
 export const useJarvisIdeTelemetry = () => {
   const sendTelemetry = useCallback(async (event: string, properties?: Record<string, unknown>) => {

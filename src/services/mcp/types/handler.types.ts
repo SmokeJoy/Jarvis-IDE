@@ -3,6 +3,8 @@
  * Utilizzare direttamente `import { ... } from '../mcp.types.js'`
  */
 
+import { NavigationParams } from './navigation.types';
+
 // Re-export per retrocompatibilità temporanea
 export * from '../mcp.types.js';
 
@@ -117,16 +119,13 @@ export interface ContextGraphExportArgs {
   format: 'dot' | 'mermaid' | 'graphml' | 'json-ld';
 }
 
-export interface ContextNavigateArgs {
-  startId: string;
-  targetId: string;
-  mode?: 'shortest' | 'weighted' | 'semantic' | 'exploratory';
-  strategy?: {
-    semanticThreshold?: number;
-    maxExploratorySteps?: number;
-    minSemanticScore?: number;
-    preferredRelations?: string[];
-    requireTags?: string[];
-    excludeTags?: string[];
-  };
+export interface NavigationOptions {
+  preferredRelations?: string[];
+  minStrength?: number;
+  minConfidence?: number;
+  maxSteps?: number;
+  requireTags?: string[];
+  excludeTags?: string[];
 }
+
+export interface ContextNavigateArgs extends NavigationParams {}

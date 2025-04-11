@@ -3,8 +3,8 @@
  * @module utils/exporters/csv
  */
 
-import type { ChatMessage } from '../../shared/types.js';
-import type { ExportableSession } from './types.js';
+import { ChatMessage } from '../../shared/types.js';
+import { ExportableSession } from './types.js';
 import { Logger } from '../logger.js';
 
 const logger = Logger.getInstance('csvExporter');

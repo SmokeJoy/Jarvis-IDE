@@ -3,9 +3,9 @@
  * @description Estensioni per l'interfaccia ExtensionMessage per supportare i messaggi MAS
  */
 
-import type { ExtensionMessage } from '../../shared/ExtensionMessage.js';
+import { ExtensionMessage } from '../../shared/ExtensionMessage.js';
 import { AgentStatus } from '../../shared/types/mas.types.js';
-import type { TaskQueueState } from '../../shared/types/mas.types.js';
+import { TaskQueueState } from '../../shared/types/mas.types.js';
 
 declare module '../../shared/ExtensionMessage' {
   interface ExtensionMessage {

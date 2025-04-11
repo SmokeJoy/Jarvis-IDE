@@ -1,0 +1,382 @@
+Designing a Multi-Agent Orchestration for Jarvis-IDE
+
+Jarvis-IDE is a VS Code extension powered by a local Multi-Agent System (MAS) where specialized agents (Planner, Developer, Reviewer, Tester, Documenter) collaborate to perform coding tasks. To build a robust, scalable, and testable MAS orchestration, we need to choose the right architecture, handle failures gracefully, and implement core components (coordinator, event bus, tasks, etc.) with concurrency in mind. Below is a comprehensive guide covering architecture choices, resilience patterns, code design (in TypeScript), and strategies for dynamic, self-improving agents.
+
+Linear vs. Event-Driven Orchestration
+
+Multi-agent orchestration approaches: a linear pipeline (bottom) versus an event-driven pub/sub model (top). In linear orchestration, agents execute in a fixed sequence (Planner → Developer → Reviewer → Tester → Documenter). In event-driven mode, a central EventBus enables agents to publish and subscribe to events, allowing more flexible or parallel interactions.
+
+Linear Pipeline (Sequential): A straightforward approach is to arrange agents in a predetermined sequence, where each agent’s output feeds into the next agent. For example, the Planner produces a plan, the Developer writes code from that plan, then the Reviewer checks the code, and so on in order. This assembly-line flow is easier to reason about and ensures a deterministic order of execution. AutoGen’s “Sequential Workflow” pattern exemplifies this: “agents respond in a deterministic sequence… each agent performs a specific sub-task and passes its result to the next agent” . Similarly, Flowise’s multi-agent design enforces one task at a time, where a Supervisor agent waits for a worker to finish before delegating the next step . Frameworks like CrewAI support sequential mode as well, executing tasks in a listed order with each agent’s output becoming context for the next . The benefit of linear orchestration is simplicity in managing state (state can be passed along or stored centrally after each step) and easier debugging due to the clear stepwise progression . However, pure linear flow can become a bottleneck and isn’t flexible if tasks could be done in parallel or if an agent needs to be dynamically invoked out-of-order.
+
+Event-Driven (Parallel/Reactive): An event-driven architecture uses a publish/subscribe (pub/sub) mechanism (an EventBus) to decouple agents and allow more dynamic interactions. Agents subscribe to certain event types or topics and publish events (messages) when they complete a task or need to trigger other agents. This is analogous to a blackboard system where agents post information and react to changes. For example, once the Planner agent decomposes a user request into tasks, it might publish an event for each task. Developer, Tester, and Documenter agents could all subscribe to relevant task events and start working in parallel if their tasks are independent. This concurrency can speed up the workflow and allows agents to collaborate in a less rigid manner. AutoGen supports this style through its topic-based messaging: a message can be broadcast so that multiple agents process it simultaneously if they are subscribed to that topic . In fact, AutoGen’s Group Chat or Concurrent Agents patterns use a shared conversation or event channel where all agents see each other’s messages  . Another example is LangChain’s LangGraph, which models agents as nodes in a graph – the edges (transitions) define how outputs route between agents. This graph approach naturally accommodates non-linear flows (branching or looping) and parallelism when independent branches exist  . CrewAI also allows parallel tasks by marking them asynchronous: e.g. two research tasks can run in parallel, and a writer task waits for both results  . In an event-driven MAS, maintaining a consistent shared state is crucial since multiple agents may attempt to update it concurrently. A common strategy is to use a central state store (in-memory object or database) that agents read/write via the coordinator with proper locking or version control. For instance, agents might emit events like “CodeDraftReady” or “TestResultsReady” along with a task ID and data; the AgentCoordinator listens and merges these into a shared project state. Consistency can be managed by designing tasks to minimize overlap (each agent works on distinct aspects or has ownership of certain data) and by using atomic updates or queues when a single resource (like a file) is modified by multiple agents. Some MAS frameworks treat the shared context as append-only messages (so state is a log of events), which avoids true simultaneous writes – agents always react to the latest state instead of overwriting each other. This is similar to event sourcing: the source of truth is the event log, and state can be derived from it when needed. In summary, event-driven orchestration offers flexibility and parallelism at the cost of more complex state management. It’s well-suited when agents need to collaborate or consult each other dynamically (e.g. a Developer and Reviewer bouncing ideas in real-time), whereas a linear pipeline is simpler for strictly sequential stages of a task.
+
+Hybrid Approaches: In practice, Jarvis-IDE can combine both patterns. For example, you might orchestrate high-level phases linearly (Plan -> Code -> Review -> Test -> Document), but within the “Code” phase use an event-driven approach where multiple Developer agents tackle different files in parallel, or a Developer and Reviewer form a feedback loop. Known architectures often implement a Supervisor/Manager agent to coordinate either style. Flowise’s Supervisor agent orchestrates workers sequentially by design  , whereas frameworks like CrewAI provide a hierarchical mode where a manager agent dynamically assigns tasks to others (more event-driven internally) . The choice of architecture should consider task independence, performance needs, and complexity. For Jarvis-IDE, an event-driven core (with an EventBus for agents to communicate) wrapped in a linear high-level flow might give the best of both worlds – e.g., the Planner kicks off parallel subtasks via events, but waits until all have responded before moving to the next stage, ensuring overall coherence.
+
+Resilience with Fallbacks, Retries, and Timeouts
+
+In a complex MAS, things will go wrong: an agent might fail to produce a useful result, two agents might deadlock waiting on each other, or a remote LLM call may hang. A robust design requires mechanisms for asynchronous timeouts, retries, and fallback strategies to handle failures gracefully without derailing the whole system.
+
+Retries: If a task fails or produces an invalid output, the system should have the ability to retry it (perhaps after some delay or with modified input). A simple implementation is to include a retry count and backoff in the Task structure. For example, Task.attempt can track how many times it’s been tried. The AgentCoordinator can catch errors from an agent and decide to task.retry() if the attempt count hasn’t exceeded a max threshold. In TypeScript/Node, an agent’s perform() method can be wrapped in a promise that rejects on failure; the coordinator can .catch that and schedule a retry (possibly publishing a “retry” event for that task). It’s important to avoid infinite retry loops – use capped retries or escalate to a human or higher-level logic after a few failures. Some MAS frameworks build this in. CrewAI, for instance, has an error handling philosophy where if an agent encounters an error, the system “gracefully handles it by sending an error message to the agent and asking it to retry” . This is a clever pattern: the failure is turned into feedback that the agent (especially an LLM-based one) can use to try a different approach on the next attempt. We can adopt a similar approach in Jarvis-IDE: if the Developer agent fails to compile code, the error output can be fed back into its prompt (or into a specialized “Debugger” agent) on the next retry, giving guidance on what went wrong.
+
+Timeouts: To prevent an agent from hanging indefinitely (for example, waiting on a slow API or getting stuck in a long reasoning loop), implement agent.timeout(ms) controls. One way is to use Promise.race in JavaScript: race the agent’s async operation against a setTimeout promise. If the timeout wins, you can reject the task as timed-out, trigger a fallback, or send a cancellation signal. In an event-driven setup, the EventBus could publish a { type: "TASK_TIMEOUT", taskId } event that other agents or the coordinator handle (maybe prompting the Planner or a supervisor agent to intervene). For example, if the Reviewer agent hasn’t responded in 30 seconds, the coordinator could abort that review task and notify a fallback agent or simply mark it as failed so the workflow can continue. Timeouts should be tuned per task type – e.g., running tests might need a longer timeout than generating a small code snippet. It’s also wise to allow agents themselves to be aware of time (an agent could check elapsed time and decide to stop early if it’s not making progress).
+
+Fallbacks and Dynamic Recovery: A fallback means if one strategy fails, try another. In a MAS, this could be: if Agent A fails, assign the task to Agent B (perhaps a “senior” version of the agent or a different approach). For instance, if the Developer (code writer) agent is unable to implement a function after 3 attempts, the system could invoke the Planner agent to break the task down further (maybe the problem was too complex and needs re-planning), or call a different Developer agent that uses a larger model or different technique. You could also have a chain of fallback roles: e.g., if the automated Reviewer fails to understand the code, fall back to a human review (through a notification) or a simpler static analysis tool as backup. Known systems incorporate this idea of dynamic agent handoff. For example, Microsoft’s TaskWeaver (though primarily a single-agent planner) notes that it can be extended with extra roles interacting with the Planner to “achieve more complex tasks”  – we can imagine a role that specifically kicks in when primary agents falter. Another reference is an arXiv paper “A Generalist Multi-Agent System for Solving Complex Tasks,” which describes a lead agent orchestrator that “plans, tracks progress, and re-plans to recover from errors” . This highlights that a good coordinator should monitor progress and, on detecting a failure, adjust the plan or switch strategies (essentially a feedback loop at the planning level).
+
+Concretely, implementing fallbacks might mean having a registry of agent capabilities. For each task type, list the preferred agent and an alternative. The AgentCoordinator, upon task failure, can check if an alternate agent exists for that task and dispatch it. Alternatively, a single agent could incorporate multiple approaches internally (for example, the Developer agent tries approach X, and if it fails, it tries approach Y). The fallback could also be more general: if any critical task fails, maybe the system uses a “Reset or Recover” plan – e.g., the Planner agent is signaled to generate a recovery plan. Designing these mechanisms requires thinking about idempotence and partial results: if a task had side effects (like writing to a file) and it fails, the fallback/retry should consider cleaning up or using a fresh state. It’s often useful to do checkpointing before a risky step. For instance, Jarvis-IDE’s coordinator could snapshot the workspace state (in memory or on disk) before calling the Developer agent, and if the Developer’s output is nonsense, revert to the snapshot before trying again. This is akin to transaction rollback. In distributed systems, the compensating transaction pattern is used to undo partial work when something fails  – in an AI coding context, compensating action might be as simple as “discard the bad code changes” or as complex as an agent writing tests to identify which parts of the output to remove.
+
+Race Conditions & Deadlocks: In a concurrent MAS, we must guard against race conditions (two agents writing the same file or variable) and deadlocks (Agent A waits for Agent B’s event while B waits for A). To handle races, serialize critical sections or use a single-writer principle for shared resources. For example, assign ownership: the Developer agent alone modifies code files, the Documenter reads code but writes only docs, etc. If multiple Developer agents are allowed (say to work on different modules), partition the project so each works on separate files or classes. You can enforce this via the coordinator (e.g., by giving each agent a scoped view of the state). Deadlocks can be mitigated by careful design of the communication protocol: use timeouts as mentioned, and consider a wait-for graph analysis if agents have complex dependencies (though in practice, if you design a clear task dependency DAG, deadlocks are rare). A simple rule is to avoid circular waiting – e.g., don’t have Agent A require confirmation from B while B is simultaneously waiting for input from A. If such cycles are needed (like the coder-reviewer reflection loop discussed later), ensure the cycle has a breaking condition (max iterations or a human kick-out) so it doesn’t run forever.
+
+In summary, achieving resilience means the MAS is self-monitoring: the coordinator and agents should log failures, timeouts, and incomplete outcomes, then respond according to predefined policies (retry X times, then fallback or abort). Below, we’ll illustrate how to implement some of these patterns in code.
+
+Architecture Components and Code Examples
+
+Now we break down a possible implementation for Jarvis-IDE’s MAS in TypeScript. Key components include an AgentCoordinator to manage workflow, an EventBus for communication, abstractions for Task and AgentResponse, and mechanisms for logging and testing. The design will emphasize modularity (so new agents or tools can be added easily) and testability (we can inject mock agents and simulate various scenarios).
+
+EventBus for Pub/Sub Communication
+
+The EventBus is a simple message broker that agents and the coordinator use to publish and subscribe to events (task assignments, completions, errors, etc.). In Node.js, this could be as simple as using an EventEmitter, or a custom pub/sub class. For clarity, here’s a basic EventBus in TypeScript:
+
+type EventPayload = any;
+type EventHandler = (payload: EventPayload) => void;
+
+class EventBus {
+  private subscribers: { [eventType: string]: EventHandler[] } = {};
+
+  subscribe(eventType: string, handler: EventHandler) {
+    if (!this.subscribers[eventType]) {
+      this.subscribers[eventType] = [];
+    }
+    this.subscribers[eventType].push(handler);
+  }
+
+  unsubscribe(eventType: string, handler: EventHandler) {
+    this.subscribers[eventType] = this.subscribers[eventType]?.filter(h => h !== handler) || [];
+  }
+
+  publish(eventType: string, payload: EventPayload) {
+    const handlers = this.subscribers[eventType] || [];
+    for (const handler of handlers) {
+      // To avoid one slow handler blocking others, run in next tick
+      setImmediate(() => handler(payload));
+    }
+  }
+}
+
+In this snippet, subscribe registers a callback for a given event type, and publish triggers all callbacks for that type. We use setImmediate (or could use process.nextTick/queueMicrotask) to ensure each handler runs asynchronously – this prevents one misbehaving agent from blocking others and aligns with an event-driven, non-blocking model. Agents will subscribe to events like "task:READY:Developer" or "task:COMPLETE:Review" depending on the protocol we choose. For example, a Developer agent might subscribe to "plan:ready" events (meaning the Planner has produced a plan and the coding task is ready), whereas the Reviewer might subscribe to "code:ready" events (code written, ready to review).
+
+Event Protocol: Designing good event types is important. A common approach is to include the task type or target agent role in the event name. Alternatively, you publish all task results to a single stream and include metadata in the payload. For clarity, let’s say we use events like: "TASK_CREATED", "TASK_ASSIGNED", "TASK_COMPLETED", "TASK_FAILED", etc., with payloads containing taskId, type, data, and maybe the agent. Agents can filter events themselves or you can have the coordinator do the routing. AutoGen, for example, uses topic subscriptions where each agent listens on specific message types (in their Reflection example, the coder agent subscribes to CodeReviewResult messages, etc.) . For our code, we might simply have the coordinator direct tasks, but using the EventBus even for linear sequencing gives flexibility (you can later change who subscribes to what without rewriting the core logic).
+
+Task and Agent Interfaces
+
+We define a Task class to encapsulate a unit of work and track its status. Each Task has an id (unique), a type (perhaps corresponding to agent role or task nature, e.g. "CodeGeneration", "CodeReview"), some input (which could be a complex object or just a string prompt), and a status. We’ll also include a result field for output and possibly an error for error messages. The status can be an enum such as:
+
+enum TaskStatus { Pending, Running, Success, Failed, Aborted }
+
+And the Task class might look like:
+
+class Task {
+  id: string;
+  type: string;
+  input: any;
+  status: TaskStatus = TaskStatus.Pending;
+  attempt: number = 0;
+  result?: any;
+  error?: string;
+  createdAt: Date = new Date();
+  updatedAt: Date = new Date();
+
+  constructor(type: string, input: any) {
+    this.id = generateUniqueId();
+    this.type = type;
+    this.input = input;
+  }
+}
+
+Here generateUniqueId() can be a simple incrementing counter or a UUID generator to tag each task (this taskId will be used in logs and events). attempt helps with retries. result and error will be filled upon completion.
+
+We also define an AgentResponse type to uniformly represent what an agent returns after performing a task. It might contain a success flag, output data (if any), and an error message if failed:
+
+interface AgentResponse {
+  success: boolean;
+  output?: any;
+  error?: string;
+}
+
+In a more complex design, an agent could also return additional info like observations (for debugging), or partial outputs, but the above is sufficient for basic flow.
+
+Each agent in our system can be represented as an object (or class instance) adhering to an interface, say:
+
+interface Agent {
+  name: string;
+  perform(task: Task, coordinator: AgentCoordinator): Promise<AgentResponse>;
+}
+
+The perform method is where the agent does its work. It’s async (returns a Promise) because the agent might call external services (like an LLM API) or do I/O. We pass in the coordinator as well, which allows an agent to, for example, publish events or create subtasks if needed. (In some patterns, agents might create new tasks – e.g., a Planner could add tasks to the queue, or an agent might delegate a sub-problem to another agent by interacting with the coordinator).
+
+Example Agent Implementation: A simple Planner agent might take a high-level request (like “Implement a Stack class with push/pop”) and split it into tasks:
+
+class PlannerAgent implements Agent {
+  name = "Planner";
+  async perform(task: Task, coordinator: AgentCoordinator): Promise<AgentResponse> {
+    // Task input is a high-level specification
+    const spec: string = task.input;
+    try {
+      // Very naive planning: split spec by " and " or something just for demo
+      const subTasksSpecs = spec.split(" and ").map(s => s.trim());
+      for (const subSpec of subTasksSpecs) {
+        // Create new sub-task for Developer agent
+        const devTask = coordinator.createTask("CodeGeneration", { spec: subSpec });
+        coordinator.assignTask(devTask, "Developer");
+      }
+      return { success: true, output: `${subTasksSpecs.length} tasks created` };
+    } catch (err: any) {
+      return { success: false, error: err.message || "Planning failed" };
+    }
+  }
+}
+
+In this pseudo-code, coordinator.createTask would instantiate a Task object, and coordinator.assignTask would assign it to an agent (perhaps by publishing an event or directly calling that agent). We’ll define AgentCoordinator next. The above just demonstrates how an agent might interact with the coordinator to orchestrate further work. In a real scenario, the Planner might use an LLM to produce a detailed plan (list of steps), but we keep it simple here.
+
+AgentCoordinator and Orchestration Logic
+
+The AgentCoordinator is effectively the conductor of the MAS orchestra. It holds references to all agents, manages the task queue, tracks the shared state, and enforces policies like retries or timeouts. A possible design is for the coordinator to maintain two structures: a task queue (for pending tasks) and an active tasks map (for tasks currently being worked on by agents). It also can maintain a shared context/state object which agents can read or update (if needed), although often state updates can just come through task results.
+
+Here’s a high-level sketch of an AgentCoordinator:
+
+class AgentCoordinator {
+  private agents: { [name: string]: Agent } = {};
+  private eventBus: EventBus;
+  private tasks: Map<string, Task> = new Map();  // track all tasks by ID
+
+  constructor(eventBus: EventBus) {
+    this.eventBus = eventBus;
+    // subscribe to events of interest, e.g., task completions
+    eventBus.subscribe("TASK_COMPLETED", this.onTaskCompleted.bind(this));
+    eventBus.subscribe("TASK_FAILED", this.onTaskFailed.bind(this));
+  }
+
+  registerAgent(agent: Agent) {
+    this.agents[agent.name] = agent;
+  }
+
+  createTask(type: string, input: any): Task {
+    const task = new Task(type, input);
+    this.tasks.set(task.id, task);
+    return task;
+  }
+
+  assignTask(task: Task, agentName: string) {
+    const agent = this.agents[agentName];
+    if (!agent) throw new Error(`No agent named ${agentName} registered`);
+    task.status = TaskStatus.Running;
+    task.attempt++;
+    // Execute the task asynchronously
+    agent.perform(task, this)
+      .then(response => {
+        if (response.success) {
+          task.status = TaskStatus.Success;
+          task.result = response.output;
+          this.eventBus.publish("TASK_COMPLETED", { task });
+        } else {
+          throw new Error(response.error || "Unknown agent error");
+        }
+      })
+      .catch(err => {
+        task.status = TaskStatus.Failed;
+        task.error = err.message;
+        this.eventBus.publish("TASK_FAILED", { task });
+      });
+  }
+
+  private onTaskCompleted(payload: { task: Task }) {
+    const task = payload.task;
+    console.log(`Task ${task.id} (${task.type}) completed by agent, result:`, task.result);
+    // Here we can decide what to do next, e.g., if this was a subtask, maybe mark parent task as done, etc.
+    // In a linear pipeline, you might trigger the next agent here.
+  }
+
+  private onTaskFailed(payload: { task: Task }) {
+    const task = payload.task;
+    console.warn(`Task ${task.id} failed: ${task.error}`);
+    // Implement retry or fallback logic:
+    if (task.attempt < 3) {
+      console.log(`Retrying task ${task.id} (attempt ${task.attempt + 1})`);
+      task.status = TaskStatus.Pending;
+      // perhaps reset some state if needed
+      this.assignTask(task, /* agentName */ determineAgentForRetry(task));
+    } else {
+      console.error(`Task ${task.id} failed after 3 attempts, aborting.`);
+      task.status = TaskStatus.Aborted;
+      // possibly notify a human or log permanently
+    }
+  }
+}
+
+In this code, assignTask is a core method that takes a Task and an agent name, marks the task running, and calls the agent’s perform. We immediately attach .then and .catch to handle success or failure. On success, we publish a "TASK_COMPLETED" event; on failure (throw), we publish "TASK_FAILED". The coordinator subscribed to those events in the constructor, so onTaskCompleted or onTaskFailed will be called accordingly.
+
+In onTaskFailed, we implemented a simple retry policy: up to 3 attempts. We could enhance determineAgentForRetry(task) to possibly switch the agent on retry. For example, if task.type == "CodeGeneration" and the Developer agent failed, maybe try a different Developer variant (if available) on the second attempt. Or simply use the same agent by default. The logic could also escalate: after 3 fails by AI agents, the coordinator might send a notification to the user that the task couldn’t be completed.
+
+Timeout Implementation: Where do timeouts fit in? We could integrate a timeout in the assignTask call. One approach is to use Promise.race as mentioned. For example:
+
+assignTask(task: Task, agentName: string, timeoutMs = 30000) {
+  // ... (setup code as above)
+  const agentPromise = agent.perform(task, this);
+  const timeoutPromise = new Promise<AgentResponse>((_, reject) => {
+    setTimeout(() => reject(new Error("Timed out")), timeoutMs);
+  });
+  Promise.race([agentPromise, timeoutPromise])
+    .then(res => {
+      // same success handling
+    })
+    .catch(err => {
+      // if timed out or agent threw, handle as failure
+    });
+}
+
+However, if the agent internally isn’t aware of the timeout, it might keep doing work (there’s no straightforward way to kill a running promise without cooperation). In a multi-threaded system you might cancel the thread, but in Node, if the agent is just awaiting an HTTP call, we could abort the HTTP request via an AbortController. In our design, if an agent is an LLM call, using an AbortController and passing a signal to the request would allow us to cancel it on timeout. So ideally, the Agent.perform method should accept an AbortSignal or be designed to check coordinator for cancellation. For simplicity, our example will assume agents either finish or throw.
+
+Maintaining Shared State: The coordinator can also hold a central state object (e.g., the current code base or project data structure) that agents read from or write to. For example, after the Developer agent completes code generation (TaskSuccess), the coordinator could update a projectFiles map with the new code. The Reviewer agent, when triggered, will then use that updated state as input (instead of relying solely on the direct output of the Developer). This central state can be as simple as a dictionary of file contents or as elaborate as a version-controlled repository. An advantage of a central state is that it avoids needing to pass large context through events – agents can just reference the coordinator’s state. The downside is you must ensure consistency (e.g., using locks if multiple agents write concurrently). In a single-threaded Node environment, if writes are done in event handlers, they are sequential by nature (event handlers won’t preempt each other). But if you had agents in worker threads, you’d need a thread-safe state (or more likely, have each agent process handle its own piece and send messages back to a main process to update state).
+
+Orchestrating Linear Flow vs. Dynamic: Our coordinator example is event-driven (reacts to task completion events). We can implement a linear pipeline on top of this by chaining tasks. For instance, suppose we want a fixed sequence: Planner -> Developer -> Reviewer -> Tester -> Documenter. We could do:
+
+// Pseudo-code for orchestrating linear sequence
+const planTask = coordinator.createTask("Planning", userRequest);
+coordinator.assignTask(planTask, "Planner");
+// In onTaskCompleted:
+if (task.type === "Planning" && task.status === TaskStatus.Success) {
+    const devTask = coordinator.createTask("CodeGeneration", {plan: task.result});
+    coordinator.assignTask(devTask, "Developer");
+}
+if (task.type === "CodeGeneration" && task.status === TaskStatus.Success) {
+    const revTask = coordinator.createTask("CodeReview", { code: task.result });
+    coordinator.assignTask(revTask, "Reviewer");
+}
+// ... and so on for Tester, Documenter.
+
+This sequential triggering can be done either in code as shown (checking task types on completion), or using events (subscribe the next agent to an event specific to the previous step’s completion). AutoGen’s sequential pattern actually uses pub/sub where “each agent publishes its output to the next agent’s topic” . For example, Developer might publish to ReviewerAgent topic, which the Reviewer subscribes to, etc. We could emulate that by having the coordinator publish events like "Planning:done" with data, and have internal handlers or the EventBus routing that to the next agent.
+
+Example: Using EventBus for Orchestration. Instead of direct function calls in onTaskCompleted, we could do:
+
+eventBus.subscribe("Planning:done", (payload) => {
+  const plan = payload.plan;
+  const devTask = coordinator.createTask("CodeGeneration", { plan });
+  coordinator.assignTask(devTask, "Developer");
+});
+eventBus.subscribe("CodeGeneration:done", (payload) => {
+  const code = payload.code;
+  const revTask = coordinator.createTask("CodeReview", { code });
+  coordinator.assignTask(revTask, "Reviewer");
+});
+
+And in the PlannerAgent, after planning, it would do something like: coordinator.eventBus.publish("Planning:done", { plan: ... }). This decouples the agents even more – the Planner doesn’t need to know who comes next, it just signals completion. This is very event-driven linear flow (a series of events triggers).
+
+Parallel Orchestration with EventBus: For parallel tasks, the coordinator can publish multiple events without waiting. For example, the Planner could generate two subtasks and do:
+
+coordinator.assignTask(task1, "Developer");
+coordinator.assignTask(task2, "Developer");
+// Both tasks run concurrently (if the Developer agent can handle it, or maybe assign to two different Developer agents if available).
+
+If we have distinct agents (say one Developer specialized in backend, one in frontend), Planner might assign tasks accordingly in parallel. The EventBus isn’t strictly required for concurrency – you can simply fire off multiple assignTask calls – but if agents are in different processes or machines, an event/message bus is essential to distribute tasks.
+
+Testing the MAS Orchestration
+
+To ensure the system works and is robust, we should write unit tests and integration tests for our coordinator and agents. Testing a multi-agent system can be tricky, but using mocks and simulated scenarios helps.
+
+Mock Agents: One strategy is to create dummy Agent implementations that have predictable behavior. For example, a MockDeveloper agent that returns success with a fixed code output (or fails intentionally), so we can test how the coordinator handles it. We might do:
+
+class MockAgent implements Agent {
+  name: string;
+  respondWith: AgentResponse;
+  delay: number;
+  constructor(name: string, respondWith: AgentResponse, delay = 0) {
+    this.name = name;
+    this.respondWith = respondWith;
+    this.delay = delay;
+  }
+  async perform(task: Task): Promise<AgentResponse> {
+    if (this.delay) await new Promise(res => setTimeout(res, this.delay));
+    return this.respondWith;
+  }
+}
+
+This MockAgent can be configured to either succeed or fail. In a test, we could do:
+
+it("retries a failed task up to 3 times", async () => {
+  const failingAgent = new MockAgent("Developer", { success: false, error: "oops" });
+  const coordinator = new AgentCoordinator(new EventBus());
+  coordinator.registerAgent(failingAgent);
+  const task = coordinator.createTask("CodeGeneration", { spec: "do X" });
+  coordinator.assignTask(task, "Developer");
+  await new Promise(res => setTimeout(res, 100)); // wait a bit for async retries
+  expect(task.status).toBe(TaskStatus.Aborted);
+  expect(task.attempt).toBe(3);
+  expect(task.error).toBe("oops");
+});
+
+This test ensures that if the Developer agent keeps failing, after 3 tries the coordinator aborts the task. We could also test a success on retry by making the mock agent fail the first time and succeed the second. For example, we could increment a counter inside a custom MockAgent that returns failure on first call, success on second.
+
+Simulating Timeouts: To test timeouts, we can have a mock agent that simply await new Promise(() => {}) (never resolves) or waits longer than the timeout. Then verify that the coordinator marks it failed with a timeout error after the specified time. We’d adjust the coordinator to handle the timeout rejection message.
+
+Event Order and Concurrency Testing: We should ensure that events come in expected order. For a parallel scenario, you might want to test that two tasks running concurrently both complete and then a dependent task starts. This can be done by using mock agents with different delays and checking timestamps or order of log messages.
+
+Because our system is asynchronous, writing deterministic tests might require injecting some scheduling control (or simply designing tests that wait for conditions rather than exact ordering). Using the EventBus, we could also spy on events to ensure the right events are published.
+
+Integration Test Example: A pseudo-integration test could involve real instances of simple agents (maybe calling a trivial function instead of an actual LLM). For example:
+	•	PlannerAgent that splits a request.
+	•	DeveloperAgent that returns a canned code for any spec.
+	•	ReviewerAgent that always says “LGTM” (or maybe checks if the code contains a certain keyword).
+	•	Coordinator orchestrating sequentially.
+
+Then feed a high-level request and assert that at the end, DocumenterAgent produced docs, etc., and no errors occurred.
+
+Integration tests can also simulate edge cases like one agent producing bad output – e.g., Developer outputs code with a bug, and Tester agent catches it (if we had a simple lint as test), then see if Reviewer maybe gets triggered to review changes.
+
+The key is that by designing each component with clear input/output and using events, we can test them in isolation. For instance, test EventBus by subscribing and publishing events; test Task and status transitions; test AgentCoordinator’s logic by injecting dummy agents and ensuring it retries and sequences tasks correctly.
+
+Addressing Latency, Rollback, and Audit Trail
+
+When deploying the MAS in a real-world setting (like a VS Code extension), a few practical challenges arise: varying latency of agents (especially those calling remote APIs), the need for rollback of changes if something goes wrong, isolating failures, and keeping an audit log for transparency.
+
+Latency and Asynchrony: Agents will have different execution times (an LLM call to generate code might take 5-10 seconds, running test cases might take several seconds, documenting could be quick, etc.). The orchestration should be largely asynchronous to handle this efficiently – which we have achieved with the event-driven model. No agent should block the main thread. Using Node’s event loop and promises means other events (like UI interactions or other tasks) can be processed while an agent is running. If some agents are particularly slow or use external services, consider parallelizing within the agent if possible. For example, a Tester agent might run multiple test files in parallel (using Node worker threads or child processes) and then combine results. The coordinator could spawn multiple tasks for tests in parallel if they are independent. The system should also provide feedback to the user about progress: e.g., a status that “Developer is writing code (10s elapsed)…”. Implementing progress events or streaming (discussed next) can alleviate the user’s wait by providing incremental output.
+
+Streaming Outputs: Often LLM agents support streaming token-by-token output. Jarvis-IDE should integrate streaming so that, for example, as the Developer agent generates code, it appears gradually in the editor. To support streaming in MAS, the agent’s perform method can emit partial results. This could be done by the agent directly publishing events like "task:update" with a chunk of output. Alternatively, design Agent.perform to return an AsyncIterable or use callbacks. For instance, DeveloperAgent could accept a callback to call with each new line of code generated. The coordinator/EventBus then relays these to the UI. Streaming complicates the interface a bit but improves responsiveness. The Model Context Protocol (MCP) mentioned in the context likely defines how our local system interacts with model APIs; ensuring MCP supports streaming tokens is important. Concretely, if using OpenAI API with streaming, the Developer agent would open a stream and on each chunk, do something like coordinator.eventBus.publish("CodeGeneration:stream", { taskId, partialCode: chunk }). The UI listening on that event can update the editor in real-time. We must also handle the case where a stream is aborted (user clicks cancel): the coordinator should signal the agent to stop (via AbortController, as discussed).
+
+Rollback Mechanisms: If an agent’s action leads to an invalid or harmful state, we want to rollback. For example, Developer writes code that ends up breaking existing functionality. In an automated scenario, the Tester agent might catch failures. How do we rollback? One approach is version control integration: Jarvis-IDE could integrate with git and commit after each major step, then if something fails later, do a git revert to the last good commit. Barring that, simpler: keep copies of files before an agent changes them. For instance, Coordinator can store a prevContent for each file modified by Developer; if tests fail badly, maybe restore the old content (and perhaps inform the agents or user of this rollback). This is tricky if multiple files changed – which do we rollback? possibly all related to that task. A sophisticated strategy is needed if partial rollback is required. Alternatively, instead of automatic rollback, mark the state and let the Planner or another agent decide how to correct the course (e.g., fix bugs rather than undo code). In any case, designing the system with statelessness or reversible state in mind is helpful. Using a temporary workspace or branches for generation is one idea: generate code in a sandbox, test there, and only merge to main project if tests pass.
+
+Isolation of Failures: To ensure one agent’s failure doesn’t crash the entire extension, run agents in isolation when appropriate. If an agent is purely an API call (like to an LLM), the worst it can do is throw an exception or return bad output – which our coordinator already catches. But if an agent runs arbitrary code (like executing user code for tests), this can be dangerous (it might hang or even crash the process with a fatal error). In such cases, it’s wise to run the agent in a separate process. For example, the Tester agent could spawn a child process to run the tests, capturing the output. If it hangs or crashes, the main process remains unaffected, and we can kill the child process on timeout. This kind of isolation is similar to how TaskWeaver “runs code inside a sandbox environment to prevent malicious code execution” . In Node, using Worker Threads or an external test runner process can achieve this. The trade-off is complexity in communication (you now need IPC between the coordinator and that process, which could still be done via events or messaging).
+
+Audit Trail and Agent Traces: For debugging and transparency, maintain a detailed log of agent activities. This includes: when each task was created, which agent was assigned, when it completed or failed, and any outputs or errors. The log can be in memory (and shown in a panel in the UI) and also persisted to disk for later analysis. Each entry should have the taskId and agent name, a timestamp, event type (e.g., “TASK_COMPLETED”), and perhaps a summary of content (like “Reviewer: marked 2 issues in function X”). Having an event log also helps in unit testing (we can assert that certain sequences of events occurred). We saw earlier that TaskWeaver emphasizes being “easy to debug” with “detailed logs, metrics, and traces (using OpenTelemetry)” . We may not need something as heavy as OpenTelemetry for Jarvis-IDE, but adopting a structured logging format (JSON lines or similar) with trace ids (task IDs) is a good practice. Additionally, enabling a verbose mode can let developers inspect the prompts sent to LLMs and the responses, to fine-tune agent behavior.
+
+Visualization: As a bonus, since this runs in VS Code, one could visualize the agent workflow (perhaps a tree of tasks or a timeline of events). This is not just cosmetic – it can aid in understanding performance bottlenecks (e.g., seeing that the Developer took 5x longer than other agents, or that the Reviewer was waiting on Developer). Tools or simple webview components could replay the event log as a sequence diagram or Gantt chart.
+
+Self-Adaptive Agents and Learning from Experience
+
+A cutting-edge aspect of MAS design is making agents self-aware and adaptive. By “self-aware” we mean the agents have some memory of past actions and can adjust their strategy based on outcomes. In Jarvis-IDE’s context, this could manifest as follows:
+	•	Dynamic Context Updates: Agents should update their internal context after each task. For example, the Planner agent, after seeing that a particular plan led to a failure, could remember that and avoid the same strategy next time. It might refine its planning prompt or break tasks differently. A Developer agent could note that “the last time I tried approach X, the Reviewer didn’t approve; I will try approach Y now.”
+	•	Memory Mechanisms: To enable the above, integrate memory components. This can range from simple in-memory objects to more sophisticated vector databases for semantic memory. Frameworks like CrewAI provide “short-term, long-term, entity, and contextual memory” to help agents “remember, reason, and learn from past interactions” . For Jarvis-IDE, a short-term memory might be the conversation history or past attempts in the current session (like what code has been written and changed). Long-term memory could be stored knowledge of the project or past projects. For instance, a Developer agent could retrieve code snippets or solutions that were used successfully in similar situations (this could tie into a knowledge base of best practices or a library of code templates). An agentWithMemory pattern means an agent’s prompt for an LLM might include not only the immediate task but also some distilled info from previous tasks.
+	•	Learning from Failures (Reflexion): One powerful pattern observed in research is the reflection or critique loop  . We briefly touched on it: a Developer (Coder) and Reviewer can engage in a loop where the Reviewer critiques the output and the Developer tries to improve it until it’s satisfactory . This is a form of multi-agent self-improvement. Another approach is a single agent reflecting on its own output (maybe after the fact). For example, after completing a coding task, the Developer agent could have a “self-review” phase where it checks its code (perhaps running a static analyzer internally, or simply re-reading the instructions to see if it missed something). AutoGen includes a Reflection pattern where one generation is followed by a critique generation  – we can leverage that by having our agents occasionally switch roles or prompt themselves for critique. A Documenter agent, for instance, might review whether the documentation covers all functions, and if not, send a note back to Developer to add missing parts.
+	•	Planner Replanning: A Planner agent can be made adaptive by allowing it to replan when the context changes. If during execution new requirements emerge or an agent reports an unexpected obstacle, the Planner could insert a new task or change the task order. This can be facilitated by the Coordinator: e.g., if a critical task fails and no straightforward retry/fallback worked, the coordinator might call plannerAgent.perform(new Task("Replan", {...current state...})). The Planner could then output something like: “Previous approach failed due to X, so now try Y,” possibly creating new tasks for agents. This kind of self-reorganization is advanced but aligns with how humans manage projects (if a step fails, re-think the approach).
+	•	Meta-Reasoning Agent: One design is to include a special agent whose job is to monitor and guide others – sometimes called a “Manager” or “Critic” agent. CrewAI’s hierarchical mode implicitly creates a manager agent that “evaluates outcomes to ensure they meet required standards” and asks agents for further improvement if needed . In Jarvis-IDE, we might integrate a simple Critic agent that observes the conversation or the final outputs (maybe after Reviewer and Tester) and says “Yes, this is good” or “No, we didn’t actually solve the problem.” This feedback could trigger another iteration or alert the user. Over time, the Critic could learn from its mistakes too (perhaps fine-tuned or via rules).
+	•	Tool Learning: Since Jarvis-IDE may use external tools (for example, analysis tools or databases of context via MCP), agents can learn which tools are effective. If the Developer agent finds that using an API documentation lookup tool helps avoid errors, it might incorporate that more often. This can be encoded as heuristic or even an internal reinforcement learning loop (though online learning in a VS Code extension might be overkill and risk unpredictable behavior – perhaps better to update models offline).
+
+In practice, enabling self-learning requires capturing outcomes and feeding back into the agent’s knowledge. This could mean updating prompt templates or using a mechanism to store “lessons.” One lightweight approach: maintain a “session memory” for each agent in the coordinator. For example, coordinator could have agentMemories: { [agentName: string]: any }. Initially empty or preloaded with some defaults, and after each task, we update it. E.g., agentMemories["Reviewer"].lastReviewQuality = ... or agentMemories["Developer"].commonMistakesFound.push("missed edge case X"). Then before each new task, the coordinator (or the agent’s perform method) can incorporate that memory into the task input context. For instance, when calling DeveloperAgent.perform, we might do:
+
+let prompt = task.input.spec;
+if (this.coordinator.agentMemories[this.name]?.commonMistakesFound) {
+   prompt += "\nNote: Avoid these mistakes: " + this.coordinator.agentMemories[this.name].commonMistakesFound.join(", ");
+}
+
+This way the agent is reminded of past issues. Over time, this list could grow, so it might need pruning or generalization (learning general rules, not just specific mistakes).
+
+Conclusion & Recommendations: Building Jarvis-IDE’s multi-agent orchestrator will involve iterative refinement. Start with a clear linear pipeline to get a baseline working (Planner → Developer → Reviewer → Tester → Documenter). Ensure the core infrastructure (tasks, events, coordinator) works in this simple flow with proper error handling. Then, gradually introduce more event-driven behavior where beneficial – e.g. allow Reviewer and Tester to work in parallel, or allow multiple Developer tasks concurrently for different modules. Implement the safety nets: timeouts for each external call, retry with informative feedback, and fallback plans for critical failures. Use logging and events liberally – they are your window into this complex asynchronous world (an audit trail of all agent decisions is invaluable for debugging and improving prompts). Citing a real-world analogy, treat the MAS like a microservices system: each agent is a service, the coordinator is orchestrating calls, and events are the message bus – all the hard-earned lessons from distributed systems (like circuit breakers, retries, idempotency, logging, monitoring) apply here as well.
+
+By following known architectures (AutoGen’s conversation patterns, CrewAI’s role delegation, LangGraph’s state graphs) and implementing the patterns discussed (streaming, abort, retry, memory, etc.), Jarvis-IDE can achieve a highly extensible MAS. You’ll be able to add new agent types (say, a SecurityAnalyzer agent to check for vulnerabilities) without changing the whole framework – just register it and have it subscribe to relevant events. Moreover, the system will be resilient: if one agent crashes or goes offline, the coordinator remains up and can either retry or gracefully degrade functionality. Finally, as the agents run on developers’ machines (Node.js locally), efficiency is important – keep agents lightweight when possible (some might share a single LLM instance via MCP to avoid redundant loads) and use the event loop to handle concurrency rather than spawning too many threads.
+
+With this design, Jarvis-IDE’s agents will collaboratively turn high-level intentions into working code, and do so in a way that’s robust against errors and adapts over time. By logging everything and learning from each run, the system itself can be continually improved – perhaps one day achieving a level of autonomy where it debugs and optimizes its own strategies. For now, you have a blueprint to implement and iterate on, with a balance of proven patterns and tailored solutions for your VS Code environment. Good luck, and happy coding with your new AI teammates!
+
+Sources:
+	•	Flowise documentation on multi-agent sequential vs. parallel workflows  
+	•	Microsoft AutoGen framework – sequential and concurrent agent patterns  
+	•	CrewAI open-source framework – role-based collaboration, hierarchical manager, and memory features  
+	•	TaskWeaver (Microsoft) – code-first agent framework emphasizing logging and safe code execution  
+	•	Research on MAS orchestration – dynamic replanning and compensating actions for robust workflows  

@@ -2,7 +2,7 @@
  * @file webview.ts - File di compatibilità per il tipo WebviewMessage
  * @description Questo file esporta le definizioni dal file centralizzato di tipi
  */
-import type { WebviewMessage as GenericWebviewMessage } from '../types/webview.types.js';
+import { WebviewMessage as GenericWebviewMessage } from '../types/webview.types.js';
 export type WebviewMessage<T = any> = GenericWebviewMessage<T>;
 export type WebviewMessagePayload<T = any> = T;
 export type WebviewSettings = import('../types/webview.types').WebviewSettings;

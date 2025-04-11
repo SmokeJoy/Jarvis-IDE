@@ -1,5 +1,5 @@
 import React from 'react'
-import type { TaskQueueState, AgentStatus, Task } from '../../shared/types.js'
+import { TaskQueueState, AgentStatus, Task } from '../../shared/types.js'
 import { TaskTable } from './TaskTable.js'
 
 interface TaskQueueViewProps {

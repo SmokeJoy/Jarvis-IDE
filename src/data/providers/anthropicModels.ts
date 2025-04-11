@@ -4,7 +4,7 @@
  * Fornisce un elenco completo dei modelli Anthropic supportati
  */
 
-import type { OpenAiCompatibleModelInfo } from "../../shared/types/api.types.js";
+import { OpenAiCompatibleModelInfo } from "../../shared/types/api.types.js";
 
 /**
  * Elenco statico dei modelli Anthropic disponibili

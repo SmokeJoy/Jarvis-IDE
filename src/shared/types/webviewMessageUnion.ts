@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 
-import type { 
+import { 
   WebviewMessage,
   WebviewMessageType,
   SendPromptMessage,

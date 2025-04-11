@@ -1,3 +1,3 @@
-import type { ChatCompletionMessageParam } from "openai"
+import { ChatCompletionMessageParam } from "openai"
 import { logger } from "../../utils/logger.js"
 // ... existing code ... 

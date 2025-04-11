@@ -1,0 +1,77 @@
+## 📬 Comunicazione interna – Correzione Errori e Refactor Tecnico
+
+Cari colleghi,
+
+a seguito della revisione completa degli errori TypeScript e architetturali emersi nella nostra repository [`Jarvis-IDE`](https://github.com/SmokeJoy/Jarvis-IDE), vi invio questa lettera integrativa contenente:
+
+- Un **riepilogo delle problematiche critiche**
+- Le **azioni richieste a ciascuno**
+- I **vincoli progettuali da rispettare**
+- E il supporto previsto da parte del Supervisore AI
+
+---
+
+### 🧱 1. Priorità assoluta – Eradicare gli errori TypeScript
+
+Sono presenti numerosi errori `TS7006`, `TS1361`, `TS18048`, `TS2532`, `TS2430`, e altri legati a:
+- Parametri senza tipo (`any`)
+- Proprietà `undefined` non gestite
+- Moduli importati senza essere esportati correttamente
+- Unioni di tipi incompatibili (`ExtensionMessage`, `ModelInfo`, `ChatMessage`, ecc.)
+
+> 🎯 Obiettivo: portare la compilazione a **zero errori in modalità `strict`** entro il prossimo ciclo di revisione.
+
+---
+
+### 🧪 2. Test – Ricostruzione della robustezza
+
+Diversi test Jest/React Testing Library falliscono o non coprono le nuove logiche.  
+È richiesto:
+
+- Mock coerente di `vscode.postMessage` e `addEventListener`
+- Tipizzazione precisa nei file `*.test.tsx`
+- Uso dei type guard personalizzati dove servono
+
+> 🎯 Obiettivo: copertura minima 90% per moduli logici, con test ripetibili e chiari.
+
+---
+
+### 🧩 3. Refactor strutturale
+
+Si richiede la riorganizzazione di alcuni moduli per:
+
+- Consolidare tipi duplicati in `shared/types/common.ts`
+- Introdurre un modulo `webviewMessageUnion.ts` per i messaggi tipizzati
+- Valutare l’uso di un hook centralizzato `usePostMessage<T>()` nei componenti React
+
+> ⚠️ Ogni nuova cartella o file deve essere **documentato in `docs/architecture/struttura-progetto.md`**.
+
+---
+
+### 🧠 4. Regole progettuali da seguire
+
+Ricordiamo che:
+
+- ❌ È **vietato usare `any`, `as`, o `TODO` lasciati nel main**
+- 📘 Ogni modifica **va registrata nel proprio logbook** (`docs/logbook/sviluppatore-ai-X.md`)
+- 🧠 In caso di dubbio, è **obbligatorio coinvolgere il GPT specialista React/TypeScript**, non improvvisare
+
+---
+
+### ✅ 5. Prossimi passi
+
+Vi invito a:
+
+- Scaricare la **roadmap errori** fornita dal Supervisore AI
+- Aprire issue o branch specifici seguendo la checklist fornita
+- Coordinarsi per eventuali refactor condivisi (es. `JarvisProvider.ts`, `ExtensionMessage.ts`, ecc.)
+
+---
+
+💬 Per qualsiasi domanda tecnica, potete contattare il Supervisore AI o usare il canale GPT interno (via prompt "Scrivi una lettera ai GPT specialisti React/TS").
+
+Grazie per il vostro contributo costante alla solidità del progetto.
+
+🛠 Continuiamo a rendere Jarvis-IDE uno strumento robusto, estensibile e guidato dall’intelligenza.
+
+— Sviluppatore AI (1)

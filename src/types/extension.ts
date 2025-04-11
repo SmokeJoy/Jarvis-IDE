@@ -1,6 +1,6 @@
-import type { ChatCompletionMessageParam } from "../types/provider-types/openai-types.js"
-import type { ApiConfiguration } from "./global.js"
-import type { 
+import { ChatCompletionMessageParam } from "../types/provider-types/openai-types.js"
+import { ApiConfiguration } from "./global.js"
+import { 
   AnthropicContentBlock, 
   AnthropicTextBlock, 
   AnthropicImageBlock, 
@@ -8,8 +8,8 @@ import type {
   AnthropicToolResultBlock,
   AnthropicMessage
 } from "./provider-types/anthropic-types.js"
-import type { WebviewMessage } from '../shared/types/webview.types.js'
-import type { ConfigModelInfo } from './models.js'
+import { WebviewMessage } from '../shared/types/webview.types.js'
+import { ConfigModelInfo } from './models.js'
 
 export type ContentBlock = AnthropicContentBlock
 export type TextBlock = AnthropicTextBlock

@@ -5,8 +5,8 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { ReliabilityFallbackStrategy } from '../ReliabilityFallbackStrategy';
-import type { LLMProviderHandler } from '../../../../providers/provider-registry-stub';
-import type { ProviderStats } from '../../LLMFallbackManager';
+import { LLMProviderHandler } from '../../../../providers/provider-registry-stub';
+import { ProviderStats } from '../../LLMFallbackManager';
 
 describe('ReliabilityFallbackStrategy', () => {
   // Crea provider di test

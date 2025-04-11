@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import type { sanitizeExportObject, extractSanitizeOptions } from '../sanitize.js';
-import type { ExportOptions } from '../types.js';
+import { sanitizeExportObject, extractSanitizeOptions } from '../sanitize.js';
+import { ExportOptions } from '../types.js';
 
 describe('sanitizeExportObject', () => {
   describe('Gestione valori base', () => {

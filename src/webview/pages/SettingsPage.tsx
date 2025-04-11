@@ -3,8 +3,28 @@ import { Switch } from '../components/ui/switch.js';
 import { Textarea } from '../components/ui/textarea.js';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select.js';
 import { getVsCodeApi } from '../vscode.js';
-import type { WebviewMessage } from '../../shared/WebviewMessage.js';
+import { WebviewMessage } from '../../shared/WebviewMessage.js';
 import { SystemPromptEditor } from '../components/SystemPromptEditor.js';
+
+interface Settings {
+  use_docs: boolean;
+  coder_mode: boolean;
+  contextPrompt: string;
+  selectedModel: string;
+  multi_agent: boolean;
+  availableModels?: string[];
+}
+
+interface SettingsLoadedMessage extends WebviewMessage {
+  type: 'settingsLoaded';
+  settings: Settings;
+}
+
+interface SettingUpdatedMessage extends WebviewMessage {
+  type: 'settingUpdated';
+  key: keyof Settings;
+  value: boolean | string;
+}
 
 const vscode = getVsCodeApi();
 
@@ -24,7 +44,7 @@ export const SettingsPage: React.FC = () => {
 
     // Configura il listener per i messaggi dal backend
     const handleMessage = (event: MessageEvent) => {
-      const message = event.data as WebviewMessage;
+      const message = event.data as SettingsLoadedMessage | SettingUpdatedMessage;
       
       if (message.type === 'settingsLoaded') {
         setUseDocs(message.settings.use_docs);
@@ -68,13 +88,13 @@ export const SettingsPage: React.FC = () => {
     };
   }, []);
 
-  const handleSettingChange = (key: string, value: any) => {
+  const handleSettingChange = (key: keyof Settings, value: boolean | string) => {
     // Invia l'aggiornamento al backend
     vscode.postMessage({
       type: 'updateSetting',
       key,
       value
-    });
+    } as SettingUpdatedMessage);
   };
 
   const handleSaveAll = () => {

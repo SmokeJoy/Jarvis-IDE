@@ -1,8 +1,8 @@
 import * as os from "os"
 import * as path from "path"
 import * as vscode from "vscode"
-import type { ContentBlock, ContentType, isImageBlock, isTextBlock, isToolUseBlock, isToolResultBlock } from "../../types/chat.types.js"
-import type { AnthropicMessage } from "../../types/provider-types/anthropic-types.js"
+import { ContentBlock, ContentType, isImageBlock, isTextBlock, isToolUseBlock, isToolResultBlock } from "../../types/chat.types.js"
+import { AnthropicMessage } from "../../types/provider-types/anthropic-types.js"
 
 export async function downloadTask(dateTs: number, conversationHistory: AnthropicMessage[]) {
 	// File name

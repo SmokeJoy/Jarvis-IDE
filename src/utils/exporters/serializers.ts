@@ -4,7 +4,7 @@
  */
 
 import yaml from 'js-yaml';
-import type { ExportOptions } from './types.js';
+import { ExportOptions } from './types.js';
 
 /**
  * Converte un oggetto in formato YAML

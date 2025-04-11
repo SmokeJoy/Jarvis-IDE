@@ -9,7 +9,7 @@ import * as path from 'path';
 import { Logger } from '../utils/logger.js';
 import { JarvisProvider } from '../core/webview/JarvisProvider.js';
 import { promisify } from 'util';
-import type {
+import {
   exportSession,
   exportSessionToFile,
   importSession,

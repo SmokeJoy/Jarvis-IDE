@@ -1,5 +1,5 @@
-import type { ContextItem } from '../types/ContextItem.js';
-import type { getMemoryContexts } from '../utils/memoryUtils.js';
+import { ContextItem } from '../types/ContextItem.js';
+import { getMemoryContexts } from '../utils/memoryUtils.js';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import * as path from 'path';

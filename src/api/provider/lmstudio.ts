@@ -1,6 +1,6 @@
-import type { ApiProvider, ProviderOptions } from './base.js';
-import type { ChatCompletionOptions, ChatCompletion, LLMProviderId, StreamChunk } from '../../types/global.js';
-import type { ModelInfo } from '../../shared/types/api.types.js';
+import { ApiProvider, ProviderOptions } from './base.js';
+import { ChatCompletionOptions, ChatCompletion, LLMProviderId, StreamChunk } from '../../types/global.js';
+import { ModelInfo } from '../../shared/types/api.types.js';
 import { Logger } from '../../utils/logger.js';
 import * as http from 'http';
 

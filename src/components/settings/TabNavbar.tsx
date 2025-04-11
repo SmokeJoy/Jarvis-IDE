@@ -1,5 +1,5 @@
 import React from 'react';
-import type { TabItem, TabId } from '../../types/tab.js';
+import { TabItem, TabId } from '../../types/tab.js';
 
 interface TabNavbarProps {
   tabs: TabItem[];

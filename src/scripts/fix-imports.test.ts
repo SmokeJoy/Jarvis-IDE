@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { performance } from 'perf_hooks';
-import type { fixImportsInFile, getJsExtensionType, extractModulesFromImports } from './fix-imports.js';
+import { fixImportsInFile, getJsExtensionType, extractModulesFromImports } from './fix-imports.js';
 
 // Mock delle funzioni di fs
 jest.mock('fs', () => ({

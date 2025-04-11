@@ -2,9 +2,9 @@
 import * as vscode from "vscode";
 import * as fs from "fs/promises";
 import * as path from "path";
-import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
+import { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
 import { search } from '../../../integrations/documentation/searchAdapter.js';
-import type { SearchDocsArgs } from '../mcp.types.js';
+import { SearchDocsArgs } from '../mcp.types.js';
 
 // Mock di vscode per ambienti non-VS Code
 const mockVscode = {

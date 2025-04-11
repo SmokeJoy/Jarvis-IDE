@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { 
+import { 
   importFromString, 
   importFromBuffer, 
   detectFormatFromExtension,

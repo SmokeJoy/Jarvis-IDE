@@ -1,4 +1,4 @@
-import type { ChatCompletionOptions } from "openai/resources/chat/completions.mjs"
+import { ChatCompletionOptions } from "openai/resources/chat/completions.mjs"
 
 declare module "openai/resources/chat/completions.mjs" {
   interface ChatCompletionOptions {

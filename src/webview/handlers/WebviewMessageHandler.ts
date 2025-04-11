@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import type { WebviewMessage } from '../../shared/types/webview.types.js';
-import type { WebviewMessageUnion } from '../../shared/types/webviewMessageUnion.js';
+import { WebviewMessage } from '../../shared/types/webview.types.js';
+import { WebviewMessageUnion } from '../../shared/types/webviewMessageUnion.js';
 import { WebviewMessageType } from '../../shared/types/webview.types.js';
 
 /**

@@ -1,6 +1,6 @@
-import type { Content, EnhancedGenerateContentResponse, InlineDataPart, Part, TextPart } from "@google/generative-ai"
+import { Content, EnhancedGenerateContentResponse, InlineDataPart, Part, TextPart } from "@google/generative-ai"
 import { logger } from "../../utils/logger.js"
-import type { 
+import { 
 	ChatMessage, 
 	ContentBlock, 
 	TextBlock, 
@@ -9,7 +9,7 @@ import type {
 	isTextBlock, 
 	isImageBlock 
 } from '../../types/chat.types.js';
-import type {
+import {
 	AnthropicMessage,
 	AnthropicContentBlock,
 	AnthropicMessageResponse,

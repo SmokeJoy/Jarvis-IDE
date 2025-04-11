@@ -3,7 +3,7 @@
  * https://docs.mistral.ai/api/
  */
 
-import type { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js';
+import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js';
 
 interface MistralChatRequest {
   model: string;

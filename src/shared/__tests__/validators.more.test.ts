@@ -3,8 +3,8 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as validators from '../validators.js';
-import type { ChatMessage } from '../types/index.js';
-import type { ChatSettings, ApiConfiguration } from '../../types/extension.js';
+import { ChatMessage } from '../types/index.js';
+import { ChatSettings, ApiConfiguration } from '../../types/extension.js';
 
 // Mock dei moduli
 vi.mock('../../utils/logger', () => ({

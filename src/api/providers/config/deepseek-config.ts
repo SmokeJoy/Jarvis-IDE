@@ -1,5 +1,5 @@
-import type { ModelInfo } from "../../../shared/types/api.types.js"
-import type { openAiModelInfoSaneDefaults } from "../../../shared/api.js"
+import { ModelInfo } from "../../../shared/types/api.types.js"
+import { openAiModelInfoSaneDefaults } from "../../../shared/api.js"
 
 export interface DeepSeekConfig {
     temperature?: number;

@@ -1,4 +1,4 @@
-import type { WebviewMessage, McpToolCall, ToolResponse } from '@shared/types/messages.js';
+import { WebviewMessage, McpToolCall, ToolResponse } from '@shared/types/messages.js';
 /**
  * Dispatcher per il Model Control Protocol (MCP)
  * Gestisce le chiamate strumentali dei modelli

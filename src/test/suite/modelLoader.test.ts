@@ -1,5 +1,5 @@
 import { describe, expect, test, beforeEach, afterEach, vi } from "vitest";
-import type { loadModels, fetchModelsFromOpenRouter } from '../../data/modelLoader.js'
+import { loadModels, fetchModelsFromOpenRouter } from '../../data/modelLoader.js'
 
 vi.mock("../../data/modelLoader", () => ({
   loadModels: vi.fn(),

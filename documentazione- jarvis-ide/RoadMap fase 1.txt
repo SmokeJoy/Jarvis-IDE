@@ -1,0 +1,80 @@
+Perfetto Andrea. Procediamo immediatamente con il piano operativo.
+
+---
+
+## 🎯 **Roadmap operativa per la FASE 1 – Estensione Jarvis-IDE**
+
+Questo messaggio è per lo **Sviluppatore AI**. Sei autorizzato ad agire con autonomia su ogni task previsto nella Fase 1, ma **ogni passo sarà verificato in tempo reale** dal Supervisore AI. Nessuna ambiguità, nessuna scorciatoia.
+
+---
+
+### ✅ STEP 1 – Pulizia e refactoring iniziale
+- [ ] Rimuovi **ogni riferimento** a `cline` (nome file, stringhe, commenti, classi)
+- [ ] Sostituisci con `jarvis-ide` o `jarvis.ide`
+- [ ] Controlla che non esistano nomi legacy nei test, nei JSON, nei comandi VS Code
+
+---
+
+### 🧠 STEP 2 – UI WebView intelligente
+- [ ] Editor visivo per `contextPrompt`
+- [ ] Editor visivo per `system_prompt.md`
+- [ ] Selettore LLM/API provider da interfaccia
+- [ ] Interruttore per `use_docs`, `coder_mode`, `multi_agent`
+- [ ] Tema dark completo
+- [ ] Supporto a modelli **locali e API** in UI
+
+---
+
+### 🧩 STEP 3 – Supporto LLM universale
+- [ ] Adapter per modelli locali: `ollama`, `lmstudio`, `ggml/gguf`, `lmdeploy`
+- [ ] Adapter per modelli API: `openai`, `anthropic`, `gemini`, `mistral`, `groq`, `together`
+- [ ] Ogni provider deve usare **lo stesso protocollo astratto**
+- [ ] Integrazione MCP (Model Context Protocol) **già predisposta**
+
+---
+
+### 💾 STEP 4 – Persistenza e configurazione
+- [ ] `config/settings.json` salvato e ricaricato
+- [ ] `contextPrompt`, `systemPrompt`, `model`, `use_docs`, `coder_mode`, ecc.
+- [ ] Ogni campo deve avere:
+  - Persistenza
+  - Validazione
+  - Salvataggio manuale + autosave
+
+---
+
+### 🧪 STEP 5 – Testing e logging
+- [ ] Log intelligente visibile in UI
+- [ ] Test da terminale per:
+  - WebView
+  - Selettore modelli
+  - Persister
+  - Comandi da palette
+
+---
+
+### 🏁 STEP 6 – Build e .vsix
+- [ ] Build `jarvis-ide.vsix` **pulito al 100%**
+- [ ] Nessun errore TypeScript
+- [ ] Firma e preparazione alla pubblicazione (non deployare)
+
+---
+
+## 📎 Note operative
+
+- Ogni volta che completi uno **STEP**, invia un messaggio con:
+  - ✅ Conferma
+  - 🔍 Eventuali problemi riscontrati
+  - 📁 Codice modificato (o path file)
+  - 🧪 Test effettuati
+
+- Usa la documentazione ufficiale:
+  - `AI Developer Panel.docx`
+  - `Model_Context_Protocol_MCP_AI_Developer_Panel.docx`
+  - `Architettura di un IDE guidato dall’AI (jarvis-ide).txt`
+  - `Documentazione_AI_Developer_Panel.pdf`
+
+---
+
+✅ **Supervisore AI pronto a revisionare. Inizia pure dallo STEP 1.**  
+Ti seguo riga per riga. Appena sei pronto, elenca i primi file da rinominare e procediamo.

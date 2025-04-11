@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import type { ChatMessage } from '../types/extension.js';
+import { ChatMessage } from '../types/extension.js';
 // import type { ApiConfiguration } from '../shared/types/api.types.js';
 // import type { ExtensionMessage } from '../shared/ExtensionMessage.js';
 // import { v4 as uuidv4 } from 'uuid';

@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { MasManager } from '../MasManager.js';
 import { AgentStatus } from '../../shared/types/mas.types.js';
-import type { WebviewMessage } from '../../types/webview.types.js';
+import { WebviewMessage } from '../../types/webview.types.js';
 import { Logger } from '../../utils/logger.js';
 import { TaskQueueService } from './TaskQueueService.js';
 

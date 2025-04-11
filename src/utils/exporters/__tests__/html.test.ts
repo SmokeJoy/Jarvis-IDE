@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { toHTML } from '../html.js';
-import type { ExportableSession } from '../types.js';
+import { ExportableSession } from '../types.js';
 import { Logger } from '../../logger.js';
 import { toMarkdown } from '../markdown.js';
 

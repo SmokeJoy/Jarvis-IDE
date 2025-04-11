@@ -1,7 +1,7 @@
 import React from 'react'
 import { VSCodeDropdown } from '@vscode/webview-ui-toolkit/react'
-import type { ConfigModelInfo } from '../../types/models.js'
-import type { ApiConfiguration } from '../../types/api.types.js'
+import { ConfigModelInfo } from '../../types/models.js'
+import { ApiConfiguration } from '../../types/api.types.js'
 
 interface OpenRouterModelPickerProps {
   apiConfiguration: ApiConfiguration

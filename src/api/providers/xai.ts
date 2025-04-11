@@ -1,11 +1,11 @@
 import { Anthropic } from "@anthropic-ai/sdk"
 import OpenAI from "openai"
-import type { ApiHandler } from "../.js"
-import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
-import type { XAIModelId, xaiDefaultModelId, xaiModels } from "../../shared/api.js"
+import { ApiHandler } from "../.js"
+import { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
+import { XAIModelId, xaiDefaultModelId, xaiModels } from "../../shared/api.js"
 import { OpenAITransformer } from "../transform/openai-format.js"
 import { ApiStream } from "../transform/stream.js"
-import type { ChatMessage } from "../../types/ChatMessage.js"
+import { ChatMessage } from "../../types/ChatMessage.js"
 
 export class XAIHandler implements ApiHandler {
 	private options: ApiHandlerOptions

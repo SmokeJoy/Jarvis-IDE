@@ -1,4 +1,4 @@
-import type { MASInputMessage, MASOutputMessage } from '../types/mas.types.js';
+import { MASInputMessage, MASOutputMessage } from '../types/mas.types.js';
 
 export interface StrategyHandler {
   id: 'sequential' | 'parallel' | 'fallback-only' | 'stream-first';

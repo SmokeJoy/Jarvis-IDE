@@ -9,7 +9,7 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import { McpToolsServer } from './McpToolsServer.js';
-import type { WebviewMessage } from '../../shared/types/webview.types.js';
+import { WebviewMessage } from '../../shared/types/webview.types.js';
 import { startMcpServer } from './toolsListServer.js';
 
 // Configurazione del server

@@ -63,10 +63,10 @@ export type LLMProviderId =
   | 'litellm'
   | 'asksage'
   | 'sambanova'
-  | 'xai'
-  | 'jarvis-ide'
-  | 'default'
-  | 'zero';
+  | 'mock'
+  | 'mock1'
+  | 'mock2'
+  | 'test';
 
 // Importazioni dei nuovi tipi da api.types.ts
 import { 

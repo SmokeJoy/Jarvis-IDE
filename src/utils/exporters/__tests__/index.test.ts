@@ -6,7 +6,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { exportSession, exportSessionToFile, getFormatExtension, formatExtensions } from '../index.js';
 import { ExportError } from '../types.js';
-import type { ExportableSession } from '../types.js';
+import { ExportableSession } from '../types.js';
 import * as serializers from '../serializers.js';
 import * as sanitize from '../sanitize.js';
 import * as fs from 'fs';

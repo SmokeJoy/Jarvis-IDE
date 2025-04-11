@@ -2,8 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import ReactMarkdown from 'react-markdown';
 import styled from "styled-components";
 import * as vscode from 'vscode-webview';
-import type { BaseMessage, MessageRole } from "../shared/types/message.js";
-import type { ApiConfiguration } from "../shared/types/global.js";
+import { BaseMessage, MessageRole } from "../shared/types/message.js";
+import { ApiConfiguration } from "../shared/types/global.js";
 import { McpView } from "./McpView.js";
 
 const Container = styled.div`
@@ -93,6 +93,27 @@ interface WebviewProps {
   config: ApiConfiguration;
 }
 
+interface ResponseMessage {
+  type: 'response';
+  response: BaseMessage;
+}
+
+interface ChunkMessage {
+  type: 'chunk';
+  chunk: string;
+}
+
+interface ErrorMessage {
+  type: 'error';
+  error: string;
+}
+
+interface McpConnectionMessage {
+  type: 'mcpConnected' | 'mcpDisconnected';
+}
+
+type WebviewMessage = ResponseMessage | ChunkMessage | ErrorMessage | McpConnectionMessage;
+
 export function Webview({ config }: WebviewProps) {
   const [messages, setMessages] = useState<BaseMessage[]>([]);
   const [input, setInput] = useState("");
@@ -101,7 +122,7 @@ export function Webview({ config }: WebviewProps) {
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      const message = event.data;
+      const message = event.data as WebviewMessage;
       switch (message.type) {
         case "response":
           setMessages((prev) => [...prev, message.response]);

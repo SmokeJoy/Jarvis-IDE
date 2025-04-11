@@ -5,7 +5,7 @@
  * Utilizza il pattern del Registry Dinamico dei Provider per massima estensibilità
  */
 
-import type { OpenAiCompatibleModelInfo, LLMProviderId } from "../shared/types/api.types.js";
+import { OpenAiCompatibleModelInfo, LLMProviderId } from "../shared/types/api.types.js";
 import { getCachedModels, cacheModels, hasCachedModels } from "./modelCache.js";
 import { fetchModels as fetchModelsFromRegistry } from "./providerRegistry.js";
 import { Logger } from "../shared/logger.js";

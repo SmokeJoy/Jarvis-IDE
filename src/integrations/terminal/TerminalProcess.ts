@@ -1,4 +1,4 @@
-import type { EventEmitter } from "events"
+import { EventEmitter } from "events"
 import { stripAnsi } from "./ansiUtils.js"
 import * as vscode from "vscode"
 

@@ -3,8 +3,8 @@
  * @description Registro dei provider LLM
  */
 
-import type { LLMProviderId } from '../../types/global.js';
-import type { ApiProvider, ProviderOptions } from '../../../api/provider/base.js';
+import { LLMProviderId } from '../../types/global.js';
+import { ApiProvider, ProviderOptions } from '../../../api/provider/base.js';
 import { OpenAIProvider } from '../../../api/provider/openai.js';
 import { OpenRouterProvider } from '../../../api/provider/openrouter.js';
 import { OllamaProvider } from '../../../api/provider/ollama.js';

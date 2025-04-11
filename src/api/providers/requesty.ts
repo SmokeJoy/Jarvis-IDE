@@ -1,9 +1,9 @@
 import { Anthropic } from "@anthropic-ai/sdk"
 import OpenAI, { ChatCompletionMessageParam, CompletionUsage } from "openai"
-import type { ApiHandler } from "../index.js"
-import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
-import type { openAiModelInfoSaneDefaults } from "../../shared/api.js"
-import type { convertToOpenAiMessages } from "../transform/openai-format.js"
+import { ApiHandler } from "../index.js"
+import { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
+import { openAiModelInfoSaneDefaults } from "../../shared/api.js"
+import { convertToOpenAiMessages } from "../transform/openai-format.js"
 import { ApiStream } from "../transform/stream.js"
 
 export class RequestyHandler implements ApiHandler {

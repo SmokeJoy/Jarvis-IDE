@@ -3,9 +3,9 @@
  * @description Definisce l'interfaccia base per i transformer che convertono messaggi tra formati
  */
 
-import type { ChatMessage, ContentBlock, TextBlock, ImageBlock, ContentType, isTextBlock, isImageBlock } from '../../types/chat.types.js';
-import type { OpenAIOptions, ChatCompletionOptions, ChatCompletionMessageParam, ChatCompletionChunk, Stream, ChatCompletion } from '../../types/provider-types/openai-types.js';
-import type { AnthropicMessage, AnthropicMessageOptions, AnthropicStreamChunk, AnthropicMessageResponse } from '../../types/provider-types/anthropic-types.js';
+import { ChatMessage, ContentBlock, TextBlock, ImageBlock, ContentType, isTextBlock, isImageBlock } from '../../types/chat.types.js';
+import { OpenAIOptions, ChatCompletionOptions, ChatCompletionMessageParam, ChatCompletionChunk, Stream, ChatCompletion } from '../../types/provider-types/openai-types.js';
+import { AnthropicMessage, AnthropicMessageOptions, AnthropicStreamChunk, AnthropicMessageResponse } from '../../types/provider-types/anthropic-types.js';
 
 /**
  * Interfaccia base per i transformer che convertono messaggi tra il formato standard dell'applicazione

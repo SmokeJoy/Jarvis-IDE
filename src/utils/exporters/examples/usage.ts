@@ -4,7 +4,7 @@
  */
 
 import { exportSession, exportSessionToFile } from '../index.js';
-import type { ExportableSession, ExportFormat } from '../types.js';
+import { ExportableSession, ExportFormat } from '../types.js';
 
 // Esempio di sessione di chat
 const sessionExample: ExportableSession = {

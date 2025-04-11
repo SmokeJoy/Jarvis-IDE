@@ -4,7 +4,7 @@
  * Implementa un sistema di lookup dinamico provider → loader
  */
 
-import type { OpenAiCompatibleModelInfo, LLMProviderId } from "../shared/types/api.types.js";
+import { OpenAiCompatibleModelInfo, LLMProviderId } from "../shared/types/api.types.js";
 import { fetchModelsFromOpenRouter, getFallbackModels as getOpenRouterFallbackModels } from "./providers/openrouterProvider.js";
 import { fetchModelsFromAnthropic, getFallbackModels as getAnthropicFallbackModels } from "./providers/anthropicProvider.js";
 import { getCachedModels, cacheModels } from "./modelCache.js";

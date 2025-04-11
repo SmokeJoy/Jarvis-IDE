@@ -1,5 +1,5 @@
-import type { ApiConfiguration } from './api.types.js';
-import type { TelemetrySetting } from './telemetry.types.js';
+import { ApiConfiguration } from './api.types.js';
+import { TelemetrySetting } from './telemetry.types.js';
 /**
  * Rappresenta un modello LLM disponibile
  */

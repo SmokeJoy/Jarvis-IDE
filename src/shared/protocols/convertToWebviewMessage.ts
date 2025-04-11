@@ -3,8 +3,8 @@
  * @description Funzione di conversione per messaggi di WebView
  */
 
-import type { WebviewMessage, OutgoingWebviewMessage, LegacyWebviewMessage } from './webview.protocol.js';
-import type { validateWebviewMessage } from './validateWebviewMessage.test.js';
+import { WebviewMessage, OutgoingWebviewMessage, LegacyWebviewMessage } from './webview.protocol.js';
+import { validateWebviewMessage } from './validateWebviewMessage.test.js';
 
 // Tipo per i messaggi legacy che potrebbero arrivare dall'estensione
 interface LegacyExtensionMessage {

@@ -1,4 +1,4 @@
-import type { McpMarketplaceCatalog, McpResource, McpResourceTemplate } from "../shared/mcp.js"
+import { McpMarketplaceCatalog, McpResource, McpResourceTemplate } from "../shared/mcp.js"
 
 interface McpResourceTemplateWithUri extends McpResourceTemplate {
   uriTemplate: string

@@ -1,0 +1,1005 @@
+# Piano di Ricerca Avanzato per Jarvis-IDE: Architettura e Implementazione di un IDE AI-Driven
+
+Il progetto Jarvis-IDE rappresenta un'ambiziosa iniziativa per creare un ambiente di sviluppo integrato completamente guidato dall'intelligenza artificiale, in grado di competere e superare le soluzioni esistenti sul mercato. Il presente documento esamina dettagliatamente gli aspetti architetturali, funzionali e implementativi necessari per realizzare questo sistema avanzato, fornendo linee guida, pattern e soluzioni concrete.
+
+## 1. Architettura Modulare per IDE AI-Driven
+
+L'implementazione di un IDE AI-driven richiede un'architettura robusta che permetta la separazione chiara delle responsabilità e garantisca estendibilità e manutenibilità nel tempo.
+
+### Principi Architetturali Fondamentali
+
+L'approccio più efficace per Jarvis-IDE è un'architettura esagonale (o "ports and adapters"), che consente di isolare il core dell'applicazione dalle tecnologie esterne. Questo pattern è particolarmente adatto per sistemi complessi che necessitano di integrare multiple tecnologie e servizi.
+
+```
+/jarvis-ide
+  /core                  # Logica di business e orchestrazione
+    /domain              # Modelli di dominio e logica core
+    /usecases            # Casi d'uso dell'applicazione
+    /ports               # Interfacce per la comunicazione con l'esterno
+  /adapters              # Implementazioni concrete dei ports
+    /ui                  # WebView e componenti React
+    /llm                 # Adapter per diversi modelli LLM
+    /storage             # Gestione della persistenza
+    /vscode              # Integrazione con l'API di VS Code
+  /infrastructure        # Servizi infrastrutturali
+    /communication       # Gestione della comunicazione tra moduli
+    /di                  # Dependency injection container
+    /logging             # Sistema di logging avanzato
+  /agents                # Sistema Multi-Agent (MCP)
+    /developer           # Agente per la scrittura del codice
+    /planner             # Agente per la pianificazione
+    /reviewer            # Agente per la revisione
+    /tester              # Agente per il testing
+    /documenter          # Agente per la documentazione
+```
+
+### Separazione dei Moduli
+
+La separazione effettiva dei moduli è cruciale per garantire la scalabilità e la manutenibilità:
+
+1. **UI Layer**: Implementato come WebView React, gestisce l'interfaccia utente e la presentazione dei dati.
+   ```typescript
+   // /adapters/ui/EditorPanel.tsx
+   import React, { useEffect, useState } from 'react';
+   import { vscode } from './vscode-api';
+   
+   export const EditorPanel: React.FC = () => {
+     const [activeAgents, setActiveAgents] = useState([]);
+     
+     // Comunicazione con il backend VS Code
+     useEffect(() => {
+       const messageHandler = (event) => {
+         const message = event.data;
+         if (message.type === 'AGENTS_STATUS_UPDATE') {
+           setActiveAgents(message.payload);
+         }
+       };
+       
+       window.addEventListener('message', messageHandler);
+       // Richiedi lo stato iniziale
+       vscode.postMessage({ command: 'getAgentsStatus' });
+       
+       return () => window.removeEventListener('message', messageHandler);
+     }, []);
+     
+     return (
+       <div className="jarvis-panel">
+         {/* Interfaccia per visualizzare e interagire con gli agenti */}
+       </div>
+     );
+   }
+   ```
+
+2. **LLM Handler**: Gestisce la comunicazione con i diversi modelli LLM attraverso un sistema di adapter.
+   ```typescript
+   // /adapters/llm/LLMManager.ts
+   import { LLMAdapter } from '../../core/ports/LLMAdapter';
+   
+   export class LLMManager {
+     private adapters: Map<string, LLMAdapter> = new Map();
+     private fallbackChain: string[] = [];
+     
+     registerAdapter(id: string, adapter: LLMAdapter): void {
+       this.adapters.set(id, adapter);
+     }
+     
+     setFallbackChain(chain: string[]): void {
+       this.fallbackChain = chain;
+     }
+     
+     async generateResponse(prompt: string, options: {
+       modelId?: string;
+       temperature?: number;
+       maxTokens?: number;
+     }): Promise<string> {
+       const modelId = options.modelId || this.fallbackChain[0];
+       try {
+         const adapter = this.adapters.get(modelId);
+         if (!adapter) throw new Error(`Model ${modelId} not found`);
+         
+         return await adapter.generate(prompt, {
+           temperature: options.temperature || 0.7,
+           maxTokens: options.maxTokens || 1024
+         });
+       } catch (error) {
+         // Implementa il fallback alla catena successiva
+         console.error(`Error with model ${modelId}:`, error);
+         if (modelId === this.fallbackChain[this.fallbackChain.length - 1]) {
+           throw error; // Nessun altro fallback disponibile
+         }
+         
+         const nextModelIndex = this.fallbackChain.indexOf(modelId) + 1;
+         if (nextModelIndex < this.fallbackChain.length) {
+           return this.generateResponse(prompt, {
+             ...options,
+             modelId: this.fallbackChain[nextModelIndex]
+           });
+         }
+         throw error;
+       }
+     }
+   }
+   ```
+
+3. **Storage Manager**: Gestisce la persistenza e il recupero dei dati.
+   ```typescript
+   // /adapters/storage/StorageManager.ts
+   import { StorageAdapter } from '../../core/ports/StorageAdapter';
+   
+   export class FileSystemStorageAdapter implements StorageAdapter {
+     private basePath: string;
+     
+     constructor(basePath: string) {
+       this.basePath = basePath;
+     }
+     
+     async save<T>(key: string, data: T): Promise<void> {
+       // Implementazione per salvare dati su filesystem
+     }
+     
+     async load<T>(key: string): Promise<T | null> {
+       // Implementazione per caricare dati da filesystem
+     }
+     
+     async delete(key: string): Promise<void> {
+       // Implementazione per eliminare dati
+     }
+   }
+   ```
+
+4. **Backend Service**: Coordina le operazioni tra i diversi moduli.
+   ```typescript
+   // /core/JarvisCore.ts
+   import { LLMManager } from '../adapters/llm/LLMManager';
+   import { StorageAdapter } from './ports/StorageAdapter';
+   import { AgentCoordinator } from '../agents/AgentCoordinator';
+   
+   export class JarvisCore {
+     private llmManager: LLMManager;
+     private storage: StorageAdapter;
+     private agentCoordinator: AgentCoordinator;
+     
+     constructor(
+       llmManager: LLMManager,
+       storage: StorageAdapter,
+       agentCoordinator: AgentCoordinator
+     ) {
+       this.llmManager = llmManager;
+       this.storage = storage;
+       this.agentCoordinator = agentCoordinator;
+     }
+     
+     async processUserRequest(request: string): Promise<void> {
+       // Elabora la richiesta dell'utente e coordina gli agenti
+       const task = await this.agentCoordinator.createTask(request);
+       await this.agentCoordinator.executeTask(task);
+     }
+     
+     // Altri metodi di coordinamento
+   }
+   ```
+
+### Isolamento per Scalabilità e Sostituzione
+
+L'isolamento dei moduli si ottiene attraverso l'uso di interfacce (ports) ben definite. Ogni modulo implementa un'interfaccia specifica, consentendo di sostituire l'implementazione concreta senza influenzare gli altri componenti.
+
+## 2. Sistema Multi-Agente (MCP)
+
+Il Master Control Program (MCP) è il cuore dell'intelligenza di Jarvis-IDE, implementato come un sistema multi-agente dove diversi agenti specializzati collaborano per completare i task di sviluppo.
+
+### Fondamenti dei Sistemi Multi-Agente
+
+Un sistema multi-agente (MAS) contiene più agenti AI che collaborano in un ambiente condiviso per raggiungere obiettivi specifici. Questi sistemi sono progettati per affrontare compiti troppo complessi o decentralizzati per essere gestiti da un singolo agente[3].
+
+Le caratteristiche chiave includono:
+- **Decentramento**: Ogni agente opera in modo indipendente, utilizzando dati locali e processi decisionali autonomi[3].
+- **Punti di vista locali**: Ogni agente ha una visione locale, ma nessun agente ha una visione globale completa del sistema[3].
+- **Autonomia**: Gli agenti prendono decisioni in modo indipendente basandosi sulle proprie regole e obiettivi[3].
+
+### Implementazione di Cooperazione tra Agenti
+
+La cooperazione tra Developer, Planner, Reviewer, Tester e Documenter può essere implementata attraverso un pattern di coordinamento basato su eventi e uno stato condiviso.
+
+```typescript
+// /agents/AgentCoordinator.ts
+import { EventBus } from '../infrastructure/communication/EventBus';
+import { DeveloperAgent } from './developer/DeveloperAgent';
+import { PlannerAgent } from './planner/PlannerAgent';
+import { ReviewerAgent } from './reviewer/ReviewerAgent';
+import { TesterAgent } from './tester/TesterAgent';
+import { DocumenterAgent } from './documenter/DocumenterAgent';
+import { Task, TaskStatus } from '../core/domain/Task';
+
+export class AgentCoordinator {
+  private eventBus: EventBus;
+  private developerAgent: DeveloperAgent;
+  private plannerAgent: PlannerAgent;
+  private reviewerAgent: ReviewerAgent;
+  private testerAgent: TesterAgent;
+  private documenterAgent: DocumenterAgent;
+  
+  private taskQueue: Task[] = [];
+  private activeTask: Task | null = null;
+  
+  constructor(
+    eventBus: EventBus,
+    developerAgent: DeveloperAgent,
+    plannerAgent: PlannerAgent,
+    reviewerAgent: ReviewerAgent,
+    testerAgent: TesterAgent,
+    documenterAgent: DocumenterAgent
+  ) {
+    this.eventBus = eventBus;
+    this.developerAgent = developerAgent;
+    this.plannerAgent = plannerAgent;
+    this.reviewerAgent = reviewerAgent;
+    this.testerAgent = testerAgent;
+    this.documenterAgent = documenterAgent;
+    
+    // Registrazione agli eventi
+    this.eventBus.subscribe('TASK_PLANNED', this.handleTaskPlanned.bind(this));
+    this.eventBus.subscribe('CODE_DEVELOPED', this.handleCodeDeveloped.bind(this));
+    this.eventBus.subscribe('CODE_REVIEWED', this.handleCodeReviewed.bind(this));
+    this.eventBus.subscribe('CODE_TESTED', this.handleCodeTested.bind(this));
+    this.eventBus.subscribe('DOCS_GENERATED', this.handleDocsGenerated.bind(this));
+  }
+  
+  async createTask(description: string): Promise<Task> {
+    const task = new Task(description);
+    this.taskQueue.push(task);
+    return task;
+  }
+  
+  async executeTask(task: Task): Promise<void> {
+    this.activeTask = task;
+    task.setStatus(TaskStatus.PLANNING);
+    
+    // Avvia il flusso con il Planner
+    await this.plannerAgent.planTask(task);
+  }
+  
+  private async handleTaskPlanned(event: any): Promise<void> {
+    if (!this.activeTask) return;
+    
+    this.activeTask.setStatus(TaskStatus.DEVELOPING);
+    await this.developerAgent.developCode(this.activeTask, event.plan);
+  }
+  
+  private async handleCodeDeveloped(event: any): Promise<void> {
+    if (!this.activeTask) return;
+    
+    this.activeTask.setStatus(TaskStatus.REVIEWING);
+    await this.reviewerAgent.reviewCode(this.activeTask, event.code);
+  }
+  
+  // Implementazione degli altri handler per il ciclo completo
+}
+```
+
+### Gestione di Stato Condiviso, Task e Logging
+
+La gestione dello stato condiviso è implementata attraverso un EventBus e un repository centralizzato per lo stato delle attività.
+
+```typescript
+// /infrastructure/communication/EventBus.ts
+type EventHandler = (event: any) => void;
+
+export class EventBus {
+  private subscribers: Map<string, EventHandler[]> = new Map();
+  
+  subscribe(eventType: string, handler: EventHandler): void {
+    if (!this.subscribers.has(eventType)) {
+      this.subscribers.set(eventType, []);
+    }
+    this.subscribers.get(eventType)?.push(handler);
+  }
+  
+  publish(eventType: string, data: any): void {
+    const handlers = this.subscribers.get(eventType) || [];
+    handlers.forEach(handler => handler(data));
+  }
+}
+```
+
+Il rollback può essere implementato tramite un sistema di snapshot che mantiene lo stato precedente degli artefatti prodotti durante il ciclo di vita del task.
+
+## 3. Integrazione LLM Universale
+
+L'integrazione con diversi modelli LLM richiede un sistema flessibile che possa adattarsi a vari provider e configurazioni.
+
+### Sistema di Adapter LLM
+
+Il pattern Adapter è ideale per creare un'interfaccia unificata per i diversi modelli LLM:
+
+```typescript
+// /core/ports/LLMAdapter.ts
+export interface LLMOptions {
+  temperature?: number;
+  maxTokens?: number;
+  topP?: number;
+  stopSequences?: string[];
+}
+
+export interface LLMAdapter {
+  generate(prompt: string, options: LLMOptions): Promise<string>;
+  stream?(prompt: string, options: LLMOptions, callback: (chunk: string) => void): Promise<void>;
+  getCapabilities(): LLMCapabilities;
+}
+
+export interface LLMCapabilities {
+  supportsStreaming: boolean;
+  maxContextLength: number;
+  specializations: string[]; // e.g., ["code", "general", "creative"]
+}
+```
+
+### Implementazione di Adapter Specifici
+
+```typescript
+// /adapters/llm/OpenAIAdapter.ts
+import { LLMAdapter, LLMOptions, LLMCapabilities } from '../../core/ports/LLMAdapter';
+import { Configuration, OpenAIApi } from 'openai';
+
+export class OpenAIAdapter implements LLMAdapter {
+  private openai: OpenAIApi;
+  private model: string;
+  
+  constructor(apiKey: string, model: string = 'gpt-4') {
+    const configuration = new Configuration({ apiKey });
+    this.openai = new OpenAIApi(configuration);
+    this.model = model;
+  }
+  
+  async generate(prompt: string, options: LLMOptions): Promise<string> {
+    const response = await this.openai.createCompletion({
+      model: this.model,
+      prompt,
+      max_tokens: options.maxTokens || 1024,
+      temperature: options.temperature || 0.7,
+      top_p: options.topP || 1,
+      stop: options.stopSequences
+    });
+    
+    return response.data.choices[0].text || '';
+  }
+  
+  async stream(
+    prompt: string, 
+    options: LLMOptions, 
+    callback: (chunk: string) => void
+  ): Promise<void> {
+    // Implementazione dello streaming
+  }
+  
+  getCapabilities(): LLMCapabilities {
+    return {
+      supportsStreaming: true,
+      maxContextLength: this.model.includes('gpt-4') ? 8192 : 4096,
+      specializations: ['code', 'general']
+    };
+  }
+}
+```
+
+### Configurazione e Selezione dei Modelli
+
+La distinzione tra modelli specializzati per il coding e modelli generalisti può essere implementata attraverso metadati e un selettore di modelli intelligente:
+
+```typescript
+// /adapters/llm/ModelSelector.ts
+import { LLMAdapter } from '../../core/ports/LLMAdapter';
+
+export class ModelSelector {
+  private adapters: Map<string, LLMAdapter> = new Map();
+  
+  registerAdapter(id: string, adapter: LLMAdapter): void {
+    this.adapters.set(id, adapter);
+  }
+  
+  selectModelForTask(taskType: string, requirements: {
+    needsCodeGeneration?: boolean;
+    complexityLevel?: 'low' | 'medium' | 'high';
+  }): string {
+    // Logica di selezione basata su task e requisiti
+    if (requirements.needsCodeGeneration) {
+      // Seleziona il miglior modello per generazione di codice
+      const codingModels = Array.from(this.adapters.entries())
+        .filter(([_, adapter]) => 
+          adapter.getCapabilities().specializations.includes('code')
+        );
+      
+      if (requirements.complexityLevel === 'high') {
+        // Preferisci modelli più potenti per task complessi
+        const advancedModel = codingModels.find(([_, adapter]) => 
+          adapter.getCapabilities().maxContextLength >= 8000
+        );
+        if (advancedModel) return advancedModel[0];
+      }
+      
+      // Fallback sul primo modello di coding disponibile
+      if (codingModels.length > 0) return codingModels[0][0];
+    }
+    
+    // Fallback su un modello generico
+    return Array.from(this.adapters.keys())[0];
+  }
+}
+```
+
+### Controllo Parametri LLM
+
+La gestione dei parametri LLM come temperatura, top_p e lunghezza massima è fondamentale per ottenere risultati ottimali[4].
+
+```typescript
+// Esempio di configurazione parametri LLM
+const llmOptions = {
+  temperature: 0.2,  // Basso per risposte più deterministiche e precise
+  maxTokens: 2048,   // Adeguato per generazione di codice
+  topP: 0.9,         // Seleziona token dal nucleo di probabilità del 90%
+  stopSequences: ["```
+};
+
+// Diversi preset per diversi tipi di task
+const llmPresets = {
+  coding: { temperature: 0.2, topP: 0.95 },
+  creative: { temperature: 0.8, topP: 1.0 },
+  factual: { temperature: 0.1, topP: 0.9 }
+};
+```
+
+## 4. WebView UI e UX Evoluta
+
+L'interfaccia utente è un elemento cruciale per un IDE AI-driven, in quanto deve presentare informazioni complesse in modo intuitivo e permettere interazioni fluide.
+
+### Pattern React per Estensioni AI
+
+```
+// /adapters/ui/AIAssistantPanel.tsx
+import React, { useState, useEffect } from 'react';
+import { vscode } from './vscode-api';
+import { ChatHistory } from './components/ChatHistory';
+import { PromptInput } from './components/PromptInput';
+import { AgentActivityMonitor } from './components/AgentActivityMonitor';
+
+export const AIAssistantPanel: React.FC = () => {
+  const [chatHistory, setChatHistory] = useState([]);
+  const [activeAgents, setActiveAgents] = useState([]);
+  const [systemPrompt, setSystemPrompt] = useState('');
+  
+  useEffect(() => {
+    // Carica la cronologia e lo stato iniziale
+    vscode.postMessage({ command: 'getChatHistory' });
+    vscode.postMessage({ command: 'getActiveAgents' });
+    vscode.postMessage({ command: 'getSystemPrompt' });
+    
+    const messageHandler = (event) => {
+      const message = event.data;
+      switch (message.command) {
+        case 'chatHistory':
+          setChatHistory(message.payload);
+          break;
+        case 'activeAgents':
+          setActiveAgents(message.payload);
+          break;
+        case 'systemPrompt':
+          setSystemPrompt(message.payload);
+          break;
+      }
+    };
+    
+    window.addEventListener('message', messageHandler);
+    return () => window.removeEventListener('message', messageHandler);
+  }, []);
+  
+  const sendPrompt = (text: string) => {
+    vscode.postMessage({
+      command: 'sendPrompt',
+      payload: text
+    });
+  };
+  
+  const updateSystemPrompt = (text: string) => {
+    vscode.postMessage({
+      command: 'updateSystemPrompt',
+      payload: text
+    });
+    setSystemPrompt(text);
+  };
+  
+  return (
+    <div className="ai-assistant-panel">
+      <div className="system-prompt-editor">
+        <h3>System Prompt</h3>
+        <textarea 
+          value={systemPrompt}
+          onChange={(e) => updateSystemPrompt(e.target.value)}
+        />
+      </div>
+      
+      <AgentActivityMonitor agents={activeAgents} />
+      
+      <ChatHistory messages={chatHistory} />
+      
+      <PromptInput onSend={sendPrompt} />
+    </div>
+  );
+};
+```
+
+### Comunicazione WebView e Backend VS Code
+
+La comunicazione tra il frontend WebView e il backend VS Code avviene attraverso un sistema di messaggi:
+
+```
+// /adapters/vscode/WebViewHandler.ts
+import * as vscode from 'vscode';
+import { JarvisCore } from '../../core/JarvisCore';
+
+export class WebViewHandler {
+  private panel: vscode.WebviewPanel | undefined;
+  private core: JarvisCore;
+  
+  constructor(core: JarvisCore) {
+    this.core = core;
+  }
+  
+  createOrShowPanel(): void {
+    if (this.panel) {
+      this.panel.reveal();
+      return;
+    }
+    
+    this.panel = vscode.window.createWebviewPanel(
+      'jarvisIDE',
+      'Jarvis IDE',
+      vscode.ViewColumn.Two,
+      {
+        enableScripts: true,
+        retainContextWhenHidden: true
+      }
+    );
+    
+    this.panel.webview.html = this.getWebviewContent();
+    
+    this.panel.webview.onDidReceiveMessage(
+      async (message) => {
+        switch (message.command) {
+          case 'sendPrompt':
+            await this.core.processUserRequest(message.payload);
+            break;
+          case 'getChatHistory':
+            const history = await this.core.getChatHistory();
+            this.sendMessageToWebview('chatHistory', history);
+            break;
+          case 'getActiveAgents':
+            const agents = await this.core.getActiveAgents();
+            this.sendMessageToWebview('activeAgents', agents);
+            break;
+          case 'updateSystemPrompt':
+            await this.core.updateSystemPrompt(message.payload);
+            break;
+        }
+      },
+      undefined,
+      []
+    );
+    
+    this.panel.onDidDispose(
+      () => { this.panel = undefined; },
+      null,
+      []
+    );
+  }
+  
+  sendMessageToWebview(command: string, payload: any): void {
+    if (this.panel) {
+      this.panel.webview.postMessage({ command, payload });
+    }
+  }
+  
+  private getWebviewContent(): string {
+    // Genera il contenuto HTML per la WebView
+    return `<!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Jarvis IDE</title>
+          <style>
+            /* Stili CSS per la WebView */
+          </style>
+        </head>
+        <body>
+          <div id="root"></div>
+          <script>
+            // JavaScript per inizializzare l'applicazione React
+          </script>
+        </body>
+      </html>`;
+  }
+}
+```
+
+## 5. Persistenza e Configurazione
+
+Un sistema di persistenza affidabile è fondamentale per salvare configurazioni, cronologia delle chat e stato degli agenti.
+
+### Best Practice per File di Configurazione
+
+```
+// /adapters/storage/ConfigurationManager.ts
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import { debounce } from '../../infrastructure/utils/debounce';
+
+export class ConfigurationManager {
+  private configPath: string;
+  private config: any = {};
+  private saveDebounced: (config: any) => Promise<void>;
+  
+  constructor(basePath: string) {
+    this.configPath = path.join(basePath, 'settings.json');
+    this.saveDebounced = debounce(this.saveToFile.bind(this), 300);
+    
+    // Carica la configurazione all'avvio
+    this.loadConfiguration().catch(err => {
+      console.error('Failed to load configuration:', err);
+      // Initialize with defaults
+      this.config = this.getDefaultConfig();
+      this.saveToFile(this.config).catch(console.error);
+    });
+  }
+  
+  async loadConfiguration(): Promise<any> {
+    try {
+      const data = await fs.readFile(this.configPath, 'utf-8');
+      this.config = JSON.parse(data);
+      return this.config;
+    } catch (error) {
+      throw error;
+    }
+  }
+  
+  async saveConfiguration(config: any): Promise<void> {
+    this.config = config;
+    await this.saveDebounced(config);
+  }
+  
+  private async saveToFile(config: any): Promise<void> {
+    try {
+      await fs.writeFile(
+        this.configPath,
+        JSON.stringify(config, null, 2),
+        'utf-8'
+      );
+    } catch (error) {
+      console.error('Failed to save configuration:', error);
+      throw error;
+    }
+  }
+  
+  private getDefaultConfig(): any {
+    return {
+      llm: {
+        defaultModel: 'gpt-4',
+        temperature: 0.7,
+        maxTokens: 2048
+      },
+      agents: {
+        developer: { enabled: true },
+        planner: { enabled: true },
+        reviewer: { enabled: true },
+        tester: { enabled: true },
+        documenter: { enabled: true }
+      },
+      ui: {
+        theme: 'light',
+        showAgentActivity: true
+      }
+    };
+  }
+}
+```
+
+### Strategie di Salvataggio con Validazione
+
+```
+// /infrastructure/utils/debounce.ts
+export function debounce<T extends (...args: any[]) => Promise<any>>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => Promise<ReturnType<T>> {
+  let timeout: NodeJS.Timeout | null = null;
+  
+  return function(...args: Parameters<T>): Promise<ReturnType<T>> {
+    return new Promise((resolve, reject) => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      
+      timeout = setTimeout(async () => {
+        timeout = null;
+        try {
+          const result = await func(...args);
+          resolve(result as ReturnType<T>);
+        } catch (error) {
+          reject(error);
+        }
+      }, wait);
+    });
+  };
+}
+
+// /adapters/storage/validators/ConfigValidator.ts
+import Ajv from 'ajv';
+import { configSchema } from './schemas/configSchema';
+
+export class ConfigValidator {
+  private ajv: Ajv;
+  
+  constructor() {
+    this.ajv = new Ajv();
+  }
+  
+  validate(config: any): { valid: boolean, errors: any[] | null } {
+    const validate = this.ajv.compile(configSchema);
+    const valid = validate(config);
+    
+    return {
+      valid,
+      errors: validate.errors
+    };
+  }
+}
+```
+
+## 6. Sicurezza e Tracciabilità
+
+La sicurezza è un aspetto critico quando si permette agli agenti AI di modificare il codice dell'utente.
+
+### Sandboxing delle Azioni AI
+
+```
+// /infrastructure/security/Sandbox.ts
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+
+export class Sandbox {
+  private sandboxDir: string;
+  
+  constructor(basePath: string) {
+    this.sandboxDir = path.join(basePath, '.jarvis', 'sandbox');
+    this.ensureSandboxExists();
+  }
+  
+  private async ensureSandboxExists(): Promise<void> {
+    try {
+      await fs.access(this.sandboxDir);
+    } catch {
+      await fs.mkdir(this.sandboxDir, { recursive: true });
+    }
+  }
+  
+  async executeInSandbox<T>(
+    action: (sandboxPath: string) => Promise<T>
+  ): Promise<T> {
+    const sessionId = uuidv4();
+    const sessionPath = path.join(this.sandboxDir, sessionId);
+    
+    try {
+      await fs.mkdir(sessionPath);
+      const result = await action(sessionPath);
+      return result;
+    } finally {
+      // Cleanup
+      try {
+        await fs.rm(sessionPath, { recursive: true, force: true });
+      } catch (error) {
+        console.error('Failed to cleanup sandbox:', error);
+      }
+    }
+  }
+  
+  async testFileOperation(
+    filePath: string,
+    operation: 'create' | 'update' | 'delete',
+    content?: string
+  ): Promise<boolean> {
+    return this.executeInSandbox(async (sandboxPath) => {
+      const testPath = path.join(sandboxPath, path.basename(filePath));
+      
+      try {
+        switch (operation) {
+          case 'create':
+            await fs.writeFile(testPath, content || '');
+            break;
+          case 'update':
+            await fs.writeFile(testPath, content || '');
+            break;
+          case 'delete':
+            // Simulazione di eliminazione senza rischi
+            break;
+        }
+        return true;
+      } catch (error) {
+        console.error(`Failed to test ${operation} operation:`, error);
+        return false;
+      }
+    });
+  }
+}
+```
+
+### Sistema di Logging Semantico
+
+```
+// /infrastructure/logging/AuditLog.ts
+import * as fs from 'fs/promises';
+import * as path from 'path';
+
+export enum ActionType {
+  FILE_CREATE = 'FILE_CREATE',
+  FILE_UPDATE = 'FILE_UPDATE',
+  FILE_DELETE = 'FILE_DELETE',
+  COMMAND_EXECUTE = 'COMMAND_EXECUTE',
+  LLM_REQUEST = 'LLM_REQUEST',
+  AGENT_TASK = 'AGENT_TASK'
+}
+
+export class AIAction {
+  type: ActionType;
+  timestamp: Date;
+  agentId: string;
+  description: string;
+  payload: any;
+  
+  constructor(
+    type: ActionType,
+    agentId: string,
+    description: string,
+    payload: any
+  ) {
+    this.type = type;
+    this.timestamp = new Date();
+    this.agentId = agentId;
+    this.description = description;
+    this.payload = payload;
+  }
+}
+
+export class LogEntry {
+  id: string;
+  action: AIAction;
+  result: 'success' | 'failure' | 'veto';
+  error?: string;
+  
+  constructor(
+    action: AIAction,
+    result: 'success' | 'failure' | 'veto',
+    error?: string
+  ) {
+    this.id = `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    this.action = action;
+    this.result = result;
+    this.error = error;
+  }
+}
+
+export class VetoRequest {
+  action: AIAction;
+  reason: string;
+  timestamp: Date;
+  
+  constructor(action: AIAction, reason: string) {
+    this.action = action;
+    this.reason = reason;
+    this.timestamp = new Date();
+  }
+}
+
+export class AuditLogger {
+  private logFilePath: string;
+  
+  constructor(basePath: string) {
+    this.logFilePath = path.join(basePath, '.jarvis', 'audit_log.jsonl');
+    this.ensureLogFileExists();
+  }
+  
+  private async ensureLogFileExists(): Promise<void> {
+    try {
+      await fs.access(path.dirname(this.logFilePath));
+    } catch {
+      await fs.mkdir(path.dirname(this.logFilePath), { recursive: true });
+    }
+    
+    try {
+      await fs.access(this.logFilePath);
+    } catch {
+      await fs.writeFile(this.logFilePath, '', 'utf-8');
+    }
+  }
+  
+  async logAction(entry: LogEntry): Promise<void> {
+    const logLine = JSON.stringify(entry) + '\n';
+    await fs.appendFile(this.logFilePath, logLine, 'utf-8');
+  }
+  
+  async getRecentLogs(limit: number = 100): Promise<LogEntry[]> {
+    const data = await fs.readFile(this.logFilePath, 'utf-8');
+    const lines = data.split('\n').filter(line => line.trim());
+    const logs = lines
+      .map(line => JSON.parse(line) as LogEntry)
+      .slice(-limit);
+    
+    return logs;
+  }
+}
+```
+
+## Conclusioni e Raccomandazioni
+
+La creazione di Jarvis-IDE rappresenta una sfida ambiziosa ma realizzabile con l'architettura e le strategie descritte in questo documento. Le sezioni analizzate coprono gli aspetti fondamentali dell'implementazione, fornendo una base solida per lo sviluppo.
+
+Per procedere efficacemente, si raccomanda di:
+
+1. **Adottare un approccio iterativo**: Iniziare con un'implementazione minima funzionante che includa l'architettura di base e un sistema di agenti semplificato, per poi espandere progressivamente le funzionalità.
+
+2. **Focalizzarsi sull'esperienza utente**: La chiave del successo di un IDE AI-driven è un'interfaccia intuitiva che renda l'interazione con gli agenti AI naturale e produttiva.
+
+3. **Investire nel sistema multi-agente**: La cooperazione efficace tra agenti specializzati è ciò che differenzierà Jarvis-IDE dai competitor, consentendo di affrontare task complessi in modo autonomo.
+
+4. **Garantire estensibilità**: Progettare ogni componente pensando alla possibilità di estensioni future, per adattarsi rapidamente all'evoluzione dei modelli LLM e delle esigenze degli sviluppatori.
+
+Seguendo queste linee guida e implementando le architetture e i pattern descritti, Jarvis-IDE ha il potenziale per diventare lo strumento di riferimento per lo sviluppo assistito dall'intelligenza artificiale, superando i limiti degli IDE tradizionali e delle soluzioni AI-driven esistenti.
+
+Fonti
+[1] AI e architettura: innovazione, sfide e opportunità nel design del futuro https://www.dataskills.it/ai-e-architettura/
+[2] [PDF] Progettazione e Realizzazione di SyncRAG AI: Un Chatbot con ... https://thesis.unipd.it/retrieve/4560a34b-2c9f-4835-8c59-df1ec07b7b98/Bando_Matteo.pdf
+[3] Guida ai sistemi multi-agente nel 2025 - Botpress https://botpress.com/it/blog/multi-agent-systems
+[4] Impostazioni LLM - Prompt Engineering Guide https://www.promptingguide.ai/it/introduction/settings
+[5] react-native-webview/docs/Guide.md at master - GitHub https://github.com/react-native-webview/react-native-webview/blob/master/docs/Guide.md
+[6] Best practice to persist C# application settings/configurations https://stackoverflow.com/questions/14272076/best-practice-to-persist-c-sharp-application-settings-configurations
+[7] EDR rollback—the time machine is real - N-able https://www.n-able.com/it/blog/edr-rollback-n-able
+[8] Automating LLM Quality Assurance with CI/CD Integration - LinkedIn https://www.linkedin.com/pulse/automating-llm-quality-assurance-cicd-integration-blogo-ai-cidvf
+[9] How to Use Cursor AI with Its Own Memory System. - YouTube https://www.youtube.com/watch?v=azXNHRtzd5s
+[10] How to use Copilot for Code Refactoring | All things Azure https://devblogs.microsoft.com/all-things-azure/how-to-use-copilot-for-code-refactoring/
+[11] Cosa sono gli ambienti di sviluppo integrati (IDE)? - Red Hat https://www.redhat.com/it/topics/middleware/what-is-ide
+[12] 16 migliori generatori di codici AI - Morning Dough https://www.morningdough.com/it/ai-tools/best-ai-code-generators/
+[13] Prefetching Model Weights and KV-Cache in Distributed LLM Serving https://arxiv.org/abs/2501.08192
+[14] 8 Tool di AI Rivoluzionari per Potenziare il tuo UX Design https://blog.talentgarden.com/it/blog/design/8-ai-tools-to-elevate-ux
+[15] Le migliori piattaforme di apprendimento personalizzate nel 2025 https://www.coursebox.ai/it/blog/best-personalized-learning-platforms
+[16] Audit Logging - MuleSoft Documentation https://docs.mulesoft.com/access-management/audit-logging
+[17] Governance dell'IA per avere successo - BitMat https://www.bitmat.it/tecnologie/intelligenza-artificiale/governance-dell-ia-una-priorita-per-le-aziende-che-vogliono-avere-successo/
+[18] Governance dell'IA - Processo per gestire l'IA - Learn Microsoft https://learn.microsoft.com/it-it/azure/cloud-adoption-framework/scenarios/ai/govern
+[19] Governance dell'IA, un impegno titanico: approcci a confronto https://www.agendadigitale.eu/cultura-digitale/governance-dellintelligenza-artificiale-limpegno-dei-governi-approcci-a-confronto/
+[20] Meta lancerà un'app di Ai generativa - Italian.Tech https://www.italian.tech/2025/02/28/news/meta_app_intelligenza_artificiale-424033362/
+[21] AI in architettura: 8 esempi di applicazione - Biblus Acca https://biblus.acca.it/ai-in-architettura-8-esempi-di-applicazione/
+[22] LLM powered migration of UI component libraries https://engineering.zalando.com/posts/2025/02/llm-migration-ui-component-libraries.html
+[23] Che cos'è un sistema multiagente? - IBM https://www.ibm.com/it-it/think/topics/multiagent-system
+[24] Fine-tuning and self-hosting an LLM for command generation - Rasa https://rasa.com/docs/rasa-pro/building-assistants/fine-tuning-recipe/
+[25] React Design Patterns - <DeveloperBlogs /> https://anuradha.hashnode.dev/react-design-patterns
+[26] The Hidden Gems of VS Code: settings.json and launch ... - nonstopio https://blog.nonstopio.com/the-hidden-gems-of-vs-code-settings-json-and-launch-json-explained-9e9e1c6b4b4a
+[27] WithSecure Elements Endpoint Protection for Computers https://www.withsecure.com/it/solutions/software-and-services/elements-endpoint-protection/computer
+[28] Best Practices for LLM Observability in CI/CD - Ghost https://latitude-blog.ghost.io/blog/best-practices-for-llm-observability-in-cicd/
+[29] Progettare con l'intelligenza artificiale in architettura, le migliori app https://www.marketingforarchitects.it/progettare-con-lintelligenza-artificiale-in-architettura-le-migliori-app/
+[30] Quali front-end esistono per connettersi alle API LLM? - Reddit https://www.reddit.com/r/LocalLLaMA/comments/18xnsar/what_all_front_ends_exist_for_connecting_to_llm/?tl=it
+[31] IA collaborativa: creazione di app con i sistemi multi-agente di OpenAI https://appmaster.io/it/blog/creazione-di-app-con-sistemi-multi-agente-openais
+[32] Configurazione LLM : r/LocalLLaMA - Reddit https://www.reddit.com/r/LocalLLaMA/comments/1i983gv/llm_setup/?tl=it
+[33] Scrivi il codice sempre più veloce! Ecco Cursor, il Tuo IDE con a ... https://www.redhotcyber.com/post/scrivi-il-codice-sempre-piu-veloce-ecco-cursor-il-tuo-ide-con-a-bordo-lintelligenza-artificiale/
+[34] Getting code suggestions in your IDE with GitHub Copilot https://docs.github.com/en/copilot/using-github-copilot/getting-code-suggestions-in-your-ide-with-github-copilot
+[35] Ambiente di sviluppo integrato - Wikipedia https://it.wikipedia.org/wiki/Ambiente_di_sviluppo_integrato
+[36] Oltre 13 migliori generatori di codici AI per il 2025: il futuro della ... https://aimojo.io/it/ai-code-generators/
+[37] Prefetching Model Weights and KV-Cache in Distributed LLM Serving https://arxiv.org/html/2501.08192v1
+[38] L'Intelligenza Artificiale applicata allo UX Design https://blog.talentgarden.com/it/blog/design/intelligenza-artificiale-applicata-allo-ux-design
+[39] Qual è il futuro dell'apprendimento personalizzato? - Moodle https://moodle.com/it/notizia/il-futuro-dellapprendimento-personalizzato/
+[40] Audit log - Automation Anywhere Documentation https://docs.automationanywhere.com/bundle/enterprise-v2019/page/enterprise-cloud/topics/control-room/audit-log/cloud-audit-log.html
+[41] Cursor o windsurf? : r/LLMDevs - Reddit https://www.reddit.com/r/LLMDevs/comments/1j52g0q/cursor_or_windsurf/?tl=it
+[42] Boost Your Code Refactoring with GitHub Copilot Chat - LinkedIn https://www.linkedin.com/pulse/boost-your-code-refactoring-github-copilot-chat-martino-vallara-vjslf
+[43] Cos'è un IDE? - Spiegazione dell'ambiente di sviluppo integrato - AWS https://aws.amazon.com/it/what-is/ide/
+[44] Google: Replit Ghostwriter Vs GitHub Copilot - HTML.it https://www.html.it/magazine/google-replit-ghostwriter-vs-github-copilot/
+[45] Meta AI su WhatsApp: cos'è e come funziona (e come attivarla) https://metricool.com/it/meta-ai-whatsapp/
+[46] Che cos'è un ambiente di sviluppo integrato (IDE)? - ServiceNow https://www.servicenow.com/it/now-platform/what-is-ide.html
+[47] Progressi in materia di privacy - Meta https://about.meta.com/it/privacy-progress/
+[48] Meta AI Studio: cos'è, come funziona, come sfruttarla https://www.braincomputing.com/blog/news/meta-ai-studio-come-funziona/
+[49] Meta userà i nostri dati per la sua AI, ma come? Tutti i dubbi su ... https://www.cybersecurity360.it/legal/privacy-dati-personali/meta-usera-i-nostri-dati-per-la-sua-ai-ma-come-tutti-i-dubbi-su-trasparenza-e-controllo/

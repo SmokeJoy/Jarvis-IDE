@@ -1,5 +1,5 @@
-import type { useCallback, useState } from 'react';
-import type { WebviewMessage } from '../types/webview.js';
+import { useCallback, useState } from 'react';
+import { WebviewMessage } from '../types/webview.js';
 
 declare const vscode: {
   postMessage: (message: WebviewMessage) => void;

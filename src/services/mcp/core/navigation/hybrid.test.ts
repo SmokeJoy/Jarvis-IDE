@@ -1,6 +1,6 @@
 import { findHybridPath } from './hybrid.js';
-import type { getContextById } from '../../../../memory/context.js';
-import type { getContextLinks } from '../../../../memory/context_links.js';
+import { getContextById } from '../../../../memory/context.js';
+import { getContextLinks } from '../../../../memory/context_links.js';
 
 // Mock delle dipendenze
 jest.mock('../../../../memory/context', () => ({

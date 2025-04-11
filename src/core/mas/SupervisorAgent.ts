@@ -1,4 +1,4 @@
-import type { 
+import { 
   AgentStatus, 
   SupervisorAgent as ISupervisorAgent,
   CoderAgent,
@@ -8,7 +8,7 @@ import type {
   AgentMessage,
   CoderInstruction
 } from './AgentTypes.js';
-import type { EventEmitter } from 'events';
+import { EventEmitter } from 'events';
 
 /**
  * Implementazione del SupervisorAgent che coordina tutti gli altri agenti nel sistema MAS

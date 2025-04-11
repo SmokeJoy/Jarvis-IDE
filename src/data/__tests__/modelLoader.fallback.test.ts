@@ -6,7 +6,7 @@
 import { fetchModels } from '../modelLoader';
 import { cacheModels, clearAllCachedModels, getCachedModels } from '../modelCache';
 import { OPENROUTER_MODELS } from '../openrouterModels';
-import type { OpenAiCompatibleModelInfo } from '../../shared/types/api.types.js';
+import { OpenAiCompatibleModelInfo } from '../../shared/types/api.types.js';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock di fetch per simulare chiamate API

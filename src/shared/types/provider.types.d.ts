@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import type { ChatSettings, AutoApprovalSettings, BrowserSettings } from "./user-settings.types.js";
-import type { ApiConfiguration } from "./api.types.js";
+import { ChatSettings, AutoApprovalSettings, BrowserSettings } from "./user-settings.types.js";
+import { ApiConfiguration } from "./api.types.js";
 import { AgentStatus, PriorityLevel } from "./mas.types.js";
-import type { WebviewMessage } from "./webview.types.js";
-import type { Platform } from "../ExtensionMessage.js";
+import { WebviewMessage } from "./webview.types.js";
+import { Platform } from "../ExtensionMessage.js";
 /**
  * Definizione esplicita dell'interfaccia ExtensionState
  * per evitare riferimenti circolari

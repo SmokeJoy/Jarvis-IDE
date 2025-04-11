@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import type {
+import {
   ChatCompletionContentPartText,
   ChatCompletionContentPartImage,
   ApiConfiguration,

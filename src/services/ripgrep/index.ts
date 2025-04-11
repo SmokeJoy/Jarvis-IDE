@@ -2,7 +2,7 @@ import * as vscode from "vscode"
 import * as childProcess from "child_process"
 import * as path from "path"
 import * as readline from "readline"
-import type { fileExistsAtPath } from "../../utils/fs.js"
+import { fileExistsAtPath } from "../../utils/fs.js"
 import { JarvisIdeIgnoreController } from "../../core/ignore/JarvisIdeIgnoreController.js"
 
 /*

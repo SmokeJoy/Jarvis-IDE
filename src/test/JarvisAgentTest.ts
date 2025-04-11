@@ -5,7 +5,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
-import type { JarvisAgent, AgentResponse } from '../agent/JarvisAgent.js';
+import { JarvisAgent, AgentResponse } from '../agent/JarvisAgent.js';
 
 // Mock delle dipendenze esterne
 vi.mock('../utils/logger', () => ({

@@ -1,4 +1,4 @@
-import type { ChatMessage, ContentType, TextContent, ImageContent } from '../../types/chat.types.js';
+import { ChatMessage, ContentType, TextContent, ImageContent } from '../../types/chat.types.js';
 import { logger } from '../../utils/logger.js';
 
 /**

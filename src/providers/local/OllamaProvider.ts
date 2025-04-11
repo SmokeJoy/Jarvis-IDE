@@ -3,7 +3,7 @@
  * https://github.com/ollama/ollama
  */
 
-import type { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js';
+import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js';
 
 interface OllamaGenerateRequest {
   model: string;

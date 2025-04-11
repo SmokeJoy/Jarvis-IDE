@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import type { WebviewMessageType, ActionType } from './webview.types.js';
-import type {
+import { WebviewMessageType, ActionType } from './webview.types.js';
+import {
   isSendPromptMessage,
   isActionMessage,
   isErrorMessage,

@@ -3,7 +3,7 @@
  * https://ai.google.dev/api/rest
  */
 
-import type { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js';
+import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js';
 
 interface GoogleAIChatRequest {
   contents: Array<{

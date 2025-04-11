@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as glob from 'glob';
 
 // Import validators and types
-import type { 
+import { 
   isValidChatMessage, 
   isValidChatMessageArray,
   isValidChatSettings, 

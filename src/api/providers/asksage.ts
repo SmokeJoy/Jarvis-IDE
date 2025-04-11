@@ -1,12 +1,12 @@
 import { Anthropic } from "@anthropic-ai/sdk"
-import type { ApiHandler } from ".."
-import type {
+import { ApiHandler } from ".."
+import {
 	AskSageModelId,
 	askSageModels,
 	askSageDefaultModelId,
 	askSageDefaultURL,
 } from "../../shared/api.js"
-import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
+import { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
 import { ApiStream } from "../transform/stream.js"
 
 type AskSageRequest = {

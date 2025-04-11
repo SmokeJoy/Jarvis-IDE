@@ -1,4 +1,4 @@
-import type { BaseMessage, ChatMessage } from "./message.js";
+import { BaseMessage, ChatMessage } from "./message.js";
 export type { BaseMessage, ChatMessage };
 export interface ChatRequest {
     messages: ChatMessage[];

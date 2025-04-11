@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import * as path from "path"
-import type {
+import {
 	arePathsEqual,
 	getRelativePath,
 	getAbsolutePath,

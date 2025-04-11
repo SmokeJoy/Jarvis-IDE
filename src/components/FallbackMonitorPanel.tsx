@@ -1,8 +1,8 @@
 import React from 'react';
 import { useFallbackTelemetry } from '../hooks/useFallbackTelemetry';
-import type { LLMProviderHandler } from '../providers/provider-registry-stub';
-import type { LLMEventBus } from '../mas/core/fallback/LLMEventBus';
-import type { FallbackStrategy } from '../mas/core/fallback/strategies/FallbackStrategy';
+import { LLMProviderHandler } from '../providers/provider-registry-stub';
+import { LLMEventBus } from '../mas/core/fallback/LLMEventBus';
+import { FallbackStrategy } from '../mas/core/fallback/strategies/FallbackStrategy';
 
 interface FallbackMonitorPanelProps {
   eventBus: LLMEventBus;

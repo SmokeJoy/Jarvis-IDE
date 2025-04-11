@@ -1,7 +1,7 @@
 import * as path from "path"
 import * as os from "os"
 import * as vscode from "vscode"
-import type { arePathsEqual } from "../../utils/path.js"
+import { arePathsEqual } from "../../utils/path.js"
 
 export async function openImage(dataUri: string) {
 	const matches = dataUri.match(/^data:image\/([a-zA-Z]+);base64,(.+)$/)

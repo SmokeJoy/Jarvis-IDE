@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { FallbackMonitorPanel } from '@jarvis/visix';
-import type { LLMEventBus } from '../mas/core/fallback/LLMEventBus';
-import type { FallbackStrategy } from '../mas/core/fallback/strategies/FallbackStrategy';
+import { LLMEventBus } from '../mas/core/fallback/LLMEventBus';
+import { FallbackStrategy } from '../mas/core/fallback/strategies/FallbackStrategy';
 
 export class VisixPanel {
   private panel: vscode.WebviewPanel | undefined;

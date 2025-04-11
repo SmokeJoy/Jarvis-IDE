@@ -1,6 +1,6 @@
-import type { Anthropic } from "@anthropic-ai/sdk"
+import { Anthropic } from "@anthropic-ai/sdk"
 import * as vscode from "vscode"
-import type { 
+import { 
 	ChatMessage, 
 	ContentBlock, 
 	TextBlock, 

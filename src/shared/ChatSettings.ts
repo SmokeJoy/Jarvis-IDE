@@ -3,7 +3,7 @@
  * @description Tipi e funzioni per le impostazioni di chat
  */
 
-import type { ChatSettings } from './types/user-settings.types.js';
+import { ChatSettings } from './types/user-settings.types.js';
 
 // Esporta i tipi usando export type per evitare errori TS1205
 export type { ChatSettings };

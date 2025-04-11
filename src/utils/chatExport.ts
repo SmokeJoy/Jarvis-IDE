@@ -1,6 +1,6 @@
-import type { ChatMessage } from '../shared/types.js';
-import type { ApiConfiguration } from '../shared/types/api.types.js';
-import type { ExtensionMessage } from '../shared/ExtensionMessage.js';
+import { ChatMessage } from '../shared/types.js';
+import { ApiConfiguration } from '../shared/types/api.types.js';
+import { ExtensionMessage } from '../shared/ExtensionMessage.js';
 import * as vscode from 'vscode';
 
 export async function exportChatToMarkdown(messages: ChatMessage[]): Promise<string> {

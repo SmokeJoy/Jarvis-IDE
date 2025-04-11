@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import { BaseWebviewMessageHandler } from './WebviewMessageHandler.js';
-import type { WebviewMessage } from '../../shared/types/webview.types.js';
-import type { WebviewMessageUnion } from '../../shared/types/webviewMessageUnion.js';
+import { WebviewMessage } from '../../shared/types/webview.types.js';
+import { WebviewMessageUnion } from '../../shared/types/webviewMessageUnion.js';
 import { WebviewMessageType } from '../../shared/types/webview.types.js';
 import { TaskQueueService } from '../../services/TaskQueueService.js';
-import type { Task } from '../../shared/types/mas.types.js';
+import { Task } from '../../shared/types/mas.types.js';
 import { Logger } from '../../utils/logger.js';
 import { MasManager } from '../../mas/MasManager.js';
 

@@ -20,12 +20,17 @@
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"noEmit": true,
-		"jsx": "react",
+		"jsx": "react-jsx",
 		"lib": ["ES2020", "DOM", "DOM.Iterable"],
 		"baseUrl": ".",
 		"paths": {
-			"@/*": ["src/*"]
-		}
+			"@/*": ["src/*"],
+			"@components/*": ["src/components/*"],
+			"@hooks/*": ["src/hooks/*"],
+			"@utils/*": ["src/utils/*"],
+			"@types/*": ["src/types/*"]
+		},
+		"types": ["vitest/globals", "node"]
 	},
 	"include": [
 		"src/**/*",

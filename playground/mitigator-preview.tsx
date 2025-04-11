@@ -1,7 +1,7 @@
 // playground/mitigator-preview.tsx
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { MitigatorOverlay } from '../src/components/MitigatorOverlay';
+import { MitigatorOverlay } from '../src/mitigator';
 
 const container = document.getElementById('root');
 if (container) {

@@ -1,6 +1,6 @@
-import type { ExtensionState } from '../types/extension.js';
-import type { ApiConfiguration } from '../types/api.types.js';
-import type { ConfigModelInfo } from '../types/models.js';
+import { ExtensionState } from '../types/extension.js';
+import { ApiConfiguration } from '../types/api.types.js';
+import { ConfigModelInfo } from '../types/models.js';
 
 export interface ExtensionStateContextType {
   state: ExtensionState;

@@ -3,9 +3,9 @@
  * @description Strategia che seleziona prima il provider preferito e poi gli altri in ordine
  */
 
-import type { FallbackStrategy } from './FallbackStrategy';
-import type { LLMProviderHandler } from '../../../providers/provider-registry-stub';
-import type { ProviderStats } from '../LLMFallbackManager';
+import { FallbackStrategy } from './FallbackStrategy';
+import { LLMProviderHandler } from '../../../providers/provider-registry-stub';
+import { ProviderStats } from '../LLMFallbackManager';
 
 /**
  * Strategia che seleziona prima il provider preferito e poi gli altri in ordine

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { sanitizeExportObject } from '../sanitize.js';
 import fs from 'fs';
 import path from 'path';
-import type { ExportOptions } from '../types.js';
+import { ExportOptions } from '../types.js';
 
 // Mock di fs
 vi.mock('fs', () => ({

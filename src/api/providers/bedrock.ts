@@ -1,26 +1,26 @@
 import AnthropicBedrock from "@anthropic-ai/bedrock-sdk"
-import type { ApiHandler } from "../index.js"
+import { ApiHandler } from "../index.js"
 import { convertToR1Format } from "../transform/r1-format.js"
-import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
+import { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
 import { calculateApiCostOpenAI } from "../../utils/cost.js"
-import type { ApiStream, ApiStreamChunk } from "../../types/global.js"
-import type { fromNodeProviderChain } from "@aws-sdk/credential-providers"
-import type {
+import { ApiStream, ApiStreamChunk } from "../../types/global.js"
+import { fromNodeProviderChain } from "@aws-sdk/credential-providers"
+import {
 	BedrockRuntimeClient,
 	ConversationRole,
 	ConverseStreamCommand,
 	InvokeModelWithResponseStreamCommand,
 	InvokeModelCommand,
 } from "@aws-sdk/client-bedrock-runtime"
-import type { 
+import { 
 	bedrockDefaultModelId, 
 	BedrockModelId, 
 	bedrockModels 
 } from "../../shared/api.types.js"
 import { ChatCompletionContentPartText } from "../transform/r1-format.js"
-import type { ChatCompletionMessageParam } from "../../types/provider-types/openai-types.js"
-import type { BaseStreamHandler } from "../handlers/BaseStreamHandler.js"
-import type { ChatMessage } from "../../types/chat.types.js"
+import { ChatCompletionMessageParam } from "../../types/provider-types/openai-types.js"
+import { BaseStreamHandler } from "../handlers/BaseStreamHandler.js"
+import { ChatMessage } from "../../types/chat.types.js"
 
 export interface BedrockConfig {
 	region: string;
@@ -30,15 +30,20 @@ export interface BedrockConfig {
 	};
 }
 
+export interface BedrockMessage {
+	role: ConversationRole;
+	content: string | Array<{ type: string; text: string }>;
+}
+
 export class BedrockProvider {
 	constructor(private config: BedrockConfig, private modelId: string) {}
 
-	public async chat(messages: any[], signal?: AbortSignal): Promise<ApiStream> {
+	public async chat(messages: BedrockMessage[], signal?: AbortSignal): Promise<ApiStream> {
 		// Implementazione del metodo chat per Bedrock
 		throw new Error("Not implemented");
 	}
 
-	public async streamChat(messages: any[], signal?: AbortSignal): Promise<AsyncGenerator<ApiStreamChunk>> {
+	public async streamChat(messages: BedrockMessage[], signal?: AbortSignal): Promise<AsyncGenerator<ApiStreamChunk>> {
 		// Implementazione del metodo streamChat per Bedrock
 		throw new Error("Not implemented");
 	}
@@ -253,18 +258,19 @@ export class AwsBedrockHandler implements ApiHandler {
 		secretAccessKey: string
 		sessionToken?: string
 	}> {
-		// Create AWS credentials by executing an AWS provider chain
-		const providerChain = fromNodeProviderChain()
-		return await AwsBedrockHandler.withTempEnv(
-			() => {
-				AwsBedrockHandler.setEnv("AWS_REGION", this.options.awsRegion)
-				AwsBedrockHandler.setEnv("AWS_ACCESS_KEY_ID", this.options.awsAccessKey)
-				AwsBedrockHandler.setEnv("AWS_SECRET_ACCESS_KEY", this.options.awsSecretKey)
-				AwsBedrockHandler.setEnv("AWS_SESSION_TOKEN", this.options.awsSessionToken)
-				AwsBedrockHandler.setEnv("AWS_PROFILE", this.options.awsProfile)
-			},
-			() => providerChain(),
-		)
+		try {
+			const credentials = await fromNodeProviderChain()()
+			return {
+				accessKeyId: credentials.accessKeyId,
+				secretAccessKey: credentials.secretAccessKey,
+				sessionToken: credentials.sessionToken,
+			}
+		} catch (error) {
+			if (error instanceof Error) {
+				console.error("Errore nel recupero delle credenziali AWS:", error.message)
+			}
+			throw new Error("Impossibile recuperare le credenziali AWS")
+		}
 	}
 
 	/**
@@ -279,15 +285,11 @@ export class AwsBedrockHandler implements ApiHandler {
 	 */
 	private async getBedrockClient(): Promise<BedrockRuntimeClient> {
 		const credentials = await this.getAwsCredentials()
-
+		const region = this.getRegion()
+		
 		return new BedrockRuntimeClient({
-			region: this.getRegion(),
-			credentials: {
-				accessKeyId: credentials.accessKeyId,
-				secretAccessKey: credentials.secretAccessKey,
-				sessionToken: credentials.sessionToken,
-			},
-			...(this.options.awsBedrockEndpoint && { endpoint: this.options.awsBedrockEndpoint }),
+			region,
+			credentials,
 		})
 	}
 
@@ -296,14 +298,11 @@ export class AwsBedrockHandler implements ApiHandler {
 	 */
 	private async getAnthropicClient(): Promise<AnthropicBedrock> {
 		const credentials = await this.getAwsCredentials()
-
-		// Return an AnthropicBedrock client with the resolved/assumed credentials.
+		const region = this.getRegion()
+		
 		return new AnthropicBedrock({
-			awsAccessKey: credentials.accessKeyId,
-			awsSecretKey: credentials.secretAccessKey,
-			awsSessionToken: credentials.sessionToken,
-			awsRegion: this.getRegion(),
-			...(this.options.awsBedrockEndpoint && { baseURL: this.options.awsBedrockEndpoint }),
+			region,
+			credentials,
 		})
 	}
 
@@ -311,36 +310,25 @@ export class AwsBedrockHandler implements ApiHandler {
 	 * Gets the appropriate model ID, accounting for cross-region inference if enabled
 	 */
 	async getModelId(): Promise<string> {
-		if (this.options.awsUseCrossRegionInference) {
-			let regionPrefix = this.getRegion().slice(0, 3)
-			switch (regionPrefix) {
-				case "us-":
-					return `us.${this.getModel().id}`
-				case "eu-":
-					return `eu.${this.getModel().id}`
-				case "ap-":
-					return `apac.${this.getModel().id}`
-				default:
-					// cross region inference is not supported in this region, falling back to default model
-					return this.getModel().id
-			}
-		}
-		return this.getModel().id
+		const model = this.getModel()
+		const region = this.getRegion()
+		return `${region}.${model.id}`
 	}
 
 	private static async withTempEnv<R>(updateEnv: () => void, fn: () => Promise<R>): Promise<R> {
-		const previousEnv = { ...process.env }
-
+		const originalEnv = { ...process.env }
 		try {
 			updateEnv()
 			return await fn()
 		} finally {
-			process.env = previousEnv
+			process.env = originalEnv
 		}
 	}
 
 	private static setEnv(key: string, value: string | undefined) {
-		if (key !== "" && value !== undefined) {
+		if (value === undefined) {
+			delete process.env[key]
+		} else {
 			process.env[key] = value
 		}
 	}

@@ -9,9 +9,9 @@ import { useFallbackAudit } from '../hooks/useFallbackAudit';
 import { useFallbackChartData } from '../hooks/useFallbackChartData';
 
 // Types
-import type { FallbackAudit } from '../types/fallback';
-import type { FallbackSnapshot } from '../types/fallback';
-import type { ProviderStats } from '../types/fallback';
+import { FallbackAudit } from '../types/fallback';
+import { FallbackSnapshot } from '../types/fallback';
+import { ProviderStats } from '../types/fallback';
 
 export {
   // Components

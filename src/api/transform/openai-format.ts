@@ -3,7 +3,7 @@
  * @description Transformer per il formato OpenAI
  */
 
-import type { 
+import { 
 	ChatMessage, 
 	ContentBlock, 
 	TextBlock, 
@@ -12,7 +12,7 @@ import type {
 	isTextBlock, 
 	isImageBlock 
 } from '../../types/chat.types.js';
-import type { 
+import { 
 	OpenAIOptions, 
 	ChatCompletionOptions, 
 	ChatCompletionMessageParam, 
@@ -21,7 +21,7 @@ import type {
 	ChatCompletionContentPartText, 
 	ChatCompletionContentPartImage 
 } from '../../types/provider-types/openai-types.js';
-import type { BaseTransformer, TokenUsage, BaseRequestOptions, ContentUtils } from './BaseTransformer.js';
+import { BaseTransformer, TokenUsage, BaseRequestOptions, ContentUtils } from './BaseTransformer.js';
 import { logger } from "../../utils/logger.js";
 
 /**

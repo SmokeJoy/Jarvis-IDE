@@ -6,7 +6,7 @@
 
 // Importo tutti i tipi dal file centralizzato
 import * as LLMTypes from './llm.types.js';
-import type { TelemetrySetting } from './telemetry.types.js';
+import { TelemetrySetting } from './telemetry.types.js';
 import { ChatCompletionContentPart, ChatCompletionContentPartText, ChatCompletionContentPartImage } from './llm.types.js';
 
 // Ri-esporto tutto per retrocompatibilità

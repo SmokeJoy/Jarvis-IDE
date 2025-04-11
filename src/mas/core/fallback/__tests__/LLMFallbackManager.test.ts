@@ -6,7 +6,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { LLMFallbackManager, LLMFallbackOptions, ProviderStats } from '../LLMFallbackManager';
 import { LLMEventBus, LLMEventName, LLMEventPayload } from '../LLMEventBus';
-import type { LLMProviderHandler } from '../../../providers/provider-registry-stub';
+import { LLMProviderHandler } from '../../../providers/provider-registry-stub';
 import { RoundRobinFallbackStrategy, ReliabilityFallbackStrategy } from '../strategies';
 
 // Crea un mock di un provider LLM

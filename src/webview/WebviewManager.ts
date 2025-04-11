@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import type { WebviewMessageHandler } from './handlers/WebviewMessageHandler.js';
-import type { TaskQueueMessageHandler } from './handlers/TaskQueueMessageHandler.js';
+import { WebviewMessageHandler } from './handlers/WebviewMessageHandler.js';
+import { TaskQueueMessageHandler } from './handlers/TaskQueueMessageHandler.js';
 import { Logger } from '../utils/logger.js';
 import { MasManager } from '../mas/MasManager.js';
 

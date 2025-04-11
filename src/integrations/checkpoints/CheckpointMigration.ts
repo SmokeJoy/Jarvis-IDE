@@ -1,7 +1,7 @@
 import * as fs from "fs/promises"
 import * as path from "path"
 import * as vscode from "vscode"
-import type { fileExistsAtPath } from "../../utils/fs.js"
+import { fileExistsAtPath } from "../../utils/fs.js"
 
 /**
  * Cleans up legacy checkpoints from task folders.

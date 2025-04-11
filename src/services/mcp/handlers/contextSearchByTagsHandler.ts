@@ -1,9 +1,40 @@
-import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
+import { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
+import { ContextItem } from "../types/ContextItem.js";
+import { ContextSearchByTagsArgs } from "../types/handler.types.js";
 import { getAllMemory } from "./contextInjectHandler.js";
 import { normalizeTag } from "./contextTagHandler.js";
 
+interface SearchResultItem extends ContextItem {
+  scope: string;
+  relevanceScore: number;
+}
+
+interface SearchOutput {
+  total: number;
+  limit: number;
+  scope: string;
+  similarityThreshold: number;
+  items: Array<{
+    id: string;
+    scope: string;
+    timestamp: number;
+    date: string;
+    textPreview: string;
+    tags: string[];
+    relevanceScore: number;
+  }>;
+  summary: string;
+}
+
+const DEFAULT_SIMILARITY_THRESHOLD = 0.7;
+const DEFAULT_LIMIT = 50;
+const MAX_LIMIT = 100;
+
 /**
  * Calcola la similarità tra due stringhe usando la distanza di Levenshtein
+ * @param str1 - Prima stringa da confrontare
+ * @param str2 - Seconda stringa da confrontare
+ * @returns Punteggio di similarità tra 0 e 1
  */
 function calculateSimilarity(str1: string, str2: string): number {
   const len1 = str1.length;
@@ -35,12 +66,16 @@ function calculateSimilarity(str1: string, str2: string): number {
 
 /**
  * Cerca contesti che corrispondono ai tag specificati
+ * @param tags - Array di tag da cercare
+ * @param scope - Scope opzionale in cui cercare
+ * @param similarityThreshold - Soglia di similarità per la ricerca fuzzy
+ * @returns Array di contesti che corrispondono ai criteri di ricerca
  */
 export function searchContextsByTags(
   tags: string[],
   scope?: string,
-  similarityThreshold: number = 0.7
-): any[] {
+  similarityThreshold: number = DEFAULT_SIMILARITY_THRESHOLD
+): SearchResultItem[] {
   // Normalizza i tag di ricerca
   const normalizedSearchTags = tags.map(tag => normalizeTag(tag));
   
@@ -48,7 +83,7 @@ export function searchContextsByTags(
     return [];
   }
   
-  let result: any[] = [];
+  let result: SearchResultItem[] = [];
   const allMemory = getAllMemory();
   
   // Filtra per scope se specificato
@@ -108,15 +143,21 @@ export function searchContextsByTags(
 
 /**
  * Handler principale per context.searchByTags
+ * @param args - Argomenti per la ricerca
+ * @returns Risultato della ricerca
  */
-export const contextSearchByTagsHandler: McpToolHandler = async (args): Promise<McpToolResult> => {
+export const contextSearchByTagsHandler: McpToolHandler = async (
+  args: ContextSearchByTagsArgs
+): Promise<McpToolResult> => {
   // Estrai i parametri
   const tags = args?.tags;
   const scope = args?.scope;
-  const limit = args?.limit && !isNaN(parseInt(args.limit)) ? parseInt(args.limit) : 50;
+  const limit = args?.limit && !isNaN(parseInt(args.limit)) 
+    ? Math.min(parseInt(args.limit), MAX_LIMIT) 
+    : DEFAULT_LIMIT;
   const similarityThreshold = args?.similarityThreshold && !isNaN(parseFloat(args.similarityThreshold))
-    ? parseFloat(args.similarityThreshold)
-    : 0.7;
+    ? Math.max(0, Math.min(1, parseFloat(args.similarityThreshold)))
+    : DEFAULT_SIMILARITY_THRESHOLD;
   
   // Valida i parametri
   if (!tags || !Array.isArray(tags) || tags.length === 0) {
@@ -143,7 +184,7 @@ export const contextSearchByTagsHandler: McpToolHandler = async (args): Promise<
     const limitedResults = results.slice(0, limit);
     
     // Prepara l'output
-    const outputResult = {
+    const outputResult: SearchOutput = {
       total: results.length,
       limit,
       scope: scope || 'all',
@@ -164,12 +205,13 @@ export const contextSearchByTagsHandler: McpToolHandler = async (args): Promise<
       success: true,
       output: JSON.stringify(outputResult)
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Errore sconosciuto';
     console.error("Errore nella ricerca per tag:", error);
     return {
       success: false,
       output: null,
-      error: `Errore nella ricerca per tag: ${error.message}`
+      error: `Errore nella ricerca per tag: ${errorMessage}`
     };
   }
 }; 

@@ -5,7 +5,7 @@
  * @deprecated Usare l'importazione da "../shared/types/message.types.js" invece
  */
 
-import type { 
+import { 
   ChatMessage as ChatMessageType, 
   normalizeChatMessages as normalizeMessages, 
   toChatMessage 

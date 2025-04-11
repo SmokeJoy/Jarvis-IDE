@@ -10,8 +10,8 @@ import {
   RoundRobinFallbackStrategy,
   ReliabilityFallbackStrategy
 } from '../';
-import type { LLMProviderHandler } from '../../../../providers/provider-registry-stub';
-import type { ProviderStats } from '../../LLMFallbackManager';
+import { LLMProviderHandler } from '../../../../providers/provider-registry-stub';
+import { ProviderStats } from '../../LLMFallbackManager';
 
 describe('CompositeFallbackStrategy', () => {
   // Utility per creare provider di test

@@ -5,8 +5,8 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { toCSV, sessionToCSV } from '../csv.js';
-import type { ChatMessage } from '../../../shared/types.js';
-import type { ExportableSession } from '../types.js';
+import { ChatMessage } from '../../../shared/types.js';
+import { ExportableSession } from '../types.js';
 import { Logger } from '../../logger.js';
 
 // Mock del logger

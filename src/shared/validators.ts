@@ -4,14 +4,14 @@
  */
 
 import Ajv from 'ajv';
-import type { WebviewMessage } from './WebviewMessage.js';
-import type { ExtensionMessage } from './ExtensionMessage.js';
-import type { ChatMessage } from './types/index.js';
-import type { ChatSettings, ApiConfiguration } from '../types/extension.js';
+import { WebviewMessage } from './WebviewMessage.js';
+import { ExtensionMessage } from './ExtensionMessage.js';
+import { ChatMessage } from './types/index.js';
+import { ChatSettings, ApiConfiguration } from '../types/extension.js';
 import { Logger } from './logger.js';
-import type { ChatSession } from './types/session.js';
+import { ChatSession } from './types/session.js';
 import { isChatSession } from './types/session.js';
-import type { OpenRouterModelInfo } from './types/api.types.js';
+import { OpenRouterModelInfo } from './types/api.types.js';
 
 // Usa require per importare gli schemi JSON 
 // (assicurati che i path siano corretti rispetto a dove verranno generati)

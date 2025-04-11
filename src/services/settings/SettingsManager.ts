@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import type { Settings } from '../../shared/types/settings.types.js';
-import type { ApiConfiguration, LLMProviderId } from '../../shared/types/api.types.js';
-import type { ContextPrompt } from '../../shared/types/webview.types.js';
-import type { TelemetrySetting } from '../../shared/types/telemetry.types.js';
+import { Settings } from '../../shared/types/settings.types.js';
+import { ApiConfiguration, LLMProviderId } from '../../shared/types/api.types.js';
+import { ContextPrompt } from '../../shared/types/webview.types.js';
+import { TelemetrySetting } from '../../shared/types/telemetry.types.js';
 import { v4 as uuidv4 } from 'uuid';
 
 /**

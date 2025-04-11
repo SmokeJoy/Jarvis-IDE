@@ -3,10 +3,16 @@ import path from 'path';
 
 export default defineConfig({
   test: {
-    globals: true,
+    include: [
+      'scripts/codemods/__tests__/**/*.test.ts',
+      'src/__tests__/**/*.test.ts',
+      'src/**/__tests__/**/*.test.ts'
+    ],
+    exclude: [
+      'src/__tests__/problematic/**/*.test.ts'
+    ],
     environment: 'node',
-    include: ['src/__tests__/**/*.test.ts', 'src/**/__tests__/**/*.test.ts'],
-    exclude: ['src/__tests__/problematic/**/*.test.ts'],
+    globals: true,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'json-summary', 'lcov', 'html'],
@@ -16,6 +22,8 @@ export default defineConfig({
         'src/test/**',
         'src/**/*.d.ts',
         'src/index.ts',
+        'node_modules/**',
+        'scripts/codemods/__tests__/**'
       ],
       all: true,
       thresholds: {

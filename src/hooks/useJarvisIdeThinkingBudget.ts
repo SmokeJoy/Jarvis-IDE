@@ -1,7 +1,7 @@
 // Dichiarazione per l'API vscode WebView
 declare const vscode: { postMessage: (message: any) => void };
 
-import type { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 export const useJarvisIdeThinkingBudget = () => {
   const [thinkingBudget, setThinkingBudget] = useState<number>(100);

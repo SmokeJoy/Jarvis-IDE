@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import { v4 as uuidv4 } from 'uuid';
-import type { EventEmitter } from 'events';
-import type { MasStateManager } from './MasStateManager.js';
+import { EventEmitter } from 'events';
+import { MasStateManager } from './MasStateManager.js';
 import { TaskQueueManager } from './TaskQueueManager.js';
-import type { 
+import { 
   MasConfig, 
   AgentConfig, 
   AgentStatus, 

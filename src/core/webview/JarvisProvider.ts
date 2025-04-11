@@ -4,14 +4,14 @@ import * as path from "path";
 import { promises as fs } from "fs";
 
 // Importazioni di type necessarie raggruppate
-import type { OpenAiCompatibleModelInfo } from "../../shared/types/api.types.js"
-import type { LLMProviderId, ApiConfiguration } from "../../shared/types/api.types.js"
-import type { WebviewMessage } from "../../shared/types/webview.types.js"
-import type { OutgoingWebviewMessage } from "../../shared/types/webview.types.js"
-import type { ExtensionState } from "../../shared/ExtensionMessage.js"
-import type { AutoApprovalSettings, ChatSettings, BrowserSettings } from "../../shared/types/user-settings.types.js"
-import type { AgentStatus, TaskQueueState, TaskStatus } from "../../shared/types/mas.types.js"
-import type { 
+import { OpenAiCompatibleModelInfo } from "../../shared/types/api.types.js"
+import { LLMProviderId, ApiConfiguration } from "../../shared/types/api.types.js"
+import { WebviewMessage } from "../../shared/types/webview.types.js"
+import { OutgoingWebviewMessage } from "../../shared/types/webview.types.js"
+import { ExtensionState } from "../../shared/ExtensionMessage.js"
+import { AutoApprovalSettings, ChatSettings, BrowserSettings } from "../../shared/types/user-settings.types.js"
+import { AgentStatus, TaskQueueState, TaskStatus } from "../../shared/types/mas.types.js"
+import { 
   IJarvisProvider, 
   ExtendedChatSettings, 
   JarvisSettings, 
@@ -20,7 +20,7 @@ import type {
   HistoryItem,
   TelemetrySetting
 } from "../../shared/types/provider.types.js"
-import type { ExportableSession } from "../../utils/exporters/types.js";
+import { ExportableSession } from "../../utils/exporters/types.js";
 
 // Importo la nuova union discriminata e la sua type guard
 import { 

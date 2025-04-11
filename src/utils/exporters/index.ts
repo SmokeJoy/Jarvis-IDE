@@ -15,7 +15,7 @@ import {
   detectFormatFromExtension,
   ImportOptions
 } from './importers.js';
-import type { 
+import { 
   ExportableSession, 
   ExportFormat, 
   ExportOptions, 

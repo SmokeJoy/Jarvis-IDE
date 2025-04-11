@@ -3,7 +3,7 @@
  * @description Test unitari per la validazione dei messaggi WebView
  */
 
-import type { 
+import { 
   WebviewMessage, 
   BaseWebviewMessage, 
   IncomingWebviewMessage, 

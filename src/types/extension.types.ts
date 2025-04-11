@@ -1,6 +1,6 @@
-import type { JarvisSettings } from './settings.types.js';
-import type { ChatMessage } from './chat.types.js';
-import type { AIProvider } from '../shared/types/provider.types.js';
+import { JarvisSettings } from './settings.types.js';
+import { ChatMessage } from './chat.types.js';
+import { AIProvider } from '../shared/types/provider.types.js';
 
 export interface ExtensionState {
   settings: JarvisSettings;

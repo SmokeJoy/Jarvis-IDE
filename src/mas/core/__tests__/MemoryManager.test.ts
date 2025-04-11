@@ -3,8 +3,11 @@
  * @description Test per la classe MemoryManager
  */
 
-import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { MemoryManager } from '../MemoryManager';
+
+// Tipi per i test
+type TestValue = string | number | boolean | object | any[];
 
 describe('MemoryManager', () => {
   let memoryManager: MemoryManager;
@@ -28,17 +31,27 @@ describe('MemoryManager', () => {
     });
 
     it('dovrebbe impostare valori di diversi tipi', async () => {
-      await memoryManager.set('stringa', 'testo');
-      await memoryManager.set('numero', 42);
-      await memoryManager.set('booleano', true);
-      await memoryManager.set('oggetto', { nome: 'test' });
-      await memoryManager.set('array', [1, 2, 3]);
+      const testValues: Record<string, TestValue> = {
+        stringa: 'testo',
+        numero: 42,
+        booleano: true,
+        oggetto: { nome: 'test' },
+        array: [1, 2, 3]
+      };
 
-      expect(await memoryManager.get('stringa')).toBe('testo');
-      expect(await memoryManager.get('numero')).toBe(42);
-      expect(await memoryManager.get('booleano')).toBe(true);
-      expect(await memoryManager.get('oggetto')).toEqual({ nome: 'test' });
-      expect(await memoryManager.get('array')).toEqual([1, 2, 3]);
+      for (const [key, value] of Object.entries(testValues)) {
+        await memoryManager.set(key, value);
+        const risultato = await memoryManager.get(key);
+        expect(risultato).toEqual(value);
+      }
+    });
+
+    it('dovrebbe gestire valori null e undefined', async () => {
+      await memoryManager.set('nullo', null);
+      await memoryManager.set('undefined', undefined);
+      
+      expect(await memoryManager.get('nullo')).toBeNull();
+      expect(await memoryManager.get('undefined')).toBeNull();
     });
   });
 
@@ -49,9 +62,14 @@ describe('MemoryManager', () => {
       expect(risultato).toBe('valore');
     });
 
-    it('dovrebbe restituire undefined per chiavi non esistenti', async () => {
+    it('dovrebbe restituire null per chiavi non esistenti', async () => {
       const risultato = await memoryManager.get('chiave_inesistente');
-      expect(risultato).toBeUndefined();
+      expect(risultato).toBeNull();
+    });
+
+    it('dovrebbe restituire null per chiavi vuote', async () => {
+      const risultato = await memoryManager.get('');
+      expect(risultato).toBeNull();
     });
   });
 
@@ -82,6 +100,18 @@ describe('MemoryManager', () => {
       const risultato = await memoryManager.get('oggetti');
       expect(risultato).toEqual([{ id: 1 }, { id: 2 }]);
     });
+
+    it('dovrebbe gestire valori null e undefined', async () => {
+      await memoryManager.set('nullo', null);
+      await memoryManager.append('nullo', 'valore');
+      const risultato = await memoryManager.get('nullo');
+      expect(risultato).toEqual(['valore']);
+
+      await memoryManager.set('undefined', undefined);
+      await memoryManager.append('undefined', 'valore');
+      const risultato2 = await memoryManager.get('undefined');
+      expect(risultato2).toEqual(['valore']);
+    });
   });
 
   describe('remove', () => {
@@ -89,13 +119,15 @@ describe('MemoryManager', () => {
       await memoryManager.set('chiave', 'valore');
       await memoryManager.remove('chiave');
       const risultato = await memoryManager.get('chiave');
-      expect(risultato).toBeUndefined();
+      expect(risultato).toBeNull();
     });
 
     it('non dovrebbe generare errori quando si rimuove una chiave inesistente', async () => {
-      expect(async () => {
-        await memoryManager.remove('chiave_inesistente');
-      }).not.toThrow();
+      await expect(memoryManager.remove('chiave_inesistente')).resolves.not.toThrow();
+    });
+
+    it('non dovrebbe generare errori quando si rimuove una chiave vuota', async () => {
+      await expect(memoryManager.remove('')).resolves.not.toThrow();
     });
   });
 
@@ -105,8 +137,30 @@ describe('MemoryManager', () => {
       await memoryManager.set('chiave2', 'valore2');
       await memoryManager.clear();
       
-      expect(await memoryManager.get('chiave1')).toBeUndefined();
-      expect(await memoryManager.get('chiave2')).toBeUndefined();
+      expect(await memoryManager.get('chiave1')).toBeNull();
+      expect(await memoryManager.get('chiave2')).toBeNull();
+    });
+
+    it('dovrebbe gestire correttamente la memoria vuota', async () => {
+      await memoryManager.clear();
+      expect(await memoryManager.get('qualsiasi_chiave')).toBeNull();
+    });
+  });
+
+  describe('concorrenza', () => {
+    it('dovrebbe gestire operazioni concorrenti correttamente', async () => {
+      const operations = Array.from({ length: 100 }, (_, i) => i);
+      
+      await Promise.all(operations.map(async (i) => {
+        await memoryManager.set(`chiave${i}`, `valore${i}`);
+        await memoryManager.append('lista', i);
+      }));
+
+      expect(await memoryManager.get('lista')).toHaveLength(100);
+      
+      for (let i = 0; i < 100; i++) {
+        expect(await memoryManager.get(`chiave${i}`)).toBe(`valore${i}`);
+      }
     });
   });
 }); 

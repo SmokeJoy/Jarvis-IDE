@@ -2,12 +2,12 @@ import { MultiAgentMessageType, MultiAgentMessageUnion } from './multi-agent-mes
 
 export const isAgentStatusUpdatedMessage = (
   message: MultiAgentMessageUnion
-): message is MultiAgentMessageUnion<MultiAgentMessageType.AGENT_STATUS_UPDATED> => {
+): message is MultiAgentMessageUnion => {
   return message.type === MultiAgentMessageType.AGENT_STATUS_UPDATED;
 };
 
 export const isAgentErrorMessage = (
   message: MultiAgentMessageUnion
-): message is MultiAgentMessageUnion<MultiAgentMessageType.AGENT_ERROR> => {
+): message is MultiAgentMessageUnion => {
   return message.type === MultiAgentMessageType.AGENT_ERROR;
 };

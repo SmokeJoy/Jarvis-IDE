@@ -3,9 +3,9 @@
  * @description Strategia che seleziona i provider in base al loro tasso di successo
  */
 
-import type { FallbackStrategy } from './FallbackStrategy';
-import type { LLMProviderHandler } from '../../../providers/provider-registry-stub';
-import type { ProviderStats } from '../LLMFallbackManager';
+import { FallbackStrategy } from './FallbackStrategy';
+import { LLMProviderHandler } from '../../../providers/provider-registry-stub';
+import { ProviderStats } from '../LLMFallbackManager';
 
 /**
  * Strategia che seleziona i provider in base alla loro affidabilità (tasso di successo)

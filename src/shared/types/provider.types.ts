@@ -1,11 +1,11 @@
 // Importazioni necessarie
 import * as vscode from "vscode";
-import type { ChatSettings, AutoApprovalSettings, BrowserSettings } from "./user-settings.types.js";
-import type { ApiConfiguration, OpenAiCompatibleModelInfo, LLMProviderId } from "./api.types.js";
-import type { AgentStatus, PriorityLevel, TaskQueueState } from "./mas.types.js";
+import { ChatSettings, AutoApprovalSettings, BrowserSettings } from "./user-settings.types.js";
+import { ApiConfiguration, OpenAiCompatibleModelInfo, LLMProviderId } from "./api.types.js";
+import { AgentStatus, PriorityLevel, TaskQueueState } from "./mas.types.js";
 import { ChatContent } from "../ChatContent.js";
-import type { WebviewMessage } from "./webview.types.js";
-import type { Platform } from "../ExtensionMessage.js";
+import { WebviewMessage } from "./webview.types.js";
+import { Platform } from "../ExtensionMessage.js";
 
 /**
  * Definizione esplicita dell'interfaccia ExtensionState

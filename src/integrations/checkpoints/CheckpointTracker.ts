@@ -4,7 +4,7 @@ import { simpleGit, SimpleGit } from "simple-git"
 import * as vscode from "vscode"
 import { telemetryService } from "../../services/telemetry/TelemetryService.js"
 import { GitOperations } from "./CheckpointGitOperations.js"
-import type { getShadowGitPath, getWorkingDirectory, hashWorkingDir } from "./CheckpointUtils.js"
+import { getShadowGitPath, getWorkingDirectory, hashWorkingDir } from "./CheckpointUtils.js"
 
 /**
  * CheckpointTracker Module

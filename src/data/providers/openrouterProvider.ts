@@ -4,7 +4,7 @@
  * Implementa le funzionalità di caricamento modelli per OpenRouter
  */
 
-import type { OpenAiCompatibleModelInfo, OpenRouterModelInfo, LLMProviderId } from "../../shared/types/api.types.js";
+import { OpenAiCompatibleModelInfo, OpenRouterModelInfo, LLMProviderId } from "../../shared/types/api.types.js";
 import { OPENROUTER_MODELS } from "../openrouterModels.js";
 import { isOpenRouterModelInfo } from "../../shared/validators.js";
 import { Logger } from "../../shared/logger.js";

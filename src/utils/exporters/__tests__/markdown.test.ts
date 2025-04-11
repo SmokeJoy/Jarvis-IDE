@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { toMarkdown } from '../markdown.js';
-import type { ExportableSession } from '../types.js';
+import { ExportableSession } from '../types.js';
 import { Logger } from '../../logger.js';
 
 // Mock del logger

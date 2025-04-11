@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import type { HandlerFunction } from '../types.js';
+import { HandlerFunction } from '../types.js';
 import { readFile } from 'fs/promises';
 import { extname } from 'path';
-import type { LintConfigArgs } from '../mcp.types.js';
+import { LintConfigArgs } from '../mcp.types.js';
 
 interface ConfigLinterArgs {
   filePath: string;

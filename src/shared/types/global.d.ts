@@ -3,9 +3,9 @@
  * @description Tipi globali centralizzati per l'applicazione
  * Questo file contiene definizioni di tipi utilizzati in tutto il sistema
  */
-import type { ChatCompletionMessageParam } from "../../types/provider-types/openai-types.js";
-import type { BaseMessage } from "./message.js";
-import type { LLMProviderId } from "./llm.types.js";
+import { ChatCompletionMessageParam } from "../../types/provider-types/openai-types.js";
+import { BaseMessage } from "./message.js";
+import { LLMProviderId } from "./llm.types.js";
 export type { LLMProviderId, BaseMessage };
 export type { ChatCompletionMessageParam };
 export type { ChatCompletionContentPartText, ChatCompletionContentPartImage } from "./api.types.js";

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import type {
+import {
   ExtensionMessage,
   ExtensionCommand,
   ExtensionConfiguration,

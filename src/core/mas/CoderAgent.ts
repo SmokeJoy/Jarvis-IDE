@@ -1,5 +1,5 @@
-import type { CoderAgent as ICoderAgent, CoderInstruction, AgentMessage } from './AgentTypes.js';
-import type { EventEmitter } from 'events';
+import { CoderAgent as ICoderAgent, CoderInstruction, AgentMessage } from './AgentTypes.js';
+import { EventEmitter } from 'events';
 import { Logger } from '../../utils/logger.js';
 
 /**

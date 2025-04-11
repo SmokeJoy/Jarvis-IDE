@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { Logger } from '../utils/logger.js';
-import type { Task, TaskQueueState, TaskStatus } from '../../webview-ui/shared/types.js';
+import { Task, TaskQueueState, TaskStatus } from '../../webview-ui/shared/types.js';
 
 /**
  * Servizio per la gestione della coda dei task

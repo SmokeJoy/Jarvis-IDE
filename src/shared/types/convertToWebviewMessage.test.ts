@@ -3,7 +3,7 @@
  * @description Test unitari per la funzione di conversione convertToWebviewMessage
  */
 
-import type { convertToWebviewMessage, ExtensionMessage, WebviewMessage } from './webview.types.js';
+import { convertToWebviewMessage, ExtensionMessage, WebviewMessage } from './webview.types.js';
 
 describe('convertToWebviewMessage', () => {
   it('should return null for null input', () => {

@@ -1,16 +1,16 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
-import type { ApiHandler } from "../index.js"
-import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
-import type { ChatMessage } from "../../types/chat.types.js"
+import { ApiHandler } from "../index.js"
+import { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
+import { ChatMessage } from "../../types/chat.types.js"
 import { ApiStream, ApiStreamChunk } from "../transform/stream.js"
-import type { BaseStreamHandler } from "../handlers/BaseStreamHandler.js"
+import { BaseStreamHandler } from "../handlers/BaseStreamHandler.js"
 import { logger } from "../../utils/logger.js"
-import type { 
+import { 
 	geminiDefaultModelId, 
 	GeminiModelId, 
 	geminiModels 
 } from "../../shared/api.ts"
-import type { convertAnthropicMessageToGemini, convertMessageToGemini } from "../transform/gemini-format.js"
+import { convertAnthropicMessageToGemini, convertMessageToGemini } from "../transform/gemini-format.js"
 
 export class GeminiHandler implements ApiHandler {
 	private options: ApiHandlerOptions

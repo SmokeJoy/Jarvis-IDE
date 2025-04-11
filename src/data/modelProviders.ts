@@ -1,7 +1,7 @@
-import type { OpenAiCompatibleModelInfo } from "../shared/types/api.types.js"
+import { OpenAiCompatibleModelInfo } from "../shared/types/api.types.js"
 import { OPENROUTER_MODELS } from "./openrouterModels.js"
 
-import type { LLMProviderId } from "../shared/types/llm.types.js"
+import { LLMProviderId } from "../shared/types/llm.types.js"
 
 /**
  * Tipo che rappresenta i provider di modelli supportati

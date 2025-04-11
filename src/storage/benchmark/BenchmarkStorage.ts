@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import type { getStoragePath } from '../StoragePath.js';
+import { getStoragePath } from '../StoragePath.js';
 import { BenchmarkSession, BenchmarkSessionDetail, ProviderStats, TimelineStats } from '../../shared/WebviewMessage.js';
 
 /**

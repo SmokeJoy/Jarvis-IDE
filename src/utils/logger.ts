@@ -1,6 +1,6 @@
 import { LogLevel } from "../types/global.js"
-import type { JarvisProvider as JarvisProviderType } from '../core/webview/JarvisProvider.js'
-import type { appendLogToFile as appendLogToFileType } from './logStorage.js'
+import { JarvisProvider as JarvisProviderType } from '../core/webview/JarvisProvider.js'
+import { appendLogToFile as appendLogToFileType } from './logStorage.js'
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 

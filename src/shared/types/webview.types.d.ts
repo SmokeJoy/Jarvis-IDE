@@ -3,9 +3,9 @@
  * @description Definizione centralizzata di tutti i tipi per la comunicazione WebView in Jarvis IDE
  * Questo file è la fonte di verità per tutti i tipi di messaggi tra estensione e WebView
  */
-import type { ApiConfiguration } from './api.types.js';
+import { ApiConfiguration } from './api.types.js';
 import { TelemetrySetting } from './telemetry.types.js';
-import type { ChatMessage as ChatMessageImport } from './message.types.js';
+import { ChatMessage as ChatMessageImport } from './message.types.js';
 export type ChatMessage = ChatMessageImport;
 /**
  * Tipi di messaggi per la comunicazione bidirezionale

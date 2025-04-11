@@ -1,4 +1,4 @@
-import type { McpToolHandler } from "../../../shared/types/mcp.types.js";
+import { McpToolHandler } from "../../../shared/types/mcp.types.js";
 interface ContextItem {
     id: string;
     scope: string;

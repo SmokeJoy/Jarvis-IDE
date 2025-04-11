@@ -1,0 +1,11 @@
+[
+  {
+    "file": "E:\\cline-main\\src\\utils\\validation.ts",
+    "line": 1,
+    "original": "// import { anthropicModels } from \"../shared/api.js\"\n// import type { ModelInfo } from '../types/models.js'\nimport type { anthropicModels } from \"../shared/api.js\";",
+    "fixed": "// import { anthropicModels } from \"../shared/api.js\"\n// import { ModelInfo } from '../types/models.js'\nimport type { anthropicModels } from \"../shared/api.js\";",
+    "imports": [
+      "anthropicModels"
+    ]
+  }
+]

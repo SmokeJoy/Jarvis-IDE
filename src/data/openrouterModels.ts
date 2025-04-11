@@ -1,4 +1,4 @@
-import type { OpenAiCompatibleModelInfo } from "../shared/types/api.types.js"
+import { OpenAiCompatibleModelInfo } from "../shared/types/api.types.js"
 
 export const OPENROUTER_MODELS: OpenAiCompatibleModelInfo[] = [
   {

@@ -1,6 +1,6 @@
-import type { ContextItem } from '../types/context.js';
-import type { getMemoryContexts, saveMemoryContexts } from '../utils/memory.js';
-import type { ToolCallResult } from '../types/tool.js';
+import { ContextItem } from '../types/context.js';
+import { getMemoryContexts, saveMemoryContexts } from '../utils/memory.js';
+import { ToolCallResult } from '../types/tool.js';
 import { v4 as uuidv4 } from 'uuid';
 
 interface ImportOptions {

@@ -1,6 +1,6 @@
-import type { ContextItem } from '../types/context.js';
-import type { getMemoryContexts } from '../utils/memory.js';
-import type { ToolCallResult } from '../types/tool.js';
+import { ContextItem } from '../types/context.js';
+import { getMemoryContexts } from '../utils/memory.js';
+import { ToolCallResult } from '../types/tool.js';
 
 interface ExportOptions {
   format: 'json' | 'csv' | 'markdown';

@@ -1,15 +1,15 @@
 import OpenAI from "openai"
-import type { ApiHandler } from "../index.js"
-import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
-import type { openAiModelInfoSaneDefaults } from "../../shared/api.js"
+import { ApiHandler } from "../index.js"
+import { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
+import { openAiModelInfoSaneDefaults } from "../../shared/api.js"
 import { calculateApiCostOpenAI } from "../../utils/cost.js"
-import type { convertToOpenAiMessages } from "../transform/openai-format.js"
+import { convertToOpenAiMessages } from "../transform/openai-format.js"
 import { ApiStream, ApiStreamChunk } from "../transform/stream.js"
 import { convertToR1Format } from "../transform/r1-format.js"
-import type { BaseStreamHandler } from "../handlers/BaseStreamHandler.js"
+import { BaseStreamHandler } from "../handlers/BaseStreamHandler.js"
 import { logger } from "../../utils/logger.js"
-import type { ChatMessage } from "../../types/chat.types.js"
-import type { ChatCompletionMessageParam } from "../../types/provider-types/openai-types.js"
+import { ChatMessage } from "../../types/chat.types.js"
+import { ChatCompletionMessageParam } from "../../types/provider-types/openai-types.js"
 
 export class TogetherHandler implements ApiHandler {
 	private options: ApiHandlerOptions

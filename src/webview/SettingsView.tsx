@@ -11,7 +11,7 @@ import {
   VSCodeBadge,
   VSCodeCheckbox
 } from '@vscode/webview-ui-toolkit/react';
-import type { useSettings } from '../webview-ui/providers/settingsProvider.js';
+import { useSettings } from '../webview-ui/providers/settingsProvider.js';
 import { PromptEditor } from './components/PromptEditor.js';
 import { SystemPromptEditor } from './components/SystemPromptEditor.js';
 

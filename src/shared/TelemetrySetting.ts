@@ -3,7 +3,7 @@
  * @description Tipi e funzioni per le impostazioni di telemetria
  */
 
-import type { TelemetrySetting } from './types/telemetry.types.js';
+import { TelemetrySetting } from './types/telemetry.types.js';
 
 // Ri-esporta il tipo per retrocompatibilità
 export type { TelemetrySetting };

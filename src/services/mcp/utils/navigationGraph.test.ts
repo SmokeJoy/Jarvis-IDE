@@ -1,10 +1,10 @@
-import type {
+import {
   calculateSemanticScore,
   buildNodeResult,
   buildEdgeResult,
   filterLinksByOptions
 } from './navigationGraph.js';
-import type { ContextLink } from '../types.js';
+import { ContextLink } from '../types.js';
 
 describe('navigationGraph utils', () => {
   describe('calculateSemanticScore', () => {

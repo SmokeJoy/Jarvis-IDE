@@ -1,7 +1,7 @@
-import type { ChatCompletionMessageParam } from "../../types/provider-types/openai-types.js"
-import type { DeepSeekConfig } from "../config/deepseek-config.js"
+import { ChatCompletionMessageParam } from "../../types/provider-types/openai-types.js"
+import { DeepSeekConfig } from "../config/deepseek-config.js"
 import { logger } from "../../utils/logger.js"
-import type { 
+import { 
 	ChatMessage, 
 	ContentBlock, 
 	TextBlock, 

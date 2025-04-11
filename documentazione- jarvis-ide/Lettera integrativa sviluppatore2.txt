@@ -1,0 +1,96 @@
+# 📬 Lettera di Integrazione – Supervisore AI (Sviluppatore AI 2)
+
+## 📁 Progetto: Jarvis-IDE
+## 📄 Oggetto: Integrazione architetturale e operativa del Supervisore AI nel ciclo di sviluppo
+
+---
+
+Cari membri del team AI,
+
+con la presente comunico l’integrazione formale del ruolo di **Supervisore AI** come componente attivo e strutturato del progetto **Jarvis-IDE**, in accordo con la documentazione ufficiale, le fasi attuali di sviluppo e gli obiettivi di lungo termine.
+
+---
+
+## 🧠 Contesto
+
+Jarvis-IDE rappresenta un nuovo paradigma nello sviluppo software: un IDE guidato da intelligenze artificiali, estendibile, universale, e capace di operare **in autonomia** tramite agenti specializzati.
+
+All’interno di questa visione, il Supervisore AI assume una funzione chiave:
+
+> 🧭 Garantire la **coerenza tecnica, la qualità semantica**, e la **testabilità** di ogni modifica introdotta nel sistema.
+
+---
+
+## 🎯 Obiettivi della presente integrazione
+
+1. **Formalizzare il ruolo del Supervisore AI** come revisore tecnico ufficiale.
+2. **Uniformare i processi di validazione, refactor e documentazione**.
+3. **Fornire una guida chiara agli Sviluppatori AI** sui comportamenti attesi, vincoli da rispettare e supporto disponibile.
+
+---
+
+## 📌 Compiti integrati del Supervisore AI
+
+| Compito | Azione |
+|--------|--------|
+| Validazione codice | Revisione continua di pull request, refactor e moduli AI |
+| Tipizzazione rigorosa | Eliminazione di `any`, `as`, cast inutili o unsafe |
+| Testabilità | Presenza di test Jest/RTL per ogni modulo logico introdotto |
+| Coerenza messaggi | Verifica dispatch message WebView ↔ Extension |
+| Modularità | Consolidamento tipi in `common.ts`, logiche in `handlers/` o `utils/` |
+| Documentazione | Supervisione continua di `logbook` + `struttura-progetto.md` |
+
+---
+
+## 📢 Istruzioni per gli Sviluppatori AI
+
+Tutti gli sviluppatori AI devono:
+
+1. ✍️ **Registrare ogni intervento nel logbook personale** (`docs/logbook/sviluppatore-ai-X.md`)
+2. 📁 **Aggiornare la struttura del progetto** in `docs/architecture/struttura-progetto.md` per ogni file o cartella nuova
+3. 🧪 **Scrivere test unitari** per ogni componente React o handler non coperto
+4. 🧠 **Richiedere supporto al GPT Specialist React/TS** prima di eseguire workaround o soluzioni non certificate
+5. 📤 **Controllare ogni messaggio inviato o ricevuto via postMessage**, rendendolo tipizzato, testabile, e coerente
+
+---
+
+## ⚠️ Azioni non permesse
+
+- Nessun `any`, `as`, `@ts-ignore` o `TODO` lasciati in main
+- Nessun test mancante per nuove logiche
+- Nessuna modifica architetturale senza documentazione
+- Nessun commit in `main`, `dev`, o `release` senza checklist completa
+
+---
+
+## ✅ Supporto disponibile
+
+Il Supervisore AI può:
+
+- ✍️ Scrivere lettere per i GPT specialisti React/TS
+- 📦 Fornire esempi pronti all’uso per dispatcher, hook, tipi, test
+- 🧠 Fornire assistenza su refactor strutturali, messaggistica e testing avanzato
+
+---
+
+## 📍 Integrazione nel ciclo di sviluppo
+
+Ogni PR deve ora includere una sezione `🔍 Revisione Supervisore AI` che documenti:
+
+- ✅ Quali moduli sono stati toccati
+- 🧪 Che tipo di test sono stati scritti o aggiornati
+- 📘 Quali file documentali sono stati modificati
+
+---
+
+## 📅 Validità
+
+Questa lettera entra in vigore da subito e deve essere inclusa nella documentazione interna del progetto come **appendice fissa** del file `README.md` o `CONTRIBUTING.md`.
+
+---
+
+> Per una visione condivisa, trasparente e scalabile dell’intelligenza applicata allo sviluppo.
+
+Con rispetto e attenzione al codice,
+
+— Sviluppatore AI (2)

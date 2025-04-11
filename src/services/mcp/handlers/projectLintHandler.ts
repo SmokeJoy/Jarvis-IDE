@@ -3,7 +3,7 @@ import * as fs from "fs/promises";
 import { exec } from "child_process";
 import { promisify } from "util";
 import * as vscode from "vscode";
-import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
+import { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
 
 // Supportiamo ESLint per TypeScript/JavaScript
 let ESLint: any;

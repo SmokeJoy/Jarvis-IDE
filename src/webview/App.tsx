@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import type { SettingsPage } from './pages/SettingsPage.js';
+import { SettingsPage } from './pages/SettingsPage.js';
 import { isDarkTheme } from './vscode.js';
 
 export const App: React.FC = () => {

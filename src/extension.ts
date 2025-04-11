@@ -20,7 +20,7 @@ import { registerExportCommands } from './commands/exportCommands.js'
 import { JarvisAgent } from './agent/JarvisAgent.js'
 import { MasManager } from './mas/MasManager.js'
 import { registerMasCommands } from './mas/masCommands.js'
-import type { LLMProviderId } from './shared/types/api.types.js'
+import { LLMProviderId } from './shared/types/api.types.js'
 import { registerTestCommand } from './services/mcp/test-script.js'
 import { logger } from './utils/logger.js';
 import { LogLevel } from './types/global.js';
@@ -29,10 +29,10 @@ import { exportCurrentLog, openLogDirectory } from './utils/logExport.js'
 import { castAs } from './shared/types/webview.types.js';
 
 // Importazioni di tipo, lasciare così
-import type { OpenRouterHandler } from './api/providers/openrouter.js'
-import type { ChatMessage } from './shared/types/chat.types.js'
-import type { WebviewMessage, WebviewMessageType, ExtensionMessage } from './shared/types/webview.types.js'
-import type { JarvisSettings } from './types/settings.types.js'
+import { OpenRouterHandler } from './api/providers/openrouter.js'
+import { ChatMessage } from './shared/types/chat.types.js'
+import { WebviewMessage, WebviewMessageType, ExtensionMessage } from './shared/types/webview.types.js'
+import { JarvisSettings } from './types/settings.types.js'
 
 // Aggiungi l'importazione del Command Center e degli agenti
 import { commandCenter } from './core/command-center';

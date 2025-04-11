@@ -1,4 +1,4 @@
-import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
+import { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
 
 /**
  * Lingue supportate e relative configurazioni per il refactoring

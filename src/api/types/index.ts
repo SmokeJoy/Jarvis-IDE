@@ -1,4 +1,4 @@
-import type { OpenRouterModelInfo } from '../../types/extension.js';
+import { OpenRouterModelInfo } from '../../types/extension.js';
 import { ApiStream } from '../../types/global.js';
 import { HistoryItem } from '../../shared/HistoryItem.js';
 import { ApiProvider } from '../../agent/api/ApiProvider.js';

@@ -1,7 +1,7 @@
 import { Anthropic } from "@anthropic-ai/sdk"
-import type { JarvisIdeApiReqInfo, JarvisIdeMessage } from "../../shared/ExtensionMessage.js"
-import type { ApiHandler } from "../../api.js"
-import type { OpenAiHandler } from "../../api/providers/openai.js"
+import { JarvisIdeApiReqInfo, JarvisIdeMessage } from "../../shared/ExtensionMessage.js"
+import { ApiHandler } from "../../api.js"
+import { OpenAiHandler } from "../../api/providers/openai.js"
 
 export class ContextManager {
 	getNewContextMessagesAndMetadata(

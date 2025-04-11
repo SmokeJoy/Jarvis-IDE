@@ -2,14 +2,14 @@ import * as vscode from "vscode"
 import * as fs from "fs/promises"
 import { join } from "path"
 import { existsSync } from "fs"
-import type { Browser, Page, ScreenshotOptions, TimeoutError, launch } from "puppeteer-core"
+import { Browser, Page, ScreenshotOptions, TimeoutError, launch } from "puppeteer-core"
 // @ts-ignore
 import PCR from "puppeteer-chromium-resolver"
 import pWaitFor from "p-wait-for"
 import { setTimeout as setTimeoutPromise } from "node:timers/promises"
-import type { fileExistsAtPath } from "../../utils/fs.js"
-import type { BrowserActionResult } from "../../shared/ExtensionMessage.js"
-import type { BrowserSettings } from "../../shared/BrowserSettings.js"
+import { fileExistsAtPath } from "../../utils/fs.js"
+import { BrowserActionResult } from "../../shared/ExtensionMessage.js"
+import { BrowserSettings } from "../../shared/BrowserSettings.js"
 // import * as chromeLauncher from "chrome-launcher"
 
 interface PCRStats {

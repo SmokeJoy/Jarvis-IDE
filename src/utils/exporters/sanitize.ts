@@ -3,7 +3,7 @@
  * @module utils/exporters/sanitize
  */
 
-import type { SanitizeOptions, ExportOptions } from './types.js';
+import { SanitizeOptions, ExportOptions } from './types.js';
 
 /**
  * Opzioni per la sanitizzazione degli oggetti

@@ -3,7 +3,7 @@
  * https://lmstudio.ai/
  */
 
-import type { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js';
+import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js';
 
 interface LMStudioChatRequest {
   messages: Array<{

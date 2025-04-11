@@ -9,8 +9,8 @@ import {
   allConditions,
   notCondition
 } from '../strategies/adaptive-conditions';
-import type { LLMProviderHandler } from '../../../providers/provider-registry-stub';
-import type { ProviderStats } from '../LLMFallbackManager';
+import { LLMProviderHandler } from '../../../providers/provider-registry-stub';
+import { ProviderStats } from '../LLMFallbackManager';
 import { LLMEventBus } from '../LLMEventBus';
 
 describe('AdaptiveFallbackStrategy E2E', () => {

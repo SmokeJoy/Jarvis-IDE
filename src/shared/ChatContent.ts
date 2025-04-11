@@ -6,8 +6,8 @@
 import { normalizeContentBlock } from "./ChatContentHelpers.ts";
 
 // Importiamo i tipi e li esportiamo correttamente
-import type { ChatMessage, ContentBlock } from "./types/chat.types.ts";
-import type { ContentType } from "./types/chat.types.ts";
+import { ChatMessage, ContentBlock } from "./types/chat.types.ts";
+import { ContentType } from "./types/chat.types.ts";
 
 // Ri-esporta i tipi usando export type
 export type { ChatMessage, ContentBlock };

@@ -8,7 +8,7 @@ import { BaseLLMProvider } from './BaseLLMProvider.js';
 // Provider locali
 import { OllamaProvider } from './local/OllamaProvider.js';
 import { LMStudioProvider } from './local/LMStudioProvider.js';
-import type { GGUFProvider, GGUFConfig } from './local/GGUFProvider.js';
+import { GGUFProvider, GGUFConfig } from './local/GGUFProvider.js';
 import { LMDeployProvider } from './local/LMDeployProvider.js';
 
 // Provider remoti

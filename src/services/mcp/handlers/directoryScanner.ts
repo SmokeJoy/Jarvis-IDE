@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import type { HandlerFunction } from '../types.js';
+import { HandlerFunction } from '../types.js';
 import { readdir } from 'fs/promises';
 import { join } from 'path';
-import type { DirectoryScanArgs } from '../mcp.types.js';
+import { DirectoryScanArgs } from '../mcp.types.js';
 
 interface DirectoryScanResult {
   path: string;

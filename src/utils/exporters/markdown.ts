@@ -3,9 +3,9 @@
  * @module utils/exporters/markdown
  */
 
-import type { ChatMessage } from '../../shared/types.js';
-import type { ChatSettings } from '../../shared/types/settings.types.js';
-import type { ExportableSession } from './types.js';
+import { ChatMessage } from '../../shared/types.js';
+import { ChatSettings } from '../../shared/types/settings.types.js';
+import { ExportableSession } from './types.js';
 import { Logger } from '../logger.js';
 
 const logger = Logger.getInstance('markdownExporter');

@@ -1,4 +1,4 @@
-import type { ContextItem } from '../types/ContextItem.js';
+import { ContextItem } from '../types/ContextItem.js';
 interface EditOptions {
     id: string;
     text?: string;

@@ -1,6 +1,6 @@
 import { LLMProviderId } from '../../types/global.js';
 import { getProvider } from '../../../mas/providers/provider-registry';
-import type { ApiProvider, ProviderOptions } from './base.js';
+import { ApiProvider, ProviderOptions } from './base.js';
 import { OpenAIProvider } from './openai.js';
 import { OllamaProvider } from './ollama.js';
 import { TogetherProvider } from './together.js';
@@ -15,7 +15,7 @@ import { VsCodeLmProvider } from './vscode-lm.js';
 import { BedrockProvider } from './bedrock.js';
 import { GeminiProvider } from './gemini.js';
 import { OpenAINativeProvider } from './openai-native.js';
-import type { RequestyProvider } from './requesty.js';
+import { RequestyProvider } from './requesty.js';
 import { JarvisIdeProvider } from './jarvis-ide.js';
 import { LiteLlmProvider } from './litellm.js';
 import { AskSageProvider } from './asksage.js';

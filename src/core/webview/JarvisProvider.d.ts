@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
-import type { OpenAiCompatibleModelInfo } from "../../shared/types/api.types.js";
-import type { ApiConfiguration } from "../../shared/types/api.types.js";
-import type { ExtensionState, ExtensionMessage } from "../../shared/ExtensionMessage.js";
-import type { AutoApprovalSettings, ChatSettings, BrowserSettings } from "../../shared/types/user-settings.types.js";
+import { OpenAiCompatibleModelInfo } from "../../shared/types/api.types.js";
+import { ApiConfiguration } from "../../shared/types/api.types.js";
+import { ExtensionState, ExtensionMessage } from "../../shared/ExtensionMessage.js";
+import { AutoApprovalSettings, ChatSettings, BrowserSettings } from "../../shared/types/user-settings.types.js";
 import { McpHub } from "../../services/mcp/McpHub.js";
-import type { IJarvisProvider, ExtendedChatSettings, JarvisSettings, ConfigModelInfo, TelemetrySetting, HistoryItem } from "../../shared/types/provider.types.js";
+import { IJarvisProvider, ExtendedChatSettings, JarvisSettings, ConfigModelInfo, TelemetrySetting, HistoryItem } from "../../shared/types/provider.types.js";
 type SecretKey = string;
 export declare class JarvisProvider implements IJarvisProvider {
     readonly context: vscode.ExtensionContext;

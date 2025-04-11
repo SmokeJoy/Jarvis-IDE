@@ -5,21 +5,25 @@ import { SnapshotDetail } from './SnapshotDetail';
 import { DecisionGraphView } from './DecisionGraphView';
 import { useDebuggerOverlay } from '../hooks/useDebuggerOverlay';
 import { useFilteredHistory } from '../hooks/useFilteredHistory';
-import { useAutoMitigation } from '../contexts/AutoMitigationContext';
+import { useAutoMitigation } from '../hooks/useAutoMitigation';
 import { AutoMitigationToast } from './AutoMitigationToast';
 import { PredictiveWarningPanel } from './PredictiveWarningPanel';
 
-interface MitigatorOverlayProps {
+export type MitigationType = 'provider_change' | 'predictive' | 'replay';
+
+export interface MitigationStats {
+  latency: number;
+  successRate: number;
+}
+
+export interface MitigatorOverlayProps {
   selectedProvider: string;
   excludedProviders: string[];
   strategy: string;
   timestamp: Date;
   details: string;
-  type: 'provider_change' | 'predictive' | 'replay';
-  stats?: {
-    latency: number;
-    successRate: number;
-  };
+  type: MitigationType;
+  stats?: MitigationStats;
 }
 
 const mockData: MitigatorOverlayProps = {
@@ -65,6 +69,10 @@ export const MitigatorOverlay: React.FC<MitigatorOverlayProps> = ({
     setSelectedEntry(entry);
   };
 
+  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilter(e.target.value as MitigationType);
+  };
+
   return (
     <div className="fixed bottom-4 right-4 w-96 bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -95,7 +103,7 @@ export const MitigatorOverlay: React.FC<MitigatorOverlayProps> = ({
             Filtro Storico
           </label>
           <select
-            onChange={(e) => setFilter(e.target.value as any)}
+            onChange={handleFilterChange}
             className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
             <option value="all">Tutti</option>

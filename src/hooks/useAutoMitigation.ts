@@ -3,6 +3,8 @@ import { useEventBus } from './useEventBus';
 import { useFallbackAudit } from './useFallbackAudit';
 import { usePredictiveWarnings } from './usePredictiveWarnings';
 import { useProviderBlacklist } from './useProviderBlacklist';
+import { AuditEntry } from '../types/audit';
+import { PredictiveWarning } from '../types/warning';
 
 interface AutoMitigationState {
   isActive: boolean;
@@ -10,6 +12,13 @@ interface AutoMitigationState {
   nextProvider: string | null;
   confidence: number;
   lastMitigation: Date | null;
+}
+
+interface AutoMitigationEvent {
+  from: string;
+  to: string;
+  confidence: number;
+  timestamp: Date;
 }
 
 export const useAutoMitigation = () => {
@@ -60,12 +69,13 @@ export const useAutoMitigation = () => {
       }));
 
       // Emetti evento di auto-mitigation
-      eventBus.emit('auto-mitigation:triggered', {
+      const event: AutoMitigationEvent = {
         from: latestAudit.currentProvider,
         to: nextProvider,
         confidence,
         timestamp: new Date()
-      });
+      };
+      eventBus.emit('auto-mitigation:triggered', event);
     }
   }, [warnings, auditData, eventBus, isBlocked, block]);
 
@@ -81,12 +91,12 @@ export const useAutoMitigation = () => {
 };
 
 // Funzioni di utilità
-function calculateConfidence(warning: any, audit: any): number {
+function calculateConfidence(warning: PredictiveWarning, audit: AuditEntry): number {
   // Implementa la logica di calcolo della confidenza
   return 0.85; // Placeholder
 }
 
-function determineNextProvider(audit: any): string {
+function determineNextProvider(audit: AuditEntry): string {
   // Implementa la logica di selezione del prossimo provider
   return 'fallback'; // Placeholder
 } 

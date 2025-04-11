@@ -3,13 +3,13 @@
  * @description Strategia di fallback che seleziona dinamicamente la strategia più appropriata in base a condizioni
  */
 
-import type { FallbackStrategy } from './FallbackStrategy';
-import type { LLMProviderHandler } from '../../../providers/provider-registry-stub';
-import type { ProviderStats } from '../LLMFallbackManager';
-import type { AdaptiveCondition } from './adaptive-conditions';
+import { FallbackStrategy } from './FallbackStrategy';
+import { LLMProviderHandler } from '../../../providers/provider-registry-stub';
+import { ProviderStats } from '../LLMFallbackManager';
+import { AdaptiveCondition } from './adaptive-conditions';
 import { allConditions } from './adaptive-conditions';
-import type { LLMEventBus } from '../LLMEventBus';
-import type { AdaptiveStrategyChangePayload } from '../LLMEventBus';
+import { LLMEventBus } from '../LLMEventBus';
+import { AdaptiveStrategyChangePayload } from '../LLMEventBus';
 import { PreferredFallbackStrategy } from './PreferredFallbackStrategy';
 
 /**

@@ -1,5 +1,5 @@
 import { JarvisIde } from './JarvisIde.js';
-import type { ApiConfiguration } from '../types/provider.types.js';
+import { ApiConfiguration } from '../types/provider.types.js';
 
 describe('JarvisIde', () => {
   let jarvisIde: JarvisIde;

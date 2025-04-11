@@ -5,17 +5,17 @@
  * @version 1.0.0
  */
 
-import type { ApiConfiguration, OpenAiCompatibleModelInfo, ModelInfo } from './api.types.js';
+import { ApiConfiguration, OpenAiCompatibleModelInfo, ModelInfo } from './api.types.js';
 import { TelemetrySetting } from './telemetry.types.js';
-import type { BrowserSettings, ChatSettings, AutoApprovalSettings } from './user-settings.types.js';
-import type { Task, AgentStatus, TaskQueueState } from './mas.types.js';
+import { BrowserSettings, ChatSettings, AutoApprovalSettings } from './user-settings.types.js';
+import { Task, AgentStatus, TaskQueueState } from './mas.types.js';
 import { ChatContent } from '../ChatContent.js';
 import { Platform } from '../Platform.js';
 import { HistoryItem } from '../HistoryItem.js';
-import type { BaseMessage } from './common.js';
+import { BaseMessage } from './common.js';
 
 // Importo la tipologia di ChatMessage
-import type { ChatMessage as ChatMessageImport } from './message.types.js';
+import { ChatMessage as ChatMessageImport } from './message.types.js';
 export type ChatMessage = ChatMessageImport;
 
 /**

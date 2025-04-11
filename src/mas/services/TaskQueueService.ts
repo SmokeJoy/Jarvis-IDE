@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { MasManager } from '../MasManager.js';
 import { Task, TaskStatus } from '../../shared/types/mas.types.js';
-import type { TaskQueueViewMessage } from '../../shared/types/webview.types.js';
+import { TaskQueueViewMessage } from '../../shared/types/webview.types.js';
 import { MasPersistenceService } from './MasPersistenceService.js';
 import { Logger } from '../../utils/logger.js';
 

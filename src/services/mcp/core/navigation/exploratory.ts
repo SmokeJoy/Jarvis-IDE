@@ -1,7 +1,7 @@
-import type { getContextById } from '../../../memory/context.js';
-import type { getContextLinks } from '../../../memory/context_links.js';
-import type { ContextLink } from '../../types.js';
-import type {
+import { getContextById } from '../../../memory/context.js';
+import { getContextLinks } from '../../../memory/context_links.js';
+import { ContextLink } from '../../types.js';
+import {
   NavigationOptions,
   NodeResult,
   EdgeResult,

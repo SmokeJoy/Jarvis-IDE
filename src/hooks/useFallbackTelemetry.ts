@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { LLMProviderHandler } from '../providers/provider-registry-stub';
-import type { LLMEventBus } from '../mas/core/fallback/LLMEventBus';
-import type { ProviderStats } from '../mas/core/fallback/LLMFallbackManager';
-import type { FallbackStrategy } from '../mas/core/fallback/strategies/FallbackStrategy';
+import { LLMProviderHandler } from '../providers/provider-registry-stub';
+import { LLMEventBus } from '../mas/core/fallback/LLMEventBus';
+import { ProviderStats } from '../mas/core/fallback/LLMFallbackManager';
+import { FallbackStrategy } from '../mas/core/fallback/strategies/FallbackStrategy';
 
 interface FallbackTelemetryState {
   activeStrategy: string;

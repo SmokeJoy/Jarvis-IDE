@@ -3,7 +3,7 @@
  * Richiede una configurazione specifica e dipende da un'implementazione locale.
  */
 
-import type { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js';
+import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js';
 import * as fs from 'fs';
 import * as path from 'path';
 import { spawn } from 'child_process';

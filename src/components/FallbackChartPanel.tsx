@@ -7,7 +7,7 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { useFallbackChartData } from '../hooks/useFallbackChartData';
-import type { FallbackAudit } from '../types/fallback';
+import { FallbackAudit } from '../types/fallback';
 
 interface FallbackChartPanelProps {
   audits: FallbackAudit[];

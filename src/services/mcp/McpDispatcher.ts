@@ -1,5 +1,12 @@
-import type { WebviewMessage, McpToolCall, ToolResponse } from '@shared/types/messages.js';
-import { isErrorMessage, isResponseMessage, safeCastAs } from '@/shared/types/webviewMessageUnion.js';
+/**
+ * 🛠️ Fix TypeScript – 2025-04-10
+ * - Importazioni corrette
+ * - Tipizzazione mock/test
+ * - Eliminazione impliciti
+ */
+
+import { WebviewMessage, McpToolCall, ToolResponse } from '../../shared/types/messages';
+import { isErrorMessage, isResponseMessage, safeCastAs } from '../../shared/types/webviewMessageUnion';
 import { readFileHandler } from './handlers/readFileHandler.js';
 import { searchDocsHandler } from './handlers/searchDocsHandler.js';
 import { memoryQueryHandler } from './handlers/memoryQueryHandler.js';
@@ -27,8 +34,8 @@ import { contextUnlinkHandler } from './handlers/contextUnlinkHandler.js';
 import { contextGraphExportHandler } from './handlers/contextGraphExportHandler.js';
 import { contextNavigateHandler } from './handlers/contextNavigateHandler.js';
 import { loadMemoryFromDisk } from './memory/memory.js';
-import type { Memory } from './memory/memory.js';
-import type {
+import { Memory } from './memory/memory.js';
+import {
   ReadFileArgs,
   SearchDocsArgs,
   MemoryQueryArgs,
@@ -56,6 +63,38 @@ import type {
   ContextGraphExportArgs,
   ContextNavigateArgs
 } from './types/handler.types.js';
+import { NavigationOptions } from './types/navigation.types';
+
+type HandlerFunction<T = Record<string, unknown>, R = unknown> = (args: T) => Promise<R>;
+
+interface HandlerMap {
+    'read_file': typeof readFileHandler;
+    'search_docs': typeof searchDocsHandler;
+    'memory.query': typeof memoryQueryHandler;
+    'project.summary': typeof projectSummaryHandler;
+    'code.generate': typeof codeGenerateHandler;
+    'fs.write': typeof fsWriteHandler;
+    'refactor.snippet': typeof refactorSnippetHandler;
+    'ask.docs': typeof askDocsHandler;
+    'project.lint': typeof projectLintHandler;
+    'fs.format': typeof fsFormatHandler;
+    'test.run': typeof testRunHandler;
+    'project.depGraph': typeof projectDepGraphHandler;
+    'context.inject': typeof contextInjectHandler;
+    'context.list': typeof contextListHandler;
+    'context.clear': typeof contextClearHandler;
+    'context.tag': typeof contextTagHandler;
+    'context.searchByTags': typeof contextSearchByTagsHandler;
+    'context.export': typeof contextExportHandler;
+    'context.import': typeof contextImportHandler;
+    'context.edit': typeof contextEditHandler;
+    'context.link': typeof contextLinkHandler;
+    'context.linksOf': typeof contextLinksOfHandler;
+    'context.graph': typeof contextGraphHandler;
+    'context.unlink': typeof contextUnlinkHandler;
+    'context.graphExport': typeof contextGraphExportHandler;
+    'context.navigate': typeof contextNavigateHandler;
+}
 
 /**
  * Dispatcher per il Model Control Protocol (MCP)
@@ -63,9 +102,36 @@ import type {
  */
 export class McpDispatcher {
     private memory: Memory;
+    private readonly handlers: HandlerMap = {
+        'read_file': readFileHandler,
+        'search_docs': searchDocsHandler,
+        'memory.query': memoryQueryHandler,
+        'project.summary': projectSummaryHandler,
+        'code.generate': codeGenerateHandler,
+        'fs.write': fsWriteHandler,
+        'refactor.snippet': refactorSnippetHandler,
+        'ask.docs': askDocsHandler,
+        'project.lint': projectLintHandler,
+        'fs.format': fsFormatHandler,
+        'test.run': testRunHandler,
+        'project.depGraph': projectDepGraphHandler,
+        'context.inject': contextInjectHandler,
+        'context.list': contextListHandler,
+        'context.clear': contextClearHandler,
+        'context.tag': contextTagHandler,
+        'context.searchByTags': contextSearchByTagsHandler,
+        'context.export': contextExportHandler,
+        'context.import': contextImportHandler,
+        'context.edit': contextEditHandler,
+        'context.link': contextLinkHandler,
+        'context.linksOf': contextLinksOfHandler,
+        'context.graph': contextGraphHandler,
+        'context.unlink': contextUnlinkHandler,
+        'context.graphExport': contextGraphExportHandler,
+        'context.navigate': contextNavigateHandler
+    };
 
-    constructor(private callback: (message: WebviewMessage) => void) {
-        // All'avvio, carica la memoria persistente
+    constructor(private readonly callback: (message: WebviewMessage) => void) {
         this.memory = loadMemoryFromDisk();
     }
 
@@ -77,95 +143,36 @@ export class McpDispatcher {
         console.log(`McpDispatcher: Gestione chiamata strumentale ${call.tool}`);
 
         try {
+            const handler = this.handlers[call.tool as keyof HandlerMap];
+            if (!handler) {
+                throw new Error(`Unknown tool: ${call.tool}`);
+            }
+
             let result: unknown;
-            switch (call.tool) {
-                case "read_file":
-                    result = await readFileHandler(call.args as ReadFileArgs);
-                    break;
-                case "search_docs":
-                    result = await searchDocsHandler(call.args as SearchDocsArgs);
-                    break;
-                case "memory.query":
-                    result = await memoryQueryHandler(call.args as MemoryQueryArgs);
-                    break;
-                case "project.summary":
-                    result = await projectSummaryHandler(call.args as ProjectSummaryArgs);
-                    break;
-                case "code.generate":
-                    result = await codeGenerateHandler(call.args as CodeGenerateArgs);
-                    break;
-                case "fs.write":
-                    result = await fsWriteHandler(call.args as FsWriteArgs);
-                    break;
-                case "refactor.snippet":
-                    result = await refactorSnippetHandler(call.args as RefactorSnippetArgs);
-                    break;
-                case "ask.docs":
-                    result = await askDocsHandler(call.args as AskDocsArgs);
-                    break;
-                case "project.lint":
-                    result = await projectLintHandler(call.args as ProjectLintArgs);
-                    break;
-                case "fs.format":
-                    result = await fsFormatHandler(call.args as FsFormatArgs);
-                    break;
-                case "test.run":
-                    result = await testRunHandler(call.args as TestRunArgs);
-                    break;
-                case "project.depGraph":
-                    result = await projectDepGraphHandler(call.args as ProjectDepGraphArgs);
-                    break;
-                case "context.inject":
-                    result = await contextInjectHandler(call.args as ContextInjectArgs);
-                    break;
-                case "context.list":
-                    result = await contextListHandler(call.args as ContextListArgs);
-                    break;
-                case "context.clear":
-                    result = await contextClearHandler(call.args as ContextClearArgs);
-                    break;
-                case "context.tag":
-                    result = await contextTagHandler(call.args as ContextTagArgs);
-                    break;
-                case "context.searchByTags":
-                    result = await contextSearchByTagsHandler(call.args as ContextSearchByTagsArgs);
-                    break;
-                case "context.export":
-                    result = await contextExportHandler(call.args as ContextExportArgs);
-                    break;
-                case "context.import":
-                    result = await contextImportHandler(call.args as ContextImportArgs);
-                    break;
-                case "context.edit":
-                    result = await contextEditHandler(call.args as ContextEditArgs);
-                    break;
-                case "context.link":
-                    result = await contextLinkHandler(call.args as ContextLinkArgs);
-                    break;
-                case "context.linksOf":
-                    result = await contextLinksOfHandler(call.args as ContextLinksOfArgs);
-                    break;
-                case "context.graph":
-                    result = await contextGraphHandler(call.args as ContextGraphArgs);
-                    break;
-                case "context.unlink":
-                    result = await contextUnlinkHandler(call.args as ContextUnlinkArgs);
-                    break;
-                case "context.graphExport":
-                    result = await contextGraphExportHandler({
-                        ...call.args as ContextGraphExportArgs,
-                        format: 'dot'
-                    });
-                    break;
-                case "context.navigate":
-                    result = await contextNavigateHandler(
-                        JSON.stringify(call.args as ContextNavigateArgs),
-                        JSON.stringify(this.memory),
-                        'semantic'
-                    );
-                    break;
-                default:
-                    throw new Error(`Unknown tool: ${call.tool}`);
+            if (call.tool === 'context.graphExport') {
+                result = await handler({
+                    ...call.args as ContextGraphExportArgs,
+                    format: 'dot'
+                });
+            } else if (call.tool === 'context.navigate') {
+                const args = call.args as ContextNavigateArgs;
+                const options: NavigationOptions = {
+                    ...args.options,
+                    minStrength: args.options?.minStrength ?? 0.5,
+                    minConfidence: args.options?.minConfidence ?? 0.7
+                };
+                
+                result = await handler(
+                    args.startId,
+                    args.targetId ?? null,
+                    args.mode ?? 'semantic',
+                    options,
+                    args.includeContent ?? false,
+                    args.includeMetadata ?? false,
+                    args.format ?? 'graph'
+                );
+            } else {
+                result = await handler(call.args);
             }
 
             return {
@@ -186,8 +193,7 @@ export class McpDispatcher {
     /**
      * Invia una risposta di successo
      */
-    private sendSuccessResponse(result: string) {
-        // Utilizzo di safeCastAs per garantire la validazione del tipo a runtime
+    private sendSuccessResponse(result: string): void {
         const message = safeCastAs<WebviewMessage>({
             type: "llm.result",
             payload: {
@@ -205,8 +211,7 @@ export class McpDispatcher {
     /**
      * Invia una risposta di errore
      */
-    private sendErrorResponse(error: string) {
-        // Utilizzo di safeCastAs per garantire la validazione del tipo a runtime
+    private sendErrorResponse(error: string): void {
         const message = safeCastAs<WebviewMessage>({
             type: "llm.error",
             payload: {

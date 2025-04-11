@@ -6,7 +6,7 @@
  * in linguaggio naturale e specifica di linguaggio di programmazione.
  */
 
-import type { McpToolHandler } from "../../../shared/types/mcp.types.js";
+import { McpToolHandler } from "../../../shared/types/mcp.types.js";
 
 /**
  * Handler per la generazione di codice da descrizione naturale

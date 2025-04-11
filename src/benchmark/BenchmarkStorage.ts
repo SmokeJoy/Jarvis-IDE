@@ -72,8 +72,9 @@ export class BenchmarkStorage {
         }
       }
     } catch (err) {
-      console.error(`❌ Errore nell'inizializzazione dello storage benchmark: ${err.message}`);
-      throw err;
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error(`❌ Errore nell'inizializzazione dello storage benchmark: ${error.message}`);
+      throw error;
     }
   }
   
@@ -89,8 +90,9 @@ export class BenchmarkStorage {
         'utf8'
       );
     } catch (err) {
-      console.error(`❌ Errore nel salvataggio della storia benchmark: ${err.message}`);
-      throw err;
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error(`❌ Errore nel salvataggio della storia benchmark: ${error.message}`);
+      throw error;
     }
   }
   
@@ -194,8 +196,9 @@ export class BenchmarkStorage {
       
       return sessionId;
     } catch (err) {
-      console.error(`❌ Errore nell'importazione da ${filePath}: ${err.message}`);
-      throw err;
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error(`❌ Errore nell'importazione da ${filePath}: ${error.message}`);
+      throw error;
     }
   }
   
@@ -249,8 +252,9 @@ export class BenchmarkStorage {
       console.log(`✅ Importati ${jsonFiles.length} file da ${fullPath}`);
       return sessionId;
     } catch (err) {
-      console.error(`❌ Errore nell'importazione dalla directory: ${err.message}`);
-      throw err;
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error(`❌ Errore nell'importazione dalla directory: ${error.message}`);
+      throw error;
     }
   }
   
@@ -281,8 +285,9 @@ export class BenchmarkStorage {
       
       console.log(`✅ Dati benchmark esportati in ${filePath}`);
     } catch (err) {
-      console.error(`❌ Errore nell'esportazione in ${filePath}: ${err.message}`);
-      throw err;
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error(`❌ Errore nell'esportazione in ${filePath}: ${error.message}`);
+      throw error;
     }
   }
   

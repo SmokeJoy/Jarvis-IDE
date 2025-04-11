@@ -1,20 +1,20 @@
 import OpenAI, { AzureOpenAI } from "openai"
-import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
-import type { 
+import { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
+import { 
 	ChatCompletionChunk, 
 	ChatCompletionMessageParam, 
 	Stream 
 } from "../../types/provider-types/openai-types.js"
 import { Anthropic } from "@anthropic-ai/sdk"
-import type { azureOpenAiDefaultApiVersion, openAiModelInfoSaneDefaults } from "../../shared/api.js"
-import type { ApiHandler } from "../index.js"
-import type { convertToOpenAiMessages } from "../transform/openai-format.js"
+import { azureOpenAiDefaultApiVersion, openAiModelInfoSaneDefaults } from "../../shared/api.js"
+import { ApiHandler } from "../index.js"
+import { convertToOpenAiMessages } from "../transform/openai-format.js"
 import { ApiStream, ApiStreamChunk } from "../transform/stream.js"
 import { convertToR1Format } from "../transform/r1-format.js"
-import type { BaseStreamHandler } from "../handlers/BaseStreamHandler.js"
+import { BaseStreamHandler } from "../handlers/BaseStreamHandler.js"
 import { logger } from "../../utils/logger.js"
 import { calculateApiCostOpenAI } from "../../utils/cost.js"
-import type { getOpenAiConfig } from "./config/openai-config.js"
+import { getOpenAiConfig } from "./config/openai-config.js"
 
 interface OpenAiUsage {
 	prompt_tokens: number;

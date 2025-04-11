@@ -3,7 +3,7 @@ import * as path from "path";
 import { exec } from "child_process";
 import { promisify } from "util";
 import * as vscode from "vscode";
-import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
+import { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
 
 // Promisify exec per usare con async/await
 const execAsync = promisify(exec);

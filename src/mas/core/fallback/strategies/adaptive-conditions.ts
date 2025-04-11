@@ -3,7 +3,7 @@
  * @description Condizioni predefinite per la strategia di fallback adattiva
  */
 
-import type { ProviderStats } from '../LLMFallbackManager';
+import { ProviderStats } from '../LLMFallbackManager';
 
 /**
  * Tipo per le funzioni che valutano una condizione in base alle statistiche dei provider

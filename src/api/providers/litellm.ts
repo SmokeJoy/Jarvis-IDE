@@ -1,13 +1,13 @@
 import { Anthropic } from "@anthropic-ai/sdk"
 import type OpenAI from "openai"
-import type { ApiHandlerOptions } from "../../shared/types/api.types.js"
-import type { liteLlmDefaultModelId, liteLlmModelInfoSaneDefaults } from "../../shared/api.js"
-import type { ApiHandler } from "../index.js"
+import { ApiHandlerOptions } from "../../shared/types/api.types.js"
+import { liteLlmDefaultModelId, liteLlmModelInfoSaneDefaults } from "../../shared/api.js"
+import { ApiHandler } from "../index.js"
 import { ApiStream } from "../transform/stream.js"
-import type { convertToOpenAiMessages } from "../transform/openai-format.js"
+import { convertToOpenAiMessages } from "../transform/openai-format.js"
 import { logger } from "../../utils/logger.js"
-import type { ApiHandlerOptions as ApiHandlerOptionsTs, ModelInfo } from "../../shared/types/api.types.js"
-import type { openAiModelInfoSaneDefaults } from "../../shared/api.js"
+import { ApiHandlerOptions as ApiHandlerOptionsTs, ModelInfo } from "../../shared/types/api.types.js"
+import { openAiModelInfoSaneDefaults } from "../../shared/api.js"
 
 export class LiteLlmHandler implements ApiHandler {
 	private options: ApiHandlerOptions

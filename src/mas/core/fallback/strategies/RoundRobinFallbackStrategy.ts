@@ -3,9 +3,9 @@
  * @description Strategia che seleziona i provider in modo ciclico
  */
 
-import type { FallbackStrategy } from './FallbackStrategy';
-import type { LLMProviderHandler } from '../../../providers/provider-registry-stub';
-import type { ProviderStats } from '../LLMFallbackManager';
+import { FallbackStrategy } from './FallbackStrategy';
+import { LLMProviderHandler } from '../../../providers/provider-registry-stub';
+import { ProviderStats } from '../LLMFallbackManager';
 
 /**
  * Strategia che seleziona i provider in modo ciclico (round-robin)

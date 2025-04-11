@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SettingsView } from './SettingsView.js';
-import type { SettingsProvider, useSettings } from '../webview-ui/providers/settingsProvider.js';
+import { SettingsProvider, useSettings } from '../webview-ui/providers/settingsProvider.js';
 
 // Mock di acquireVsCodeApi
 (global as any).acquireVsCodeApi = () => ({

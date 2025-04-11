@@ -1,4 +1,4 @@
-import type { OutputChannel } from "vscode"
+import { OutputChannel } from "vscode"
 
 /**
  * Simple logging utility for the extension's backend code.

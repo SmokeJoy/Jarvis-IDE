@@ -1,4 +1,4 @@
-import type { ToolCallResult } from '../types/tool.js';
+import { ToolCallResult } from '../types/tool.js';
 interface ImportOptions {
     format: 'auto' | 'json' | 'csv' | 'markdown';
     content: string;

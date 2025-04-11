@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { FallbackChartPanel } from '../components/FallbackChartPanel';
-import type { FallbackAudit } from '../types/fallback';
+import { FallbackAudit } from '../types/fallback';
 
 // Dati mock iniziali
 const initialMockAudits: FallbackAudit[] = [

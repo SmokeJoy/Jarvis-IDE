@@ -3,7 +3,7 @@
  * @description File di compatibilità che re-esporta i tipi API dal file src/shared/types/api.types.ts
  */
 
-import type { ConfigModelInfo } from './models.js';
+import { ConfigModelInfo } from './models.js';
 
 // Ri-esporta tutti i tipi dal file src/shared/types/api.types.ts
 export type {

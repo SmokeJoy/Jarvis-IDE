@@ -3,7 +3,7 @@
  * @description Questo file esporta le definizioni dal file centralizzato di tipi
  */
 
-import type { WebviewMessage as GenericWebviewMessage } from '../types/webview.types.js';
+import { WebviewMessage as GenericWebviewMessage } from '../types/webview.types.js';
 
 // Ri-esportiamo tutto dalla definizione unificata usando export type
 export type WebviewMessage<T = any> = GenericWebviewMessage<T>;

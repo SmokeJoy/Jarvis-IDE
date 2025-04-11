@@ -1,12 +1,12 @@
 import * as vscode from "vscode"
-import type { ApiHandler } from "../index.js"
-import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
-import type { openAiModelInfoSaneDefaults } from "../../shared/api.js"
-import type { convertToVsCodeLmMessages } from "../transform/vscode-lm-format.js"
+import { ApiHandler } from "../index.js"
+import { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
+import { openAiModelInfoSaneDefaults } from "../../shared/api.js"
+import { convertToVsCodeLmMessages } from "../transform/vscode-lm-format.js"
 import { ApiStream } from "../transform/stream.js"
 import { calculateApiCostAnthropic } from "../../utils/cost.js"
-import type { SELECTOR_SEPARATOR, stringifyVsCodeLmModelSelector } from "../../shared/vsCodeSelectorUtils.js"
-import type { SingleCompletionHandler } from "../index.js"
+import { SELECTOR_SEPARATOR, stringifyVsCodeLmModelSelector } from "../../shared/vsCodeSelectorUtils.js"
+import { SingleCompletionHandler } from "../index.js"
 import { Anthropic } from "@anthropic-ai/sdk"
 
 // Definiamo i tipi usando type aliases per evitare conflitti

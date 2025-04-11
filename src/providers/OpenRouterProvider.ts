@@ -1,6 +1,6 @@
 import { OpenRouterRequest, OpenRouterResponse, isOpenRouterRequest } from './openrouter-message';
 import { BaseLLMProvider } from './BaseProvider';
-import type { LLMRequest, LLMResponse } from '../../shared/types/llm.types';
+import { LLMRequest, LLMResponse } from '../../shared/types/llm.types';
 
 export class OpenRouterProvider extends BaseLLMProvider {
   static providerId = 'openrouter' as const;

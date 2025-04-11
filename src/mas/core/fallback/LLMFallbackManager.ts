@@ -3,7 +3,7 @@
  * @description Gestione del fallback tra provider LLM in caso di errori
  */
 
-import type { LLMProviderHandler } from '../../providers/provider-registry-stub';
+import { LLMProviderHandler } from '../../providers/provider-registry-stub';
 import { LLMEventBus } from './LLMEventBus';
 import { 
   FallbackStrategy, 

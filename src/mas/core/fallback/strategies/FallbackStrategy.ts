@@ -3,8 +3,8 @@
  * @description Interfaccia per le strategie di selezione dei provider di fallback
  */
 
-import type { LLMProviderHandler } from '../../../providers/provider-registry-stub';
-import type { ProviderStats } from '../LLMFallbackManager';
+import { LLMProviderHandler } from '../../../providers/provider-registry-stub';
+import { ProviderStats } from '../LLMFallbackManager';
 
 /**
  * Interfaccia per le strategie di selezione dei provider di fallback
