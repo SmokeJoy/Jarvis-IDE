@@ -6,4 +6,5 @@
 export * from './FallbackStrategy';
 export * from './PreferredFallbackStrategy';
 export * from './RoundRobinFallbackStrategy';
-export * from './ReliabilityFallbackStrategy'; 
+export * from './ReliabilityFallbackStrategy';
+export * from './FallbackStrategyFactory'; 

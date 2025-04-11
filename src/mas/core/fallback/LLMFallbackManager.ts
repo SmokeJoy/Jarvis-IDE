@@ -5,6 +5,11 @@
 
 import type { LLMProviderHandler } from '../../providers/provider-registry-stub';
 import { LLMEventBus } from './LLMEventBus';
+import { 
+  FallbackStrategy, 
+  PreferredFallbackStrategy,
+  FallbackStrategyFactory
+} from './strategies';
 
 /**
  * Interfaccia per le statistiche di un provider
@@ -70,6 +75,26 @@ export interface LLMFallbackOptions {
    * @default 60000 (1 minuto)
    */
   cooldownMs?: number;
+  
+  /**
+   * Strategia di fallback da utilizzare (opzionale)
+   * Se non specificata, viene utilizzata PreferredFallbackStrategy
+   */
+  strategy?: FallbackStrategy;
+  
+  /**
+   * Tipo di strategia da utilizzare (opzionale)
+   * Se specificato, sovrascrive 'strategy'
+   * Valori possibili: 'preferred', 'roundRobin', 'reliability'
+   */
+  strategyType?: string;
+  
+  /**
+   * Numero minimo di tentativi per considerare affidabile un provider
+   * Usato solo nella strategia 'reliability'
+   * @default 5
+   */
+  minimumAttempts?: number;
 }
 
 /**
@@ -79,13 +104,12 @@ export interface LLMFallbackOptions {
  */
 export class LLMFallbackManager {
   private providers: LLMProviderHandler[];
-  private lastSuccessfulProvider: LLMProviderHandler | null = null;
-  private preferredProviderId: string | null = null;
   private rememberSuccessful: boolean;
   private maxRetries: number;
   private collectStats: boolean;
   private eventBus: LLMEventBus;
   private cooldownMs: number;
+  private strategy: FallbackStrategy;
   
   // Statistiche per provider
   private stats: Map<string, ProviderStats> = new Map();
@@ -102,13 +126,20 @@ export class LLMFallbackManager {
     this.eventBus = options.eventBus || new LLMEventBus(); // Usa l'event bus fornito o ne crea uno nuovo
     this.cooldownMs = options.cooldownMs || 60_000; // 1 minuto di default
     
+    // Inizializza la strategia, usando la factory se viene specificato un tipo di strategia
+    if (options.strategyType) {
+      this.strategy = FallbackStrategyFactory.create(options.strategyType, {
+        preferredProvider: options.preferredProvider,
+        rememberSuccessful: this.rememberSuccessful,
+        minimumAttempts: options.minimumAttempts
+      });
+    } else {
+      this.strategy = options.strategy || 
+        new PreferredFallbackStrategy(options.preferredProvider || null, this.rememberSuccessful);
+    }
+    
     // Inizializza le statistiche per tutti i provider
     this.initializeStats();
-    
-    // Imposta il provider preferito iniziale se specificato
-    if (options.preferredProvider) {
-      this.setPreferredProvider(options.preferredProvider);
-    }
   }
 
   /**
@@ -179,6 +210,13 @@ export class LLMFallbackManager {
       stats: { ...providerStats },
       success
     });
+    
+    // Notifica la strategia del successo o fallimento
+    if (success) {
+      this.strategy.notifySuccess(providerId);
+    } else {
+      this.strategy.notifyFailure(providerId);
+    }
   }
 
   /**
@@ -186,12 +224,9 @@ export class LLMFallbackManager {
    * @param providerId ID del provider preferito
    */
   public setPreferredProvider(providerId: string): void {
-    this.preferredProviderId = providerId;
-    
-    // Cerca il provider nell'elenco dei provider disponibili
-    const preferredProvider = this.providers.find(p => p.id === providerId);
-    if (preferredProvider && preferredProvider.isEnabled) {
-      this.lastSuccessfulProvider = preferredProvider;
+    // Se stiamo usando una strategia PreferredFallbackStrategy, aggiorniamo la sua preferenza
+    if (this.strategy instanceof PreferredFallbackStrategy) {
+      this.strategy.setPreferredProvider(providerId);
     }
   }
 
@@ -200,7 +235,15 @@ export class LLMFallbackManager {
    * @returns Il provider preferito o null se non impostato
    */
   public getPreferredProvider(): LLMProviderHandler | null {
-    return this.lastSuccessfulProvider;
+    // Se stiamo usando una strategia PreferredFallbackStrategy, otteniamo il suo provider preferito
+    if (this.strategy instanceof PreferredFallbackStrategy) {
+      const preferredId = this.strategy.getPreferredProviderId();
+      if (preferredId) {
+        return this.providers.find(p => p.id === preferredId && p.isEnabled) || null;
+      }
+    }
+    
+    return null;
   }
 
   /**
@@ -237,15 +280,6 @@ export class LLMFallbackManager {
     // Rimuovi le statistiche per questo provider
     if (this.collectStats) {
       this.stats.delete(providerId);
-    }
-    
-    // Se il provider rimosso era quello preferito, resetta lo stato
-    if (this.lastSuccessfulProvider?.id === providerId) {
-      this.lastSuccessfulProvider = null;
-    }
-    
-    if (this.preferredProviderId === providerId) {
-      this.preferredProviderId = null;
     }
   }
 
@@ -294,7 +328,7 @@ export class LLMFallbackManager {
       return rateB - rateA;
     });
   }
-
+  
   /**
    * Verifica se un provider è in cooldown
    * @param providerId ID del provider da verificare
@@ -320,77 +354,17 @@ export class LLMFallbackManager {
     // Array di errori per eventuale diagnostica
     const errors: Error[] = [];
     
-    // Prima prova con il provider preferito se esiste
-    if (this.lastSuccessfulProvider) {
-      // Verifica se il provider preferito è in cooldown
-      if (this.isProviderInCooldown(this.lastSuccessfulProvider.id)) {
-        // Emetti evento di cooldown
-        this.eventBus.emit('provider:cooldown', {
-          providerId: this.lastSuccessfulProvider.id,
-          cooldownUntil: this.stats.get(this.lastSuccessfulProvider.id)!.lastFailureTimestamp + this.cooldownMs
-        });
-      } else {
-        try {
-          // Esegui più tentativi se configurato
-          for (let attempt = 0; attempt < this.maxRetries; attempt++) {
-            try {
-              const startTime = Date.now();
-              const result = await callback(this.lastSuccessfulProvider);
-              const responseTime = Date.now() - startTime;
-              
-              // Registra il successo nelle statistiche
-              this.recordAttempt(this.lastSuccessfulProvider.id, true, responseTime);
-              
-              // Emetti evento di successo
-              this.eventBus.emit('provider:success', {
-                providerId: this.lastSuccessfulProvider.id,
-                responseTime,
-                attempt
-              });
-              
-              return result;
-            } catch (error) {
-              if (attempt === this.maxRetries - 1) {
-                // Registra il fallimento nelle statistiche
-                this.recordAttempt(this.lastSuccessfulProvider.id, false, 0);
-                
-                // Emetti evento di fallimento
-                this.eventBus.emit('provider:failure', {
-                  providerId: this.lastSuccessfulProvider.id,
-                  error: error as Error,
-                  attempts: attempt + 1
-                });
-                
-                throw error; // Rilancia l'errore all'ultimo tentativo
-              }
-              // Altrimenti continua con il prossimo tentativo
-            }
-          }
-        } catch (error) {
-          console.error(`Il provider preferito ${this.lastSuccessfulProvider.id} ha fallito:`, error);
-          errors.push(error as Error);
-          
-          // Se arriviamo qui, il provider preferito ha fallito e dobbiamo fare fallback
-          // Memorizziamo il provider fallito per riferimento
-          const failedProviderId = this.lastSuccessfulProvider.id;
-          
-          // Continua con il fallback
-        }
-      }
-    }
-
-    // Filtra i provider disponibili ed esclude quello già tentato
-    const availableProviders = this.providers.filter(
-      p => p.isEnabled && p.id !== this.lastSuccessfulProvider?.id
-    );
+    // Set di provider già tentati e falliti in questa sequenza
+    const failedProviders = new Set<string>();
     
-    // Se non ci sono provider disponibili, lancia un errore
-    if (availableProviders.length === 0) {
-      throw new Error('Nessun provider LLM disponibile');
-    }
-
-    // Prova con ogni provider disponibile
-    for (const provider of availableProviders) {
+    // Ottieni i provider in ordine secondo la strategia corrente
+    const orderedProviders = this.strategy.getProvidersInOrder([...this.providers], this.stats);
+    
+    // Prova con ogni provider in ordine
+    for (const provider of orderedProviders) {
+      // Salta i provider disabilitati
+      if (!provider.isEnabled) continue;
+      
       // Verifica se il provider è in cooldown
       if (this.isProviderInCooldown(provider.id)) {
         // Emetti evento di cooldown
@@ -398,17 +372,7 @@ export class LLMFallbackManager {
           providerId: provider.id,
           cooldownUntil: this.stats.get(provider.id)!.lastFailureTimestamp + this.cooldownMs
         });
-        // Salta al prossimo provider
-        continue;
-      }
-      
-      // Emetti evento di fallback quando passiamo a un altro provider
-      if (this.lastSuccessfulProvider) {
-        this.eventBus.emit('provider:fallback', {
-          providerId: provider.id,
-          fromProviderId: this.lastSuccessfulProvider.id,
-          reason: 'fallimento provider precedente'
-        });
+        continue; // Passa al prossimo provider
       }
       
       try {
@@ -427,13 +391,8 @@ export class LLMFallbackManager {
               providerId: provider.id,
               responseTime,
               attempt,
-              isFallback: true
+              isFallback: failedProviders.size > 0
             });
-            
-            // Memorizza questo provider come ultimo con successo se l'opzione è attiva
-            if (this.rememberSuccessful) {
-              this.lastSuccessfulProvider = provider;
-            }
             
             return result;
           } catch (error) {
@@ -446,7 +405,7 @@ export class LLMFallbackManager {
                 providerId: provider.id,
                 error: error as Error,
                 attempts: attempt + 1,
-                isFallback: true
+                isFallback: failedProviders.size > 0
               });
               
               throw error; // Rilancia l'errore all'ultimo tentativo
@@ -457,6 +416,28 @@ export class LLMFallbackManager {
       } catch (error) {
         console.error(`Provider ${provider.id} fallito:`, error);
         errors.push(error as Error);
+        
+        // Aggiungi questo provider al set dei falliti
+        failedProviders.add(provider.id);
+        
+        // Trova un provider precedente non fallito per l'evento di fallback
+        const lastNonFailedProvider = orderedProviders
+          .filter(p => !failedProviders.has(p.id))
+          .find(p => true);
+        
+        // Emetti evento di fallback se c'è un provider successivo
+        const nextProvider = orderedProviders.find(p => 
+          p.isEnabled && !failedProviders.has(p.id) && !this.isProviderInCooldown(p.id)
+        );
+        
+        if (nextProvider) {
+          this.eventBus.emit('provider:fallback', {
+            providerId: nextProvider.id,
+            fromProviderId: provider.id,
+            reason: 'fallimento provider precedente'
+          });
+        }
+        
         // Continua con il prossimo provider
       }
     }
@@ -464,5 +445,21 @@ export class LLMFallbackManager {
     // Se arriviamo qui, tutti i provider hanno fallito
     const errorDetails = errors.map(e => e.message).join('; ');
     throw new Error(`Tutti i provider LLM hanno fallito: ${errorDetails}`);
+  }
+  
+  /**
+   * Imposta la strategia di fallback da utilizzare
+   * @param strategy Nuova strategia da utilizzare
+   */
+  public setStrategy(strategy: FallbackStrategy): void {
+    this.strategy = strategy;
+  }
+  
+  /**
+   * Ottiene la strategia di fallback correntemente in uso
+   * @returns Strategia corrente
+   */
+  public getStrategy(): FallbackStrategy {
+    return this.strategy;
   }
 } 

@@ -1,19 +1,22 @@
-# Architettura dell'Orchestratore Multi-Agente
+# Orchestratore Multi-Agente
 
-## Introduzione
+## Overview
 
-L'orchestratore Multi-Agente (MASOrchestrator) è il componente centrale del sistema che coordina l'esecuzione di diversi agenti specializzati per portare a termine task complessi. Questo documento descrive l'architettura di alto livello dell'orchestratore, i suoi componenti principali e i pattern di interazione.
+L'orchestratore multi-agente è il componente centrale che coordina le interazioni tra i vari agenti specializzati. È responsabile di:
 
-## Componenti Principali
+1. Ricevere le richieste degli utenti
+2. Determinare quali agenti devono essere coinvolti
+3. Coordinare il flusso di informazioni tra gli agenti
+4. Aggregare le risposte e fornire un output coerente all'utente
 
-L'orchestratore è composto dai seguenti elementi:
+## Architettura
 
-1. **Agenti**: entità specializzate che eseguono compiti specifici (es. pianificazione, ricerca, analisi)
-2. **Manager degli Agenti**: gestisce la registrazione e il recupero degli agenti 
-3. **Manager della Memoria**: gestisce lo stato condiviso tra gli agenti
-4. **Gestore del Flusso**: coordina l'esecuzione sequenziale o parallela degli agenti
-5. **Sistema di Fallback**: gestisce gli errori e garantisce la resilienza dell'esecuzione
-6. **Gestore dei Provider LLM**: gestisce l'accesso ai modelli linguistici di terze parti
+L'orchestratore è progettato con un'architettura modulare che permette di sostituire facilmente i componenti. I principali elementi sono:
+
+- **Router**: smista le richieste agli agenti appropriati
+- **Dispatcher**: gestisce la coda di lavoro e l'esecuzione degli agenti
+- **Context Manager**: mantiene il contesto della conversazione
+- **Provider Manager**: gestisce l'accesso ai diversi provider LLM
 
 ## Flusso di Esecuzione
 
@@ -166,6 +169,51 @@ Il sistema di fallback supporta diverse strategie per la selezione dei provider,
    });
    ```
 
+#### Configurazione tramite Factory
+
+Per semplificare la creazione e configurazione delle strategie, è disponibile una factory che permette di istanziare la strategia appropriata in base a un identificatore di tipo:
+
+```typescript
+import { FallbackStrategyFactory } from './strategies';
+
+// Crea una strategia specificando il tipo e le opzioni
+const strategy = FallbackStrategyFactory.create('reliability', {
+  minimumAttempts: 10
+});
+
+const fallbackManager = new LLMFallbackManager({
+  providers: [...],
+  strategy: strategy
+});
+```
+
+È possibile anche specificare direttamente il tipo di strategia nelle opzioni del LLMFallbackManager:
+
+```typescript
+const fallbackManager = new LLMFallbackManager({
+  providers: [...],
+  strategyType: 'roundRobin'  // Usa direttamente la factory
+});
+```
+
+#### Configurazione tramite Variabili d'Ambiente
+
+Il sistema supporta la configurazione tramite variabili d'ambiente, facilitando il deployment in diversi ambienti:
+
+```typescript
+import { LLMFallbackManager } from './fallback';
+
+const fallbackManager = new LLMFallbackManager({
+  providers: [...],
+  strategyType: process.env.FALLBACK_STRATEGY || 'preferred',
+  preferredProvider: process.env.PREFERRED_PROVIDER,
+  minimumAttempts: parseInt(process.env.MIN_ATTEMPTS || '5', 10),
+  cooldownMs: parseInt(process.env.PROVIDER_COOLDOWN_MS || '60000', 10)
+});
+```
+
+Questo approccio permette di modificare la strategia e i suoi parametri senza dover ricompilare l'applicazione.
+
 #### Implementare Strategie Personalizzate
 
 È possibile creare strategie personalizzate implementando l'interfaccia `FallbackStrategy`:
@@ -200,8 +248,10 @@ class CustomStrategy implements FallbackStrategy {
 // Passa a una strategia round robin quando necessario
 fallbackManager.setStrategy(new RoundRobinFallbackStrategy());
 
-// Passa a una strategia basata sull'affidabilità
-fallbackManager.setStrategy(new ReliabilityFallbackStrategy());
+// Oppure usando la factory
+fallbackManager.setStrategy(
+  FallbackStrategyFactory.create('reliability', { minimumAttempts: 3 })
+);
 ```
 
 ## Esecuzione Parallela
