@@ -1,9 +1,9 @@
-import { Logger } from '../utils/logger.js.js';
-import type { AgentResponse } from './JarvisAgent.js.js';
-import type { Settings } from '../shared/settings.js.js';
-import { getApiProvider } from './api/getApiProvider.js.js';
-import type { StreamHandler } from './api/ApiProvider.js.js';
-import type { ChatMessage, normalizeChatMessages } from '../types/ChatMessage.js.js';
+import { Logger } from '../utils/logger.js';
+import type { AgentResponse } from './JarvisAgent.js';
+import type { Settings } from '../shared/settings.js';
+import { getApiProvider } from './api/getApiProvider.js';
+import type { StreamHandler } from './api/ApiProvider.js';
+import type { ChatMessage, normalizeChatMessages } from '../types/ChatMessage.js';
 
 /**
  * Invia un prompt al modello LLM e gestisce la risposta

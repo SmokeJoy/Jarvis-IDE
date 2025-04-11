@@ -1,9 +1,10 @@
 import React from 'react';
 import { VSCodeCheckbox, VSCodeTextArea } from '@vscode/webview-ui-toolkit/react';
-import type { TelemetrySetting } from '../../types/extension.js.js';
-import type { ApiConfiguration } from '../../types/api.types.js.js';
-import type { OpenRouterModelPicker } from './OpenRouterModelPicker.js.js';
-import { ThinkingBudgetSlider } from './ThinkingBudgetSlider.js.js';
+import type { TelemetrySetting } from '../../types/extension.ts';
+import type { ApiConfiguration } from '../../types/api.types.ts';
+import type { OpenRouterModelPicker } from './OpenRouterModelPicker.ts';
+import { ThinkingBudgetSlider } from './ThinkingBudgetSlider.ts';
+import { SystemPromptEditor } from '../../components/SystemPromptEditor.tsx';
 
 interface SettingsViewProps {
   telemetrySetting: TelemetrySetting;
@@ -42,6 +43,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           apiConfiguration={apiConfiguration}
           onApiConfigurationChange={onApiConfigurationChange}
         />
+      </section>
+
+      <section>
+        <h2>AI Prompt Editor</h2>
+        <SystemPromptEditor />
       </section>
 
       <section>

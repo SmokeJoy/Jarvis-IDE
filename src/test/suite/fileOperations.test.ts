@@ -1,6 +1,6 @@
 import { describe, expect, test, beforeEach, afterEach, vi } from "vitest";
 import * as vscode from "vscode";
-import { FileManager } from "../../core/file-operations/FileManager.js.js";
+import { FileManager } from "../../core/file-operations/FileManager.js";
 
 vi.mock("vscode");
 

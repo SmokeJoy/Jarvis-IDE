@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
-import type { searchDocsHandler } from './searchDocsHandler.js.js';
-import type { SearchDocsArgs } from '../mcp.types.js.js';
+import type { searchDocsHandler } from './searchDocsHandler.js';
+import type { SearchDocsArgs } from '../mcp.types.js';
 
 // Mock della funzione search
 jest.mock('../../../integrations/documentation/searchAdapter.js', () => ({
@@ -8,7 +8,7 @@ jest.mock('../../../integrations/documentation/searchAdapter.js', () => ({
 }));
 
 // Importa il mock per usarlo nei test
-import { search } from '../../../integrations/documentation/searchAdapter.js.js';
+import { search } from '../../../integrations/documentation/searchAdapter.js';
 
 describe('searchDocsHandler', () => {
   // Resetta tutti i mock prima di ogni test

@@ -462,4 +462,75 @@ export class LLMFallbackManager {
   public getStrategy(): FallbackStrategy {
     return this.strategy;
   }
+
+  private handleProviderFailure(providerId: string, error: Error): void {
+    // Aggiorna le statistiche
+    const stats = this.stats.get(providerId);
+    if (stats) {
+      stats.failureCount++;
+      stats.lastFailureTimestamp = Date.now();
+      
+      // Calcola il cooldown se necessario
+      if (stats.failureCount >= this.maxRetries) {
+        const cooldownUntil = Date.now() + this.cooldownMs;
+        this.cooldownMs = cooldownUntil - Date.now();
+        
+        // Emetti l'evento di cooldown
+        if (this.eventBus) {
+          this.eventBus.emit('provider:cooldown', {
+            providerId,
+            cooldownUntil,
+            reason: 'Failure threshold exceeded',
+            error
+          });
+        }
+      }
+    }
+    
+    // Notifica la strategia
+    this.strategy.notifyFailure(providerId);
+    
+    // Emetti l'evento di fallimento
+    if (this.eventBus) {
+      this.eventBus.emit('provider:failure', {
+        providerId,
+        error,
+        timestamp: Date.now()
+      });
+    }
+  }
+
+  private handleProviderSuccess(providerId: string, result: any): void {
+    // Aggiorna le statistiche
+    const stats = this.stats.get(providerId);
+    if (stats) {
+      stats.successCount++;
+      
+      // Rimuovi il cooldown se presente
+      if (this.cooldownMs > 0) {
+        this.cooldownMs = 0;
+        
+        // Emetti l'evento di fine cooldown
+        if (this.eventBus) {
+          this.eventBus.emit('provider:cooldown:end', {
+            providerId,
+            reason: 'Success after failure',
+            timestamp: Date.now()
+          });
+        }
+      }
+    }
+    
+    // Notifica la strategia
+    this.strategy.notifySuccess(providerId);
+    
+    // Emetti l'evento di successo
+    if (this.eventBus) {
+      this.eventBus.emit('provider:success', {
+        providerId,
+        result,
+        timestamp: Date.now()
+      });
+    }
+  }
 } 

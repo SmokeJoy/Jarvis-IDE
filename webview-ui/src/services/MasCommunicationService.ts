@@ -1,5 +1,33 @@
 import { vscode } from '../vscode-api';
 import { AgentStatus, Task, TaskQueueState, AgentMode, CodeStyle } from '../types/mas-types';
+import { useExtensionMessage } from '../hooks/useExtensionMessage';
+import { 
+  AgentMessageUnion, 
+  MasMessageType,
+  GetAgentsStatusMessage,
+  GetTaskQueueStatusMessage,
+  SendCoderInstructionMessage,
+  AbortCoderInstructionMessage,
+  ToggleAgentActiveMessage,
+  SetAgentModeMessage,
+  SetAgentStyleMessage,
+  SetSystemModeMessage,
+  SetDefaultStyleMessage,
+  GetMasConfigurationMessage,
+  AbortTaskMessage,
+  RerunTaskMessage,
+  SetTaskQueueFilterMessage
+} from '../types/mas-message';
+import {
+  isAgentMessage,
+  isAgentsStatusUpdateMessage,
+  isTaskQueueUpdateMessage,
+  isInstructionReceivedMessage,
+  isInstructionCompletedMessage,
+  isInstructionFailedMessage,
+  isConfigurationSavedMessage,
+  isConfigurationErrorMessage
+} from '../types/mas-message-guards';
 
 /**
  * Tipi di messaggi per la comunicazione con il backend MAS
@@ -8,6 +36,7 @@ export type MasMessageCallback = (data: any) => void;
 
 /**
  * Servizio per la comunicazione tra la WebView e il sistema MAS nel backend
+ * Implementa il pattern Union Dispatcher Type-Safe per la gestione dei messaggi
  */
 export class MasCommunicationService {
   private static instance: MasCommunicationService;
@@ -34,35 +63,30 @@ export class MasCommunicationService {
     window.addEventListener('message', event => {
       const message = event.data;
       
-      // Gestisci diversi tipi di messaggi dal backend
-      switch (message.type) {
-        case 'agentsStatusUpdate':
+      // Implementazione del pattern Union Dispatcher Type-Safe
+      if (isAgentMessage(message)) {
+        // Notifica i sottoscrittori in base al tipo di messaggio
+        if (isAgentsStatusUpdateMessage(message)) {
           this.notifySubscribers('agentsStatusUpdate', message.payload);
-          break;
-        
-        case 'taskQueueUpdate':
+        }
+        else if (isTaskQueueUpdateMessage(message)) {
           this.notifySubscribers('taskQueueUpdate', message.payload);
-          break;
-          
-        case 'instructionReceived':
+        }
+        else if (isInstructionReceivedMessage(message)) {
           this.notifySubscribers('instructionReceived', message.payload);
-          break;
-          
-        case 'instructionCompleted':
+        }
+        else if (isInstructionCompletedMessage(message)) {
           this.notifySubscribers('instructionCompleted', message.payload);
-          break;
-          
-        case 'instructionFailed':
+        }
+        else if (isInstructionFailedMessage(message)) {
           this.notifySubscribers('instructionFailed', message.payload);
-          break;
-          
-        case 'configurationSaved':
+        }
+        else if (isConfigurationSavedMessage(message)) {
           this.notifySubscribers('configurationSaved', message.payload);
-          break;
-          
-        case 'configurationError':
+        }
+        else if (isConfigurationErrorMessage(message)) {
           this.notifySubscribers('configurationError', message.payload);
-          break;
+        }
       }
     });
   }
@@ -78,41 +102,49 @@ export class MasCommunicationService {
     style?: string, 
     priority?: 'high' | 'normal' | 'low'
   ): void {
-    vscode.postMessage({
-      type: 'sendCoderInstruction',
+    const message: SendCoderInstructionMessage = {
+      type: MasMessageType.SEND_CODER_INSTRUCTION,
       payload: {
         instruction,
-        style,
+        style: style as CodeStyle,
         priority
       }
-    });
+    };
+    
+    this.sendTypeSafeMessage(message);
   }
   
   /**
    * Richiede lo stato attuale di tutti gli agenti
    */
   public requestAgentsStatus(): void {
-    vscode.postMessage({
-      type: 'getAgentsStatus'
-    });
+    const message: GetAgentsStatusMessage = {
+      type: MasMessageType.GET_AGENTS_STATUS
+    };
+    
+    this.sendTypeSafeMessage(message);
   }
   
   /**
    * Richiede lo stato attuale della coda dei task
    */
   public requestTaskQueueStatus(): void {
-    vscode.postMessage({
-      type: 'getTaskQueueStatus'
-    });
+    const message: GetTaskQueueStatusMessage = {
+      type: MasMessageType.GET_TASK_QUEUE_STATUS
+    };
+    
+    this.sendTypeSafeMessage(message);
   }
   
   /**
    * Richiede di interrompere l'istruzione corrente del CoderAgent
    */
   public abortCurrentCoderInstruction(): void {
-    vscode.postMessage({
-      type: 'abortCoderInstruction'
-    });
+    const message: AbortCoderInstructionMessage = {
+      type: MasMessageType.ABORT_CODER_INSTRUCTION
+    };
+    
+    this.sendTypeSafeMessage(message);
   }
   
   /**
@@ -121,13 +153,15 @@ export class MasCommunicationService {
    * @param active Stato desiderato (attivo/inattivo)
    */
   public toggleAgentActive(agentId: string, active: boolean): void {
-    vscode.postMessage({
-      type: 'toggleAgentActive',
+    const message: ToggleAgentActiveMessage = {
+      type: MasMessageType.TOGGLE_AGENT_ACTIVE,
       payload: {
         agentId,
         active
       }
-    });
+    };
+    
+    this.sendTypeSafeMessage(message);
   }
   
   /**
@@ -136,13 +170,15 @@ export class MasCommunicationService {
    * @param mode Modalità operativa desiderata
    */
   public setAgentMode(agentId: string, mode: AgentMode): void {
-    vscode.postMessage({
-      type: 'setAgentMode',
+    const message: SetAgentModeMessage = {
+      type: MasMessageType.SET_AGENT_MODE,
       payload: {
         agentId,
         mode
       }
-    });
+    };
+    
+    this.sendTypeSafeMessage(message);
   }
   
   /**
@@ -151,13 +187,15 @@ export class MasCommunicationService {
    * @param style Stile di codice desiderato
    */
   public setAgentStyle(agentId: string, style: CodeStyle): void {
-    vscode.postMessage({
-      type: 'setAgentStyle',
+    const message: SetAgentStyleMessage = {
+      type: MasMessageType.SET_AGENT_STYLE,
       payload: {
         agentId,
         style
       }
-    });
+    };
+    
+    this.sendTypeSafeMessage(message);
   }
   
   /**
@@ -165,12 +203,14 @@ export class MasCommunicationService {
    * @param mode Modalità operativa desiderata
    */
   public setSystemMode(mode: 'collaborative' | 'single'): void {
-    vscode.postMessage({
-      type: 'setSystemMode',
+    const message: SetSystemModeMessage = {
+      type: MasMessageType.SET_SYSTEM_MODE,
       payload: {
         mode
       }
-    });
+    };
+    
+    this.sendTypeSafeMessage(message);
   }
   
   /**
@@ -178,21 +218,25 @@ export class MasCommunicationService {
    * @param style Stile di codice predefinito
    */
   public setDefaultStyle(style: CodeStyle): void {
-    vscode.postMessage({
-      type: 'setDefaultStyle',
+    const message: SetDefaultStyleMessage = {
+      type: MasMessageType.SET_DEFAULT_STYLE,
       payload: {
         style
       }
-    });
+    };
+    
+    this.sendTypeSafeMessage(message);
   }
   
   /**
    * Richiede la configurazione completa del sistema MAS
    */
   public requestMasConfiguration(): void {
-    vscode.postMessage({
-      type: 'getMasConfiguration'
-    });
+    const message: GetMasConfigurationMessage = {
+      type: MasMessageType.GET_MAS_CONFIGURATION
+    };
+    
+    this.sendTypeSafeMessage(message);
   }
   
   /**
@@ -237,10 +281,10 @@ export class MasCommunicationService {
   }
   
   /**
-   * Invia un messaggio generico al backend
-   * @param message Messaggio da inviare
+   * Invia un messaggio type-safe al backend
+   * @param message Messaggio fortemente tipizzato da inviare
    */
-  public postMessage(message: any): void {
+  private sendTypeSafeMessage<T extends AgentMessageUnion>(message: T): void {
     vscode.postMessage(message);
   }
   
@@ -249,12 +293,14 @@ export class MasCommunicationService {
    * @param taskId ID del task da annullare
    */
   public abortTask(taskId: string): void {
-    vscode.postMessage({
-      type: 'abortTask',
+    const message: AbortTaskMessage = {
+      type: MasMessageType.ABORT_TASK,
       payload: {
         taskId
       }
-    });
+    };
+    
+    this.sendTypeSafeMessage(message);
   }
   
   /**
@@ -262,32 +308,36 @@ export class MasCommunicationService {
    * @param task Task da ri-eseguire
    */
   public rerunTask(task: Task): void {
-    vscode.postMessage({
-      type: 'rerunTask',
+    const message: RerunTaskMessage = {
+      type: MasMessageType.RERUN_TASK,
       payload: {
         task
       }
-    });
+    };
+    
+    this.sendTypeSafeMessage(message);
   }
   
   /**
-   * Imposta un filtro per la coda dei task
-   * @param status Filtro per lo stato
-   * @param priority Filtro per la priorità
-   * @param agentId Filtro per l'agente
+   * Imposta i filtri per la visualizzazione della coda dei task
+   * @param status Filtro per lo stato dei task
+   * @param priority Filtro per la priorità dei task
+   * @param agentId Filtro per l'agente assegnato
    */
   public setTaskQueueFilter(
     status?: 'all' | 'pending' | 'active' | 'completed' | 'failed',
     priority?: 'all' | 'high' | 'normal' | 'low',
     agentId?: string
   ): void {
-    vscode.postMessage({
-      type: 'setTaskQueueFilter',
+    const message: SetTaskQueueFilterMessage = {
+      type: MasMessageType.SET_TASK_QUEUE_FILTER,
       payload: {
         status,
         priority,
         agentId
       }
-    });
+    };
+    
+    this.sendTypeSafeMessage(message);
   }
 } 

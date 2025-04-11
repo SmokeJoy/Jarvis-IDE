@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { configLinter } from './configLinter.js.js';
+import { configLinter } from './configLinter.js';
 
 // Mock del modulo fs/promises
 jest.mock('fs/promises', () => ({

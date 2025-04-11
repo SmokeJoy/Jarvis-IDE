@@ -3,8 +3,8 @@ import { VSCodeDropdown, VSCodeOption, VSCodeCheckbox } from '@vscode/webview-ui
 import styled from 'styled-components';
 import { useExtensionState } from '../context/ExtensionStateContext';
 import { ConfigModelInfo } from '../types/models';
-import { WebviewMessageType } from '../../src/shared/WebviewMessageType';
-import { vscode } from '../utils/vscode';
+import { useExtensionMessage } from '../hooks/useExtensionMessage';
+import { ModelSelectorMessageUnion } from '../../../src/webview/messages/model-selector-message';
 
 const SelectorContainer = styled.div`
   margin: 1rem 0;
@@ -37,13 +37,14 @@ interface ModelSelectorProps {
 export const ModelSelector: React.FC<ModelSelectorProps> = () => {
   const { state, setSelectedModel } = useExtensionState();
   const [showOnlyCoderModels, setShowOnlyCoderModels] = useState(false);
+  const { postMessage } = useExtensionMessage();
   
   useEffect(() => {
-    // Richiedi le impostazioni all'estensione
-    vscode.postMessage({
-      type: WebviewMessageType.GET_SETTINGS
+    // Richiedi le impostazioni all'estensione usando il pattern type-safe
+    postMessage<ModelSelectorMessageUnion>({
+      type: 'requestModels'
     });
-  }, []);
+  }, [postMessage]);
   
   const handleModelChange = (event: Event) => {
     const target = event.target as HTMLSelectElement;
@@ -51,10 +52,10 @@ export const ModelSelector: React.FC<ModelSelectorProps> = () => {
     
     setSelectedModel(newModelId);
     
-    // Invio un messaggio all'estensione per aggiornare il modello
-    vscode.postMessage({
-      type: WebviewMessageType.UPDATE_MODEL,
-      value: newModelId
+    // Invio un messaggio all'estensione per aggiornare il modello usando il pattern type-safe
+    postMessage<ModelSelectorMessageUnion>({
+      type: 'modelSelected',
+      payload: { modelId: newModelId }
     });
   };
   

@@ -5,17 +5,17 @@
  * @version 1.0.0
  */
 
-import type { ApiConfiguration, OpenAiCompatibleModelInfo, ModelInfo } from './api.types.js.js';
-import { TelemetrySetting } from './telemetry.types.js.js';
-import type { BrowserSettings, ChatSettings, AutoApprovalSettings } from './user-settings.types.js.js';
-import type { Task, AgentStatus, TaskQueueState } from './mas.types.js.js';
-import { ChatContent } from '../ChatContent.js.js';
-import { Platform } from '../Platform.js.js';
-import { HistoryItem } from '../HistoryItem.js.js';
-import type { BaseMessage } from './common.js.js';
+import type { ApiConfiguration, OpenAiCompatibleModelInfo, ModelInfo } from './api.types.js';
+import { TelemetrySetting } from './telemetry.types.js';
+import type { BrowserSettings, ChatSettings, AutoApprovalSettings } from './user-settings.types.js';
+import type { Task, AgentStatus, TaskQueueState } from './mas.types.js';
+import { ChatContent } from '../ChatContent.js';
+import { Platform } from '../Platform.js';
+import { HistoryItem } from '../HistoryItem.js';
+import type { BaseMessage } from './common.js';
 
 // Importo la tipologia di ChatMessage
-import type { ChatMessage as ChatMessageImport } from './message.types.js.js';
+import type { ChatMessage as ChatMessageImport } from './message.types.js';
 export type ChatMessage = ChatMessageImport;
 
 /**
@@ -49,6 +49,13 @@ export enum WebviewMessageType {
     GET_SETTINGS = "getSettings",
     UPDATE_SETTINGS = "updateSettings",
     UPDATE_SETTING = "updateSetting",
+    
+    // Operazioni con profili di prompt (MCP-F6)
+    GET_PROMPT_PROFILES = "getPromptProfiles",
+    CREATE_PROMPT_PROFILE = "createPromptProfile",
+    UPDATE_PROMPT_PROFILE = "updatePromptProfile",
+    DELETE_PROMPT_PROFILE = "deletePromptProfile",
+    SWITCH_PROMPT_PROFILE = "switchPromptProfile",
     
     // Operazioni con immagini
     SELECT_IMAGES = "selectImages",

@@ -1,6 +1,6 @@
-import type { getOpenAiConfig } from "./openai-config.js.js"
-import type { openAiModelInfoSaneDefaults } from "../../../shared/api.js.js"
-import type { ModelInfo } from "../../../shared/types/api.types.js.js"
+import type { getOpenAiConfig } from "./openai-config.js"
+import type { openAiModelInfoSaneDefaults } from "../../../shared/api.js"
+import type { ModelInfo } from "../../../shared/types/api.types.js"
 
 describe("getOpenAiConfig", () => {
     it("dovrebbe restituire i valori predefiniti quando modelInfo è undefined", () => {

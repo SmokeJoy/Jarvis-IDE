@@ -1,10 +1,10 @@
 import type { Message, Ollama } from "ollama"
-import type { ApiHandler } from "../index.js.js"
-import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js.js"
-import type { openAiModelInfoSaneDefaults } from "../../shared/api.js.js"
-import type { convertToOllamaMessages } from "../transform/ollama-format.js.js"
-import { ApiStream } from "../transform/stream.js.js"
-import type { ChatMessage } from "../../types/chat.types.js.js"
+import type { ApiHandler } from "../index.js"
+import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
+import type { openAiModelInfoSaneDefaults } from "../../shared/api.js"
+import type { convertToOllamaMessages } from "../transform/ollama-format.js"
+import { ApiStream } from "../transform/stream.js"
+import type { ChatMessage } from "../../types/chat.types.js"
 
 export class OllamaHandler implements ApiHandler {
 	private options: ApiHandlerOptions

@@ -1,7 +1,7 @@
 import * as vscode from "vscode"
 import * as path from "path"
-import { listFiles } from "../../services/glob/list-files.js.js"
-import { JarvisProvider } from "../../core/webview/JarvisProvider.js.js"
+import { listFiles } from "../../services/glob/list-files.js"
+import { JarvisProvider } from "../../core/webview/JarvisProvider.js"
 
 const cwd = vscode.workspace.workspaceFolders?.map((folder) => folder.uri.fsPath).at(0)
 

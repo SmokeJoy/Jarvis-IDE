@@ -3,7 +3,7 @@
  * che ogni provider deve implementare.
  */
 
-import { LLMProvider } from "../shared/types/api.types.js.js";
+import { LLMProvider } from "../shared/types/api.types.js";
 
 export interface LLMMessage {
   role: 'system' | 'user' | 'assistant';

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { TabNavbar } from './TabNavbar.js.js'
-import type { TabId, TabItem } from '../../types/tab.js.js'
+import { TabNavbar } from './TabNavbar.js'
+import type { TabId, TabItem } from '../../types/tab.js'
 
 const tabs: TabItem[] = [
   {

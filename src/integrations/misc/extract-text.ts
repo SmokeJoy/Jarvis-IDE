@@ -4,7 +4,7 @@ import pdf from "pdf-parse/lib/pdf-parse"
 import mammoth from "mammoth"
 import fs from "fs/promises"
 import { isBinaryFile } from "isbinaryfile"
-import { getFileSizeInKB } from "../../utils/fs.js.js"
+import { getFileSizeInKB } from "../../utils/fs.js"
 
 export async function extractTextFromFile(filePath: string): Promise<string> {
 	try {

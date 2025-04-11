@@ -1,9 +1,9 @@
 import * as vscode from "vscode"
 import * as fs from "fs/promises"
 import * as path from "path"
-import { JarvisProvider } from "../../core/webview/JarvisProvider.js.js"
-import { HistoryItem } from "../../shared/HistoryItem.js.js"
-import type { JarvisMessage } from "../../shared/ExtensionMessage.js.js"
+import { JarvisProvider } from "../../core/webview/JarvisProvider.js"
+import { HistoryItem } from "../../shared/HistoryItem.js"
+import type { JarvisMessage } from "../../shared/ExtensionMessage.js"
 
 /**
  * Registers development-only commands for task manipulation.

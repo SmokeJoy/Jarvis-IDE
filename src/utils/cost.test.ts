@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
-import { calculateApiCostAnthropic, calculateApiCostOpenAI } from "./cost.js.js"
-import type { ModelInfo } from "../shared/api.js.js"
+import { calculateApiCostAnthropic, calculateApiCostOpenAI } from "./cost.js"
+import type { ModelInfo } from "../shared/api.js"
 
 describe("Cost Utilities", () => {
 	describe("calculateApiCostAnthropic", () => {

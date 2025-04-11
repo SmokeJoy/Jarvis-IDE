@@ -1,9 +1,9 @@
 import { describe, it, beforeEach, afterEach } from "mocha"
 import "should"
 import * as sinon from "sinon"
-import { TerminalProcess } from "./TerminalProcess.js.js"
+import { TerminalProcess } from "./TerminalProcess.js"
 import * as vscode from "vscode"
-import { TerminalRegistry } from "./TerminalRegistry.js.js"
+import { TerminalRegistry } from "./TerminalRegistry.js"
 import type { EventEmitter } from "events"
 import { expect } from 'chai'
 

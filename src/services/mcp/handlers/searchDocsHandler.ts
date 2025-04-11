@@ -1,10 +1,10 @@
 // src/services/mcp/handlers/searchDocsHandler.ts
-import type * as vscode from "vscode";
+import * as vscode from "vscode";
 import * as fs from "fs/promises";
 import * as path from "path";
-import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js.js";
-import { search } from '../../../integrations/documentation/searchAdapter.js.js';
-import type { SearchDocsArgs } from '../mcp.types.js.js';
+import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
+import { search } from '../../../integrations/documentation/searchAdapter.js';
+import type { SearchDocsArgs } from '../mcp.types.js';
 
 // Mock di vscode per ambienti non-VS Code
 const mockVscode = {
@@ -79,7 +79,7 @@ export async function searchDocsHandler(args: SearchDocsArgs): Promise<{ success
   }
 }
 
-export const searchDocsHandlerOld: McpToolHandler = async (input) => {
+export const searchDocsHandlerOld: McpToolHandler = async (input: any) => {
   const query = input?.query as string | undefined;
   const maxResults = (input?.maxResults as number) || 3;
   const regexMode = !!input?.regex;

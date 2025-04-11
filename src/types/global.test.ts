@@ -5,7 +5,7 @@ import type {
   ApiConfiguration,
   OpenAiCompatibleModelInfo,
   TelemetrySetting
-} from './global.js.js'
+} from './global.js'
 
 test('ChatCompletionContentPartText deve avere le proprietà corrette', () => {
   const textPart: ChatCompletionContentPartText = {

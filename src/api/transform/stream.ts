@@ -2,8 +2,8 @@
  * Definizioni di tipi e utility per il flusso di risposte AI.
  */
 
-import { logger } from "../../utils/logger.js.js"
-import { ApiStream, ApiStreamChunk, ApiStreamTextChunk, ApiStreamReasoningChunk, ApiStreamUsageChunk } from "../../shared/types/api.types.js.js"
+import { logger } from "../../utils/logger.js"
+import { ApiStream, ApiStreamChunk, ApiStreamTextChunk, ApiStreamReasoningChunk, ApiStreamUsageChunk } from "../../shared/types/api.types.js"
 
 // Tipo di compatibilità per supportare codice legacy
 export type ApiStreamOld = AsyncGenerator<ApiStreamChunk>;

@@ -1,4 +1,4 @@
-import type { ChatMessage } from '../../shared/types/chat.types.js.js';
+import type { ChatMessage } from '../../shared/types/chat.types.js';
 
 /**
  * Handler per gestire i messaggi durante lo streaming

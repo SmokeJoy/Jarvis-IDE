@@ -1,4 +1,4 @@
-import type { ContextItem, getMemoryContexts } from "../../memory/context.js.js";
+import type { ContextItem, getMemoryContexts } from "../../memory/context.js";
 import { readFile } from "fs/promises";
 import path from "path";
 

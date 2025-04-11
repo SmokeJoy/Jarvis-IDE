@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { VSCodeButton, VSCodeTextField, VSCodeDropdown, VSCodeOption } from '@vscode/webview-ui-toolkit/react';
-import { MasCommunicationService } from '../services/MasCommunicationService';
 import { AgentStatus, CodeStyle, PriorityLevel } from '../types/mas-types';
+import { useExtensionMessage } from '../hooks/useExtensionMessage';
+import { 
+  MasMessageType,
+  SendCoderInstructionMessage,
+  AbortCoderInstructionMessage,
+  AgentMessageUnion
+} from '../types/mas-message';
 import './CoderAgentPrompt.css';
 
 interface CoderAgentPromptProps {
@@ -11,186 +17,154 @@ interface CoderAgentPromptProps {
 
 /**
  * Componente per inviare istruzioni al CoderAgent
+ * Implementa il pattern Union Dispatcher Type-Safe
  */
-export const CoderAgentPrompt: React.FC<CoderAgentPromptProps> = ({ 
+export const CoderAgentPrompt: React.FC<CoderAgentPromptProps> = ({
   agentStatus,
-  onInstructionSent 
+  onInstructionSent
 }) => {
-  const [instruction, setInstruction] = useState<string>('');
+  const [instruction, setInstruction] = useState('');
   const [style, setStyle] = useState<CodeStyle>('standard');
   const [priority, setPriority] = useState<PriorityLevel>('normal');
-  const [isSending, setIsSending] = useState<boolean>(false);
-  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   
-  const masService = MasCommunicationService.getInstance();
+  // Hook type-safe per la comunicazione con l'estensione
+  const { postMessage } = useExtensionMessage();
   
-  // Effetto per gestire i messaggi dal backend
-  useEffect(() => {
-    const handleInstructionReceived = (data: any) => {
-      setIsSending(false);
-      setStatusMessage('Istruzione ricevuta dal CoderAgent');
-      
-      // Resetta il messaggio di stato dopo 3 secondi
-      setTimeout(() => {
-        setStatusMessage(null);
-      }, 3000);
-      
-      if (onInstructionSent) {
-        onInstructionSent();
-      }
-    };
-    
-    const handleInstructionFailed = (data: any) => {
-      setIsSending(false);
-      setStatusMessage(`Errore: ${data.error || 'Invio istruzione fallito'}`);
-    };
-    
-    // Sottoscrizione agli eventi di risposta
-    masService.subscribe('instructionReceived', handleInstructionReceived);
-    masService.subscribe('instructionFailed', handleInstructionFailed);
-    
-    return () => {
-      // Pulizia delle sottoscrizioni
-      masService.unsubscribe('instructionReceived', handleInstructionReceived);
-      masService.unsubscribe('instructionFailed', handleInstructionFailed);
-    };
-  }, [masService, onInstructionSent]);
-  
-  /**
-   * Gestisce l'invio dell'istruzione
-   */
+  // Gestisce la sottomissione dell'istruzione
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!instruction.trim()) {
-      setStatusMessage('L\'istruzione non può essere vuota');
       return;
     }
     
-    setIsSending(true);
-    setStatusMessage('Invio istruzione in corso...');
+    setIsLoading(true);
     
-    // Invia l'istruzione tramite il servizio di comunicazione
-    masService.sendCoderInstruction(instruction, style, priority);
+    // Creazione del messaggio type-safe
+    const message: SendCoderInstructionMessage = {
+      type: MasMessageType.SEND_CODER_INSTRUCTION,
+      payload: {
+        instruction: instruction.trim(),
+        style,
+        priority
+      }
+    };
+    
+    // Invio del messaggio tramite il dispatcher type-safe
+    postMessage<AgentMessageUnion>(message);
+    
+    // Reset del form dopo l'invio
+    setInstruction('');
+    
+    // Notifica al parent che un'istruzione è stata inviata
+    if (onInstructionSent) {
+      onInstructionSent();
+    }
+    
+    // Reimposta lo stato di caricamento dopo un breve ritardo
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
   };
   
-  /**
-   * Annulla l'istruzione corrente
-   */
+  // Gestisce l'interruzione dell'istruzione corrente
   const handleAbort = () => {
-    masService.abortCurrentCoderInstruction();
-    setStatusMessage('Richiesta di annullamento inviata');
+    // Creazione del messaggio type-safe
+    const message: AbortCoderInstructionMessage = {
+      type: MasMessageType.ABORT_CODER_INSTRUCTION
+    };
+    
+    // Invio del messaggio tramite il dispatcher type-safe
+    postMessage<AgentMessageUnion>(message);
+    
+    // Notifica al parent che un'istruzione è stata inviata
+    if (onInstructionSent) {
+      onInstructionSent();
+    }
   };
   
   return (
     <div className="coder-agent-prompt">
       <div className="prompt-header">
-        <h3>Invia istruzioni al CoderAgent</h3>
-        {agentStatus && (
-          <div className={`agent-status ${agentStatus.isActive ? 'active' : 'inactive'}`}>
-            {agentStatus.isActive ? 'Agente attivo' : 'Agente inattivo'}
-          </div>
-        )}
+        <h3>Istruzione per CoderAgent</h3>
+        <div className="agent-status">
+          <span className={`status-indicator ${agentStatus?.isActive ? 'active' : 'inactive'}`}>
+            {agentStatus?.isActive ? 'Attivo' : 'Inattivo'}
+          </span>
+        </div>
       </div>
       
-      <form onSubmit={handleSubmit} className="prompt-form">
-        <VSCodeTextField
-          value={instruction}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInstruction(e.target.value)}
-          placeholder="Scrivi un'istruzione per il CoderAgent..."
-          multiline
-          rows={5}
-          disabled={isSending || (agentStatus && !agentStatus.isActive)}
-          className="instruction-input"
-        />
+      <form className="prompt-form" onSubmit={handleSubmit}>
+        <div className="input-container">
+          <VSCodeTextField
+            className="prompt-input"
+            value={instruction}
+            onChange={(e: any) => setInstruction(e.target.value)}
+            placeholder="Inserisci un'istruzione per il CoderAgent..."
+            disabled={isLoading || !agentStatus?.isActive}
+          />
+        </div>
         
-        <div className="prompt-controls">
-          <div className="prompt-options">
-            <label>Stile:</label>
+        <div className="form-controls">
+          <div className="control-group">
+            <label>Stile di codice:</label>
             <VSCodeDropdown
               value={style}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => 
-                setStyle(e.target.value as CodeStyle)}
-              disabled={isSending || (agentStatus && !agentStatus.isActive)}
+              onChange={(e: any) => setStyle(e.target.value as CodeStyle)}
+              disabled={isLoading || !agentStatus?.isActive}
             >
               <VSCodeOption value="standard">Standard</VSCodeOption>
               <VSCodeOption value="concise">Conciso</VSCodeOption>
               <VSCodeOption value="verbose">Dettagliato</VSCodeOption>
             </VSCodeDropdown>
-            
+          </div>
+          
+          <div className="control-group">
             <label>Priorità:</label>
             <VSCodeDropdown
               value={priority}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => 
-                setPriority(e.target.value as PriorityLevel)}
-              disabled={isSending || (agentStatus && !agentStatus.isActive)}
+              onChange={(e: any) => setPriority(e.target.value as PriorityLevel)}
+              disabled={isLoading || !agentStatus?.isActive}
             >
-              <VSCodeOption value="low">Bassa</VSCodeOption>
-              <VSCodeOption value="normal">Normale</VSCodeOption>
               <VSCodeOption value="high">Alta</VSCodeOption>
+              <VSCodeOption value="normal">Normale</VSCodeOption>
+              <VSCodeOption value="low">Bassa</VSCodeOption>
             </VSCodeDropdown>
           </div>
           
-          <div className="prompt-actions">
+          <div className="button-group">
             <VSCodeButton
               type="submit"
-              disabled={!instruction.trim() || isSending || (agentStatus && !agentStatus.isActive)}
+              disabled={isLoading || !instruction.trim() || !agentStatus?.isActive}
             >
-              {isSending ? 'Invio in corso...' : 'Invia istruzione'}
+              {isLoading ? 'Inviando...' : 'Invia istruzione'}
             </VSCodeButton>
             
-            {agentStatus?.currentTask && (
-              <VSCodeButton
-                appearance="secondary"
-                onClick={handleAbort}
-                disabled={isSending || (agentStatus && !agentStatus.isActive)}
-              >
-                Annulla operazione
-              </VSCodeButton>
-            )}
+            <VSCodeButton
+              type="button"
+              appearance="secondary"
+              onClick={handleAbort}
+              disabled={!agentStatus?.isActive || !agentStatus?.currentTask}
+            >
+              Interrompi
+            </VSCodeButton>
           </div>
         </div>
-        
-        {statusMessage && (
-          <div className={`status-message ${statusMessage.includes('Errore') ? 'error' : 'info'}`}>
-            {statusMessage}
-          </div>
-        )}
       </form>
       
-      {/* Suggerimenti per prompt comuni */}
-      <div className="prompt-templates">
-        <h4>Template di istruzioni:</h4>
-        <div className="template-list">
-          <button 
-            className="template-item"
-            onClick={() => setInstruction('Crea una nuova classe per gestire...')}
-            disabled={isSending || (agentStatus && !agentStatus.isActive)}
-          >
-            Crea una nuova classe
-          </button>
-          <button 
-            className="template-item"
-            onClick={() => setInstruction('Rifattorizza il seguente metodo per migliorare...')}
-            disabled={isSending || (agentStatus && !agentStatus.isActive)}
-          >
-            Rifattorizza metodo
-          </button>
-          <button 
-            className="template-item"
-            onClick={() => setInstruction('Implementa dei test per la classe...')}
-            disabled={isSending || (agentStatus && !agentStatus.isActive)}
-          >
-            Crea tests
-          </button>
-          <button 
-            className="template-item"
-            onClick={() => setInstruction('Documenta la funzione seguendo lo standard JSDoc...')}
-            disabled={isSending || (agentStatus && !agentStatus.isActive)}
-          >
-            Aggiungi documentazione
-          </button>
-        </div>
+      <div className="prompt-info">
+        {agentStatus?.currentTask ? (
+          <p className="current-task">
+            <strong>Task corrente:</strong> {agentStatus.currentTask}
+          </p>
+        ) : (
+          <p className="no-task">
+            {agentStatus?.isActive 
+              ? 'CoderAgent è in attesa di istruzioni'
+              : 'CoderAgent non è attivo. Attivalo dalle impostazioni degli agenti.'}
+          </p>
+        )}
       </div>
     </div>
   );

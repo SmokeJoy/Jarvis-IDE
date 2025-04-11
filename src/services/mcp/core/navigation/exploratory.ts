@@ -1,6 +1,6 @@
-import type { getContextById } from '../../../memory/context.js.js';
-import type { getContextLinks } from '../../../memory/context_links.js.js';
-import type { ContextLink } from '../../types.js.js';
+import type { getContextById } from '../../../memory/context.js';
+import type { getContextLinks } from '../../../memory/context_links.js';
+import type { ContextLink } from '../../types.js';
 import type {
   NavigationOptions,
   NodeResult,
@@ -9,7 +9,7 @@ import type {
   buildNodeResult,
   buildEdgeResult,
   filterLinksByOptions
-} from '../../utils/navigationGraph.js.js';
+} from '../../utils/navigationGraph.js';
 
 export async function findExploratoryPath(
   startId: string,

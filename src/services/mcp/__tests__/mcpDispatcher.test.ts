@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { mcpDispatcher } from '../mcpDispatcher.js.js';
-import * as typeGuards from '../../../shared/typeGuards.js.js';
-import { Logger } from '../../../shared/logger.js.js';
+import type { mcpDispatcher } from '../mcpDispatcher.js';
+import * as typeGuards from '../../../shared/typeGuards.js';
+import { Logger } from '../../../shared/logger.js';
 
 // Mock delle dipendenze
 vi.mock('../../../shared/typeGuards', () => ({

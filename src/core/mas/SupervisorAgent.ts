@@ -7,7 +7,7 @@ import type {
   DocAgent,
   AgentMessage,
   CoderInstruction
-} from './AgentTypes.js.js';
+} from './AgentTypes.js';
 import type { EventEmitter } from 'events';
 
 /**

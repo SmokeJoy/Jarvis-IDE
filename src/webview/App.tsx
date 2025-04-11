@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import type { SettingsPage } from './pages/SettingsPage.js.js';
-import { isDarkTheme } from './vscode.js.js';
+import type { SettingsPage } from './pages/SettingsPage.js';
+import { isDarkTheme } from './vscode.js';
 
 export const App: React.FC = () => {
   const [darkMode, setDarkMode] = useState(true);

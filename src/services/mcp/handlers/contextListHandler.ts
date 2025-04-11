@@ -1,6 +1,6 @@
-import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js.js";
-import { getFromMemory, getAllMemory } from "./contextInjectHandler.js.js";
-import type { getContextsByTags } from "./contextTagHandler.js.js";
+import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
+import { getFromMemory, getAllMemory } from "./contextInjectHandler.js";
+import type { getContextsByTags } from "./contextTagHandler.js";
 
 /**
  * Crea una stringa di anteprima del testo (primi 50 caratteri)

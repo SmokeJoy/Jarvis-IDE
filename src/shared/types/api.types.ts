@@ -5,19 +5,20 @@
  */
 
 // Importo tutti i tipi dal file centralizzato
-import * as LLMTypes from './llm.types.js.js';
-import type { TelemetrySetting } from './telemetry.types.js.js';
-import { ChatCompletionContentPart, ChatCompletionContentPartText, ChatCompletionContentPartImage } from './llm.types.js.js';
+import * as LLMTypes from './llm.types.js';
+import type { TelemetrySetting } from './telemetry.types.js';
+import { ChatCompletionContentPart, ChatCompletionContentPartText, ChatCompletionContentPartImage } from './llm.types.js';
 
 // Ri-esporto tutto per retrocompatibilità
-export * from './llm.types.js.js';
+export * from './llm.types.js';
 export { TelemetrySetting };
 
 // Tipo specifico per retrocompatibilità
 export type AzureOpenAIDeploymentId = string;
 
 /**
- * Per retrocompatibilità con il tipo OpenRouterModelInfo
+ * Per retrocompatibilità con il tipo OpenRouterModelInfo originale
+ * @deprecated Usare OpenRouterModelInfo da provider.types.ts
  */
 export interface OpenRouterModelInfo {
   id: string;
@@ -40,39 +41,254 @@ export interface OpenRouterModelInfo {
  */
 
 /**
- * Interfaccia base per le informazioni sui modelli
+ * Interfaccia base per le informazioni di un modello
  */
-export interface ModelInfo {
+export interface ModelInfoBase {
   id: string;
   name: string;
+  provider: string;
   contextLength: number;
-  provider: LLMProviderId;
   maxTokens?: number;
-  contextWindow?: number;
-  capabilities?: string[];
-  isThirdParty?: boolean;
+  temperature?: number;
   description?: string;
-  supportsImages?: boolean;
-  supportsComputerUse?: boolean;
-  supportsPromptCache?: boolean;
-  pricing?: {
-    input?: number;
-    output?: number;
+}
+
+/**
+ * Interfaccia per modelli compatibili con OpenAI
+ */
+export interface OpenAiCompatibleModelInfo extends ModelInfoBase {
+  provider: 'openai' | 'openrouter' | 'azure';
+  apiVersion?: string;
+  deploymentName?: string;
+}
+
+/**
+ * Interfaccia per modelli Anthropic
+ */
+export interface AnthropicModelInfo extends ModelInfoBase {
+  provider: 'anthropic';
+  modelFamily: string;
+  version: string;
+}
+
+/**
+ * Interfaccia per modelli Mistral
+ */
+export interface MistralModelInfo extends ModelInfoBase {
+  provider: 'mistral';
+  modelFamily: string;
+  version: string;
+}
+
+/**
+ * Interfaccia per modelli Gemini
+ */
+export interface GeminiModelInfo extends ModelInfoBase {
+  provider: 'gemini';
+  modelFamily: string;
+  version: string;
+}
+
+/**
+ * Interfaccia per modelli Ollama
+ */
+export interface OllamaModelInfo extends ModelInfoBase {
+  provider: 'ollama';
+  modelFamily: string;
+  version: string;
+}
+
+/**
+ * Unione di tutti i tipi di modelli supportati
+ */
+export type ModelInfo = 
+  | OpenAiCompatibleModelInfo
+  | AnthropicModelInfo
+  | MistralModelInfo
+  | GeminiModelInfo
+  | OllamaModelInfo;
+
+/**
+ * Interfaccia per modelli con fallback
+ */
+export interface ModelWithFallback<T extends ModelInfo> {
+  model: T;
+  fallback?: {
+    id: string;
+    name: string;
+    contextLength: number;
   };
-  inputPrice?: number;
-  outputPrice?: number;
-  cacheWritesPrice?: number;
-  cacheReadsPrice?: number;
+}
+
+/**
+ * Tipo per la configurazione dell'API
+ */
+export interface ApiConfiguration {
+  provider: string;
+  apiKey?: string;
+  selectedModel: string;
+  modelInfo?: ModelInfo;
+  endpoint?: string;
+  additionalHeaders?: Record<string, string>;
+}
+
+/**
+ * Tipo per i messaggi di errore dell'API
+ */
+export interface ApiError {
+  code: string;
+  message: string;
+  details?: unknown;
+}
+
+/**
+ * Tipo per la risposta dell'API
+ */
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: ApiError;
+}
+
+/**
+ * Interfaccia base fondamentale per tutti i modelli LLM
+ * Definisce le proprietà essenziali che TUTTI i modelli devono avere
+ * @interface ModelInfoBase
+ */
+export interface ModelInfoBase {
+  /** Identificatore univoco del modello (es: 'gpt-4', 'claude-3-opus') */
+  id: string;
+
+  /** Nome leggibile del modello */
+  name: string;
+
+  /** Provider del modello (es: 'openai', 'anthropic') */
+  provider: LLMProviderId;
+
+  /** 
+   * Lunghezza massima del contesto supportata (in token)
+   * Indica la quantità massima di token che il modello può processare in un singolo prompt
+   */
+  contextLength: number;
+}
+
+/**
+ * Estende ModelInfoBase con capacità comuni tra vari modelli LLM
+ * Queste proprietà sono opzionali ma standardizzate per facilitare funzionalità trasversali
+ * @interface ModelInfoStandard
+ * @extends ModelInfoBase
+ */
+export interface ModelInfoStandard extends ModelInfoBase {
+  /** Token massimi in output che il modello può generare */
+  maxTokens?: number;
+
+  /** 
+   * Dimensione finestra di contesto 
+   * Spesso uguale a contextLength, ma può variare in alcuni modelli 
+   */
+  contextWindow?: number;
+
+  /** 
+   * Array di capacità supportate dal modello 
+   * Utile per filtraggio e selezione modelli basati su feature
+   */
+  capabilities?: string[];
+
+  /** Indica se il modello è di terze parti */
+  isThirdParty?: boolean;
+
+  /** Descrizione testuale del modello */
+  description?: string;
+  
+  /** Temperatura predefinita consigliata per il modello */
   temperature?: number;
 }
 
 /**
- * Estensione di ModelInfo per modelli compatibili con OpenAI
+ * Interfaccia per proprietà relative alla multimodalità e funzionalità avanzate
+ * @interface ModelCapabilitiesInfo
  */
-export interface OpenAiCompatibleModelInfo extends ModelInfo {
-  maxCompletionTokens?: number;
+export interface ModelCapabilitiesInfo {
+  /** Indica se il modello supporta input di immagini */
+  supportsImages?: boolean;
+
+  /** Indica se il modello supporta esecuzione di codice/calcoli */
+  supportsComputerUse?: boolean;
+  
+  /** Indica se il modello supporta chiamate a funzioni/strumenti */
   supportsTools?: boolean;
+  
+  /** Indica se il modello supporta l'elaborazione di immagini (vision) */
   supportsVision?: boolean;
+  
+  /** Indica se il modello supporta il caching dei prompt */
+  supportsPromptCache?: boolean;
+}
+
+/**
+ * Interfaccia per informazioni di costo e pricing
+ * @interface ModelPricingInfo
+ */
+export interface ModelPricingInfo {
+  /** Prezzo per milione di token in input (in USD) */
+  inputPrice?: number;
+  
+  /** Prezzo per milione di token in output (in USD) */
+  outputPrice?: number;
+  
+  /** Prezzo per milione di token per scritture in cache (in USD) */
+  cacheWritesPrice?: number;
+  
+  /** Prezzo per milione di token per letture da cache (in USD) */
+  cacheReadsPrice?: number;
+  
+  /** 
+   * Struttura prezzi alternativa 
+   * @deprecated Preferire inputPrice e outputPrice direttamente nell'interfaccia 
+   */
+  pricing?: {
+    input?: number;
+    output?: number;
+  };
+}
+
+/**
+ * ModelInfo completo che combina tutte le interfacce precedenti
+ * Questa è l'interfaccia principale usata in tutto il codice
+ * @interface ModelInfo
+ * @extends ModelInfoStandard
+ * @extends ModelCapabilitiesInfo
+ * @extends ModelPricingInfo
+ */
+export interface ModelInfo extends ModelInfoStandard, ModelCapabilitiesInfo, ModelPricingInfo {}
+
+/**
+ * Interfaccia specifica per modelli OpenRouter
+ * @interface OpenRouterModelInfo
+ * @extends ModelInfo
+ */
+export interface OpenRouterModelInfo extends ModelInfo {
+  /** Timestamp di creazione del modello */
+  created?: number;
+  
+  /** Punteggio di performance relativo */
+  performanceScore?: number;
+  
+  /** Fornitore originale del modello */
+  originalProvider?: string;
+}
+
+/**
+ * Interfaccia specifica per modelli Azure OpenAI
+ * @interface AzureOpenAIModelInfo
+ * @extends OpenAiCompatibleModelInfo
+ */
+export interface AzureOpenAIModelInfo extends OpenAiCompatibleModelInfo {
+  /** Deployment ID in Azure */
+  deploymentId: string;
+  
+  /** Versione API di Azure OpenAI */
+  apiVersion?: string;
 }
 
 /**
@@ -91,15 +307,6 @@ export interface ApiHandlerOptions {
   timeout?: number;
   baseUrl?: string;
   transformer?: ApiTransformer;
-}
-
-/**
- * Struttura di errore per le API
- */
-export interface ApiError {
-  message: string;
-  code?: string;
-  status?: number;
 }
 
 /**
@@ -162,117 +369,6 @@ export type LLMProviderId =
  */
 export interface ApiStream {
   stream: ApiMessageGenerator;
-}
-
-/**
- * Interfaccia unificata per le configurazioni di provider API
- * Questa è la definizione centrale che racchiude tutti i parametri possibili
- * per tutti i provider LLM supportati
- */
-export interface ApiConfiguration extends ApiHandlerOptions {
-  provider: LLMProviderId | string;
-  apiKey?: string;
-  modelId?: string;
-  modelInfo?: OpenAiCompatibleModelInfo;
-  baseUrl?: string;
-  temperature?: number;
-  maxTokens?: number;
-  customInstructions?: string;
-  
-  openAiApiKey?: string;
-  openAiModelId?: string;
-  openAiModelInfo?: OpenAiCompatibleModelInfo;
-  openAiBaseUrl?: string;
-  openAiNativeApiKey?: string;
-  
-  openRouterApiKey?: string;
-  openRouterModelId?: string;
-  openRouterModelInfo?: OpenAiCompatibleModelInfo;
-  openRouterProviderSorting?: string | boolean;
-  
-  anthropicApiKey?: string;
-  anthropicModelInfo?: OpenAiCompatibleModelInfo;
-  anthropicBaseUrl?: string;
-  anthropicModelId?: string;
-
-  awsAccessKey?: string;
-  awsSecretKey?: string;
-  awsAccessKeyId?: string;
-  awsSecretAccessKey?: string;
-  awsSessionToken?: string;
-  awsRegion?: string;
-  awsBedrockEndpoint?: string;
-  awsUseCrossRegionInference?: boolean;
-  awsBedrockUsePromptCache?: boolean;
-  awsUseProfile?: boolean;
-  awsProfile?: string;
-  
-  azureApiKey?: string;
-  azureDeploymentId?: string;
-  azureDeploymentName?: string;
-  azureEndpoint?: string;
-  azureApiVersion?: string;
-  azureResourceName?: string;
-  
-  vertexProjectId?: string;
-  vertexLocation?: string;
-  vertexRegion?: string;
-  
-  geminiApiKey?: string;
-  
-  ollamaBaseUrl?: string;
-  ollamaModelId?: string;
-  ollamaApiOptionsCtxNum?: string;
-  ollama?: {
-    baseUrl?: string;
-  };
-  
-  lmStudioBaseUrl?: string;
-  lmStudioModelId?: string;
-  lmStudio?: {
-    baseUrl?: string;
-  };
-  
-  mistralApiKey?: string;
-  
-  deepSeekApiKey?: string;
-  
-  requestyApiKey?: string;
-  requestyModelId?: string;
-  
-  togetherApiKey?: string;
-  togetherModelId?: string;
-  
-  qwenApiKey?: string;
-  qwenApiLine?: string;
-  
-  vsCodeLmModelSelector?: any;
-  
-  liteLlmBaseUrl?: string;
-  liteLlmModelId?: string;
-  liteLlmApiKey?: string;
-  
-  o3MiniReasoningEffort?: string;
-  
-  asksageApiUrl?: string;
-  asksageApiKey?: string;
-  
-  xaiApiKey?: string;
-  
-  sambanovaApiKey?: string;
-  
-  jarvisIdeApiKey?: string;
-  
-  topP?: number;
-  frequencyPenalty?: number;
-  presencePenalty?: number;
-  
-  thinkingBudgetTokens?: number;
-  organization?: string;
-  
-  apiModelId?: string;
-  telemetryEnabled?: boolean;
-  model?: string;
 }
 
 /**

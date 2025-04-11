@@ -1,12 +1,12 @@
 import * as vscode from "vscode"
 import * as path from "path"
 import * as fs from "fs/promises"
-import { createDirectoriesForFile } from "../../utils/fs.js.js"
-import type { arePathsEqual } from "../../utils/path.js.js"
-import type { formatResponse } from "../../core/prompts/responses.js.js"
-import { DecorationController } from "./DecorationController.js.js"
+import { createDirectoriesForFile } from "../../utils/fs.js"
+import type { arePathsEqual } from "../../utils/path.js"
+import type { formatResponse } from "../../core/prompts/responses.js"
+import { DecorationController } from "./DecorationController.js"
 import * as diff from "diff"
-import { diagnosticsToProblemsString, getNewDiagnostics } from "../diagnostics.js.js"
+import { diagnosticsToProblemsString, getNewDiagnostics } from "../diagnostics.js"
 
 export const DIFF_VIEW_URI_SCHEME = "jarvis-ide-diff"
 

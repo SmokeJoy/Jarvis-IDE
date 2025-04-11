@@ -4,7 +4,14 @@
 interface VSCodeMessage {
   type: string;
   command?: string;
-  payload?: any;
+  payload?: unknown;
+}
+
+/**
+ * Interfaccia per lo stato del webview
+ */
+interface WebviewState {
+  [key: string]: unknown;
 }
 
 /**
@@ -28,7 +35,7 @@ export const vscode = {
    * Ottiene lo stato corrente salvato nel webview
    * @returns Lo stato corrente
    */
-  getState() {
+  getState(): WebviewState {
     return this.webviewApi.getState();
   },
 
@@ -36,7 +43,7 @@ export const vscode = {
    * Imposta un nuovo stato per il webview
    * @param state Il nuovo stato da impostare
    */
-  setState(state: any) {
+  setState(state: WebviewState) {
     this.webviewApi.setState(state);
   }
 };
@@ -45,7 +52,7 @@ export const vscode = {
  * Dichiara la funzione acquireVsCodeApi per TypeScript
  */
 declare function acquireVsCodeApi(): {
-  postMessage(message: any): void;
-  getState(): any;
-  setState(state: any): void;
+  postMessage(message: VSCodeMessage): void;
+  getState(): WebviewState;
+  setState(state: WebviewState): void;
 }; 

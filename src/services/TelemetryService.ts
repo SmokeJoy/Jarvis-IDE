@@ -1,5 +1,5 @@
 import { PostHog } from "posthog-node";
-import { TelemetrySetting } from "../types/global.js.js";
+import { TelemetrySetting } from "../types/global.js";
 
 export class TelemetryService {
   private client: PostHog | null = null;

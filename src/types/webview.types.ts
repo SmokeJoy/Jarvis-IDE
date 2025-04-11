@@ -5,7 +5,7 @@
  */
 
 // Re-esporta tutto dal file centralizzato
-export * from '../shared/types/webview.types.js.js';
+export * from '../shared/types/webview.types.js';
 
 // Questo file è mantenuto solo per retrocompatibilità con il codice esistente
 // e non dovrebbe avere definizioni proprie per evitare duplicazioni. 

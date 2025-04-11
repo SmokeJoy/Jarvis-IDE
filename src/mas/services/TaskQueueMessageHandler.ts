@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { MasManager } from '../MasManager.js.js';
-import { AgentStatus } from '../../shared/types/mas.types.js.js';
-import type { WebviewMessage } from '../../types/webview.types.js.js';
-import { Logger } from '../../utils/logger.js.js';
-import { TaskQueueService } from './TaskQueueService.js.js';
+import { MasManager } from '../MasManager.js';
+import { AgentStatus } from '../../shared/types/mas.types.js';
+import type { WebviewMessage } from '../../types/webview.types.js';
+import { Logger } from '../../utils/logger.js';
+import { TaskQueueService } from './TaskQueueService.js';
 
 // Definiamo interfacce per i messaggi specifici se non esistono nei file centralizzati
 interface TaskQueueViewMessage extends WebviewMessage {

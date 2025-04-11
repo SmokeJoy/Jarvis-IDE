@@ -12,7 +12,7 @@ import type {
 	isImageBlock,
 	isToolUseBlock,
 	isToolResultBlock
-} from "../../types/chat.types.js.js"
+} from "../../types/chat.types.js"
 
 /**
  * Safely converts a value into a plain object.

@@ -1,5 +1,5 @@
-import type { JarvisMessage } from "./ExtensionMessage.js.js"
-import type { ChatMessage } from "./types.js.js"
+import type { JarvisMessage } from "./ExtensionMessage.js"
+import type { ChatMessage } from "./types.js"
 
 /**
  * Combines API request start and finish messages in an array of JarvisMessages.

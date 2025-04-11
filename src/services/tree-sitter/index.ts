@@ -1,9 +1,9 @@
 import * as fs from "fs/promises"
 import * as path from "path"
-import { listFiles } from "../glob/list-files.js.js"
-import { LanguageParser, loadRequiredLanguageParsers } from "./languageParser.js.js"
-import type { fileExistsAtPath } from "../../utils/fs.js.js"
-import { JarvisIdeIgnoreController } from "../../core/ignore/JarvisIdeIgnoreController.js.js"
+import { listFiles } from "../glob/list-files.js"
+import { LanguageParser, loadRequiredLanguageParsers } from "./languageParser.js"
+import type { fileExistsAtPath } from "../../utils/fs.js"
+import { JarvisIdeIgnoreController } from "../../core/ignore/JarvisIdeIgnoreController.js"
 
 // TODO: implement caching behavior to avoid having to keep analyzing project for new tasks.
 export async function parseSourceCodeForDefinitionsTopLevel(
@@ -135,7 +135,7 @@ async function parseFile(
 		const captures = query.captures(tree.rootNode)
 
 		// Sort captures by their start position
-		captures.sort((a, b) => a.node.startPosition.row - b.node.startPosition.row)
+		captures.sort((a: { node: { startPosition: { row: number } } }, b: { node: { startPosition: { row: number } } }) => a.node.startPosition.row - b.node.startPosition.row)
 
 		// Split the file content into individual lines
 		const lines = fileContent.split("\n")
@@ -143,7 +143,7 @@ async function parseFile(
 		// Keep track of the last line we've processed
 		let lastLine = -1
 
-		captures.forEach((capture) => {
+		captures.forEach((capture: { node: { startPosition: { row: number }, endPosition: { row: number } }, name: string }) => {
 			const { node, name } = capture
 			// Get the start and end lines of the current AST node
 			const startLine = node.startPosition.row

@@ -1,4 +1,4 @@
-// import { mentionRegex } from "../shared/context-mentions.js.js"; // Rimuovi import e correggi percorso
+// import { mentionRegex } from "../shared/context-mentions.js"; // Rimuovi import e correggi percorso
 
 export enum ContextMenuOptionType {
   File = 'file',

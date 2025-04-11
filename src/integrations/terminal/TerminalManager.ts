@@ -1,8 +1,8 @@
 import pWaitFor from "p-wait-for"
 import * as vscode from "vscode"
-import type { arePathsEqual } from "../../utils/path.js.js"
-import type { mergePromise, TerminalProcess, TerminalProcessResultPromise } from "./TerminalProcess.js.js"
-import { TerminalInfo, TerminalRegistry } from "./TerminalRegistry.js.js"
+import type { arePathsEqual } from "../../utils/path.js"
+import type { mergePromise, TerminalProcess, TerminalProcessResultPromise } from "./TerminalProcess.js"
+import { TerminalInfo, TerminalRegistry } from "./TerminalRegistry.js"
 
 /*
 TerminalManager:

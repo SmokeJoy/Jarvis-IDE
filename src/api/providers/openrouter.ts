@@ -1,13 +1,13 @@
 import { Anthropic } from "@anthropic-ai/sdk";
-import type { OpenAiCompatibleModelInfo, ModelInfo, ApiStream, ApiStreamChunk, ApiStreamTextChunk, ApiStreamUsageChunk } from '../../shared/types/api.types.js.js';
-import type { ApiHandler } from '../index.js.js';
-import type { BaseStreamHandler } from "../handlers/BaseStreamHandler.js.js";
-import { retryAsync } from "../retry.js.js";
-import { logger } from "../../utils/logger.js.js";
+import type { OpenAiCompatibleModelInfo, ModelInfo, ApiStream, ApiStreamChunk, ApiStreamTextChunk, ApiStreamUsageChunk } from '../../shared/types/api.types.js';
+import type { ApiHandler } from '../index.js';
+import type { BaseStreamHandler } from "../handlers/BaseStreamHandler.js";
+import { retryAsync } from "../retry.js";
+import { logger } from "../../utils/logger.js";
 import type { ChatCompletionMessageParam } from "openai";
-import type { convertToOpenAiMessages } from "../transform/openai-format.js.js";
-import type { OpenRouterModelId } from "../../shared/api.js.js";
-import { convertToR1Format } from "../transform/o1-format.js.js";
+import type { convertToOpenAiMessages } from "../transform/openai-format.js";
+import type { OpenRouterModelId } from "../../shared/api.js";
+import { convertToR1Format } from "../transform/o1-format.js";
 
 /**
  * Tipo per rappresentare la risposta di OpenRouter

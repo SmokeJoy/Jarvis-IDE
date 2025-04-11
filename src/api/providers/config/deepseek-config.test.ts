@@ -1,6 +1,6 @@
-import type { buildDeepSeekConfig } from "./deepseek-config.js.js"
-import type { openAiModelInfoSaneDefaults } from "../../../shared/api.js.js"
-import type { ModelInfo } from "../../../shared/types/api.types.js.js"
+import type { buildDeepSeekConfig } from "./deepseek-config.js"
+import type { openAiModelInfoSaneDefaults } from "../../../shared/api.js"
+import type { ModelInfo } from "../../../shared/types/api.types.js"
 
 describe("buildDeepSeekConfig", () => {
     it("dovrebbe restituire i valori predefiniti quando modelInfo è undefined", () => {

@@ -1,8 +1,8 @@
 import * as Anthropic from '@anthropic-ai/sdk';
 import * as diff from "diff"
 import * as path from "path"
-import { JarvisIdeIgnoreController, LOCK_TEXT_SYMBOL } from "../ignore/JarvisIdeIgnoreController.js.js"
-import type { ChatCompletionContentPartText, ChatCompletionContentPartImage } from "../../types/global.js.js"
+import { JarvisIdeIgnoreController, LOCK_TEXT_SYMBOL } from "../ignore/JarvisIdeIgnoreController.js"
+import type { ChatCompletionContentPartText, ChatCompletionContentPartImage } from "../../types/global.js"
 
 // Definisci i tipi in modo compatibile con OpenAI SDK
 type TextBlock = ChatCompletionContentPartText;

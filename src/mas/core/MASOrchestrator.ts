@@ -5,6 +5,7 @@ import { ZodSchemaMap } from '../../utils/validation';
 import { AgentManager } from './AgentManager';
 import { MemoryManager } from './MemoryManager';
 import { AgentRole } from './types';
+import { LLMFallbackManager } from './fallback/LLMFallbackManager';
 
 // Interfaccia per le opzioni di inizializzazione dell'orchestratore
 interface MASOptions {
@@ -13,6 +14,8 @@ interface MASOptions {
   maxConcurrentAgents?: number;
   startingAgent?: AgentRole;
   parallelExecution?: boolean;
+  providers?: LLMProviderHandler[];
+  preferredProvider?: string;
 }
 
 // Interfaccia per le opzioni di esecuzione dell'orchestratore
@@ -30,54 +33,10 @@ interface ParallelTask {
   input: any;
 }
 
-/**
- * Gestione del fallback dei provider LLM
- */
-class ProviderFallbackHandler {
-  lastSuccessfulProvider: LLMProviderHandler | null = null;
-
-  constructor(private providers: LLMProviderHandler[]) {}
-
-  /**
-   * Tenta di utilizzare il provider preferito o fallback su altri disponibili
-   */
-  async executeWithFallback(callback: (provider: LLMProviderHandler) => Promise<any>): Promise<any> {
-    // Se c'è un provider che ha funzionato in precedenza, tenta prima quello
-    if (this.lastSuccessfulProvider) {
-      try {
-        const result = await callback(this.lastSuccessfulProvider);
-        return result;
-      } catch (error) {
-        console.error('Provider preferito fallito, tentativo con provider alternativi');
-        // Continua con il fallback
-      }
-    }
-
-    // Tenta con ogni provider disponibile
-    let lastError: Error | null = null;
-    for (const provider of this.providers) {
-      if (!provider.isEnabled) continue;
-
-      try {
-        const result = await callback(provider);
-        // Memorizza questo provider come ultimo che ha avuto successo
-        this.lastSuccessfulProvider = provider;
-        return result;
-      } catch (error) {
-        console.error(`Provider ${provider.id} fallito:`, error);
-        lastError = error as Error;
-      }
-    }
-
-    // Se tutti i provider falliscono, solleva l'ultimo errore
-    throw lastError || new Error('Tutti i provider hanno fallito');
-  }
-}
-
 export class MASOrchestrator {
   private providers: LLMProviderHandler[] = [];
   private historyStore: InMemoryAgentHistory;
-  private fallbackHandler: ProviderFallbackHandler;
+  private fallbackManager: LLMFallbackManager;
   private agentManager: AgentManager;
   private memoryManager: MemoryManager;
   private maxConcurrentAgents: number;
@@ -91,12 +50,20 @@ export class MASOrchestrator {
     this.maxConcurrentAgents = options.maxConcurrentAgents || 1;
     this.startingAgent = options.startingAgent || 'planner';
     this.parallelExecution = options.parallelExecution || false;
-    this.initializeProviders();
-    this.fallbackHandler = new ProviderFallbackHandler(this.providers);
+    
+    // Inizializza i provider e il gestore di fallback
+    this.initializeProviders(options.providers);
+    this.fallbackManager = new LLMFallbackManager({
+      providers: this.providers,
+      preferredProvider: options.preferredProvider,
+      rememberSuccessful: true,
+      maxRetries: 1
+    });
   }
 
-  private initializeProviders() {
-    this.providers = registerDefaultProviders();
+  private initializeProviders(customProviders?: LLMProviderHandler[]) {
+    // Utilizza i provider forniti o registra quelli di default
+    this.providers = customProviders || registerDefaultProviders();
   }
 
   /**
@@ -112,8 +79,8 @@ export class MASOrchestrator {
         throw new Error('Invalid message type');
       }
 
-      // Utilizzo del handler di fallback per scegliere il provider
-      return await this.fallbackHandler.executeWithFallback(async (provider) => {
+      // Utilizzo del manager di fallback per scegliere il provider
+      return await this.fallbackManager.executeWithFallback(async (provider) => {
         console.log(`Tentativo di esecuzione con provider ${provider.id}`);
         const result = await provider.handle(message, schemaMap);
         return result;

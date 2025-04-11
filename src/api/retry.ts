@@ -1,4 +1,4 @@
-import { logger } from "../utils/logger.js.js"
+import { logger } from "../utils/logger.js"
 
 /**
  * Riprova una funzione asincrona più volte in caso di errore.

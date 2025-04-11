@@ -1,0 +1,590 @@
+/**
+ * Stili per il componente AgentFlowDebugger
+ */
+
+/* Stili generali del container */
+.agentflowdebugger-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  font-family: var(--vscode-font-family);
+  border-radius: 6px;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Stili per l'header */
+.agentflowdebugger-header {
+  padding: 12px 16px;
+  background-color: var(--vscode-sideBar-background);
+  border-radius: 4px;
+  border-left: 4px solid var(--vscode-activityBar-activeBorder, #007acc);
+}
+
+.agentflowdebugger-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.agentflowdebugger-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.agentflowdebugger-status-badge {
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.agentflowdebugger-status-active {
+  background-color: rgba(3, 169, 244, 0.2);
+  color: #03a9f4;
+}
+
+.agentflowdebugger-status-completed {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+}
+
+.agentflowdebugger-status-error {
+  background-color: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+}
+
+.agentflowdebugger-status-unknown {
+  background-color: rgba(158, 158, 158, 0.2);
+  color: #9e9e9e;
+}
+
+.agentflowdebugger-last-updated {
+  font-size: 0.8rem;
+  color: var(--vscode-descriptionForeground);
+}
+
+.agentflowdebugger-header-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 0.9rem;
+}
+
+.agentflowdebugger-detail {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.agentflowdebugger-detail-label {
+  color: var(--vscode-descriptionForeground);
+  font-weight: 500;
+}
+
+.agentflowdebugger-detail-value {
+  color: var(--vscode-editor-foreground);
+}
+
+.agentflowdebugger-loading-indicator {
+  font-size: 0.9rem;
+  color: var(--vscode-disabledForeground);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* Stili per le statistiche */
+.agentflowdebugger-stats-container {
+  padding: 12px;
+  background-color: var(--vscode-sideBar-background);
+  border-radius: 4px;
+}
+
+.agentflowdebugger-stats-container h3 {
+  margin: 0 0 12px 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--vscode-editor-foreground);
+}
+
+.agentflowdebugger-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.agentflowdebugger-stat-box {
+  padding: 12px;
+  background-color: var(--vscode-editor-background);
+  border-radius: 4px;
+  border: 1px solid var(--vscode-widget-border);
+}
+
+.agentflowdebugger-stat-box h4 {
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--vscode-editor-foreground);
+}
+
+.agentflowdebugger-stat-value {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--vscode-editor-foreground);
+}
+
+.agentflowdebugger-stat-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.agentflowdebugger-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.agentflowdebugger-stat-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.agentflowdebugger-stat-label {
+  flex: 1;
+  color: var(--vscode-descriptionForeground);
+}
+
+.agentflowdebugger-stat-count {
+  font-weight: 600;
+  color: var(--vscode-editor-foreground);
+}
+
+.agentflowdebugger-stat-description {
+  font-size: 0.9rem;
+  color: var(--vscode-descriptionForeground);
+  margin-top: 4px;
+}
+
+.agentflowdebugger-stats-loading,
+.agentflowdebugger-stats-empty {
+  padding: 12px;
+  text-align: center;
+  font-style: italic;
+  color: var(--vscode-disabledForeground);
+}
+
+/* Stili per i controlli */
+.agentflowdebugger-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px;
+  background-color: var(--vscode-sideBar-background);
+  border-radius: 4px;
+}
+
+.agentflowdebugger-search {
+  flex: 1;
+  min-width: 200px;
+}
+
+.agentflowdebugger-search input {
+  width: 100%;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--vscode-input-border);
+  background-color: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  font-family: var(--vscode-font-family);
+  font-size: 14px;
+}
+
+.agentflowdebugger-search input:focus {
+  outline: none;
+  border-color: var(--vscode-focusBorder);
+}
+
+.agentflowdebugger-filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.agentflowdebugger-filter-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.agentflowdebugger-filter-option {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.agentflowdebugger-filter-option:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.agentflowdebugger-filter-option.selected {
+  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
+.agentflowdebugger-zoom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.agentflowdebugger-zoom-slider {
+  width: 120px;
+}
+
+.agentflowdebugger-refresh-button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: none;
+  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.agentflowdebugger-refresh-button:hover {
+  background-color: var(--vscode-button-hoverBackground);
+}
+
+/* Stili per il diagramma */
+.agentflowdebugger-diagram-container {
+  min-height: 300px;
+  background-color: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-widget-border);
+  border-radius: 4px;
+  padding: 16px;
+  position: relative;
+  overflow: auto;
+  transition: transform 0.3s ease;
+  transform-origin: top left;
+}
+
+.agentflowdebugger-diagram {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+}
+
+.agentflowdebugger-diagram svg {
+  width: 100%;
+  height: auto;
+  max-width: none;
+}
+
+.agentflowdebugger-diagram-loading,
+.agentflowdebugger-diagram-error,
+.agentflowdebugger-diagram-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  font-style: italic;
+  color: var(--vscode-disabledForeground);
+  text-align: center;
+}
+
+/* Stili personalizzati per i diagrammi Mermaid */
+.agentflowdebugger-diagram .node rect {
+  fill: var(--vscode-editor-background);
+  stroke: var(--vscode-widget-border);
+  rx: 4;
+  ry: 4;
+}
+
+.agentflowdebugger-diagram .node text {
+  fill: var(--vscode-editor-foreground);
+}
+
+.agentflowdebugger-diagram .edgeLabel {
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+.agentflowdebugger-diagram .edgePath path {
+  stroke-width: 2px;
+}
+
+/* Stili per la timeline */
+.agentflowdebugger-timeline-container {
+  padding: 12px;
+  background-color: var(--vscode-sideBar-background);
+  border-radius: 4px;
+}
+
+.agentflowdebugger-timeline-container h3 {
+  margin: 0 0 12px 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--vscode-editor-foreground);
+}
+
+.agentflowdebugger-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.agentflowdebugger-timeline-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background-color: var(--vscode-editor-background);
+  border-radius: 4px;
+  border-left: 4px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.agentflowdebugger-timeline-item:hover {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+.agentflowdebugger-timeline-time {
+  min-width: 80px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--vscode-descriptionForeground);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.agentflowdebugger-timeline-relative-time {
+  font-size: 0.7rem;
+  color: var(--vscode-textPreformat-foreground);
+}
+
+.agentflowdebugger-timeline-type-indicator {
+  width: 4px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+.agentflowdebugger-timeline-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.agentflowdebugger-timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.agentflowdebugger-timeline-agents {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.agentflowdebugger-timeline-agent.source {
+  color: var(--vscode-textLink-foreground);
+}
+
+.agentflowdebugger-timeline-agent.target {
+  color: var(--vscode-editorInfo-foreground);
+}
+
+.agentflowdebugger-timeline-type {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  background-color: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
+}
+
+.agentflowdebugger-timeline-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.agentflowdebugger-timeline-message {
+  background-color: var(--vscode-textCodeBlock-background);
+  border-radius: 4px;
+  padding: 8px;
+  overflow: auto;
+  max-height: 200px;
+}
+
+.agentflowdebugger-timeline-message pre {
+  margin: 0;
+  font-family: var(--vscode-editor-font-family);
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--vscode-textCodeBlock-foreground);
+}
+
+.agentflowdebugger-timeline-loading,
+.agentflowdebugger-timeline-error,
+.agentflowdebugger-timeline-empty {
+  padding: 16px;
+  text-align: center;
+  font-style: italic;
+  color: var(--vscode-disabledForeground);
+}
+
+/* Media queries per la responsività */
+@media (max-width: 768px) {
+  .agentflowdebugger-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .agentflowdebugger-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .agentflowdebugger-header-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .agentflowdebugger-timeline-item {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .agentflowdebugger-timeline-time {
+    min-width: auto;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .agentflowdebugger-timeline-type-indicator {
+    height: 4px;
+    width: auto;
+  }
+}
+
+/* Stili specifici per tema scuro */
+.vscode-dark .agentflowdebugger-diagram .node rect {
+  fill: #1e1e1e;
+  stroke: #444;
+}
+
+.vscode-dark .agentflowdebugger-diagram .edgeLabel {
+  background-color: #2d2d2d;
+  color: #cccccc;
+}
+
+.vscode-dark .agentflowdebugger-stat-box {
+  background-color: #252526;
+}
+
+.vscode-dark .agentflowdebugger-timeline-message {
+  background-color: #1e1e1e;
+}
+
+/* Layout a righe e colonne */
+.agentflowdebugger-row {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.agentflowdebugger-column {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Stili per AgentFlowSummary */
+.agentflowdebugger-summary-container {
+  background-color: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.agentflowdebugger-summary-container h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 16px;
+  color: var(--vscode-foreground);
+  border-bottom: 1px solid var(--vscode-panel-border);
+  padding-bottom: 8px;
+}
+
+.agentflowdebugger-summary-section {
+  margin-bottom: 16px;
+}
+
+.agentflowdebugger-summary-section h4 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: var(--vscode-foreground);
+}
+
+.agentflowdebugger-summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.agentflowdebugger-summary-label {
+  color: var(--vscode-descriptionForeground);
+}
+
+.agentflowdebugger-summary-value {
+  font-weight: 500;
+  color: var(--vscode-foreground);
+}
+
+.agentflowdebugger-summary-loading,
+.agentflowdebugger-summary-empty {
+  padding: 16px;
+  text-align: center;
+  color: var(--vscode-descriptionForeground);
+  font-style: italic;
+}

@@ -3,7 +3,7 @@
  * https://console.groq.com/docs/quickstart
  */
 
-import type { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js.js';
+import type { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js';
 
 interface GroqChatRequest {
   model: string;

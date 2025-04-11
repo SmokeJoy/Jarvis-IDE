@@ -5,7 +5,7 @@ import type {
   ExtensionConfiguration,
   ExtensionState,
   ExtensionContext,
-} from "./extension.js.js";
+} from "./extension.js";
 
 describe("Extension Types", () => {
   test("ExtensionMessage should have correct structure", () => {

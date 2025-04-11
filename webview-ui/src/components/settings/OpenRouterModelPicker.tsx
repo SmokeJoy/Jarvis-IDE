@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { VSCodeDropdown, VSCodeOption } from '@vscode/webview-ui-toolkit/react';
 import { useExtensionState } from '../../context/ExtensionStateContext';
-import { WebviewMessageType } from '@/shared/WebviewMessageType';
+import { WebviewMessageType, ModelSelectedMessage } from '@/types/WebviewMessageType';
 import { vscode } from '@/utils/vscode';
 import type { OpenAiCompatibleModelInfo } from '@/types/models';
 import { fetchModels } from '@/utils/modelFetcher';
@@ -70,6 +70,16 @@ export const OpenRouterModelPicker: React.FC<OpenRouterModelPickerProps> = ({
 			
 			if (selectedModel) {
 				onChange(selectedModel);
+				
+				const message: ModelSelectedMessage = {
+					type: 'modelSelected',
+					timestamp: Date.now(),
+					payload: {
+						modelId: selectedModel.id,
+						modelInfo: selectedModel
+					}
+				};
+				vscode.postMessage(message);
 			} else {
 				// Fallback se il modello non è trovato
 				const newModelInfo: OpenAiCompatibleModelInfo = {

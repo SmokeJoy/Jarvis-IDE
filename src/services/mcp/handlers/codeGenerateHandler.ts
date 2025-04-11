@@ -6,14 +6,14 @@
  * in linguaggio naturale e specifica di linguaggio di programmazione.
  */
 
-import type { McpToolHandler } from "../../../shared/types/mcp.types.js.js";
+import type { McpToolHandler } from "../../../shared/types/mcp.types.js";
 
 /**
  * Handler per la generazione di codice da descrizione naturale
  * @param input - Parametri per la generazione di codice
  * @returns Risultato con il codice generato o errore
  */
-export const codeGenerateHandler: McpToolHandler = async (input) => {
+export const codeGenerateHandler: McpToolHandler = async (input: any) => {
   const { language, description, contextFile } = input;
 
   // Validazione dei parametri obbligatori

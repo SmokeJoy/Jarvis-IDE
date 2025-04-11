@@ -3,8 +3,8 @@
  * @description Funzioni di supporto per normalizzare i contenuti di chat
  */
 
-import type { ContentBlock } from "./types/chat.types.js.js";
-import type { ContentType } from "./types/chat.types.js.js";
+import type { ContentBlock } from "./types/chat.types.ts";
+import type { ContentType } from "./types/chat.types.ts";
 
 /**
  * Normalizza un blocco di contenuto

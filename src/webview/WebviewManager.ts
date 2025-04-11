@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import type { WebviewMessageHandler } from './handlers/WebviewMessageHandler.js.js';
-import type { TaskQueueMessageHandler } from './handlers/TaskQueueMessageHandler.js.js';
-import { Logger } from '../utils/logger.js.js';
-import { MasManager } from '../mas/MasManager.js.js';
+import type { WebviewMessageHandler } from './handlers/WebviewMessageHandler.js';
+import type { TaskQueueMessageHandler } from './handlers/TaskQueueMessageHandler.js';
+import { Logger } from '../utils/logger.js';
+import { MasManager } from '../mas/MasManager.js';
 
 /**
  * Gestisce la WebView e i suoi handler di messaggi
@@ -120,8 +120,8 @@ export class WebviewManager {
    * Ottiene il contenuto HTML per la WebView
    */
   private _getWebviewContent(): string {
-    // In sviluppo, puoi usare un server di sviluppo
-    const isDevelopment = process.env.NODE_ENV === 'development';
+    // Verifica se siamo in ambiente di sviluppo
+    const isDevelopment = process.env['NODE_ENV'] === 'development';
 
     if (isDevelopment) {
       // Durante lo sviluppo, utilizza un server locale

@@ -1,6 +1,6 @@
-import type { ContextItem } from '../types/ContextItem.js.js';
-import type { getMemoryContexts, saveMemoryContexts } from '../utils/memoryUtils.js.js';
-import { normalizeTags } from '../utils/tagUtils.js.js';
+import type { ContextItem } from '../types/ContextItem.js';
+import type { getMemoryContexts, saveMemoryContexts } from '../utils/memoryUtils.js';
+import { normalizeTags } from '../utils/tagUtils.js';
 
 interface EditOptions {
   id: string;

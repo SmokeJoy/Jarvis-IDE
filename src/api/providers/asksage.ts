@@ -5,9 +5,9 @@ import type {
 	askSageModels,
 	askSageDefaultModelId,
 	askSageDefaultURL,
-} from "../../shared/api.js.js"
-import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js.js"
-import { ApiStream } from "../transform/stream.js.js"
+} from "../../shared/api.js"
+import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
+import { ApiStream } from "../transform/stream.js"
 
 type AskSageRequest = {
 	system_prompt: string

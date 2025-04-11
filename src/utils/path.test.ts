@@ -11,7 +11,7 @@ import type {
 	getBasename,
 	getDirname,
 	getReadablePath
-} from "./path.js.js"
+} from "./path.js"
 
 describe("Path Utils", () => {
 	test("arePathsEqual should compare paths correctly", () => {

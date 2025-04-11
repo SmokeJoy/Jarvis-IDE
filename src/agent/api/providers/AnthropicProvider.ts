@@ -1,8 +1,8 @@
-import type { ApiProvider, StreamHandler } from '../ApiProvider.js.js';
-import type { ChatMessage } from '../../../types/ChatMessage.js.js';
-import { AnthropicTransformer } from '../../../api/transform/anthropic-format.js.js';
-import type { ApiConfiguration } from '../../../shared/types/api.types.js.js';
-import { logger } from '../../../utils/logger.js.js';
+import type { ApiProvider, StreamHandler } from '../ApiProvider.js';
+import type { ChatMessage } from '../../../types/ChatMessage.js';
+import { AnthropicTransformer } from '../../../api/transform/anthropic-format.js';
+import type { ApiConfiguration } from '../../../shared/types/api.types.js';
+import { logger } from '../../../utils/logger.js';
 
 /**
  * Provider per Anthropic (Claude)

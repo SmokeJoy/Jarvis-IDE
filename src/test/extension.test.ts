@@ -4,10 +4,10 @@ import path from "path"
 import { expect } from 'chai'
 import * as vscode from "vscode"
 import { test, beforeEach, afterEach, vi } from "vitest"
-import { activate, deactivate } from "../extension.js.js"
-import { JarvisProvider } from "../core/webview/JarvisProvider.js.js"
-import { TelemetryService } from "../services/TelemetryService.js.js"
-import type { ApiConfiguration } from "../types/global.js.js"
+import { activate, deactivate } from "../extension.js"
+import { JarvisProvider } from "../core/webview/JarvisProvider.js"
+import { TelemetryService } from "../services/TelemetryService.js"
+import type { ApiConfiguration } from "../types/global.js"
 
 const packagePath = path.join(__dirname, "..", "..", "package.json")
 

@@ -25,9 +25,9 @@ export default defineConfig({
 		port: 3000
 	},
 	define: {
-		"process.env": {
-			NODE_ENV: JSON.stringify(process.env.IS_DEV ? "development" : "production"),
-			IS_DEV: JSON.stringify(process.env.IS_DEV),
+		'process.env': {
+			NODE_ENV: JSON.stringify(process.env['IS_DEV'] ? "development" : "production"),
+			IS_DEV: JSON.stringify(process.env['IS_DEV']),
 		},
 	},
 	resolve: {

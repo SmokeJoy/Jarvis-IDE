@@ -1,6 +1,6 @@
-import { LogLevel } from "../types/global.js.js"
-import type { JarvisProvider as JarvisProviderType } from '../core/webview/JarvisProvider.js.js'
-import type { appendLogToFile as appendLogToFileType } from './logStorage.js.js'
+import { LogLevel } from "../types/global.js"
+import type { JarvisProvider as JarvisProviderType } from '../core/webview/JarvisProvider.js'
+import type { appendLogToFile as appendLogToFileType } from './logStorage.js'
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 
@@ -86,7 +86,7 @@ function log(level: keyof typeof LogLevel, levelNum: number, message: string, er
   // Log a file se disponibile
   if (appendLogToFile) {
     try {
-      appendLogToFile(formattedMessage + '\n', 'jarvis-ide.log')
+      appendLogToFile(level, message)
     } catch (err) {
       console.error('Failed to write to log file:', err)
     }

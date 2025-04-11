@@ -9,7 +9,7 @@
 import { mkdir, writeFile, rm } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
-import { processFile, getFilesToProcess } from './fix-imports.js.js'; // Corretto il percorso di importazione
+import { processFile, getFilesToProcess } from './fix-imports.js'; // Corretto il percorso di importazione
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
@@ -47,9 +47,9 @@ describe('Fix-Imports Integration Tests', () => {
     // Crea un file TypeScript con import relativi senza estensione .js
     const content = `
       import type { Component } from 'react';
-      import { helper } from './utils/helper.js.js';
-      import { Button } from '../components/Button.js.js';
-      import type { Props } from './types.js.js';
+      import { helper } from './utils/helper.js';
+      import { Button } from '../components/Button.js';
+      import type { Props } from './types.js';
     `;
     
     const filePath = await createTempFile('test.ts', content);
@@ -63,8 +63,8 @@ describe('Fix-Imports Integration Tests', () => {
     
     // Verifica il contenuto del file modificato
     const updatedContent = await fs.readFile(filePath, 'utf8');
-    expect(updatedContent).toContain("import { helper } from './utils/helper.js.js';");
-    expect(updatedContent).toContain("import { Button } from '../components/Button.js.js';");
+    expect(updatedContent).toContain("import { helper } from './utils/helper.js';");
+    expect(updatedContent).toContain("import { Button } from '../components/Button.js';");
     expect(updatedContent).toContain("import type { Component } from 'react';"); // Non modificato
   });
 
@@ -74,7 +74,7 @@ describe('Fix-Imports Integration Tests', () => {
     await fs.mkdir(subDir, { recursive: true });
     
     // File nella directory principale
-    await createTempFile('main.ts', "import { util } from './util.js.js';");
+    await createTempFile('main.ts', "import { util } from './util.js';");
     
     // File nella sottodirectory
     await createTempFile('subdir/util.ts', "export const util = () => 'hello';");
@@ -94,13 +94,13 @@ describe('Fix-Imports Integration Tests', () => {
     
     // Verifica che il file principale sia stato aggiornato
     const mainContent = await fs.readFile(path.join(tempDir, 'main.ts'), 'utf8');
-    expect(mainContent).toContain("import { util } from './util.js.js';");
+    expect(mainContent).toContain("import { util } from './util.js';");
   });
 
   test('Dovrebbe ignorare file non TypeScript', async () => {
     // Crea diversi tipi di file
-    await createTempFile('file.ts', "import { a } from './b.js.js';");
-    await createTempFile('file.js', "import { a } from './b.js.js';");
+    await createTempFile('file.ts', "import { a } from './b.js';");
+    await createTempFile('file.js', "import { a } from './b.js';");
     await createTempFile('file.txt', "Non TypeScript");
     
     // Ottieni i file da processare
@@ -115,8 +115,8 @@ describe('Fix-Imports Integration Tests', () => {
     // Crea un file con import di tipo che dovrebbero essere corretti
     const content = `
       import type { Component } from 'react';
-      import type { UserType } from './types.js.js';
-      import type { ButtonProps } from '../components/Button.js.js';
+      import type { UserType } from './types.js';
+      import type { ButtonProps } from '../components/Button.js';
     `;
     
     const filePath = await createTempFile('typeTest.ts', content);
@@ -133,12 +133,12 @@ describe('Fix-Imports Integration Tests', () => {
     expect(updatedContent).toContain("import type { Component } from 'react';"); // Non modificato
   });
 
-  test('Dovrebbe correggere le estensioni .js.js duplicate', async () => {
-    // Crea un file con import contenenti estensioni .js.js duplicate
+  test('Dovrebbe correggere le estensioni .js duplicate', async () => {
+    // Crea un file con import contenenti estensioni .js duplicate
     const content = `
       import type { Component } from 'react';
-      import { helper } from './utils/helper.js.js';
-      import { Button } from '../components/Button.js.js';
+      import { helper } from './utils/helper.js';
+      import { Button } from '../components/Button.js';
     `;
     
     const filePath = await createTempFile('doubleJsTest.ts', content);
@@ -154,16 +154,16 @@ describe('Fix-Imports Integration Tests', () => {
     const updatedContent = await fs.readFile(filePath, 'utf8');
     
     // Verifica che le estensioni doppie siano state corrette
-    expect(updatedContent).toContain("import { helper } from './utils/helper.js.js';");
-    expect(updatedContent).toContain("import { Button } from '../components/Button.js.js';");
+    expect(updatedContent).toContain("import { helper } from './utils/helper.js';");
+    expect(updatedContent).toContain("import { Button } from '../components/Button.js';");
     expect(updatedContent).toContain("import type { Component } from 'react';"); // Non modificato
   });
 
   test('Non dovrebbe modificare file in modalità check', async () => {
     // Crea un file con import da correggere
     const content = `
-      import { helper } from './utils/helper.js.js';
-      import { Button } from '../components/Button.js.js';
+      import { helper } from './utils/helper.js';
+      import { Button } from '../components/Button.js';
     `;
     
     const filePath = await createTempFile('checkTest.ts', content);

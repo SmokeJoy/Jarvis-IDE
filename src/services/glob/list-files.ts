@@ -1,7 +1,7 @@
 import type { globby, Options } from "globby"
 import * as os from "os"
 import * as path from "path"
-import type { arePathsEqual } from "../../utils/path.js.js"
+import type { arePathsEqual } from "../../utils/path.js"
 
 export async function listFiles(dirPath: string, recursive: boolean, limit: number): Promise<[string[], boolean]> {
 	// First resolve the path normally - path.resolve doesn't care about glob special characters

@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import { v4 as uuidv4 } from 'uuid';
 import type { EventEmitter } from 'events';
-import type { MasStateManager } from './MasStateManager.js.js';
-import { TaskQueueManager } from './TaskQueueManager.js.js';
+import type { MasStateManager } from './MasStateManager.js';
+import { TaskQueueManager } from './TaskQueueManager.js';
 import type { 
   MasConfig, 
   AgentConfig, 
@@ -11,7 +11,7 @@ import type {
   Task, 
   CodeStyle,
   PriorityLevel
-} from '../shared/types/mas.types.js.js';
+} from '../shared/types/mas.types.js';
 
 /**
  * Classe principale per la gestione del sistema Multi-Agent

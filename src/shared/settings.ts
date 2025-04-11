@@ -1,10 +1,10 @@
-import type { ApiConfiguration } from "./types/api.types.js.js"
-import type { TelemetrySetting } from './types.js.js';
+import type { ApiConfiguration } from "./types/api.types.js"
+import type { TelemetrySetting } from './types.js';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { LLMProviderId } from '../types/global.js.js';
-import type { Settings, AvailableModel } from './types/settings.types.js.js';
+import { LLMProviderId } from '../types/global.js';
+import type { Settings, AvailableModel } from './types/settings.types.js';
 
 export class SettingsManager {
   private static instance: SettingsManager;

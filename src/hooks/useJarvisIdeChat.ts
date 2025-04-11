@@ -1,6 +1,6 @@
 import type { useCallback, useState } from 'react';
-import type { ChatMessage, ChatHistory } from '../types/chat.types.js.js';
-import type { AIProvider } from '../types/provider.types.js.js';
+import type { ChatMessage, ChatHistory } from '../types/chat.types.js';
+import type { AIProvider } from '../types/provider.types.js';
 
 export const useJarvisIdeChat = (provider: AIProvider) => {
   const [messages, setMessages] = useState<ChatHistory>([]);

@@ -5,13 +5,22 @@ export const window = {
   showErrorMessage: vi.fn(),
   showWarningMessage: vi.fn(),
   createOutputChannel: vi.fn(),
-  createWebviewPanel: vi.fn(),
+  createWebviewPanel: vi.fn(() => ({
+    webview: {
+      html: '',
+      onDidReceiveMessage: vi.fn(),
+      postMessage: vi.fn(),
+    },
+    reveal: vi.fn(),
+    onDidDispose: vi.fn(),
+    dispose: vi.fn(),
+  })),
   createTextDocument: vi.fn(),
   showTextDocument: vi.fn(),
 };
 
 export const workspace = {
-  getConfiguration: vi.fn(),
+  getConfiguration: vi.fn(() => ({ get: vi.fn(), update: vi.fn() })),
   workspaceFolders: [],
   onDidChangeConfiguration: vi.fn(),
   onDidChangeWorkspaceFolders: vi.fn(),
@@ -24,7 +33,7 @@ export const commands = {
 };
 
 export const Uri = {
-  file: vi.fn(),
+  file: vi.fn((p: string) => ({ fsPath: p })),
   parse: vi.fn(),
 };
 
@@ -40,6 +49,10 @@ export const ConfigurationTarget = {
   WorkspaceFolder: 3,
 };
 
+export const ViewColumn = {
+  One: 1,
+};
+
 export default {
   window,
   workspace,
@@ -51,4 +64,5 @@ export default {
   TextEdit,
   WorkspaceEdit,
   ConfigurationTarget,
+  ViewColumn,
 }; 

@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ChatSession",
+  "description": "Rappresenta una sessione di chat completa",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Identificatore univoco della sessione"
+    },
+    "title": {
+      "type": "string",
+      "description": "Titolo della sessione"
+    },
+    "created": {
+      "oneOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "string",
+          "format": "date-time"
+        }
+      ],
+      "description": "Data di creazione della sessione"
+    },
+    "updated": {
+      "oneOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "string",
+          "format": "date-time"
+        }
+      ],
+      "description": "Data dell'ultimo aggiornamento della sessione"
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "ChatMessage.schema.json"
+      },
+      "description": "Messaggi nella sessione"
+    },
+    "settings": {
+      "$ref": "ChatSettings.schema.json",
+      "description": "Impostazioni della sessione"
+    },
+    "apiConfiguration": {
+      "$ref": "ApiConfiguration.schema.json",
+      "description": "Configurazione API utilizzata per questa sessione"
+    },
+    "context": {
+      "type": "object",
+      "description": "Informazioni di contesto per la sessione"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "archived", "deleted"],
+      "description": "Stato corrente della sessione"
+    }
+  },
+  "required": ["id", "messages", "created"],
+  "additionalProperties": false
+} 

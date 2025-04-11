@@ -7,9 +7,9 @@ import type { Browser, Page, ScreenshotOptions, TimeoutError, launch } from "pup
 import PCR from "puppeteer-chromium-resolver"
 import pWaitFor from "p-wait-for"
 import { setTimeout as setTimeoutPromise } from "node:timers/promises"
-import type { fileExistsAtPath } from "../../utils/fs.js.js"
-import type { BrowserActionResult } from "../../shared/ExtensionMessage.js.js"
-import type { BrowserSettings } from "../../shared/BrowserSettings.js.js"
+import type { fileExistsAtPath } from "../../utils/fs.js"
+import type { BrowserActionResult } from "../../shared/ExtensionMessage.js"
+import type { BrowserSettings } from "../../shared/BrowserSettings.js"
 // import * as chromeLauncher from "chrome-launcher"
 
 interface PCRStats {

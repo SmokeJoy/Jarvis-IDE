@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs'
 import * as path from 'path'
 import * as vscode from 'vscode'
-import { LogLevel } from '../types/global.js.js'
+import { LogLevel } from '../types/global.js'
 
 const LOG_DIR = path.join(__dirname, '..', '..', 'logs')
 let currentLogFilePath: string | null = null

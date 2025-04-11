@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import type { Task, TaskResult, TaskStatus, PriorityLevel, Instruction } from '../shared/types/mas.types.js.js';
+import type { Task, TaskResult, TaskStatus, PriorityLevel, Instruction } from '../shared/types/mas.types.js';
 
 /**
  * Interfaccia che rappresenta lo stato della coda dei task

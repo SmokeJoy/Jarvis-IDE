@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { getVsCodeApi } from '../vscode.js.js';
+import { getVsCodeApi } from '../vscode.js';
 import ReactMarkdown from 'react-markdown';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs.js.js';
-import type { WebviewMessage } from '../../types/webview.types.js.js';
-import type { ExtensionMessage } from '../../shared/ExtensionMessage.js.js';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs.js';
+import type { WebviewMessage } from '../../types/webview.types.js';
+import type { ExtensionMessage } from '../../shared/ExtensionMessage.js';
 
 const vscode = getVsCodeApi();
 

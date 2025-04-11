@@ -7,11 +7,11 @@
  * 3. AnthropicTransformer - conversione bidirezionale messaggi
  */
 
-import { AnthropicProvider } from '../AnthropicProvider.js.js';
-import { AnthropicTransformer } from '../../../../api/transform/anthropic-format.js.js';
-import type { ChatMessage } from '../../../../types/chat.types.js.js';
-import type { ContentType } from '../../../../types/chat.types.js.js';
-import type { StreamHandler } from '../../ApiProvider.js.js';
+import { AnthropicProvider } from '../AnthropicProvider.js';
+import { AnthropicTransformer } from '../../../../api/transform/anthropic-format.js';
+import type { ChatMessage } from '../../../../types/chat.types.js';
+import type { ContentType } from '../../../../types/chat.types.js';
+import type { StreamHandler } from '../../ApiProvider.js';
 
 // Mock globale per fetch
 global.fetch = jest.fn();

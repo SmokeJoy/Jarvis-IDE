@@ -3,10 +3,10 @@
  * @description Transformer per il formato Anthropic
  */
 
-import type { ChatMessage, ContentPart, ContentType, TextContent, ImageContent, ToolUseContent, ToolResultContent } from '../../types/chat.types.js.js';
-import type { AnthropicMessage, AnthropicMessageOptions, AnthropicStreamChunk, AnthropicMessageResponse, AnthropicTextBlock, AnthropicImageBlock, AnthropicToolUseBlock, AnthropicToolResultBlock, AnthropicContentBlock, AnthropicURLImageSource, AnthropicBase64ImageSource } from '../../types/provider-types/anthropic-types.js.js';
-import type { BaseTransformer, TokenUsage, BaseRequestOptions, ContentUtils } from './BaseTransformer.js.js';
-import { logger } from '../../utils/logger.js.js';
+import type { ChatMessage, ContentPart, ContentType, TextContent, ImageContent, ToolUseContent, ToolResultContent } from '../../types/chat.types.js';
+import type { AnthropicMessage, AnthropicMessageOptions, AnthropicStreamChunk, AnthropicMessageResponse, AnthropicTextBlock, AnthropicImageBlock, AnthropicToolUseBlock, AnthropicToolResultBlock, AnthropicContentBlock, AnthropicURLImageSource, AnthropicBase64ImageSource } from '../../types/provider-types/anthropic-types.js';
+import type { BaseTransformer, TokenUsage, BaseRequestOptions, ContentUtils } from './BaseTransformer.js';
+import { logger } from '../../utils/logger.js';
 
 /**
  * Transformer per convertire tra il formato ChatMessage standard e il formato Anthropic

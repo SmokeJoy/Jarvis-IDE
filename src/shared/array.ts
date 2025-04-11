@@ -1,4 +1,4 @@
-import type { ChatMessage } from "./types.js.js"
+import type { ChatMessage } from "./types.js"
 
 /**
  * Returns the index of the last element in the array where predicate is true, and -1

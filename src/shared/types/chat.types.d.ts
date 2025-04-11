@@ -2,8 +2,8 @@
  * @file chat.types.ts
  * @description Definizione centralizzata per tipi di messaggi chat e contenuti multimodali
  */
-import type { ChatSettings } from './user-settings.types.js.js';
-import type { ChatCompletionContentPart, ChatCompletionContentPartText, ChatCompletionContentPartImage } from './llm.types.js.js';
+import type { ChatSettings } from './user-settings.types.js';
+import type { ChatCompletionContentPart, ChatCompletionContentPartText, ChatCompletionContentPartImage } from './llm.types.js';
 export type { ChatSettings };
 export type { ChatCompletionContentPart, ChatCompletionContentPartText, ChatCompletionContentPartImage };
 /**

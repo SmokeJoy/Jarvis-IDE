@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { MasManager } from '../MasManager.js.js';
-import { Task, TaskStatus } from '../../shared/types/mas.types.js.js';
-import type { TaskQueueViewMessage } from '../../shared/types/webview.types.js.js';
-import { MasPersistenceService } from './MasPersistenceService.js.js';
-import { Logger } from '../../utils/logger.js.js';
+import { MasManager } from '../MasManager.js';
+import { Task, TaskStatus } from '../../shared/types/mas.types.js';
+import type { TaskQueueViewMessage } from '../../shared/types/webview.types.js';
+import { MasPersistenceService } from './MasPersistenceService.js';
+import { Logger } from '../../utils/logger.js';
 
 /**
  * Servizio che gestisce la comunicazione tra il backend MAS e la WebView

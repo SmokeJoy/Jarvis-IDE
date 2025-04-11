@@ -2,8 +2,8 @@ import * as vscode from "vscode"
 import * as childProcess from "child_process"
 import * as path from "path"
 import * as readline from "readline"
-import type { fileExistsAtPath } from "../../utils/fs.js.js"
-import { JarvisIdeIgnoreController } from "../../core/ignore/JarvisIdeIgnoreController.js.js"
+import type { fileExistsAtPath } from "../../utils/fs.js"
+import { JarvisIdeIgnoreController } from "../../core/ignore/JarvisIdeIgnoreController.js"
 
 /*
 This file provides functionality to perform regex searches on files using ripgrep.

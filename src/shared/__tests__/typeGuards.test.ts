@@ -4,7 +4,7 @@ import type {
   isExtensionMessage, 
   safeCastAs,
   strictGuard 
-} from '../typeGuards.js.js';
+} from '../typeGuards.js';
 
 describe('Type Guards', () => {
   describe('isWebviewMessage', () => {

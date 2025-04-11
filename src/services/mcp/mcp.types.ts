@@ -308,7 +308,7 @@ export const EXCLUDED_DIRS: string[] = ['node_modules', '.git', 'dist', 'build',
 export const KEY_FILE_EXTENSIONS: string[] = ['.ts', '.tsx', '.js', '.jsx', '.json', '.md'];
 
 // Rimosso re-export per evitare cicli di importazione
-// export * from './types/handler.types.js.js'; 
+// export * from './types/handler.types.js'; 
 
 /**
  * Argomenti per l'analisi di file di configurazione

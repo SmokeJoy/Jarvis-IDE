@@ -8,7 +8,7 @@ import type { OpenAiCompatibleModelInfo } from "../../shared/types/api.types.js"
 import type { LLMProviderId, ApiConfiguration } from "../../shared/types/api.types.js"
 import type { WebviewMessage } from "../../shared/types/webview.types.js"
 import type { OutgoingWebviewMessage } from "../../shared/types/webview.types.js"
-import type { ExtensionState, ExtensionMessage } from "../../shared/ExtensionMessage.js"
+import type { ExtensionState } from "../../shared/ExtensionMessage.js"
 import type { AutoApprovalSettings, ChatSettings, BrowserSettings } from "../../shared/types/user-settings.types.js"
 import type { AgentStatus, TaskQueueState, TaskStatus } from "../../shared/types/mas.types.js"
 import type { 
@@ -21,6 +21,19 @@ import type {
   TelemetrySetting
 } from "../../shared/types/provider.types.js"
 import type { ExportableSession } from "../../utils/exporters/types.js";
+
+// Importo la nuova union discriminata e la sua type guard
+import { 
+  ExtensionMessage, 
+  ExtensionMessageType, 
+  isExtensionMessage,
+  LogUpdatePayload,
+  ErrorPayload,
+  InfoPayload,
+  ModelUpdatePayload,
+  SettingsUpdatePayload,
+  ChatUpdatePayload
+} from "../../shared/types/extensionMessageUnion.js";
 
 // Importazioni concrete
 import { SettingsManager } from "../../services/settings/SettingsManager.js"
@@ -47,17 +60,69 @@ interface MASInstructionData {
   result?: unknown;
   error?: {
     message?: string;
+    code?: string;
+    details?: Record<string, unknown>;
   };
 }
 
-// Interfaccia per i task nella coda
-interface Task {
+// Interfaccia base per SupervisorAgent
+interface SupervisorAgent {
+  on(event: string, callback: (data: unknown) => void): void;
+  sendInstruction(instruction: string): Promise<{ id: string }>;
+  abortAllInstructions(): void;
+  activateAgent(agentId: string): void;
+  deactivateAgent(agentId: string): void;
+  getAllAgentsStatus(): AgentStatus[];
+}
+
+// Interfaccia per AgentStatus
+interface AgentStatus {
   id: string;
-  agentId: string;
-  instruction: string;
-  status: TaskStatus;
-  createdAt: Date;
-  updatedAt: Date;
+  name: string;
+  status: string;
+  capabilities: string[];
+  isActive: boolean;
+}
+
+// Interfaccia per TaskQueueState
+interface TaskQueueState {
+  tasks: Array<{
+    id: string;
+    type: string;
+    status: string;
+    data: unknown;
+    result?: unknown;
+    error?: string;
+  }>;
+  pending: number;
+  running: number;
+  completed: number;
+  failed: number;
+}
+
+interface JarvisProviderState {
+	apiConfiguration: ApiConfiguration;
+	lastShownAnnouncementId?: string;
+	customInstructions?: string;
+	taskHistory?: HistoryItem[];
+	autoApprovalSettings: AutoApprovalSettings;
+	browserSettings: BrowserSettings;
+	chatSettings: ChatSettings;
+	userInfo?: { displayName: string | null; email: string | null; photoURL: string | null };
+	previousModeProvider?: string;
+	previousModeModelId?: string;
+	previousModeModelInfo?: OpenAiCompatibleModelInfo;
+	previousModeVsCodeLmModelSelector?: string;
+	previousModeThinkingBudgetTokens?: number;
+	mcpMarketplaceEnabled: boolean;
+	telemetrySetting: TelemetrySetting;
+	planActSeparateModelsSetting: boolean;
+	activeThreadId?: string;
+	chatThreads: Map<string, ChatMessage[]>;
+	currentModel?: OpenAiCompatibleModelInfo;
+	isInitialized: boolean;
+	lastError?: Error;
+	settings: Record<string, unknown>;
 }
 
 export class JarvisProvider implements IJarvisProvider {
@@ -117,6 +182,19 @@ export class JarvisProvider implements IJarvisProvider {
 	private mcpDispatcher: McpDispatcher;
 	private _extensionUri: vscode.Uri;
 	private _state: ExtensionState;
+	private state: JarvisProviderState = {
+		apiConfiguration: this.apiConfiguration,
+		autoApprovalSettings: this.autoApprovalSettings,
+		browserSettings: {} as BrowserSettings,
+		chatSettings: {} as ChatSettings,
+		mcpMarketplaceEnabled: this.mcpMarketplaceEnabled,
+		telemetrySetting: this.telemetrySetting,
+		planActSeparateModelsSetting: this.planActSeparateModelsSetting,
+		chatThreads: new Map<string, ChatMessage[]>(),
+		isInitialized: false,
+		settings: {}
+	};
+	private messageHandlers: Map<ExtensionMessageType, (message: ExtensionMessage) => void>;
 
 	constructor(
 		readonly context: vscode.ExtensionContext,
@@ -183,6 +261,9 @@ export class JarvisProvider implements IJarvisProvider {
 
 		this._extensionUri = extensionUri;
 		this._state = initialState;
+
+		this.messageHandlers = new Map();
+		this.initializeMessageHandlers();
 	}
 
 	private async initializeSettings(): Promise<void> {
@@ -259,7 +340,7 @@ export class JarvisProvider implements IJarvisProvider {
 
 		// Set the HTML content
 		let htmlContent = ""
-		if (process.env.NODE_ENV === "development" && process.env.WEBVIEW_URL) {
+		if (process.env['NODE_ENV'] === "development" && process.env['WEBVIEW_URL']) {
 			htmlContent = await this.getHMRHtmlContent(webviewView.webview)
 		} else {
 			htmlContent = this.getHtmlContent(webviewView.webview)
@@ -382,7 +463,9 @@ export class JarvisProvider implements IJarvisProvider {
 
 	private async getHMRHtmlContent(webview: vscode.Webview): Promise<string> {
 		// Generate HTML for development with Hot Module Replacement
-		const scriptUri = process.env.WEBVIEW_URL
+		const scriptUri = process.env['WEBVIEW_URL']
+			? vscode.Uri.parse(process.env['WEBVIEW_URL'])
+			: scriptPathOnDisk;
 		const nonce = getNonce()
 
 		// Get VSCode theme
@@ -647,7 +730,7 @@ export class JarvisProvider implements IJarvisProvider {
 					case 'toggleAgentActive':
 						const agentId = message.payload?.agentId as string;
 						if (agentId) {
-							this.handleToggleAgentActive(agentId, message.payload.active);
+							this.handleToggleAgentActive(agentId, message.payload.active as boolean);
 						}
 						break;
 
@@ -730,8 +813,11 @@ export class JarvisProvider implements IJarvisProvider {
 		// TODO: Implement logic to update custom instructions
 	}
 
-	async updateApiConfiguration(/* apiConfiguration: ApiConfiguration */) {
-		// TODO: Implement logic to update API configuration
+	async updateApiConfiguration(config: ApiConfiguration): Promise<void> {
+		// Implementa la logica per aggiornare la configurazione API
+		this.apiConfiguration = { ...config };
+		// Comunica le modifiche alla WebView
+		await this.postStateToWebview();
 	}
 
 	async getDocumentsPath(): Promise<string> {
@@ -799,7 +885,7 @@ export class JarvisProvider implements IJarvisProvider {
 	public async readFile(filePath: string): Promise<string> {
 		try {
 			return await this.fileManager?.readFile(filePath) || '';
-		} catch (error) {
+		} catch (error: unknown) {
 			throw new Error(`Errore nella lettura del file ${filePath}: ${error}`);
 		}
 	}
@@ -807,7 +893,7 @@ export class JarvisProvider implements IJarvisProvider {
 	public async editFile(filePath: string, newContent: string): Promise<void> {
 		try {
 			await this.fileManager?.writeFile(filePath, newContent);
-		} catch (error) {
+		} catch (error: unknown) {
 			throw new Error(`Errore nella modifica del file ${filePath}: ${error}`);
 		}
 	}
@@ -815,7 +901,7 @@ export class JarvisProvider implements IJarvisProvider {
 	public async createFile(filePath: string, content: string): Promise<void> {
 		try {
 			await this.fileManager?.createFile(filePath, content);
-		} catch (error) {
+		} catch (error: unknown) {
 			throw new Error(`Errore nella creazione del file ${filePath}: ${error}`);
 		}
 	}
@@ -823,7 +909,7 @@ export class JarvisProvider implements IJarvisProvider {
 	public async deleteFile(filePath: string): Promise<void> {
 		try {
 			await this.fileManager?.deleteFile(filePath);
-		} catch (error) {
+		} catch (error: unknown) {
 			throw new Error(`Errore nell'eliminazione del file ${filePath}: ${error}`);
 		}
 	}
@@ -831,7 +917,7 @@ export class JarvisProvider implements IJarvisProvider {
 	public async listFiles(dirPath: string = '.'): Promise<string[]> {
 		try {
 			return await this.fileManager?.listFiles(dirPath) || [];
-		} catch (error) {
+		} catch (error: unknown) {
 			throw new Error(`Errore nel listing dei file dalla directory ${dirPath}: ${error}`);
 		}
 	}
@@ -839,15 +925,15 @@ export class JarvisProvider implements IJarvisProvider {
 	public async listFilesRecursive(dirPath: string = '.'): Promise<string[]> {
 		try {
 			return await this.fileManager?.listFilesRecursive(dirPath) || [];
-		} catch (error) {
+		} catch (error: unknown) {
 			throw new Error(`Errore nel listing ricorsivo dei file dalla directory ${dirPath}: ${error}`);
 		}
 	}
 
-	async handleSettingChange(key: string, value: any): Promise<void> {
+	async handleSettingChange<K extends keyof JarvisSettings>(key: K, value: JarvisSettings[K]): Promise<void> {
 		// Aggiorna l'impostazione specifica
 		if (key === "selectedModel") {
-			this.apiConfiguration.modelId = value;
+			this.apiConfiguration.modelId = value as string;
 		} else if (key in this) {
 			// @ts-ignore - Uso any per aggirare la verifica delle chiavi
 			this[key] = value;
@@ -897,34 +983,7 @@ export class JarvisProvider implements IJarvisProvider {
 		});
 	}
 
-	async getStateToPostToWebview(): Promise<ExtensionState> {
-		// Implement state retrieval for webview
-		return {} as ExtensionState;
-	}
-
-	async clearTask() {
-		// Implement task clearing
-	}
-
-	async getState(): Promise<{
-		apiConfiguration: ApiConfiguration;
-		lastShownAnnouncementId?: string;
-		customInstructions?: string;
-		taskHistory?: HistoryItem[];
-		autoApprovalSettings: AutoApprovalSettings;
-		browserSettings: BrowserSettings;
-		chatSettings: ChatSettings;
-		userInfo?: unknown;
-		previousModeProvider?: string;
-		previousModeModelId?: string;
-		previousModeModelInfo?: OpenAiCompatibleModelInfo;
-		previousModeVsCodeLmModelSelector?: string;
-		previousModeThinkingBudgetTokens?: number;
-		mcpMarketplaceEnabled: boolean;
-		telemetrySetting: TelemetrySetting;
-		planActSeparateModelsSetting: boolean;
-	}> {
-		// Implement state retrieval
+	async getStateToPostToWebview(): Promise<JarvisProviderState> {
 		return {
 			apiConfiguration: this.apiConfiguration,
 			lastShownAnnouncementId: this.lastShownAnnouncementId,
@@ -941,7 +1000,53 @@ export class JarvisProvider implements IJarvisProvider {
 			previousModeThinkingBudgetTokens: this.previousModeThinkingBudgetTokens,
 			mcpMarketplaceEnabled: this.mcpMarketplaceEnabled,
 			telemetrySetting: this.telemetrySetting,
-			planActSeparateModelsSetting: this.planActSeparateModelsSetting
+			planActSeparateModelsSetting: this.planActSeparateModelsSetting,
+			activeThreadId: this.state.activeThreadId,
+			chatThreads: this.state.chatThreads,
+			currentModel: this.state.currentModel,
+			isInitialized: this.state.isInitialized,
+			lastError: this.state.lastError,
+			settings: this.state.settings
+		};
+	}
+
+	async clearTask(): Promise<void> {
+		// Implement task clearing
+		this._task = undefined;
+		this._images = undefined;
+		
+		// Notifica la WebView
+		if (this._view?.webview) {
+			this._view.webview.postMessage({
+				type: 'taskCleared'
+			});
+		}
+	}
+
+	async getState(): Promise<JarvisProviderState> {
+		return {
+			apiConfiguration: this.apiConfiguration,
+			lastShownAnnouncementId: this.lastShownAnnouncementId,
+			customInstructions: this.customInstructions,
+			taskHistory: this.taskHistory,
+			autoApprovalSettings: this.autoApprovalSettings,
+			browserSettings: {} as BrowserSettings,
+			chatSettings: {} as ChatSettings,
+			userInfo: this.userInfo,
+			previousModeProvider: this.previousModeProvider,
+			previousModeModelId: this.previousModeModelId,
+			previousModeModelInfo: this.previousModeModelInfo,
+			previousModeVsCodeLmModelSelector: this.previousModeVsCodeLmModelSelector,
+			previousModeThinkingBudgetTokens: this.previousModeThinkingBudgetTokens,
+			mcpMarketplaceEnabled: this.mcpMarketplaceEnabled,
+			telemetrySetting: this.telemetrySetting,
+			planActSeparateModelsSetting: this.planActSeparateModelsSetting,
+			activeThreadId: this.state.activeThreadId,
+			chatThreads: this.state.chatThreads,
+			currentModel: this.state.currentModel,
+			isInitialized: this.state.isInitialized,
+			lastError: this.state.lastError,
+			settings: this.state.settings
 		};
 	}
 
@@ -1083,7 +1188,7 @@ export class JarvisProvider implements IJarvisProvider {
 			}
 			
 			const data = await response.json();
-			const models = data.models?.map((model: any) => model.name) || [];
+			const models = data.models?.map((model: { name: string }) => model.name) || [];
 			// Correggo l'errore con Set
 			const uniqueModels: string[] = [];
 			for (const model of models) {
@@ -1121,7 +1226,7 @@ export class JarvisProvider implements IJarvisProvider {
 			}
 			
 			const data = await response.json();
-			const modelsArray = data?.data?.map((model: any) => model.id) || [];
+			const modelsArray = data?.data?.map((model: { id: string }) => model.id) || [];
 			// Correggo l'errore con Set
 			const uniqueModels: string[] = [];
 			for (const model of modelsArray) {
@@ -1262,475 +1367,237 @@ export class JarvisProvider implements IJarvisProvider {
 	 * Gestisce i messaggi ricevuti dalla WebView
 	 * @param message Messaggio ricevuto dalla WebView
 	 */
-	protected async handleWebviewMessage(message: any): Promise<void> {
-		// Validazione del messaggio
-		if (!message || typeof message !== 'object' || !message.type) {
-			console.error("Messaggio WebView non valido:", message);
-			return;
-		}
-
+	protected async handleWebviewMessage(message: unknown): Promise<void> {
 		try {
-			// Utilizzo any per evitare errori di tipizzazione durante la migrazione
-			const msg = message as any;
+			// Utilizziamo isExtensionMessage come type guard per verificare il tipo di messaggio
+			const messageTypes: ExtensionMessageType[] = ['log.update', 'error', 'info', 'model.update', 'settings.update', 'chat.update'];
 			
-			// Switch basato sul tipo di messaggio
-			switch (msg.type) {
-				case "llm.query":
-					// Supporto per le chiamate tool da LLM
-					if (msg.payload?.tool_call) {
-						// Verifica autorizzazione MCP
-						if (this.autoApprovalSettings.enabled && 
-							this.autoApprovalSettings.actions.useMcp) {
-							this.outputChannel.appendLine(`Invocazione tool MCP: ${msg.payload.tool_call.tool}`);
-							
-							// Passa la chiamata al dispatcher MCP
-							await this.mcpDispatcher.handleToolCall(msg.payload.tool_call);
-						} else {
-							// L'accesso MCP non è autorizzato
-							this.postMessageToWebview({
-								type: "llm.error",
-								payload: { 
-									error: "L'accesso a strumenti MCP non è autorizzato nelle impostazioni" 
-								}
-							});
-						}
-						return;
-					}
-					
-					// Gestione normale delle query LLM...
-					break;
-
-				case "updateSetting":
-					if (msg.key && msg.value !== undefined) {
-						await this.handleSettingChange(msg.key, msg.value);
-					}
-					break;
-				case "getSettings":
-					this.postStateToWebview();
-					break;
-				case "getSystemPrompt":
-					try {
-						const content = await this.getSystemPrompt();
-						this.postMessageToWebview({
-							type: "response",
-							payload: { content }
-						});
-					} catch (error) {
-						console.error("Errore nel recupero del prompt di sistema:", error);
-						this.postMessageToWebview({
-							type: "error",
-							error: "Errore nel recupero del prompt di sistema"
-						});
-					}
-					break;
-				case "saveSystemPrompt":
-					if (msg.content) {
-						try {
-							await this.saveSystemPrompt(msg.content);
-							this.postMessageToWebview({
-								type: "response",
-								payload: { success: true }
-							});
-						} catch (error) {
-							console.error("Errore nel salvataggio del prompt di sistema:", error);
-							this.postMessageToWebview({
-								type: "error",
-								error: "Errore nel salvataggio del prompt di sistema"
-							});
-						}
-					}
-					break;
-				default:
-					console.warn(`Tipo di messaggio WebView non supportato: ${msg.type}`);
-					break;
+			// Verifichiamo se il messaggio è uno dei tipi conosciuti
+			const matchingType = messageTypes.find(type => isExtensionMessage(message, type));
+			
+			if (matchingType) {
+				// Invochiamo il dispatcher type-safe
+				await this.dispatchMessage(message as ExtensionMessage);
+			} else {
+				console.warn(`Tipo di messaggio non supportato: ${(message as { type?: string })?.type || 'unknown'}`);
 			}
-		} catch (error) {
-			console.error("Errore nella gestione del messaggio WebView:", error);
-		}
-	}
-	
-	/**
-	 * Handles sending an instruction to the CoderAgent
-	 */
-	private async handleSendCoderInstruction(instruction: string): Promise<void> {
-		try {
-			const masSystem = this.masSystem;
-			if (!masSystem) {
-				return;
-			}
-
-			// Invia l'istruzione al sistema MAS
-			await masSystem.queueInstruction('coder-agent', instruction);
-
-			// Notifica la WebView che l'istruzione è stata ricevuta
-			this.postMessageToWebview({
-				type: "instructionCompleted",
+		} catch (error: unknown) {
+			console.error('Error handling webview message:', error);
+			// Creiamo un messaggio di errore type-safe
+			const errorMessage: ExtensionMessage = {
+				type: 'error',
+				timestamp: Date.now(),
 				payload: {
-					id: uuidv4(),
-					agentId: 'coder-agent',
-					instruction,
-					result: null
+					code: 'MESSAGE_HANDLER_ERROR',
+					message: error instanceof Error ? error.message : 'Unknown error',
+					details: error instanceof Error ? { stack: error.stack } : {}
 				}
-			} as WebviewMessage);
-
-		} catch (error) {
-			// In caso di errore, notifica la WebView
-			this.postMessageToWebview({
-				type: 'instructionFailed',
-				payload: {
-					id: uuidv4(),
-					agentId: 'coder-agent',
-					instruction,
-					error: String(error)
-				}
-			} as WebviewMessage);
+			};
+			this.handleError(errorMessage);
 		}
 	}
 	
 	/**
-	 * Handles getting the status of all agents
+	 * Dispatcher type-safe per i messaggi
+	 * @param message Messaggio da dispatchare
 	 */
-	private handleGetAgentsStatus(): void {
-		if (!this.masSystem) {
-			return;
-		}
-
-		const agentsStatus = this.masSystem.getAllAgentsStatus();
+	private async dispatchMessage(message: ExtensionMessage): Promise<void> {
+		// Creiamo un oggetto di handler type-safe usando ExtensionMessageType come chiavi
+		const handlers: {
+			[K in ExtensionMessageType]: (msg: Extract<ExtensionMessage, { type: K }>) => Promise<void> | void
+		} = {
+			'log.update': this.handleLogUpdate.bind(this),
+			'error': this.handleError.bind(this),
+			'info': this.handleInfo.bind(this),
+			'model.update': this.handleModelUpdate.bind(this),
+			'settings.update': this.handleSettingsUpdate.bind(this),
+			'chat.update': this.handleChatUpdate.bind(this)
+		};
 		
-		this.postMessageToWebview({
-			type: 'agentsStatusUpdate',
-			payload: agentsStatus
-		} as WebviewMessage);
+		// Invochiamo l'handler corretto in base al tipo
+		const handler = handlers[message.type];
+		// Impostiamo il tipo corretto usando Extract
+		await handler(message as Extract<ExtensionMessage, { type: typeof message.type }>);
 	}
 	
 	/**
-	 * Handles getting the current task queue status
+	 * Invia un messaggio alla WebView
+	 * @param message Messaggio da inviare alla WebView
 	 */
-	private handleGetTaskQueueStatus(): void {
-		if (!this.masSystem) {
+	protected postMessageToWebview(message: ExtensionMessage): void {
+		if (!this._view) {
+			console.warn('WebView non disponibile, impossibile inviare il messaggio');
 			return;
 		}
-
-		const taskQueue = this.getTaskQueue();
 		
-		this.postMessageToWebview({
-			type: 'taskQueueUpdate',
-			payload: taskQueue
-		} as WebviewMessage);
-	}
-	
-	/**
-	 * Handles aborting the current CoderAgent instruction
-	 */
-	private handleAbortCoderInstruction(): void {
-		if (!this.masSystem) {
-			return;
-		}
-
-		// Aggiungi il task attivo ai task abortiti se esiste
-		if (this.taskQueue.active) {
-			const abortedTask = { ...this.taskQueue.active, status: 'aborted' as TaskStatus };
-			this.taskQueue.aborted.push(abortedTask);
-			this.taskQueue.active = null; // Usa null invece di undefined
-			
-			// Notifica la WebView
-			this.postMessageToWebview({
-				type: 'taskQueueUpdate',
-				payload: this.taskQueue
-			});
-		}
-	}
-	
-	/**
-	 * Handles activating or deactivating an agent
-	 */
-	private handleToggleAgentActive(agentId: string, active: boolean): void {
 		try {
-			const masSystem = this.masSystem;
-			if (!masSystem) return;
-			
-			// Send a message to activate/deactivate the agent
-			masSystem.sendMessage({
-				id: uuidv4(),
-				from: 'webview',
-				to: agentId,
-				type: 'notification',
-				payload: active ? 'activate' : 'deactivate',
-				timestamp: new Date(),
-				replyTo: undefined
-			});
-			
-			// Update the agent status
-			setTimeout(() => {
-				this.handleGetAgentsStatus();
-			}, 500);
+			this._view.webview.postMessage(message);
 		} catch (error) {
-			console.error(`Error toggling agent ${agentId} active state:`, error);
+			console.error('Errore durante invio messaggio a Webview:', error);
 		}
 	}
 
-	// Metodo per impostare la configurazione del modello in base al provider
-	private async setModelConfiguration(modelId: string): Promise<void> {
-		// Utilizziamo i tipi corretti di ApiConfiguration
-		const providerType = this.apiConfiguration.provider;
-		
-		// Aggiorniamo l'ID del modello
-		this.apiConfiguration.modelId = modelId;
-		
-		// Configurazione specifica in base al provider
-		switch (providerType) {
-			case 'openrouter':
-				// Per OpenRouter, non possiamo modificare direttamente le proprietà specifiche
-				// ma dobbiamo aggiornare la configurazione dell'API
-				this.apiConfiguration.modelId = modelId;
-				break;
-				
-			case 'openai':
-				// Per OpenAI, aggiorniamo l'ID del modello
-				this.apiConfiguration.modelId = modelId;
-				break;
-				
-			case 'anthropic':
-				// Per Anthropic, aggiorniamo l'ID del modello
-				this.apiConfiguration.modelId = modelId;
-				break;
-				
-			// Altri provider...
-		}
-		
-		// Aggiornamenti alla WebView
-		if (this._view) {
-			this.postMessageToWebview({
-				type: 'api.configuration',
-				apiConfiguration: this.apiConfiguration
-			});
-		}
+	private initializeMessageHandlers(): void {
+		// Non è più necessario in quanto useremo il dispatcher type-safe
+		// Questo metodo potrebbe essere rimosso in futuro
 	}
 
-	switchToProvider(provider: string, modelId?: string) {
-		console.log(`Switching provider from ${this.apiConfiguration.provider} to ${provider}, model ID: ${this.apiConfiguration.modelId} to ${modelId || 'default'}`);
+	private handleLogUpdate(message: Extract<ExtensionMessage, { type: 'log.update' }>): void {
+		const { level, message: logMessage, context } = message.payload;
+		console.log(`[${level}] ${logMessage}`, context);
+	}
+
+	private handleChatUpdate(message: Extract<ExtensionMessage, { type: 'chat.update' }>): void {
+		const { threadId, messages, status } = message.payload;
 		
-		// Salva la configurazione attuale
-		const previousProvider = this.apiConfiguration.provider
-		const previousModelId = this.apiConfiguration.modelId
+		if (status === 'error') {
+			console.error(`Errore nella chat ${threadId}:`, message.payload.error);
+			return;
+		}
+
+		this.state.chatThreads.set(threadId, messages);
+	}
+	
+	private handleModelUpdate(message: Extract<ExtensionMessage, { type: 'model.update' }>): void {
+		const { modelId, modelInfo, status } = message.payload;
 		
-		// Aggiorna il provider
-		this.apiConfiguration.provider = provider
+		// Aggiorniamo il modello corrente
+		this.state.currentModel = modelInfo;
 		
-		// Se è fornito un ID modello, aggiornalo
-		if (modelId) {
-			this.apiConfiguration.modelId = modelId
-			
-			// Configurazioni specifiche per alcuni provider
-			if (provider === 'google') {
-				// Invece di usare 'googleModelId' che non esiste, aggiorniamo direttamente modelId
-				this.apiConfiguration.modelId = modelId;
-			} else if (provider === 'mistral') {
-				// Invece di usare 'mistralModelId' che non esiste, aggiorniamo direttamente modelId
-				this.apiConfiguration.modelId = modelId;
-			}
+		// Segniamo lo stato come inizializzato dopo il primo aggiornamento di modello
+		if (!this.state.isInitialized) {
+			this.state.isInitialized = true;
+		}
+		
+		// Aggiorniamo lo stato e lo inviamo alla WebView
+		this.postStateToWebview();
+	}
+
+	private handleSettingsUpdate(message: Extract<ExtensionMessage, { type: 'settings.update' }>): void {
+		this.state.settings = {
+			...this.state.settings,
+			...message.payload.settings
+		};
+	}
+
+	private handleError(message: Extract<ExtensionMessage, { type: 'error' }>): void {
+		const { code, message: errorMessage, details } = message.payload;
+		console.error(`[${code}] ${errorMessage}`, details);
+		
+		// Salviamo l'ultimo errore nello stato
+		this.state.lastError = new Error(errorMessage);
+		
+		// Opzionalmente, mostriamo un messaggio di errore all'utente
+		vscode.window.showErrorMessage(errorMessage);
+	}
+
+	private handleInfo(message: Extract<ExtensionMessage, { type: 'info' }>): void {
+		const { message: infoMessage, severity = 'info' } = message.payload;
+		console.log(`[${severity}] ${infoMessage}`);
+		
+		// Opzionalmente, mostriamo un messaggio informativo all'utente in base alla severità
+		if (severity === 'warning') {
+			vscode.window.showWarningMessage(infoMessage);
+		} else if (severity === 'error') {
+			vscode.window.showErrorMessage(infoMessage);
 		} else {
-			// Se non viene specificato un modello, imposta un modello predefinito in base al provider
-			switch (provider) {
-				case 'openai':
-					this.apiConfiguration.modelId = 'gpt-4'
-					break
-				case 'anthropic':
-					this.apiConfiguration.modelId = 'claude-3-opus-20240229'
-					break
-				case 'mistral':
-					this.apiConfiguration.modelId = 'mistral-large-latest'
-					break
-				case 'google':
-					this.apiConfiguration.modelId = 'gemini-pro'
-					break
-				case 'ollama':
-					// Usa il primo modello disponibile o un predefinito
-					this.apiConfiguration.modelId = this.cachedOllamaModels?.[0] || 'llama2';
-					break
-				case 'lmstudio':
-					// Usa il primo modello disponibile o un predefinito
-					this.apiConfiguration.modelId = this.cachedLmStudioModels?.[0] || 'local-model';
-					break
-				default:
-					// Mantiene l'ID modello corrente
-					break;
-			}
+			vscode.window.showInformationMessage(infoMessage);
 		}
-		
-		console.log(`Switched provider from ${previousProvider} to ${this.apiConfiguration.provider}, model ID: ${previousModelId} to ${this.apiConfiguration.modelId}`);
-		
-		// Invia la configurazione aggiornata al webview
-		const message: WebviewMessage = {
-			type: "api.configuration",
-			payload: {
-				apiConfiguration: this.apiConfiguration
-			}
-		};
-		this.postMessageToWebview(message);
 	}
 
-	// Metodo per aggiornare la configurazione API
-	private updateApiConfig(apiConfig?: ApiConfiguration): void {
-		if (!apiConfig) {
+	private async handleSendCoderInstruction(instruction: string): Promise<void> {
+		if (!instruction || typeof instruction !== 'string') {
+			console.error("Istruzione non valida ricevuta");
 			return;
 		}
 		
-		// Aggiorna la configurazione locale
-		this.apiConfiguration = {
-			...this.apiConfiguration,
-			...apiConfig,
-		};
-		
-		// Assicurati che il provider sia una stringa
-		if (typeof this.apiConfiguration.provider !== 'string') {
-			this.apiConfiguration.provider = 'openai';
-		}
-		
-		// Assicurati che il modelId sia definito
-		if (!this.apiConfiguration.modelId) {
-			this.apiConfiguration.modelId = 'gpt-4';
-		}
-		
-		// Invia la configurazione aggiornata al webview
-		const message: WebviewMessage = {
-			type: "api.configuration",
-			payload: {
-				apiConfiguration: this.apiConfiguration
-			}
-		};
-		this.postMessageToWebview(message);
-	}
-
-	// Metodo che controlla le istruzioni completate
-	private async onInstructionCompleted(id: string, agentId: string, instruction: string, result: string): Promise<void> {
-		// Pubblica un messaggio al webview con il tipo corretto
-		const message: WebviewMessage = {
-			type: "instructionCompleted",
-			payload: {
-				id,
-				agentId,
-				instruction,
-				result: result || ""
-			}
-		};
-		this.postMessageToWebview(message);
-	}
-
-	/**
-	 * Restituisce la sessione corrente per l'esportazione
-	 * @returns La sessione esportabile
-	 */
-	async getCurrentSession(): Promise<ExportableSession> {
-		// Implementa il recupero della sessione corrente
-		// Questo è un esempio, l'implementazione effettiva dipende dalla struttura
-		// dei dati in JarvisProvider
-		
-		// Ottieni i messaggi dalla sessione corrente
-		const messages = await this.getChatMessages();
-		
-		// Crea l'oggetto sessione esportabile
-		const session: ExportableSession = {
-			messages: messages.map(msg => ({
-				role: msg.role,
-				content: msg.content,
-				timestamp: msg.timestamp
-			})),
-			settings: {
-				model: this.apiConfiguration.modelId || "",
-				temperature: this.apiConfiguration.temperature,
-				maxTokens: this.apiConfiguration.maxTokens
-			},
-			contextFiles: [],
-			timestamp: Date.now()
-		};
-		
-		return session;
-	}
-	
-	/**
-	 * Carica una sessione importata
-	 * @param session La sessione importata
-	 */
-	async loadImportedSession(session: ExportableSession): Promise<void> {
-		if (!session.messages || session.messages.length === 0) {
-			throw new Error("La sessione importata non contiene messaggi");
-		}
-		
 		try {
-			// Svuota la sessione corrente
-			await this.clearChat();
+			// Initialize MAS if not already done
+			this.initMasSystem();
 			
-			// Carica i messaggi della sessione importata
-			for (const msg of session.messages) {
-				await this.addChatMessage(msg);
-			}
+			// Log the instruction
+			this.outputChannel.appendLine(`Sending instruction: ${instruction}`);
 			
-			// Applica le impostazioni della sessione importata, se presenti
-			if (session.settings) {
-				if (session.settings.model) {
-					this.apiConfiguration.modelId = session.settings.model;
-				}
-				if (session.settings.temperature !== undefined) {
-					this.apiConfiguration.temperature = session.settings.temperature;
-				}
-				if (session.settings.maxTokens !== undefined) {
-					this.apiConfiguration.maxTokens = session.settings.maxTokens;
-				}
-			}
+			// Send the instruction to the supervisor agent
+			const result = await this.masSystem?.sendInstruction(instruction);
 			
-			// Aggiorna lo stato nella UI
-			await this.postStateToWebview();
-			
-			// Notifica la UI che i messaggi sono stati caricati
-			await this.postMessageToWebview({
-				type: "chatMessagesLoaded",
+			// Update UI with result
+			this.postMessageToWebview({
+				type: 'instructionSent',
 				payload: {
-					messages: session.messages
+					instruction,
+					success: true,
+					taskId: result?.id || uuidv4()
 				}
 			});
-		} catch (error) {
-			console.error("Errore nel caricamento della sessione importata:", error);
-			throw new Error(`Errore nel caricamento della sessione: ${error instanceof Error ? error.message : String(error)}`);
+		} catch (error: unknown) {
+			// Handle error
+			this.outputChannel.appendLine(`Error sending instruction: ${error instanceof Error ? error.message : String(error)}`);
+			this.postMessageToWebview({
+				type: 'instructionSent',
+				payload: {
+					instruction,
+					success: false,
+					error: error instanceof Error ? error.message : 'Unknown error occurred'
+				}
+			});
 		}
 	}
-	
-	/**
-	 * Recupera i messaggi della chat corrente
-	 * @returns Array di messaggi della chat
-	 */
-	private async getChatMessages(): Promise<any[]> {
-		// Implementazione di esempio - sostituisci con la logica effettiva
-		// In una implementazione reale, questi messaggi potrebbero essere recuperati
-		// dallo stato dell'estensione o tramite una chiamata al WebView
+
+	private handleGetAgentsStatus(): void {
+		const agentsStatus = this.getAgentsStatus();
+		this.postMessageToWebview({
+			type: 'agentsStatus',
+			payload: agentsStatus
+		});
+	}
+
+	private handleGetTaskQueueStatus(): void {
+		this.updateTaskQueue();
+	}
+
+	private handleAbortCoderInstruction(): void {
+		// Implement abort logic
+		if (this.masSystem) {
+			this.masSystem.abortAllInstructions();
+			
+			// Update UI
+			this.postMessageToWebview({
+				type: 'instructionAborted',
+				payload: {
+					success: true
+				}
+			});
+		}
+	}
+
+	private handleToggleAgentActive(agentId: string, active: boolean): void {
+		if (!this.masSystem || !agentId) return;
 		
-		// Richiedi i messaggi al WebView
-		return []; // Sostituisci con l'implementazione reale
-	}
-	
-	/**
-	 * Svuota la chat corrente
-	 */
-	private async clearChat(): Promise<void> {
-		// Invia un messaggio al WebView per svuotare la chat
-		await this.postMessageToWebview({
-			type: "clearChat",
-			payload: {}
-		});
-	}
-	
-	/**
-	 * Aggiunge un messaggio alla chat
-	 * @param message Il messaggio da aggiungere
-	 */
-	private async addChatMessage(message: any): Promise<void> {
-		// Invia un messaggio al WebView per aggiungere il messaggio
-		await this.postMessageToWebview({
-			type: "addChatMessage",
-			payload: {
-				message
+		try {
+			// Toggle agent active state
+			if (active) {
+				this.masSystem.activateAgent(agentId);
+			} else {
+				this.masSystem.deactivateAgent(agentId);
 			}
-		});
+			
+			// Update agents status
+			const agentsStatus = this.getAgentsStatus();
+			this.postMessageToWebview({
+				type: 'agentsStatus',
+				payload: agentsStatus
+			});
+		} catch (error: unknown) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			this.postMessageToWebview({
+				type: 'error',
+				payload: {
+					code: 'AGENT_TOGGLE_ERROR',
+					message: `Failed to ${active ? 'activate' : 'deactivate'} agent: ${errorMessage}`
+				}
+			});
+		}
 	}
 }
 
@@ -1751,35 +1618,139 @@ function getTheme() {
 
 // Aggiungo le classi placeholder alla fine del file
 class WorkspaceTracker {
-  constructor(provider: any) {}
+	constructor(private provider: JarvisProvider) {
+		this.initialize();
+	}
+
+	private initialize(): void {
+		// Inizializzazione del tracker
+	}
+
+	public async trackFileChange(filePath: string): Promise<void> {
+		await this.provider.postMessageToWebview({
+			type: 'file.change',
+			payload: { filePath }
+		});
+	}
 }
 
 class JarvisAccountService {
-  constructor(provider: any) {
-    this.signOut = async () => {};
-  }
-  async signOut() {}
+	constructor(private provider: JarvisProvider) {
+		this.initialize();
+	}
+
+	private initialize(): void {
+		// Inizializzazione del servizio account
+	}
+
+	async signOut(): Promise<void> {
+		await this.provider.postMessageToWebview({
+			type: 'account.signOut',
+			payload: { success: true }
+		});
+	}
 }
 
 class FileManager {
-  readFile(filePath: string): Promise<string> { return Promise.resolve(''); }
-  writeFile(filePath: string, content: string): Promise<void> { return Promise.resolve(); }
-  createFile(filePath: string, content: string): Promise<void> { return Promise.resolve(); }
-  deleteFile(filePath: string): Promise<void> { return Promise.resolve(); }
-  listFiles(dirPath: string): Promise<string[]> { return Promise.resolve([]); }
-  listFilesRecursive(dirPath: string): Promise<string[]> { return Promise.resolve([]); }
+	async readFile(filePath: string): Promise<string> {
+		try {
+			return await fs.readFile(filePath, 'utf-8');
+		} catch (error: unknown) {
+			throw new Error(`Failed to read file: ${filePath}`);
+		}
+	}
+
+	async writeFile(filePath: string, content: string): Promise<void> {
+		try {
+			await fs.writeFile(filePath, content, 'utf-8');
+		} catch (error: unknown) {
+			throw new Error(`Failed to write file: ${filePath}`);
+		}
+	}
+
+	async createFile(filePath: string, content: string): Promise<void> {
+		try {
+			await fs.writeFile(filePath, content, 'utf-8');
+		} catch (error: unknown) {
+			throw new Error(`Failed to create file: ${filePath}`);
+		}
+	}
+
+	async deleteFile(filePath: string): Promise<void> {
+		try {
+			await fs.unlink(filePath);
+		} catch (error: unknown) {
+			throw new Error(`Failed to delete file: ${filePath}`);
+		}
+	}
+
+	async listFiles(dirPath: string): Promise<string[]> {
+		try {
+			return await fs.readdir(dirPath);
+		} catch (error: unknown) {
+			throw new Error(`Failed to list files in directory: ${dirPath}`);
+		}
+	}
+
+	async listFilesRecursive(dirPath: string): Promise<string[]> {
+		try {
+			const files = await fs.readdir(dirPath);
+			const results: string[] = [];
+
+			for (const file of files) {
+				const fullPath = path.join(dirPath, file);
+				const stat = await fs.stat(fullPath);
+
+				if (stat.isDirectory()) {
+					const subFiles = await this.listFilesRecursive(fullPath);
+					results.push(...subFiles.map(f => path.join(file, f)));
+				} else {
+					results.push(file);
+				}
+			}
+
+			return results;
+		} catch (error: unknown) {
+			throw new Error(`Failed to list files recursively in directory: ${dirPath}`);
+		}
+	}
 }
 
 class AIFileManager {
-  constructor(fileManager: FileManager) {}
-  setModel(modelInfo: any, provider: any) {}
+	constructor(
+		private fileManager: FileManager,
+		private modelInfo?: ModelInfo,
+		private provider?: string
+	) {}
+
+	setModel(modelInfo: ModelInfo, provider: string): void {
+		this.modelInfo = modelInfo;
+		this.provider = provider;
+	}
 }
 
-class TelemetryService {}
+class TelemetryService {
+	private events: Map<string, Array<{timestamp: Date, properties: Record<string, unknown>}>> = new Map();
+
+	trackEvent(eventName: string, properties?: Record<string, unknown>): void {
+		const event = {
+			timestamp: new Date(),
+			properties: properties || {}
+		};
+
+		const events = this.events.get(eventName) || [];
+		events.push(event);
+		this.events.set(eventName, events);
+	}
+
+	getEvents(eventName: string): Array<{timestamp: Date, properties: Record<string, unknown>}> {
+		return this.events.get(eventName) || [];
+	}
+}
 
 // Aggiungo una funzione placeholder per getUri
 function getUri(webview: vscode.Webview, extensionUri: vscode.Uri, pathList: string[]): vscode.Uri {
-    // Utilizziamo path.join invece di Uri.joinPath che non esiste
-    const joinedPath = path.join(...pathList);
-    return vscode.Uri.file(path.join(extensionUri.fsPath, joinedPath));
+	// Utilizziamo path.join invece di Uri.joinPath che non esiste
+	const joinedPath = path.join(...pathList);
+	return vscode.Uri.file(path.join(extensionUri.fsPath, joinedPath));
 } 

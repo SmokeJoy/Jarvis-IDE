@@ -1,5 +1,5 @@
-import type { ChatCompletionMessageParam } from "./provider-types/openai-types.js.js";
-import type { ApiConfiguration } from "./global.js.js";
+import type { ChatCompletionMessageParam } from "./provider-types/openai-types.js";
+import type { ApiConfiguration } from "./global.js";
 
 export interface WebviewState {
   messages: ChatCompletionMessageParam[];

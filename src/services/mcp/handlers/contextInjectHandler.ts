@@ -1,8 +1,8 @@
 import * as path from "path";
 import * as fs from "fs/promises";
+import * as vscode from "vscode";
 import { v4 as uuidv4 } from "uuid";
-import type * as vscode from "vscode";
-import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js.js";
+import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
 
 // Mock di vscode per ambienti non-VS Code
 const mockVscode = {

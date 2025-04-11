@@ -1,15 +1,15 @@
 import { Anthropic } from "@anthropic-ai/sdk"
 import { Stream as AnthropicStream } from "@anthropic-ai/sdk/streaming"
-import type { ApiHandler } from "../index.js.js"
-import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js.js"
+import type { ApiHandler } from "../index.js"
+import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
 import type {
 	anthropicDefaultModelId,
 	AnthropicModelId,
 	anthropicModels,
 } from "../../shared/api.ts"
-import { ApiStream } from "../transform/stream.js.js"
-import type { MessageParam } from "../MessageParam.js.js"
-import type { BaseStreamHandler } from "../handlers/BaseStreamHandler.js.js"
+import { ApiStream } from "../transform/stream.js"
+import type { MessageParam } from "../MessageParam.js"
+import type { BaseStreamHandler } from "../handlers/BaseStreamHandler.js"
 
 export class AnthropicHandler implements ApiHandler {
 	private options: ApiHandlerOptions

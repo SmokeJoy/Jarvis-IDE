@@ -1,6 +1,6 @@
-import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js.js";
-import { getAllMemory } from "./contextInjectHandler.js.js";
-import { normalizeTag } from "./contextTagHandler.js.js";
+import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
+import { getAllMemory } from "./contextInjectHandler.js";
+import { normalizeTag } from "./contextTagHandler.js";
 
 /**
  * Calcola la similarità tra due stringhe usando la distanza di Levenshtein

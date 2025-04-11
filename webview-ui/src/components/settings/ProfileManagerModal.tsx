@@ -575,6 +575,6 @@ export const ProfileManagerModal: React.FC<ProfileManagerModalProps> = ({
           </ConfirmActions>
         </ConfirmDialog>
       )}
-    </ModalContainer>
+    </ModalBackdrop>
   );
 }; 

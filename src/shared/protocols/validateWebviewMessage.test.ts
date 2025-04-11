@@ -8,7 +8,7 @@ import type {
   BaseWebviewMessage, 
   IncomingWebviewMessage, 
   OutgoingWebviewMessage 
-} from './webview.protocol.js.js';
+} from './webview.protocol.js';
 
 /**
  * Funzione per validare un messaggio WebView

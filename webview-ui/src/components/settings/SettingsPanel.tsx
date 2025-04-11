@@ -9,7 +9,21 @@ import {
   VSCodeOption
 } from '@vscode/webview-ui-toolkit/react';
 import { useExtensionState } from '../../context/ExtensionStateContext';
-import { vscode } from '../../utils/vscode';
+import { useExtensionMessage } from '../../hooks/useExtensionMessage';
+import { 
+  SettingsMessageType, 
+  SettingsMessageUnion,
+  GetSettingsMessage,
+  UpdateSettingMessage,
+  SaveAllSettingsMessage,
+  ResetAllSettingsMessage,
+  IDESettings 
+} from '../../types/settings-message';
+import { 
+  isSettingsLoadedMessage, 
+  isSettingUpdatedMessage, 
+  isSettingsErrorMessage 
+} from '../../types/settings-message-guards';
 
 const SettingsPanelContainer = styled.div`
   display: flex;
@@ -86,19 +100,25 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ onOpenSystemPrompt
   const [selectedModel, setSelectedModel] = useState('');
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [statusMessage, setStatusMessage] = useState<{text: string, isSuccess: boolean} | null>(null);
+  
+  // Hook type-safe per la comunicazione con l'estensione
+  const { postMessage } = useExtensionMessage();
 
   // Carica impostazioni all'avvio
   useEffect(() => {
     // Richiedi le impostazioni correnti al backend
-    vscode.postMessage({
-      type: 'getSettings'
-    });
+    const getSettingsMessage: GetSettingsMessage = {
+      type: SettingsMessageType.GET_SETTINGS
+    };
+    
+    postMessage<SettingsMessageUnion>(getSettingsMessage);
     
     // Ascolta i messaggi in arrivo
     const handleMessage = (event: MessageEvent) => {
       const message = event.data;
       
-      if (message.type === 'settingsLoaded') {
+      // Implementazione del pattern Union Dispatcher Type-Safe
+      if (isSettingsLoadedMessage(message)) {
         console.log('Impostazioni caricate:', message.settings);
         setUseDocuments(message.settings.use_docs || false);
         setCoderMode(message.settings.coder_mode || true);
@@ -110,12 +130,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ onOpenSystemPrompt
           setAvailableModels(message.settings.availableModels);
         }
       }
-      
-      if (message.type === 'settingUpdated') {
+      else if (isSettingUpdatedMessage(message)) {
         showStatusMessage(`Impostazione "${message.key}" aggiornata con successo`, true);
       }
-      
-      if (message.type === 'error') {
+      else if (isSettingsErrorMessage(message)) {
         showStatusMessage(`Errore: ${message.message}`, false);
       }
     };
@@ -125,7 +143,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ onOpenSystemPrompt
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, []);
+  }, [postMessage]);
   
   // Mostra un messaggio di stato temporaneo
   const showStatusMessage = (text: string, isSuccess: boolean) => {
@@ -167,33 +185,41 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ onOpenSystemPrompt
     updateSetting('selectedModel', newValue);
   };
   
-  // Funzione per aggiornare un'impostazione
+  // Funzione type-safe per aggiornare un'impostazione
   const updateSetting = (key: string, value: any) => {
-    vscode.postMessage({
-      type: 'updateSetting',
+    const updateSettingMessage: UpdateSettingMessage = {
+      type: SettingsMessageType.UPDATE_SETTING,
       key,
       value
-    });
+    };
+    
+    postMessage<SettingsMessageUnion>(updateSettingMessage);
   };
   
   // Gestori per azioni di salvataggio/reset
   const handleSaveAll = () => {
-    vscode.postMessage({
-      type: 'saveAllSettings',
-      settings: {
-        use_docs: useDocuments,
-        coder_mode: coderMode,
-        contextPrompt,
-        selectedModel
-      }
-    });
+    const settings: IDESettings = {
+      use_docs: useDocuments,
+      coder_mode: coderMode,
+      contextPrompt,
+      selectedModel
+    };
+    
+    const saveAllSettingsMessage: SaveAllSettingsMessage = {
+      type: SettingsMessageType.SAVE_ALL_SETTINGS,
+      settings
+    };
+    
+    postMessage<SettingsMessageUnion>(saveAllSettingsMessage);
     showStatusMessage('Tutte le impostazioni salvate con successo', true);
   };
   
   const handleResetAll = () => {
-    vscode.postMessage({
-      type: 'resetAllSettings'
-    });
+    const resetAllSettingsMessage: ResetAllSettingsMessage = {
+      type: SettingsMessageType.RESET_ALL_SETTINGS
+    };
+    
+    postMessage<SettingsMessageUnion>(resetAllSettingsMessage);
     showStatusMessage('Impostazioni ripristinate ai valori predefiniti', true);
   };
 

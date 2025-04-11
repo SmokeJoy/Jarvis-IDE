@@ -9,7 +9,7 @@ import type {
   ChatMessage as ChatMessageType, 
   normalizeChatMessages as normalizeMessages, 
   toChatMessage 
-} from '../shared/types/message.types.js.js';
+} from '../shared/types/message.types.js';
 
 // Esporta per retrocompatibilità
 export type ChatMessage = ChatMessageType;

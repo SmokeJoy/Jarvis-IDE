@@ -1,9 +1,9 @@
 import { describe, expect, test, beforeEach, afterEach, vi } from "vitest";
 import * as vscode from "vscode";
-import { activate, deactivate } from "./extension.js.js";
-import { JarvisProvider } from "./core/webview/JarvisProvider.js.js";
-import { TelemetryService } from "./services/TelemetryService.js.js";
-import type { ApiConfiguration } from "./types/global.js.js";
+import { activate, deactivate } from "./extension.js";
+import { JarvisProvider } from "./core/webview/JarvisProvider.js";
+import { TelemetryService } from "./services/TelemetryService.js";
+import type { ApiConfiguration } from "./types/global.js";
 
 vi.mock("vscode");
 vi.mock("./core/webview/JarvisProvider");

@@ -1,5 +1,5 @@
 import type { Content, EnhancedGenerateContentResponse, InlineDataPart, Part, TextPart } from "@google/generative-ai"
-import { logger } from "../../utils/logger.js.js"
+import { logger } from "../../utils/logger.js"
 import type { 
 	ChatMessage, 
 	ContentBlock, 
@@ -8,14 +8,14 @@ import type {
 	ContentType, 
 	isTextBlock, 
 	isImageBlock 
-} from '../../types/chat.types.js.js';
+} from '../../types/chat.types.js';
 import type {
 	AnthropicMessage,
 	AnthropicContentBlock,
 	AnthropicMessageResponse,
 	AnthropicTextBlock,
 	AnthropicImageBlock
-} from '../../types/provider-types/anthropic-types.js.js';
+} from '../../types/provider-types/anthropic-types.js';
 
 /**
  * Converte il contenuto dal formato interno al formato Gemini

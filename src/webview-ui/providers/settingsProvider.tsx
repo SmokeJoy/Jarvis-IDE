@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { vscode } from '../vscode.js.js';
+import { vscode } from '../vscode.js';
 
 // Definizione del modello disponibile
 interface AvailableModel {

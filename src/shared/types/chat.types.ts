@@ -4,15 +4,15 @@
  * @version 1.0.0
  */
 
-import type { ChatSettings } from './user-settings.types.js.js';
+import type { ChatSettings } from './user-settings.types.js';
 import type { 
   ChatCompletionContentPart,
   ChatCompletionContentPartText,
   ChatCompletionContentPartImage
-} from './llm.types.js.js';
+} from './llm.types.js';
 
 // Importazione della definizione principale di ChatMessage
-import type { ChatMessage } from './message.types.js.js';
+import type { ChatMessage } from './message.types.js';
 
 export type { ChatSettings, ChatMessage };
 export type { ChatCompletionContentPart, ChatCompletionContentPartText, ChatCompletionContentPartImage };

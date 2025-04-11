@@ -12,7 +12,7 @@ import { t } from '../i18n';
 // Logger condiviso per le operazioni di messaggistica
 const logger = {
   debug: (message: string, ...data: any[]) => {
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env['NODE_ENV'] === 'development') {
       console.log(`[WebView] ${message}`, ...data);
     }
   },

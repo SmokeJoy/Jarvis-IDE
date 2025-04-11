@@ -1,6 +1,6 @@
-import type { findExploratoryPath } from './exploratory.js.js';
-import type { getContextById } from '../../../../memory/context.js.js';
-import type { getContextLinks } from '../../../../memory/context_links.js.js';
+import { findExploratoryPath } from './exploratory.js';
+import type { getContextById } from '../../../../memory/context.js';
+import type { getContextLinks } from '../../../../memory/context_links.js';
 
 // Mock delle dipendenze
 jest.mock('../../../../memory/context', () => ({

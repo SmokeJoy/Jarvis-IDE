@@ -1770,3 +1770,299 @@ Per completare questa funzionalità, intendo:
 1. Aggiungere una factory di strategie per la creazione basata su configurazione
 2. Implementare una strategia "composite" che combina più strategie
 3. Creare una strategia adattiva che cambia comportamento in base alle condizioni del sistema
+
+## Implementazione della strategia di fallback adattiva (`AdaptiveFallbackStrategy`)
+
+### Obiettivo
+Implementare una strategia di fallback in grado di adattarsi dinamicamente alle condizioni di runtime, selezionando la migliore strategia di fallback in base a parametri misurabili come:
+- Il tasso di fallimento dei provider
+- La latenza di risposta
+- L'ora del giorno
+- Fallimenti recenti di specifici provider
+
+### Motivazione
+La strategia di fallback adattiva permette un comportamento più intelligente e reattivo del sistema, in grado di rispondere a cambiamenti nelle condizioni operative. Ad esempio:
+- In caso di alta affidabilità, utilizzare un provider preferito per coerenza
+- Quando il tasso di fallimento aumenta, passare a una strategia basata su affidabilità
+- Durante le ore di picco, distribuire il carico con round robin
+- In caso di latenza elevata, preferire i provider più veloci
+
+### Architettura
+
+#### Componenti chiave:
+1. **AdaptiveFallbackStrategy**: La strategia principale che seleziona dinamicamente la strategia più appropriata
+2. **Condizioni configurabili**: Un sistema di condizioni che determinano quando attivare ciascuna strategia
+3. **Operatori logici**: Meccanismi per combinare condizioni in logiche complesse (AND, OR, NOT)
+
+#### Meccanismo di adattabilità:
+- Verifica le condizioni in ordine di priorità
+- Attiva la prima strategia la cui condizione risulta vera
+- Se nessuna condizione è soddisfatta, usa la strategia predefinita (la prima)
+- Propaga gli eventi di successo/fallimento a tutte le strategie interne
+
+### Implementazione
+
+#### 1. Condizioni predefinite
+
+Ho creato un modulo `adaptive-conditions.ts` che contiene diverse funzioni factory per creare condizioni:
+
+- `failureRateAbove(threshold)`: Verifica se il tasso di fallimento supera una soglia percentuale
+- `totalFailuresAbove(count)`: Verifica se il numero totale di fallimenti supera una soglia
+- `avgLatencyAbove(ms)`: Verifica se la latenza media di tutti i provider supera una soglia
+- `providerLatencyAbove(providerId, ms)`: Verifica se la latenza di un provider specifico supera una soglia
+- `providerFailedRecently(providerId, timeWindowMs)`: Verifica se un provider ha fallito entro una finestra temporale
+- `duringTimeWindow(startHour, endHour)`: Verifica se l'ora corrente è in un intervallo specificato
+
+Operatori logici per combinare le condizioni:
+- `allConditions(conditions)`: AND logico (tutte le condizioni devono essere vere)
+- `anyCondition(conditions)`: OR logico (almeno una condizione deve essere vera)
+- `notCondition(condition)`: NOT logico (nega una condizione)
+
+#### 2. Strategia adattiva
+
+La classe `AdaptiveFallbackStrategy` implementa l'interfaccia `FallbackStrategy` e:
+- Mantiene un array di strategie con le relative condizioni
+- Seleziona la prima strategia la cui condizione è soddisfatta
+- Propaga le notifiche a tutte le strategie interne
+- Supporta il debug per tracciare i cambi di strategia a runtime
+- Fornisce metodi per gestire dinamicamente le strategie (aggiungere/rimuovere)
+
+#### 3. Integrazione nella Factory
+
+Ho esteso `FallbackStrategyFactory` per supportare la creazione di strategie adattive tramite configurazione JSON:
+
+```typescript
+const strategyConfig = {
+  type: 'adaptive',
+  adaptiveStrategies: [
+    {
+      type: 'preferred',
+      options: { preferredProvider: 'openai' },
+      condition: { 
+        type: 'failureRate', 
+        threshold: 20 
+      },
+      name: 'defaultPreferred'
+    },
+    {
+      type: 'reliability',
+      condition: { 
+        type: 'and',
+        conditions: [
+          { type: 'failureRate', threshold: 20 },
+          { type: 'avgLatency', threshold: 200 }
+        ]
+      },
+      name: 'reliabilityBackup'
+    }
+  ]
+};
+```
+
+### Test
+
+Ho implementato test completi per:
+1. Verifica di tutte le condizioni predefinite
+2. Comportamento della strategia adattiva in vari scenari
+3. Combinazione di condizioni con operatori logici
+4. Corretto passaggio da una strategia all'altra in base a parametri
+5. Supporto per la configurazione tramite Factory
+
+### Esempi di utilizzo
+
+#### Esempio 1: Strategia basata sul carico giornaliero
+```typescript
+// Preferisci OpenAI durante le ore normali, ma passa a RoundRobin durante l'orario di punta
+new AdaptiveFallbackStrategy([
+  {
+    strategy: new PreferredFallbackStrategy('openai'),
+    condition: notCondition(duringTimeWindow(9, 17)),
+    name: 'night-mode'
+  },
+  {
+    strategy: new RoundRobinFallbackStrategy(),
+    condition: duringTimeWindow(9, 17),
+    name: 'business-hours'
+  }
+]);
+```
+
+#### Esempio 2: Strategia basata sull'affidabilità
+```typescript
+// Usa il provider preferito finché è stabile, altrimenti passa all'affidabilità
+new AdaptiveFallbackStrategy([
+  {
+    strategy: new PreferredFallbackStrategy('openai'),
+    condition: notCondition(failureRateAbove(15)),
+    name: 'stable-mode'
+  },
+  {
+    strategy: new ReliabilityFallbackStrategy(),
+    condition: failureRateAbove(15),
+    name: 'reliability-mode'
+  }
+]);
+```
+
+### Conclusioni
+
+La strategia adattiva aggiunge un importante livello di intelligenza al sistema di fallback, consentendo comportamenti auto-adattivi basati su condizioni misurabili a runtime. Questo porta numerosi vantaggi:
+
+1. **Maggiore resilienza**: Il sistema può reagire automaticamente a problemi di performance
+2. **Ottimizzazione dei costi**: Possibilità di utilizzare strategie diverse in base all'ora del giorno o alle performance
+3. **Adattabilità**: Capacità di rispondere a situazioni impreviste
+4. **Configurabilità**: Possibilità di definire regole complesse tramite configurazione JSON
+
+Questo completa il sistema di fallback con tutte le strategie richieste, fornendo una soluzione flessibile e potente per la gestione dei provider LLM.
+
+# Logbook AI1 - Implementazione AdaptiveFallbackStrategy
+
+## 2024-04-11: Aggiunta Condizione providerCostAbove
+
+### Motivazione
+Per ottimizzare i costi di utilizzo dei provider LLM, è stato implementato un nuovo sistema di monitoraggio dei costi per token. Questo permette di:
+- Evitare l'utilizzo di provider con costi eccessivi
+- Bilanciare il carico tra provider in base al costo
+- Mantenere i costi sotto controllo durante l'utilizzo intensivo
+
+### Design
+La nuova condizione `providerCostAbove`:
+- Monitora il costo per token di un provider specifico
+- Attiva strategie alternative quando il costo supera una soglia
+- Supporta configurazioni dinamiche per adattarsi a diversi budget
+
+### Implementazione
+```typescript
+export const providerCostAbove = (providerId: string, costPerToken: number): AdaptiveCondition => {
+  return (stats: Map<string, ProviderStats>) => {
+    const providerStats = stats.get(providerId);
+    if (!providerStats || !providerStats.costPerToken) return false;
+    return providerStats.costPerToken >= costPerToken;
+  };
+};
+```
+
+### Test
+Sono stati implementati test completi che verificano:
+- Comportamento con provider non disponibili
+- Gestione di costi mancanti
+- Confronto con soglie di costo
+- Edge case con costi uguali alla soglia
+
+### Esempio di Utilizzo
+```typescript
+const costAwareStrategy = new AdaptiveFallbackStrategy([
+  {
+    strategy: new PreferredFallbackStrategy('provider1'),
+    condition: notCondition(providerCostAbove('provider1', 0.1))
+  },
+  {
+    strategy: new RoundRobinFallbackStrategy(),
+    condition: providerCostAbove('provider1', 0.1)
+  }
+]);
+```
+
+### Prossimi Passi
+- Integrare il monitoraggio dei costi nel sistema di metriche
+- Aggiungere alert per costi anomali
+- Implementare strategie di ottimizzazione dei costi più avanzate
+
+// ... existing content ...
+
+## 2025-04-10 - Modulo di Monitoraggio Strategia Fallback
+
+### Hook: useFallbackTelemetry
+
+- **Tracciamento in Tempo Reale**:
+  - Strategia attiva con aggiornamento automatico
+  - Provider corrente con selezione dinamica
+  - Eventi recenti (`strategy:adaptive:change`, `provider:success`, `provider:failure`)
+  - Statistiche provider con metriche chiave
+  - Condizioni attive per strategie adattive
+
+- **Funzionalità Avanzate**:
+  - Gestione eventi tramite `LLMEventBus`
+  - Aggiornamento periodico dello stato
+  - Supporto debug con logging dettagliato
+  - Limitazione eventi recenti configurabile
+  - Pulizia automatica dei listener
+
+### Componente: FallbackMonitorPanel
+
+- **Interfaccia Utente**:
+  - Design moderno con Tailwind CSS
+  - Layout responsive e compatto
+  - Sezioni chiaramente distinte
+  - Scroll automatico per eventi
+  - Indicatori visivi per stato e condizioni
+
+- **Visualizzazione Dati**:
+  - Strategia e provider correnti in evidenza
+  - Lista eventi con colori distintivi
+  - Timestamp formattati per leggibilità
+  - Statistiche provider in formato tabella
+  - Indicatori di stato per condizioni
+
+### Integrazione Storybook
+
+- **Demo Interattive**:
+  - Strategia Adattiva con condizioni dinamiche
+  - Strategia Preferita con provider fisso
+  - Strategia Round Robin con rotazione
+  - Simulazione eventi in tempo reale
+  - Mock di dati realistici
+
+- **Simulazione Eventi**:
+  - Cambio strategia ogni 5 secondi
+  - Successi provider ogni 3 secondi
+  - Fallimenti provider ogni 7 secondi
+  - Timestamp realistici
+  - Payload di esempio
+
+### Considerazioni Tecniche
+
+- **Architettura**:
+  - Pattern Observer per eventi
+  - Gestione stato con React Hooks
+  - Tipizzazione TypeScript completa
+  - Interfacce chiare e documentate
+  - Facile estensibilità
+
+- **Performance**:
+  - Ottimizzazione re-render
+  - Limitazione eventi storici
+  - Cleanup automatico risorse
+  - Gestione efficiente memoria
+  - Debug mode opzionale
+
+- **Manutenibilità**:
+  - Codice modulare e testabile
+  - Documentazione inline
+  - Esempi di utilizzo
+  - Storie Storybook complete
+  - Facile integrazione
+
+### Roadmap Futura
+
+- **Potenziamenti Previsti**:
+  - Esportazione log in JSON
+  - Integrazione sistema audit
+  - Grafici storici performance
+  - Interfaccia test manuale
+  - Alert e notifiche
+
+- **Ottimizzazioni**:
+  - Caching dati storici
+  - Filtri eventi avanzati
+  - Personalizzazione UI
+  - Metriche custom
+  - Report automatici
+
+### Commit
+
+```bash
+feat(ui): aggiunto monitor fallback con hook + pannello + simulazione eventi
+```
+
+// ... existing code ...

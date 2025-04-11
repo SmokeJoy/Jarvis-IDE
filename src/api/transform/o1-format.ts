@@ -1,6 +1,6 @@
 import { Anthropic } from "@anthropic-ai/sdk"
 import OpenAI, { ChatCompletionMessageParam } from "openai"
-import type { ChatCompletionContentPartText, ChatCompletionContentPartImage } from '../../types/global.js.js';
+import type { ChatCompletionContentPartText, ChatCompletionContentPartImage } from '../../types/global.js';
 
 const o1SystemPrompt = (systemPrompt: string) => `
 # System Prompt

@@ -1,7 +1,7 @@
-import { retryAsync } from "../retry.js.js"
-import { ApiStream, ApiStreamChunk, createMockStream } from "../transform/stream.js.js"
-import type { ApiHandlerOptions } from "../../shared/types/api.types.js.js"
-import { logger } from "../../utils/logger.js.js"
+import { retryAsync } from "../retry.js"
+import { ApiStream, ApiStreamChunk, createMockStream } from "../transform/stream.js"
+import type { ApiHandlerOptions } from "../../shared/types/api.types.js"
+import { logger } from "../../utils/logger.js"
 
 /**
  * Classe base per handler API che forniscono uno stream

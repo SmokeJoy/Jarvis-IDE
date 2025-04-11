@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ChatMessage",
+  "description": "Interfaccia per i messaggi di chat",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Identificatore univoco del messaggio"
+    },
+    "role": {
+      "type": "string",
+      "enum": ["user", "assistant", "system", "function", "tool"],
+      "description": "Ruolo del mittente del messaggio"
+    },
+    "content": {
+      "type": "string",
+      "description": "Contenuto del messaggio"
+    },
+    "timestamp": {
+      "oneOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "string",
+          "format": "date-time"
+        }
+      ],
+      "description": "Timestamp di creazione del messaggio"
+    },
+    "streaming": {
+      "type": "boolean",
+      "description": "Flag che indica se il messaggio è in fase di streaming"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nome della funzione o strumento, se applicabile"
+    }
+  },
+  "required": ["role", "content", "timestamp"],
+  "additionalProperties": false
+} 

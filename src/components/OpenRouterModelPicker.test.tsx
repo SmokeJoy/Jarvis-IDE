@@ -1,8 +1,8 @@
 import React from "react";
 import { describe, expect, test } from "vitest";
-import type { render, screen, fireEvent } from "@testing-library/react";
-import type { OpenRouterModelPicker } from "./OpenRouterModelPicker.js.js";
-import type { OpenAiCompatibleModelInfo } from "../types/global.js.js";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { OpenRouterModelPicker } from "./OpenRouterModelPicker.js";
+import type { OpenAiCompatibleModelInfo } from "../types/global.js";
 
 describe("OpenRouterModelPicker", () => {
   const models: OpenAiCompatibleModelInfo[] = [

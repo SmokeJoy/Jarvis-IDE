@@ -1,4 +1,4 @@
-import { JarvisProvider } from '../core/webview/JarvisProvider.js.js';
+import { JarvisProvider } from '../core/webview/JarvisProvider.js';
 import * as vscode from 'vscode';
 import fs from 'fs/promises';
 import path from 'path';

@@ -1,33 +1,33 @@
 import type { WebviewMessage, McpToolCall, ToolResponse } from '@shared/types/messages.js';
-import type { isErrorMessage, isResponseMessage, safeCastAs } from '@/shared/types/webviewMessageUnion.js';
-import type { readFileHandler } from './handlers/readFileHandler.js.js';
-import type { searchDocsHandler } from './handlers/searchDocsHandler.js.js';
-import type { memoryQueryHandler } from './handlers/memoryQueryHandler.js.js';
-import type { projectSummaryHandler } from './handlers/projectSummaryHandler.js.js';
-import type { codeGenerateHandler } from './handlers/codeGenerateHandler.js.js';
-import type { fsWriteHandler } from './handlers/fsWriteHandler.js.js';
-import type { refactorSnippetHandler } from './handlers/refactorSnippetHandler.js.js';
-import type { askDocsHandler } from './handlers/askDocsHandler.js.js';
-import type { projectLintHandler } from './handlers/projectLintHandler.js.js';
-import type { fsFormatHandler } from './handlers/fsFormatHandler.js.js';
-import type { testRunHandler } from './handlers/testRunHandler.js.js';
-import type { projectDepGraphHandler } from './handlers/projectDepGraphHandler.js.js';
-import type { contextInjectHandler } from './handlers/contextInjectHandler.js.js';
-import type { contextListHandler } from './handlers/contextListHandler.js.js';
-import type { contextClearHandler } from './handlers/contextClearHandler.js.js';
-import type { contextTagHandler } from './handlers/contextTagHandler.js.js';
-import type { contextSearchByTagsHandler } from './handlers/contextSearchByTagsHandler.js.js';
-import type { contextExportHandler } from './handlers/contextExportHandler.js.js';
-import type { contextImportHandler } from './handlers/contextImportHandler.js.js';
-import type { contextEditHandler } from './handlers/contextEditHandler.js.js';
-import type { contextLinkHandler } from './handlers/contextLinkHandler.js.js';
-import type { contextLinksOfHandler } from './handlers/contextLinksOfHandler.js.js';
-import type { contextGraphHandler } from './handlers/contextGraphHandler.js.js';
-import type { contextUnlinkHandler } from './handlers/contextUnlinkHandler.js.js';
-import type { contextGraphExportHandler } from './handlers/contextGraphExportHandler.js.js';
-import type { contextNavigateHandler } from './handlers/contextNavigateHandler.js.js';
-import { loadMemoryFromDisk } from './memory/memory.js.js';
-import type { Memory } from './memory/memory.js.js';
+import { isErrorMessage, isResponseMessage, safeCastAs } from '@/shared/types/webviewMessageUnion.js';
+import { readFileHandler } from './handlers/readFileHandler.js';
+import { searchDocsHandler } from './handlers/searchDocsHandler.js';
+import { memoryQueryHandler } from './handlers/memoryQueryHandler.js';
+import { projectSummaryHandler } from './handlers/projectSummaryHandler.js';
+import { codeGenerateHandler } from './handlers/codeGenerateHandler.js';
+import { fsWriteHandler } from './handlers/fsWriteHandler.js';
+import { refactorSnippetHandler } from './handlers/refactorSnippetHandler.js';
+import { askDocsHandler } from './handlers/askDocsHandler.js';
+import { projectLintHandler } from './handlers/projectLintHandler.js';
+import { fsFormatHandler } from './handlers/fsFormatHandler.js';
+import { testRunHandler } from './handlers/testRunHandler.js';
+import { projectDepGraphHandler } from './handlers/projectDepGraphHandler.js';
+import { contextInjectHandler } from './handlers/contextInjectHandler.js';
+import { contextListHandler } from './handlers/contextListHandler.js';
+import { contextClearHandler } from './handlers/contextClearHandler.js';
+import { contextTagHandler } from './handlers/contextTagHandler.js';
+import { contextSearchByTagsHandler } from './handlers/contextSearchByTagsHandler.js';
+import { contextExportHandler } from './handlers/contextExportHandler.js';
+import { contextImportHandler } from './handlers/contextImportHandler.js';
+import { contextEditHandler } from './handlers/contextEditHandler.js';
+import { contextLinkHandler } from './handlers/contextLinkHandler.js';
+import { contextLinksOfHandler } from './handlers/contextLinksOfHandler.js';
+import { contextGraphHandler } from './handlers/contextGraphHandler.js';
+import { contextUnlinkHandler } from './handlers/contextUnlinkHandler.js';
+import { contextGraphExportHandler } from './handlers/contextGraphExportHandler.js';
+import { contextNavigateHandler } from './handlers/contextNavigateHandler.js';
+import { loadMemoryFromDisk } from './memory/memory.js';
+import type { Memory } from './memory/memory.js';
 import type {
   ReadFileArgs,
   SearchDocsArgs,
@@ -55,7 +55,7 @@ import type {
   ContextUnlinkArgs,
   ContextGraphExportArgs,
   ContextNavigateArgs
-} from './types/handler.types.js.js';
+} from './types/handler.types.js';
 
 /**
  * Dispatcher per il Model Control Protocol (MCP)

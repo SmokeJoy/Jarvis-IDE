@@ -1,17 +1,17 @@
 import { Anthropic } from "@anthropic-ai/sdk"
-import type { ApiHandler } from "../index.js.js"
-import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js.js"
+import type { ApiHandler } from "../index.js"
+import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
 import OpenAI, { ChatCompletionMessageParam } from "openai"
-import type { convertToOpenAiMessages } from "../transform/openai-format.js.js"
-import { ApiStream, ApiStreamChunk } from "../../types/global.js.js"
-import { convertToR1Format } from "../transform/r1-format.js.js"
+import type { convertToOpenAiMessages } from "../transform/openai-format.js"
+import { ApiStream, ApiStreamChunk } from "../../types/global.js"
+import { convertToR1Format } from "../transform/r1-format.js"
 import type {
 	qwenDefaultModelId,
 	QwenModelId,
 	qwenModels,
 	MainlandQwenModelId,
 	InternationalQwenModelId,
-} from "../../shared/api.js.js"
+} from "../../shared/api.js"
 
 export interface QwenConfig {
 	apiKey: string;

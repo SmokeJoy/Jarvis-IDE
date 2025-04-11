@@ -1,0 +1,237 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ApiConfiguration",
+  "description": "Interfaccia unificata per le configurazioni di provider API",
+  "type": "object",
+  "properties": {
+    "provider": {
+      "type": "string",
+      "description": "Identificatore del provider LLM"
+    },
+    "apiKey": {
+      "type": "string",
+      "description": "Chiave API generica"
+    },
+    "modelId": {
+      "type": "string",
+      "description": "ID del modello da utilizzare"
+    },
+    "baseUrl": {
+      "type": "string",
+      "description": "URL base dell'API"
+    },
+    "temperature": {
+      "type": "number",
+      "description": "Livello di casualità nella generazione"
+    },
+    "maxTokens": {
+      "type": "number",
+      "description": "Massimo numero di token da generare"
+    },
+    "customInstructions": {
+      "type": "string",
+      "description": "Istruzioni personalizzate per il modello"
+    },
+    "openAiApiKey": {
+      "type": "string",
+      "description": "Chiave API OpenAI"
+    },
+    "openAiModelId": {
+      "type": "string",
+      "description": "ID del modello OpenAI"
+    },
+    "openAiBaseUrl": {
+      "type": "string",
+      "description": "URL base dell'API OpenAI"
+    },
+    "openAiNativeApiKey": {
+      "type": "string",
+      "description": "Chiave API per l'API nativa di OpenAI"
+    },
+    "openRouterApiKey": {
+      "type": "string",
+      "description": "Chiave API OpenRouter"
+    },
+    "openRouterModelId": {
+      "type": "string",
+      "description": "ID del modello OpenRouter"
+    },
+    "openRouterProviderSorting": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "boolean" }
+      ],
+      "description": "Ordinamento dei provider in OpenRouter"
+    },
+    "anthropicApiKey": {
+      "type": "string",
+      "description": "Chiave API Anthropic"
+    },
+    "anthropicBaseUrl": {
+      "type": "string",
+      "description": "URL base dell'API Anthropic"
+    },
+    "anthropicModelId": {
+      "type": "string",
+      "description": "ID del modello Anthropic"
+    },
+    "awsAccessKey": {
+      "type": "string",
+      "description": "Chiave di accesso AWS"
+    },
+    "awsSecretKey": {
+      "type": "string",
+      "description": "Chiave segreta AWS"
+    },
+    "awsAccessKeyId": {
+      "type": "string",
+      "description": "ID chiave di accesso AWS"
+    },
+    "awsSecretAccessKey": {
+      "type": "string",
+      "description": "Chiave di accesso segreta AWS"
+    },
+    "awsSessionToken": {
+      "type": "string",
+      "description": "Token di sessione AWS"
+    },
+    "awsRegion": {
+      "type": "string",
+      "description": "Regione AWS"
+    },
+    "awsBedrockEndpoint": {
+      "type": "string",
+      "description": "Endpoint AWS Bedrock"
+    },
+    "awsUseCrossRegionInference": {
+      "type": "boolean",
+      "description": "Usa inferenza cross-region in AWS"
+    },
+    "awsBedrockUsePromptCache": {
+      "type": "boolean",
+      "description": "Usa cache dei prompt in AWS Bedrock"
+    },
+    "awsUseProfile": {
+      "type": "boolean",
+      "description": "Usa profilo AWS"
+    },
+    "awsProfile": {
+      "type": "string",
+      "description": "Nome del profilo AWS"
+    },
+    "azureApiKey": {
+      "type": "string",
+      "description": "Chiave API Azure"
+    },
+    "azureDeploymentId": {
+      "type": "string",
+      "description": "ID deployment Azure"
+    },
+    "azureDeploymentName": {
+      "type": "string",
+      "description": "Nome deployment Azure"
+    },
+    "azureEndpoint": {
+      "type": "string",
+      "description": "Endpoint Azure"
+    },
+    "azureApiVersion": {
+      "type": "string",
+      "description": "Versione API Azure"
+    },
+    "azureResourceName": {
+      "type": "string",
+      "description": "Nome risorsa Azure"
+    },
+    "vertexProjectId": {
+      "type": "string",
+      "description": "ID progetto Vertex AI"
+    },
+    "vertexLocation": {
+      "type": "string",
+      "description": "Località Vertex AI"
+    },
+    "vertexRegion": {
+      "type": "string",
+      "description": "Regione Vertex AI"
+    },
+    "geminiApiKey": {
+      "type": "string",
+      "description": "Chiave API Gemini"
+    },
+    "ollamaBaseUrl": {
+      "type": "string",
+      "description": "URL base Ollama"
+    },
+    "ollamaModelId": {
+      "type": "string",
+      "description": "ID modello Ollama"
+    },
+    "ollamaApiOptionsCtxNum": {
+      "type": "string",
+      "description": "Opzioni API Ollama per il contesto"
+    },
+    "ollama": {
+      "type": "object",
+      "properties": {
+        "baseUrl": {
+          "type": "string",
+          "description": "URL base Ollama"
+        }
+      },
+      "description": "Configurazione Ollama"
+    },
+    "lmStudioBaseUrl": {
+      "type": "string",
+      "description": "URL base LM Studio"
+    },
+    "lmStudioModelId": {
+      "type": "string",
+      "description": "ID modello LM Studio"
+    },
+    "lmStudio": {
+      "type": "object",
+      "properties": {
+        "baseUrl": {
+          "type": "string",
+          "description": "URL base LM Studio"
+        }
+      },
+      "description": "Configurazione LM Studio"
+    },
+    "mistralApiKey": {
+      "type": "string",
+      "description": "Chiave API Mistral"
+    },
+    "deepSeekApiKey": {
+      "type": "string",
+      "description": "Chiave API DeepSeek"
+    },
+    "requestyApiKey": {
+      "type": "string",
+      "description": "Chiave API Requesty"
+    },
+    "requestyModelId": {
+      "type": "string",
+      "description": "ID modello Requesty"
+    },
+    "togetherApiKey": {
+      "type": "string",
+      "description": "Chiave API Together"
+    },
+    "togetherModelId": {
+      "type": "string",
+      "description": "ID modello Together"
+    },
+    "qwenApiKey": {
+      "type": "string",
+      "description": "Chiave API Qwen"
+    },
+    "qwenApiLine": {
+      "type": "string",
+      "description": "Linea API Qwen"
+    }
+  },
+  "required": ["provider"],
+  "additionalProperties": false
+} 

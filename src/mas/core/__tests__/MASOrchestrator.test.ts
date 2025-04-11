@@ -795,4 +795,175 @@ describe('MASOrchestrator E2E', () => {
     // Verifica che ci siano effettivamente 3 valori unici
     expect(uniqueValues.size).toBe(3);
   });
+
+  // ----------- NUOVI TEST PER AUMENTARE LA COPERTURA -----------
+
+  // Test per verificare la gestione dei cicli tra agenti
+  it('Dovrebbe rilevare e gestire i cicli tra agenti', async () => {
+    // Modifica temporanea dell'agente analyzer per creare un ciclo verso planner
+    mockAgents.analyzer.execute = vi.fn().mockImplementation(async (context) => {
+      return {
+        thought: "Ho analizzato i dati ma serve un nuovo piano",
+        message: "Richiesta nuovo piano dopo analisi",
+        nextAgent: 'planner', // Crea un ciclo con il planner
+        context: {
+          ...context,
+          analysis: "Analisi completata, serve nuovo piano"
+        }
+      };
+    });
+
+    // Input iniziale
+    const query = "Query che causerà un ciclo planner → analyzer → planner";
+    const conversationId = 'test-ciclo-pap';
+    
+    // Esecuzione dell'orchestratore
+    const result = await orchestrator.run({
+      query,
+      conversationId,
+      maxTurns: 6
+    });
+    
+    // Verifica che si sia verificato un ciclo
+    // L'agente planner dovrebbe essere chiamato più di una volta
+    expect(mockAgents.planner.execute).toHaveBeenCalledTimes(2);
+    
+    // Verifica che il ciclo sia stato rilevato
+    const memory = mockMemory[conversationId];
+    expect(memory).toHaveProperty('cycleDetected', true);
+    
+    // Verifica che l'esecuzione sia terminata correttamente nonostante il ciclo
+    expect(result).toHaveProperty('analysis');
+  });
+
+  // Test per verificare l'interruzione al superamento di maxTurns
+  it('Dovrebbe interrompere l\'esecuzione al raggiungimento di maxTurns', async () => {
+    // Modifica temporanea per creare una catena infinita
+    mockAgents.researcher.execute = vi.fn().mockImplementation(async (context) => {
+      return {
+        thought: "Continuo a fare ricerche",
+        message: "Sto ancora raccogliendo dati",
+        nextAgent: 'researcher', // Auto-riferimento per creare una catena infinita
+        context: {
+          ...context,
+          researchIteration: (context.researchIteration || 0) + 1
+        }
+      };
+    });
+
+    // Input iniziale
+    const query = "Query che causerà iterazioni infinite";
+    const maxTurns = 3; // Limita a 3 turni
+    
+    // Esecuzione dell'orchestratore
+    const result = await orchestrator.run({
+      query,
+      conversationId: 'test-max-turns',
+      maxTurns
+    });
+    
+    // Verifica che l'agente researcher sia stato chiamato esattamente maxTurns volte
+    expect(mockAgents.researcher.execute).toHaveBeenCalledTimes(maxTurns);
+    
+    // Verifica che il risultato contenga il numero corretto di iterazioni
+    expect(result).toHaveProperty('researchIteration', maxTurns);
+  });
+
+  // Test per verificare l'uso di fallbackAgent quando un agente fallisce
+  it('Dovrebbe utilizzare il fallbackAgent specificato quando un agente fallisce', async () => {
+    // Crea un agente specializzato per gestire errori
+    const errorHandlerAgent = createMockAgent('errorHandler', async (context) => {
+      return {
+        thought: "Sto gestendo l'errore di un altro agente",
+        message: "Ho risolto il problema causato dall'errore",
+        nextAgent: null, // Termina dopo aver gestito l'errore
+        context: {
+          ...context,
+          errorHandled: true,
+          errorSource: context.error?.agent
+        }
+      };
+    });
+    
+    // Aggiungi l'agente al registry
+    mockAgents.errorHandler = errorHandlerAgent;
+    
+    // Configura l'agente analyzer per fallire
+    mockAgents.analyzer.execute = vi.fn().mockRejectedValue(
+      new Error("Errore critico nell'analisi dei dati")
+    );
+    
+    // Input iniziale
+    const query = "Query che causerà un errore durante l'analisi";
+    
+    // Esecuzione dell'orchestratore con fallbackAgent configurato
+    const result = await orchestrator.run({
+      query,
+      conversationId: 'test-fallback-agent',
+      maxTurns: 10,
+      fallbackAgent: 'errorHandler' // Specifica l'agente di fallback
+    });
+    
+    // Verifica che la catena di esecuzione sia corretta fino all'errore
+    expect(mockAgents.planner.execute).toHaveBeenCalledTimes(1);
+    expect(mockAgents.researcher.execute).toHaveBeenCalledTimes(1);
+    expect(mockAgents.analyzer.execute).toHaveBeenCalledTimes(1);
+    
+    // Verifica che l'agente di fallback sia stato chiamato
+    expect(mockAgents.errorHandler.execute).toHaveBeenCalledTimes(1);
+    
+    // Verifica che il risultato finale contenga sia l'informazione dell'errore gestito
+    // che le informazioni accumulate prima dell'errore
+    expect(result).toHaveProperty('errorHandled', true);
+    expect(result).toHaveProperty('errorSource', 'analyzer');
+    expect(result).toHaveProperty('research'); // Dati raccolti prima dell'errore
+  });
+
+  // Test per verificare la scrittura corretta in memoria del contesto aggiornato
+  it('Dovrebbe aggiornare correttamente la memoria con il contesto di ogni agente', async () => {
+    // Input iniziale con un ID conversazione univoco
+    const query = "Query per testare gli aggiornamenti della memoria";
+    const conversationId = 'test-memory-updates';
+    
+    // Esecuzione dell'orchestratore
+    await orchestrator.run({
+      query,
+      conversationId,
+      maxTurns: 10
+    });
+    
+    // Verifica che ogni chiamata a memoryManager.set contenga i dati dei vari agenti
+    // Estrai le chiamate a set per la nostra conversazione
+    const setCalls = vi.mocked(memoryManager.set).mock.calls
+      .filter(call => call[0] === conversationId);
+    
+    // Ci aspettiamo almeno 5 aggiornamenti:
+    // 1. Inizializzazione
+    // 2-5. Uno per ogni agente (planner, researcher, analyzer, writer)
+    expect(setCalls.length).toBeGreaterThanOrEqual(5);
+    
+    // Verifica che gli aggiornamenti contengano i dati attesi
+    // Ultima chiamata (writer)
+    const lastUpdate = setCalls[setCalls.length - 1][1];
+    expect(lastUpdate).toHaveProperty('plan'); // Dal planner
+    expect(lastUpdate).toHaveProperty('research'); // Dal researcher
+    expect(lastUpdate).toHaveProperty('analysis'); // Dall'analyzer
+    expect(lastUpdate).toHaveProperty('finalAnswer'); // Dal writer
+    
+    // Verifica anche nella memoria effettiva
+    const finalMemory = mockMemory[conversationId];
+    expect(finalMemory).toEqual(lastUpdate);
+    
+    // Verifica che gli aggiornamenti siano incrementali
+    // Primo aggiornamento dopo l'inizializzazione (planner)
+    const plannerUpdate = setCalls[1][1];
+    expect(plannerUpdate).toHaveProperty('plan');
+    expect(plannerUpdate).not.toHaveProperty('research');
+    
+    // Secondo aggiornamento (researcher)
+    const researcherUpdate = setCalls[2][1];
+    expect(researcherUpdate).toHaveProperty('plan'); // Mantenuto dal planner
+    expect(researcherUpdate).toHaveProperty('research'); // Aggiunto dal researcher
+    expect(researcherUpdate).not.toHaveProperty('analysis');
+  });
 }); 

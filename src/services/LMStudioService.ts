@@ -5,9 +5,9 @@
 // e restituisce la risposta generata dall'AI.
 
 // La funzione è asincrona: attende il completamento della richiesta HTTP
-import type { getLLMModel } from "../config/configManager.js.js";
-import { shouldUseDocs } from "../config/configManager.js.js";
-import { loadDocsFromFolder } from "../utils/docLoader.js.js";
+import type { getLLMModel } from "../config/configManager.js";
+import { shouldUseDocs } from "../config/configManager.js";
+import { loadDocsFromFolder } from "../utils/docLoader.js";
 
 export async function sendPrompt(prompt: string): Promise<string> {
   try {

@@ -1,4 +1,4 @@
-import { vscode } from '../../../webview-ui/src/utils/vscode.js.js'
+import { vscode } from '../../../webview-ui/src/utils/vscode.js'
 
 interface LMStudioResponse {
   response: string

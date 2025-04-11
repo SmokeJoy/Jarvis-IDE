@@ -5,10 +5,10 @@
 
 import { stringify } from 'yaml';
 import * as vscode from 'vscode';
-import type { ChatMessage } from '../shared/types.js.js';
-import type { ChatSettings } from '../shared/types/settings.types.js.js';
-import type { ApiConfiguration } from '../shared/types/api.types.js.js';
-import { Logger } from './logger.js.js';
+import type { ChatMessage } from '../shared/types.js';
+import type { ChatSettings } from '../shared/types/settings.types.js';
+import type { ApiConfiguration } from '../shared/types/api.types.js';
+import { Logger } from './logger.js';
 
 const logger = Logger.getInstance("Exporters");
 

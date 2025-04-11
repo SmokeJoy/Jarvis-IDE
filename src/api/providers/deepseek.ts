@@ -3,18 +3,18 @@ import type {
 	ChatCompletionChunk, 
 	ChatCompletionMessageParam, 
 	Stream 
-} from "../../types/provider-types/openai-types.js.js"
+} from "../../types/provider-types/openai-types.js"
 import { Anthropic } from "@anthropic-ai/sdk"
-import type { ApiHandler } from "../index.js.js"
-import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js.js"
-import { logger } from "../../utils/logger.js.js"
-import { ApiStream, ApiStreamChunk } from "../transform/stream.js.js"
-import type { convertToOpenAiMessages } from "../transform/openai-format.js.js"
-import { convertToR1Format } from "../transform/r1-format.js.js"
-import type { BaseStreamHandler } from "../handlers/BaseStreamHandler.js.js"
-import type { getDeepseekConfig } from "./config/deepseek-config.js.js"
-import type { deepseekModelInfoSaneDefaults } from "../../shared/api.js.js"
-import { calculateApiCostDeepSeek } from "../../utils/cost.js.js"
+import type { ApiHandler } from "../index.js"
+import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
+import { logger } from "../../utils/logger.js"
+import { ApiStream, ApiStreamChunk } from "../transform/stream.js"
+import type { convertToOpenAiMessages } from "../transform/openai-format.js"
+import { convertToR1Format } from "../transform/r1-format.js"
+import type { BaseStreamHandler } from "../handlers/BaseStreamHandler.js"
+import type { getDeepseekConfig } from "./config/deepseek-config.js"
+import type { deepseekModelInfoSaneDefaults } from "../../shared/api.js"
+import { calculateApiCostDeepSeek } from "../../utils/cost.js"
 
 /**
  * Handler per l'API DeepSeek, estende BaseStreamHandler

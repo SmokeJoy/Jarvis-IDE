@@ -11,7 +11,7 @@ import {
 	listFiles,
 	isDirectory,
 	copyFile,
-} from "./fs.js.js";
+} from "./fs.js";
 
 describe("File System Utils", () => {
 	let testDir: string;

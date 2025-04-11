@@ -4,12 +4,12 @@
  */
 
 import OpenAI from 'openai';
-import type { ChatMessage } from '../../../types/chat.types.js.js';
-import type { ApiProvider, StreamHandler } from '../ApiProvider.js.js';
-import type { normalizeChatMessages } from '../../../types/chat.types.js.js';
-import * as OpenAITransformer from '../../../api/transform/openai-format.js.js';
-import { logger } from '../../../utils/logger.js.js';
-import type { OpenAIOptions, ChatCompletionOptions } from '../../../types/provider-types/openai-types.js.js';
+import type { ChatMessage } from '../../../types/chat.types.js';
+import type { ApiProvider, StreamHandler } from '../ApiProvider.js';
+import type { normalizeChatMessages } from '../../../types/chat.types.js';
+import * as OpenAITransformer from '../../../api/transform/openai-format.js';
+import { logger } from '../../../utils/logger.js';
+import type { OpenAIOptions, ChatCompletionOptions } from '../../../types/provider-types/openai-types.js';
 
 /**
  * Provider per l'API OpenAI

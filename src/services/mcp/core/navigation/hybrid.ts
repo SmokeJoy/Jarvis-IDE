@@ -1,7 +1,7 @@
-import type { findSemanticPath } from './semantic.js.js';
-import type { findExploratoryPath } from './exploratory.js.js';
-import type { NavigationOptions } from '../types.js.js';
-import type { ContextLink } from '../../../../memory/context_links.js.js';
+import type { findSemanticPath } from './semantic.js';
+import type { findExploratoryPath } from './exploratory.js';
+import type { NavigationOptions } from '../types.js';
+import type { ContextLink } from '../../../../memory/context_links.js';
 
 interface HybridNavigationOptions extends NavigationOptions {
   semanticThreshold: number;  // Soglia per passare da exploratory a semantic

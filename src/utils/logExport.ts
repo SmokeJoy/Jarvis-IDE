@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import * as fs from 'fs'
 // import * as path from 'path' // Rimuovi importazione non utilizzata
-import { getCurrentLogFile, getLogDirectory } from './logStorage.js.js' // Aggiungi estensione .js
+import { getCurrentLogFile, getLogDirectory } from './logStorage.js' // Aggiungi estensione .js
 
 export async function exportCurrentLog(): Promise<void> {
   const currentFile = getCurrentLogFile()

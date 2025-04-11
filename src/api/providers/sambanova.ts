@@ -1,12 +1,12 @@
 import OpenAI from "openai"
-import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js.js"
-import type { SambanovaModelId, sambanovaDefaultModelId, sambanovaModels } from "../../shared/api.js.js"
-import type { ApiHandler } from "../index.js.js"
-import type { convertToOpenAiMessages } from "../transform/openai-format.js.js"
-import { ApiStream } from "../transform/stream.js.js"
-import { convertToR1Format } from "../transform/r1-format.js.js"
-import type { ChatMessage } from "../../types/chat.types.js.js"
-import type { ChatCompletionMessageParam } from "../../types/provider-types/openai-types.js.js"
+import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
+import type { SambanovaModelId, sambanovaDefaultModelId, sambanovaModels } from "../../shared/api.js"
+import type { ApiHandler } from "../index.js"
+import type { convertToOpenAiMessages } from "../transform/openai-format.js"
+import { ApiStream } from "../transform/stream.js"
+import { convertToR1Format } from "../transform/r1-format.js"
+import type { ChatMessage } from "../../types/chat.types.js"
+import type { ChatCompletionMessageParam } from "../../types/provider-types/openai-types.js"
 
 export class SambanovaHandler implements ApiHandler {
 	private options: ApiHandlerOptions

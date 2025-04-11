@@ -3,7 +3,7 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
-import { BenchmarkStorage } from '../storage/benchmark/BenchmarkStorage.js.js';
+import { BenchmarkStorage } from '../storage/benchmark/BenchmarkStorage.js';
 
 // Controlla gli argomenti
 const args = process.argv.slice(2);

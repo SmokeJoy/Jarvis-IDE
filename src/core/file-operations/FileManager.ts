@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import type { fileExistsAtPath } from '../../utils/fs.js.js';
-import { DiffViewProvider } from '../../integrations/editor/DiffViewProvider.js.js';
+import type { fileExistsAtPath } from '../../utils/fs.js';
+import { DiffViewProvider } from '../../integrations/editor/DiffViewProvider.js';
 
 export class FileManager {
     private static instance: FileManager;

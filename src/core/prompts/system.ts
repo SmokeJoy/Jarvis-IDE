@@ -1,12 +1,12 @@
-import { getShell } from "../../utils/shell.js.js"
+import { getShell } from "../../utils/shell.js"
 import os from "os"
 import osName from "os-name"
-import { McpHub } from "../../services/mcp/McpHub.js.js"
-import type { BrowserSettings } from "../../shared/BrowserSettings.js.js"
-import type { ChatSettings } from "../../shared/types/chat.types.js.js"
-import type { AutoApprovalSettings } from "../../shared/AutoApprovalSettings.js.js"
-import { TelemetrySetting } from "../../shared/TelemetrySetting.js.js"
-import { Platform } from "../../types/global.js.js"
+import { McpHub } from "../../services/mcp/McpHub.js"
+import type { BrowserSettings } from "../../shared/BrowserSettings.js"
+import type { ChatSettings } from "../../shared/types/chat.types.js"
+import type { AutoApprovalSettings } from "../../shared/AutoApprovalSettings.js"
+import { TelemetrySetting } from "../../shared/TelemetrySetting.js"
+import { Platform } from "../../types/global.js"
 
 export function getSystemPrompt(settings: ChatSettings, platform: Platform): string {
 	const prompt = `You are a powerful agentic AI coding assistant, powered by Claude 3.5 Sonnet. You operate exclusively in Cursor, the world's best IDE.

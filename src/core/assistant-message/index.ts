@@ -1,6 +1,6 @@
 export type AssistantMessageContent = TextContent | ToolUse
 
-export { parseAssistantMessage } from "./parse-assistant-message.js.js"
+export { parseAssistantMessage } from "./parse-assistant-message.js"
 
 export interface TextContent {
 	type: "text"

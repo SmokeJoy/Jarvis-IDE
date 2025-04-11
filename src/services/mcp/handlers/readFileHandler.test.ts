@@ -1,8 +1,8 @@
 import { jest } from '@jest/globals';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import type { readFileHandler } from './readFileHandler.js.js';
-import type { ReadFileArgs } from '../mcp.types.js.js';
+import type { readFileHandler } from './readFileHandler.js';
+import type { ReadFileArgs } from '../mcp.types.js';
 
 // Mock del modulo fs/promises
 jest.mock('fs/promises', () => ({

@@ -1,6 +1,6 @@
-import type { ApiProvider, StreamHandler } from '../ApiProvider.js.js';
-import type { ChatMessage, normalizeChatMessages } from '../../../types/ChatMessage.js.js';
-import { Logger } from '../../../utils/logger.js.js';
+import type { ApiProvider, StreamHandler } from '../ApiProvider.js';
+import type { ChatMessage, normalizeChatMessages } from '../../../types/ChatMessage.js';
+import { Logger } from '../../../utils/logger.js';
 
 export class OpenRouterProvider implements ApiProvider {
   readonly id = 'openrouter';

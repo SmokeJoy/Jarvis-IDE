@@ -1,7 +1,7 @@
 import { describe, it } from "vitest"
 import { expect } from "vitest"
-import { findLastIndex, findLast } from "./array.js.js"
-import type { ChatMessage } from "./types.js.js"
+import { findLastIndex, findLast } from "./array.js"
+import type { ChatMessage } from "./types.js"
 
 describe("Array Utilities", () => {
 	describe("findLastIndex", () => {

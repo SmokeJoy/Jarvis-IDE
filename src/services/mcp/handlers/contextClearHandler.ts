@@ -1,5 +1,5 @@
-import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js.js";
-import { getAllMemory, getFromMemory, persistMemoryToDisk } from "./contextInjectHandler.js.js";
+import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
+import { getAllMemory, getFromMemory, persistMemoryToDisk } from "./contextInjectHandler.js";
 
 /**
  * Rimuove un elemento specifico dalla memoria in base all'ID

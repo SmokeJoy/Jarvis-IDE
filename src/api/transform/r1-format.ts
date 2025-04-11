@@ -2,8 +2,8 @@ import type {
 	ChatCompletionMessageParam, 
 	ChatCompletionContentPartText, 
 	ChatCompletionContentPartImage 
-} from "../../types/provider-types/openai-types.js.js"
-import { logger } from "../../utils/logger.js.js"
+} from "../../types/provider-types/openai-types.js"
+import { logger } from "../../utils/logger.js"
 import type { 
 	ChatMessage, 
 	ContentBlock, 
@@ -12,8 +12,8 @@ import type {
 	ContentType, 
 	isTextBlock, 
 	isImageBlock 
-} from "../../types/chat.types.js.js"
-import { BaseTransformer } from "./BaseTransformer.js.js"
+} from "../../types/chat.types.js"
+import { BaseTransformer } from "./BaseTransformer.js"
 
 /**
  * Transformer per il formato R1 (DeepSeek Reasoner)

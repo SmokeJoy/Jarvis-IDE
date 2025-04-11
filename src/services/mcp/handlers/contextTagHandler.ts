@@ -1,5 +1,5 @@
-import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js.js";
-import { getAllMemory, persistMemoryToDisk } from "./contextInjectHandler.js.js";
+import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
+import { getAllMemory, persistMemoryToDisk } from "./contextInjectHandler.js";
 
 /**
  * Normalizza un tag (lowercase, rimuove spazi non necessari, ecc.)

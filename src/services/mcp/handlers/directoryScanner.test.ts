@@ -1,7 +1,14 @@
 import { jest } from '@jest/globals';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { directoryScanner } from './directoryScanner.js.js';
+import { directoryScanner } from './directoryScanner.js';
+
+// Interfaccia per il risultato della scansione
+interface DirectoryScanResult {
+  path: string;
+  type: 'file' | 'directory';
+  children?: DirectoryScanResult[];
+}
 
 // Mock del modulo fs/promises
 jest.mock('fs/promises', () => ({
@@ -49,8 +56,8 @@ describe('directoryScanner', () => {
     // Assert
     expect(result.success).toBe(true);
     expect(result.data).toHaveLength(3);
-    expect(result.data?.find(item => item.path === '/test/directory/subdir')?.type).toBe('directory');
-    expect(result.data?.find(item => item.path === '/test/directory/file1.txt')?.type).toBe('file');
+    expect(result.data?.find((item: DirectoryScanResult) => item.path === '/test/directory/subdir')?.type).toBe('directory');
+    expect(result.data?.find((item: DirectoryScanResult) => item.path === '/test/directory/file1.txt')?.type).toBe('file');
     expect(fs.readdir).toHaveBeenCalledTimes(2);
   });
 
@@ -75,7 +82,7 @@ describe('directoryScanner', () => {
     expect(result.success).toBe(true);
     expect(result.data).toHaveLength(2);
     
-    const subdir = result.data?.find(item => item.path === '/test/directory/subdir');
+    const subdir = result.data?.find((item: DirectoryScanResult) => item.path === '/test/directory/subdir');
     expect(subdir).toBeDefined();
     expect(subdir?.type).toBe('directory');
     expect(subdir?.children).toHaveLength(0); // Non dovrebbe avere figli con maxDepth=1
@@ -119,7 +126,7 @@ describe('directoryScanner', () => {
     expect(result.data).toHaveLength(2);
     
     // Verifica che node_modules e tmp siano stati esclusi
-    const paths = result.data?.map(item => item.path);
+    const paths = result.data?.map((item: DirectoryScanResult) => item.path);
     expect(paths).not.toContain('/test/directory/node_modules');
     expect(paths).not.toContain('/test/directory/tmp');
     expect(paths).toContain('/test/directory/file1.txt');
@@ -165,7 +172,7 @@ describe('directoryScanner', () => {
     
     // Solo file1.txt e src dovrebbero essere inclusi (esclusione default di .git e node_modules)
     expect(result.data).toHaveLength(2);
-    expect(result.data?.map(item => item.path)).toContain('/test/directory/file1.txt');
-    expect(result.data?.map(item => item.path)).toContain('/test/directory/src');
+    expect(result.data?.map((item: DirectoryScanResult) => item.path)).toContain('/test/directory/file1.txt');
+    expect(result.data?.map((item: DirectoryScanResult) => item.path)).toContain('/test/directory/src');
   });
 }); 

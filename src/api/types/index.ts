@@ -1,7 +1,7 @@
-import type { OpenRouterModelInfo } from '../../types/extension.js.js';
-import { ApiStream } from '../../types/global.js.js';
-import { HistoryItem } from '../../shared/HistoryItem.js.js';
-import { ApiProvider } from '../../agent/api/ApiProvider.js.js';
+import type { OpenRouterModelInfo } from '../../types/extension.js';
+import { ApiStream } from '../../types/global.js';
+import { HistoryItem } from '../../shared/HistoryItem.js';
+import { ApiProvider } from '../../agent/api/ApiProvider.js';
 
 export interface ApiHandler {
   createMessage(

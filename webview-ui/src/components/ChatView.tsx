@@ -11,6 +11,11 @@ import {
   createMessage
 } from '../utils/messageUtils';
 import { useTranslation } from '../i18n';
+import { VSCodeButton, VSCodeTextArea } from '@vscode/webview-ui-toolkit/react';
+import { vscode } from '@/utils/vscode';
+import type { ErrorMessage, InfoMessage } from '@/types/WebviewMessageType';
+import { MessageList } from './MessageList';
+import { SystemMessage } from './SystemMessage';
 
 // Type guard per verificare se un oggetto è un ChatMessage valido
 function isChatMessage(obj: any): obj is ChatMessage {
@@ -79,228 +84,219 @@ function useChatMessages() {
   };
 }
 
-/**
- * Componente principale della vista chat
- */
-const ChatView: React.FC = () => {
-  const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [inputText, setInputText] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  
-  const {
-    messages,
-    addMessage,
-    loadMessages,
-    clearMessages
-  } = useChatMessages();
-  
-  // Scroll automatico quando arrivano nuovi messaggi
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages]);
-  
-  // Gestione dei messaggi in arrivo dall'estensione
-  useEffect(() => {
-    const removeListener = createMessageListener((message: ExtensionMessage) => {
-      console.log('Messaggio ricevuto:', message.type, message);
-      
-      // Resetta lo stato di errore ad ogni nuovo messaggio
-      setError(null);
-      
-      switch (message.type) {
-        case WebviewMessageType.CHAT_RESPONSE:
-          // Gestisci risposta chat
-          setLoading(false);
-          if (message.message && isChatMessage(message.message)) {
-            addMessage(message.message);
-          }
-          break;
-          
-        case 'chatMessagesLoaded': // Retrocompatibilità
-        case WebviewMessageType.LOAD_CHAT_HISTORY:
-          // Carica i messaggi della chat
-          if (message.messages && Array.isArray(message.messages)) {
-            loadMessages(message.messages);
-          }
-          break;
-          
-        case 'clearChat': // Retrocompatibilità
-        case WebviewMessageType.CLEAR_CHAT_HISTORY:
-          // Svuota la chat
-          clearMessages();
-          break;
-          
-        case 'addChatMessage': // Retrocompatibilità
-          // Aggiungi un messaggio alla chat
-          if (message.payload?.message && isChatMessage(message.payload.message)) {
-            addMessage(message.payload.message);
-          }
-          break;
-          
-        case 'error':
-        case WebviewMessageType.ERROR:
-        case WebviewMessageType.SHOW_ERROR_MESSAGE:
-          // Gestisci errori
-          setLoading(false);
-          setError(message.error || t('errors.unknown'));
-          break;
-          
-        default:
-          // Se non è un tipo di messaggio gestito, ignora
-          break;
-      }
-    });
-    
-    // Pulizia del listener quando il componente viene smontato
-    return () => removeListener();
-  }, [addMessage, loadMessages, clearMessages, t]);
-  
-  // Gestione dell'invio del messaggio
-  const handleSendMessage = useCallback(() => {
-    if (!inputText.trim()) return;
-    
-    try {
-      // Aggiungi il messaggio dell'utente alla chat
-      const userMessage: ChatMessage = {
-        role: 'user',
-        content: inputText.trim(),
-        timestamp: Date.now()
-      };
-      
-      addMessage(userMessage);
-      
-      // Invia il messaggio all'estensione
-      sendMessageToExtension(createMessage.chatRequest(inputText));
-      
-      // Resetta l'input e imposta lo stato di caricamento
-      setInputText('');
-      setLoading(true);
-    } catch (error) {
-      console.error(t('errors.sendFailed'), error);
-      setError(error instanceof Error ? error.message : t('errors.unknown'));
-    }
-  }, [inputText, addMessage, t]);
-  
-  // Gestione della cancellazione della chat
-  const handleClearChat = useCallback(() => {
-    try {
-      sendMessageToExtension(createMessage.clearChat());
-      // Non cancellare i messaggi qui, aspetta la conferma dall'estensione
-    } catch (error) {
-      console.error(t('errors.clearFailed'), error);
-      setError(error instanceof Error ? error.message : t('errors.unknown'));
-    }
-  }, [t]);
-  
-  // Gestione dell'input
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputText(e.target.value);
-  }, []);
-  
-  // Invio con il tasto Enter (senza Shift)
-  const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  }, [handleSendMessage]);
-  
-  // Renderizza un singolo messaggio della chat
-  const renderMessage = (message: ChatMessage, index: number) => {
-    const isUser = message.role === 'user';
-    const className = `chat-message ${isUser ? 'user-message' : 'assistant-message'}`;
-    
-    return (
-      <div key={index} className={className}>
-        <div className="message-header">
-          <span className="message-role">
-            {isUser ? t('chat.user') : t('chat.assistant')}
-          </span>
-          {message.timestamp && (
-            <span className="message-time">
-              {new Date(message.timestamp).toLocaleTimeString()}
-            </span>
-          )}
-        </div>
-        <div className="message-content">
-          {typeof message.content === 'string' 
-            ? message.content
-            : JSON.stringify(message.content)}
-        </div>
-      </div>
-    );
-  };
-  
-  return (
-    <div className="chat-container">
-      <div className="chat-header">
-        <h1>{t('chat.title')}</h1>
-        <button 
-          className="clear-button" 
-          onClick={handleClearChat}
-          disabled={loading || messages.length === 0}
-        >
-          {t('chat.clear')}
-        </button>
-      </div>
-      
-      {error && (
-        <div className="error-notification" role="alert">
-          <span className="error-icon">⚠️</span>
-          <span className="error-message">{error}</span>
-          <button 
-            className="error-dismiss" 
-            onClick={() => setError(null)}
-            aria-label={t('common.dismiss')}
-          >
-            ×
-          </button>
-        </div>
-      )}
-      
-      <div className="chat-messages">
-        {messages.length === 0 ? (
-          <div className="empty-state">
-            <p>{t('chat.empty')}</p>
-          </div>
-        ) : (
-          messages.map(renderMessage)
-        )}
-        {loading && (
-          <div className="loading-indicator">
-            <div className="loading-dots">
-              <span></span><span></span><span></span>
-            </div>
-            <p>{t('chat.thinking')}</p>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-      
-      <div className="chat-input">
-        <textarea
-          value={inputText}
-          onChange={handleInputChange}
-          onKeyPress={handleKeyPress}
-          placeholder={t('chat.inputPlaceholder')}
-          disabled={loading}
-          rows={3}
-          aria-label={t('chat.inputLabel')}
-        />
-        <button 
-          className="send-button"
-          onClick={handleSendMessage}
-          disabled={loading || !inputText.trim()}
-        >
-          {loading ? t('chat.sending') : t('chat.send')}
-        </button>
-      </div>
-    </div>
-  );
+interface ChatViewProps {
+	messages: ChatMessage[];
+	onSendMessage: (message: string) => void;
+	isLoading: boolean;
+	error?: string;
+}
+
+export const ChatView: React.FC<ChatViewProps> = ({
+	messages,
+	onSendMessage,
+	isLoading,
+	error
+}) => {
+	const { t } = useTranslation();
+	const [inputValue, setInputValue] = useState<string>('');
+	const [isSending, setIsSending] = useState<boolean>(false);
+	const messagesEndRef = useRef<HTMLDivElement>(null);
+
+	const {
+		addMessage,
+		loadMessages,
+		clearMessages
+	} = useChatMessages();
+
+	// Scroll automatico quando arrivano nuovi messaggi
+	useEffect(() => {
+		if (messagesEndRef.current) {
+			messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+		}
+	}, [messages]);
+
+	// Gestione dei messaggi in arrivo dall'estensione
+	useEffect(() => {
+		const removeListener = createMessageListener((message: ExtensionMessage) => {
+			console.log('Messaggio ricevuto:', message.type, message);
+			
+			// Resetta lo stato di errore ad ogni nuovo messaggio
+			error = null;
+			
+			switch (message.type) {
+				case WebviewMessageType.CHAT_RESPONSE:
+					// Gestisci risposta chat
+					isLoading = false;
+					if (message.message && isChatMessage(message.message)) {
+						addMessage(message.message);
+					}
+					break;
+				
+				case 'chatMessagesLoaded': // Retrocompatibilità
+				case WebviewMessageType.LOAD_CHAT_HISTORY:
+					// Carica i messaggi della chat
+					if (message.messages && Array.isArray(message.messages)) {
+						loadMessages(message.messages);
+					}
+					break;
+				
+				case 'clearChat': // Retrocompatibilità
+				case WebviewMessageType.CLEAR_CHAT_HISTORY:
+					// Svuota la chat
+					clearMessages();
+					break;
+				
+				case 'addChatMessage': // Retrocompatibilità
+					// Aggiungi un messaggio alla chat
+					if (message.payload?.message && isChatMessage(message.payload.message)) {
+						addMessage(message.payload.message);
+					}
+					break;
+				
+				case 'error':
+				case WebviewMessageType.ERROR:
+				case WebviewMessageType.SHOW_ERROR_MESSAGE:
+					// Gestisci errori
+					isLoading = false;
+					error = message.error || t('errors.unknown');
+					break;
+				
+				default:
+					// Se non è un tipo di messaggio gestito, ignora
+					break;
+			}
+		});
+		
+		// Pulizia del listener quando il componente viene smontato
+		return () => removeListener();
+	}, [addMessage, loadMessages, clearMessages, t]);
+
+	const handleInputChange = useCallback((event: React.FormEvent<HTMLTextAreaElement>) => {
+		setInputValue(event.currentTarget.value);
+	}, []);
+
+	const handleSendMessage = useCallback(async () => {
+		if (!inputValue.trim() || isSending) return;
+
+		setIsSending(true);
+		try {
+			onSendMessage(inputValue);
+			setInputValue('');
+
+			const infoMessage: InfoMessage = {
+				type: 'info',
+				timestamp: Date.now(),
+				payload: {
+					message: 'Messaggio inviato con successo',
+					severity: 'success'
+				}
+			};
+			vscode.postMessage(infoMessage);
+		} catch (err) {
+			const errorMessage: ErrorMessage = {
+				type: 'error',
+				timestamp: Date.now(),
+				payload: {
+					message: 'Errore durante l\'invio del messaggio',
+					code: 'SEND_ERROR'
+				}
+			};
+			vscode.postMessage(errorMessage);
+		} finally {
+			setIsSending(false);
+		}
+	}, [inputValue, isSending, onSendMessage]);
+
+	const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+		if (event.key === 'Enter' && !event.shiftKey) {
+			event.preventDefault();
+			handleSendMessage();
+		}
+	}, [handleSendMessage]);
+
+	// Renderizza un singolo messaggio della chat
+	const renderMessage = (message: ChatMessage, index: number) => {
+		const isUser = message.role === 'user';
+		const className = `chat-message ${isUser ? 'user-message' : 'assistant-message'}`;
+		
+		return (
+			<div key={index} className={className}>
+				<div className="message-header">
+					<span className="message-role">
+						{isUser ? t('chat.user') : t('chat.assistant')}
+					</span>
+					{message.timestamp && (
+						<span className="message-time">
+							{new Date(message.timestamp).toLocaleTimeString()}
+						</span>
+					)}
+				</div>
+				<div className="message-content">
+					{typeof message.content === 'string' 
+						? message.content
+						: JSON.stringify(message.content)}
+				</div>
+			</div>
+		);
+	};
+
+	return (
+		<div className="chat-container">
+			<div className="chat-header">
+				<h1>{t('chat.title')}</h1>
+				<button 
+					className="clear-button" 
+					onClick={clearMessages}
+					disabled={isLoading || messages.length === 0}
+				>
+					{t('chat.clear')}
+				</button>
+			</div>
+			
+			{error && (
+				<div className="error-notification" role="alert">
+					<span className="error-icon">⚠️</span>
+					<span className="error-message">{error}</span>
+					<button 
+						className="error-dismiss" 
+						onClick={() => error = null}
+						aria-label={t('common.dismiss')}
+					>
+						×
+					</button>
+				</div>
+			)}
+			
+			<div className="chat-messages">
+				{messages.length === 0 ? (
+					<div className="empty-state">
+						<p>{t('chat.empty')}</p>
+					</div>
+				) : (
+					<MessageList messages={messages} isLoading={isLoading} />
+				)}
+				<div ref={messagesEndRef} />
+			</div>
+			
+			<div className="chat-input">
+				<VSCodeTextArea
+					value={inputValue}
+					onChange={handleInputChange}
+					onKeyDown={handleKeyDown}
+					placeholder={t('chat.inputPlaceholder')}
+					disabled={isSending || isLoading}
+					rows={3}
+					aria-label={t('chat.inputLabel')}
+				/>
+				<VSCodeButton
+					onClick={handleSendMessage}
+					disabled={!inputValue.trim() || isSending || isLoading}
+				>
+					{isSending ? t('chat.sending') : t('chat.send')}
+				</VSCodeButton>
+			</div>
+		</div>
+	);
 };
 
 export default ChatView; 

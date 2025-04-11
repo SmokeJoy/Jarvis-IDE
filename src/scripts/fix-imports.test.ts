@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { performance } from 'perf_hooks';
-import type { fixImportsInFile, getJsExtensionType, extractModulesFromImports } from './fix-imports.js.js';
+import type { fixImportsInFile, getJsExtensionType, extractModulesFromImports } from './fix-imports.js';
 
 // Mock delle funzioni di fs
 jest.mock('fs', () => ({
@@ -37,11 +37,11 @@ describe('fix-imports script', () => {
         import React from 'react';
         import type { useState, useEffect } from 'react';
         import * as path from 'path';
-        import type { User } from '../types/user.js.js';
+        import type { User } from '../types/user.js';
         import('./dynamicModule').then(module => {});
         const fs = require('fs');
-        export { default as Button } from './Button.js.js';
-        export * from './utils.js.js';
+        export { default as Button } from './Button.js';
+        export * from './utils.js';
       `;
 
       const result = extractModulesFromImports(code);
@@ -61,10 +61,10 @@ describe('fix-imports script', () => {
     test('dovrebbe aggiungere .js alle importazioni relative in file TS/TSX', async () => {
       // Mock del contenuto del file
       const fileContent = `
-        import type { Component } from '../components/Component.js.js';
-        import utils from './utils.js.js';
-        import * as constants from '../constants.js.js';
-        import type { User } from '../types/user.js.js';
+        import type { Component } from '../components/Component.js';
+        import utils from './utils.js';
+        import * as constants from '../constants.js';
+        import type { User } from '../types/user.js';
         import React from 'react';
       `;
       
@@ -96,26 +96,26 @@ describe('fix-imports script', () => {
       // Verifica che writeFile sia stato chiamato con le estensioni .js aggiunte
       expect(fs.promises.writeFile).toHaveBeenCalledWith(
         'src/someFile.ts',
-        expect.stringContaining("import type { Component } from '../components/Component.js.js';"),
+        expect.stringContaining("import type { Component } from '../components/Component.js';"),
         'utf8'
       );
       
       expect(fs.promises.writeFile).toHaveBeenCalledWith(
         'src/someFile.ts',
-        expect.stringContaining("import utils from './utils.js.js';"),
+        expect.stringContaining("import utils from './utils.js';"),
         'utf8'
       );
       
       expect(fs.promises.writeFile).toHaveBeenCalledWith(
         'src/someFile.ts',
-        expect.stringContaining("import * as constants from '../constants.js.js';"),
+        expect.stringContaining("import * as constants from '../constants.js';"),
         'utf8'
       );
       
       // I tipi non dovrebbero avere estensione .js
       expect(fs.promises.writeFile).toHaveBeenCalledWith(
         'src/someFile.ts',
-        expect.stringContaining("import type { User } from '../types/user.js.js';"),
+        expect.stringContaining("import type { User } from '../types/user.js';"),
         'utf8'
       );
       
@@ -130,8 +130,8 @@ describe('fix-imports script', () => {
     test('dovrebbe rimuovere .js dalle importazioni relative quando richiesto', async () => {
       // Mock del contenuto del file
       const fileContent = `
-        import type { Component } from '../components/Component.js.js';
-        import utils from './utils.js.js';
+        import type { Component } from '../components/Component.js';
+        import utils from './utils.js';
         import React from 'react';
       `;
       
@@ -149,13 +149,13 @@ describe('fix-imports script', () => {
       
       expect(fs.promises.writeFile).toHaveBeenCalledWith(
         'src/someFile.ts',
-        expect.stringContaining("import type { Component } from '../components/Component.js.js';"),
+        expect.stringContaining("import type { Component } from '../components/Component.js';"),
         'utf8'
       );
       
       expect(fs.promises.writeFile).toHaveBeenCalledWith(
         'src/someFile.ts',
-        expect.stringContaining("import utils from './utils.js.js';"),
+        expect.stringContaining("import utils from './utils.js';"),
         'utf8'
       );
       
@@ -170,8 +170,8 @@ describe('fix-imports script', () => {
     test('non dovrebbe modificare il file in modalità dry run', async () => {
       // Mock del contenuto del file
       const fileContent = `
-        import type { Component } from '../components/Component.js.js';
-        import utils from './utils.js.js';
+        import type { Component } from '../components/Component.js';
+        import utils from './utils.js';
       `;
       
       (fs.promises.readFile as jest.Mock).mockResolvedValue(fileContent);
@@ -193,8 +193,8 @@ describe('fix-imports script', () => {
     test('dovrebbe gestire correttamente i percorsi index', async () => {
       // Mock del contenuto del file
       const fileContent = `
-        import { Button } from '../components.js.js';
-        import { utils } from './utils/index.js.js';
+        import { Button } from '../components.js';
+        import { utils } from './utils/index.js';
       `;
       
       (fs.promises.readFile as jest.Mock).mockResolvedValue(fileContent);
@@ -225,13 +225,13 @@ describe('fix-imports script', () => {
       
       expect(fs.promises.writeFile).toHaveBeenCalledWith(
         'src/someFile.ts',
-        expect.stringContaining("import { Button } from '../components/index.js.js';"),
+        expect.stringContaining("import { Button } from '../components/index.js';"),
         'utf8'
       );
       
       expect(fs.promises.writeFile).toHaveBeenCalledWith(
         'src/someFile.ts',
-        expect.stringContaining("import { utils } from './utils/index.js.js';"),
+        expect.stringContaining("import { utils } from './utils/index.js';"),
         'utf8'
       );
     });
@@ -241,7 +241,7 @@ describe('fix-imports script', () => {
       performanceNowSpy.mockReturnValueOnce(0);
       performanceNowSpy.mockReturnValueOnce(100); // Simuliamo 100ms di esecuzione
       
-      const fileContent = `import type { Component } from '../components/Component.js.js';`;
+      const fileContent = `import type { Component } from '../components/Component.js';`;
       (fs.promises.readFile as jest.Mock).mockResolvedValue(fileContent);
       (fs.existsSync as jest.Mock).mockReturnValue(true);
       (fs.promises.stat as jest.Mock).mockResolvedValue({ isDirectory: () => false });

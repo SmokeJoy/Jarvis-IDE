@@ -3,10 +3,10 @@ import ReactMarkdown from 'react-markdown';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import * as vscode from 'vscode-webview';
-import type { Message } from '../types/messages.js.js';
-import type { WebviewMessage } from '../types/webview.types.js.js';
-import type { ApiConfiguration } from '../shared/types/api.types.js.js';
-import type { ExtensionMessage } from '../shared/ExtensionMessage.js.js';
+import type { Message } from '../types/messages.js';
+import type { WebviewMessage } from '../types/webview.types.js';
+import type { ApiConfiguration } from '../shared/types/api.types.js';
+import type { ExtensionMessage } from '../shared/ExtensionMessage.js';
 import { VSCodeButton } from '@vscode/webview-ui-toolkit/react';
 import styled from 'styled-components';
 

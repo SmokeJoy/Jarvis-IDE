@@ -3,9 +3,9 @@
  * @description File di reindirizzamento per le definizioni dei tipi API
  * @deprecated Per nuovi sviluppi, importare direttamente da llm.types.ts
  */
-import type { TelemetrySetting } from './telemetry.types.js.js';
-import { ChatCompletionContentPartText, ChatCompletionContentPartImage } from './llm.types.js.js';
-export * from './llm.types.js.js';
+import type { TelemetrySetting } from './telemetry.types.js';
+import { ChatCompletionContentPartText, ChatCompletionContentPartImage } from './llm.types.js';
+export * from './llm.types.js';
 export { TelemetrySetting };
 export type AzureOpenAIDeploymentId = string;
 /**

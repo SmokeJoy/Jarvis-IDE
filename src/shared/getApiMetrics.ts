@@ -1,4 +1,4 @@
-import type { JarvisMessage } from "./ExtensionMessage.js.js"
+import type { JarvisMessage } from "./ExtensionMessage.js"
 
 /**
  * Rappresenta le metriche di utilizzo dell'API

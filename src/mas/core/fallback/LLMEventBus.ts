@@ -6,23 +6,31 @@
 /**
  * Tipi di eventi supportati dal sistema
  */
-export type LLMEventName = 
+export type LLMEventType =
   | 'provider:success'    // Emesso quando un provider ha eseguito con successo
   | 'provider:failure'    // Emesso quando un provider ha fallito
   | 'provider:fallback'   // Emesso quando viene selezionato un provider di fallback
   | 'provider:statsUpdated' // Emesso quando le statistiche vengono aggiornate
-  | 'provider:cooldown';  // Emesso quando un provider è in cooldown dopo un fallimento
+  | 'provider:cooldown'    // Emesso quando un provider è in cooldown dopo un fallimento
+  | 'strategy:adaptive:change';
 
 /**
  * Struttura standard di payload per gli eventi
  */
 export interface LLMEventPayload {
   /** ID del provider coinvolto nell'evento */
-  providerId: string;
+  providerId?: string;
   /** Timestamp dell'evento in millisecondi */
   timestamp: number;
   /** Dati aggiuntivi specifici dell'evento */
   [key: string]: any;
+}
+
+export interface AdaptiveStrategyChangePayload extends LLMEventPayload {
+  fromStrategy: string;
+  toStrategy: string;
+  reason: string;
+  stats: Map<string, ProviderStats>;
 }
 
 /**
@@ -36,7 +44,7 @@ export type LLMEventListener = (payload: LLMEventPayload) => void;
  */
 export class LLMEventBus {
   /** Mappa degli eventi e relativi listener */
-  private listeners: Map<LLMEventName, Set<LLMEventListener>> = new Map();
+  private listeners: Map<LLMEventType, Set<LLMEventListener>> = new Map();
 
   /**
    * Registra un listener per un determinato evento
@@ -44,7 +52,7 @@ export class LLMEventBus {
    * @param listener Funzione di callback da eseguire quando l'evento viene emesso
    * @returns Riferimento a this per supportare il method chaining
    */
-  public on(eventName: LLMEventName, listener: LLMEventListener): this {
+  public on(eventName: LLMEventType, listener: LLMEventListener): this {
     if (!this.listeners.has(eventName)) {
       this.listeners.set(eventName, new Set());
     }
@@ -59,7 +67,7 @@ export class LLMEventBus {
    * @param listener Funzione di callback da rimuovere
    * @returns Riferimento a this per supportare il method chaining
    */
-  public off(eventName: LLMEventName, listener: LLMEventListener): this {
+  public off(eventName: LLMEventType, listener: LLMEventListener): this {
     const eventListeners = this.listeners.get(eventName);
     
     if (eventListeners) {
@@ -79,7 +87,7 @@ export class LLMEventBus {
    * @param eventName Nome dell'evento da emettere
    * @param payload Dati associati all'evento
    */
-  public emit(eventName: LLMEventName, payload: Omit<LLMEventPayload, 'timestamp'>): void {
+  public emit(eventName: LLMEventType, payload: Omit<LLMEventPayload, 'timestamp'>): void {
     const eventListeners = this.listeners.get(eventName);
     
     if (!eventListeners) return;
@@ -105,7 +113,7 @@ export class LLMEventBus {
    * @param eventName Nome dell'evento opzionale, se non specificato rimuove tutti i listener
    * @returns Riferimento a this per supportare il method chaining
    */
-  public removeAllListeners(eventName?: LLMEventName): this {
+  public removeAllListeners(eventName?: LLMEventType): this {
     if (eventName) {
       this.listeners.delete(eventName);
     } else {
@@ -120,7 +128,7 @@ export class LLMEventBus {
    * @param eventName Nome dell'evento
    * @returns Numero di listener registrati
    */
-  public listenerCount(eventName: LLMEventName): number {
+  public listenerCount(eventName: LLMEventType): number {
     const eventListeners = this.listeners.get(eventName);
     return eventListeners ? eventListeners.size : 0;
   }

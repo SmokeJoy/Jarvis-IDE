@@ -5,7 +5,7 @@ import type {
   WebviewCommand,
   WebviewTheme,
   WebviewConfiguration,
-} from "./webview.js.js";
+} from "./webview.js";
 
 describe("Webview Types", () => {
   test("WebviewState should have correct structure", () => {

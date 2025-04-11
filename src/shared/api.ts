@@ -1,5 +1,5 @@
-import type { OpenAiCompatibleModelInfo, ApiConfiguration, ModelInfo, ApiHandlerOptions } from "./types/api.types.js.js"
-import type { ApiProvider } from "../agent/api/ApiProvider.js.js"
+import type { OpenAiCompatibleModelInfo, ApiConfiguration, ModelInfo, ApiHandlerOptions } from "./types/api.types.js"
+import type { ApiProvider } from "../agent/api/ApiProvider.js"
 
 // Esporta esplicitamente i tipi importati
 export type { OpenAiCompatibleModelInfo, ApiConfiguration, ModelInfo, ApiHandlerOptions, ApiProvider }

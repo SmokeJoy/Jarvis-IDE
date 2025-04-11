@@ -1,26 +1,27 @@
-import { LLMProviderId } from '../../types/global.js.js';
-import type { ApiProvider, ProviderOptions } from './base.js.js';
-import { OpenAIProvider } from './openai.js.js';
-import { OllamaProvider } from './ollama.js.js';
-import { TogetherProvider } from './together.js.js';
-import { DeepSeekProvider } from './deepseek.js.js';
-import { QwenProvider } from './qwen.js.js';
-import { MistralProvider } from './mistral.js.js';
-import { LMStudioProvider } from './lmstudio.js.js';
-import type { OpenRouterProvider } from './openrouter.js.js';
-import { VertexProvider } from './vertex.js.js';
-import { AnthropicProvider } from './anthropic.js.js';
-import { VsCodeLmProvider } from './vscode-lm.js.js';
-import { BedrockProvider } from './bedrock.js.js';
-import { GeminiProvider } from './gemini.js.js';
-import { OpenAINativeProvider } from './openai-native.js.js';
-import type { RequestyProvider } from './requesty.js.js';
-import { JarvisIdeProvider } from './jarvis-ide.js.js';
-import { LiteLlmProvider } from './litellm.js.js';
-import { AskSageProvider } from './asksage.js.js';
-import { XAIProvider } from './xai.js.js';
-import { SambanovaProvider } from './sambanova.js.js';
-import { LocalCustomProvider } from './local-custom.js.js';
+import { LLMProviderId } from '../../types/global.js';
+import { getProvider } from '../../../mas/providers/provider-registry';
+import type { ApiProvider, ProviderOptions } from './base.js';
+import { OpenAIProvider } from './openai.js';
+import { OllamaProvider } from './ollama.js';
+import { TogetherProvider } from './together.js';
+import { DeepSeekProvider } from './deepseek.js';
+import { QwenProvider } from './qwen.js';
+import { MistralProvider } from './mistral.js';
+import { LMStudioProvider } from './lmstudio.js';
+import { AnthropicProvider } from './anthropic.js';
+import { VertexProvider } from './vertex.js';
+import { OpenRouterProvider } from './OpenRouterProvider';
+import { VsCodeLmProvider } from './vscode-lm.js';
+import { BedrockProvider } from './bedrock.js';
+import { GeminiProvider } from './gemini.js';
+import { OpenAINativeProvider } from './openai-native.js';
+import type { RequestyProvider } from './requesty.js';
+import { JarvisIdeProvider } from './jarvis-ide.js';
+import { LiteLlmProvider } from './litellm.js';
+import { AskSageProvider } from './asksage.js';
+import { XAIProvider } from './xai.js';
+import { SambanovaProvider } from './sambanova.js';
+import { LocalCustomProvider } from './local-custom.js';
 
 /**
  * Mappa dei provider LLM supportati
@@ -35,8 +36,8 @@ const apiProviders: Record<LLMProviderId, new (options: ProviderOptions) => ApiP
   'qwen': QwenProvider,
   'lmstudio': LMStudioProvider,
   'local-custom': LocalCustomProvider,
-  'openrouter': OpenRouterProvider,
   'anthropic': AnthropicProvider,
+  'openrouter': OpenRouterProvider,
   'vscode-lm': VsCodeLmProvider,
   'bedrock': BedrockProvider,
   'gemini': GeminiProvider,
@@ -56,10 +57,17 @@ const apiProviders: Record<LLMProviderId, new (options: ProviderOptions) => ApiP
  * @returns Istanza del provider LLM
  */
 export function getApiProvider(providerId: LLMProviderId, options: ProviderOptions): ApiProvider {
+    // Prima verifica nel registry dinamico
+  const RegisteredProvider = getProvider(providerId);
+  if (RegisteredProvider) {
+    return new RegisteredProvider(options);
+  }
+
+  // Fallback alla mappa statica esistente
   const ProviderClass = apiProviders[providerId];
   
   if (!ProviderClass) {
-    throw new Error(`Provider LLM non supportato: ${providerId}`);
+    throw new Error(`Provider LLM non supportato o non registrato: ${providerId}`);
   }
   
   return new ProviderClass(options);
@@ -72,4 +80,4 @@ export function getApiProvider(providerId: LLMProviderId, options: ProviderOptio
  */
 export function isProviderSupported(providerId: string): providerId is LLMProviderId {
   return providerId in apiProviders;
-} 
+}

@@ -6,7 +6,7 @@ import {
   sleep,
   getTimestamp,
   formatTimestamp,
-} from "./time.js.js";
+} from "./time.js";
 
 describe("Time Utils", () => {
   test("secondsToMs should convert seconds to milliseconds", () => {

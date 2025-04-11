@@ -309,4 +309,164 @@ L'orchestratore è progettato per bilanciare efficienza e affidabilità:
 
 1. **Gestione della Memoria**: Il contesto viene aggiornato in modo incrementale, preservando solo le informazioni necessarie
 2. **Esecuzione Ottimizzata**: Gli agenti vengono eseguiti solo quando necessario, evitando operazioni ridondanti
-3. **Profiling delle Prestazioni**: È possibile monitorare il tempo di esecuzione di ogni agente per identificare colli di bottiglia 
+3. **Profiling delle Prestazioni**: È possibile monitorare il tempo di esecuzione di ogni agente per identificare colli di bottiglia
+
+#### `LLMFallbackManager`
+
+Il cuore del sistema di orchestrazione è il `LLMFallbackManager`. Questo componente:
+
+1. Mantiene una lista di provider LLM disponibili
+2. Permette di eseguire richieste con un robusto sistema di fallback
+3. Raccoglie statistiche sulle performance di ogni provider
+4. Gestisce un sistema di cooldown per provider che falliscono ripetutamente
+5. Implementa diverse strategie di fallback configurabili
+
+### Strategie di Fallback
+
+Il sistema supporta diverse strategie di fallback per selezionare i provider da utilizzare quando un provider fallisce:
+
+#### `PreferredFallbackStrategy` (default)
+
+Questa strategia mantiene un provider preferito (configurabile) che viene sempre provato per primo, seguito dagli altri provider in ordine. È possibile abilitare la funzionalità "rememberSuccessful" per memorizzare automaticamente l'ultimo provider che ha avuto successo come provider preferito.
+
+```typescript
+// Configurazione con provider preferito esplicito
+const fallbackManager = new LLMFallbackManager({
+  providers: [openai, anthropic, mistral],
+  strategyType: 'preferred',
+  strategyOptions: {
+    preferredProvider: 'openai',
+    rememberSuccessful: false
+  }
+});
+```
+
+#### `RoundRobinFallbackStrategy`
+
+Questa strategia distribuisce equamente il carico tra tutti i provider, ruotando il provider principale ad ogni richiesta. Utile per bilanciare il carico in ambienti con molte richieste.
+
+```typescript
+// Configurazione per round robin
+const fallbackManager = new LLMFallbackManager({
+  providers: [openai, anthropic, mistral],
+  strategyType: 'roundRobin'
+});
+```
+
+#### `ReliabilityFallbackStrategy`
+
+Seleziona i provider in base al loro tasso di successo (success rate). I provider con tassi di successo più alti vengono preferiti. Questa strategia richiede un minimo di tentativi prima di considerare affidabili le statistiche.
+
+```typescript
+// Configurazione per strategia basata su affidabilità
+const fallbackManager = new LLMFallbackManager({
+  providers: [openai, anthropic, mistral],
+  strategyType: 'reliability',
+  strategyOptions: {
+    minimumAttempts: 10 // Numero minimo di tentativi prima di considerare le statistiche
+  }
+});
+```
+
+#### `CompositeFallbackStrategy`
+
+Combina più strategie di fallback in sequenza per creare comportamenti complessi. Ogni strategia viene consultata in ordine e la prima che restituisce un provider valido vince.
+
+```typescript
+// Configurazione per strategia composita
+const fallbackManager = new LLMFallbackManager({
+  providers: [openai, anthropic, mistral],
+  strategyType: 'composite',
+  strategyOptions: {
+    strategies: [
+      { 
+        type: 'preferred', 
+        options: { preferredProvider: 'openai' }
+      },
+      { 
+        type: 'reliability'
+      }
+    ]
+  }
+});
+```
+
+#### `AdaptiveFallbackStrategy`
+
+La `AdaptiveFallbackStrategy` è una strategia avanzata che seleziona dinamicamente la migliore strategia di fallback in base a condizioni di sistema e performance dei provider.
+
+#### Condizioni Supportate
+
+##### Monitoraggio Costi
+```typescript
+// Esempio: Evita provider con costi eccessivi
+const costAwareStrategy = new AdaptiveFallbackStrategy([
+  {
+    strategy: new PreferredFallbackStrategy('provider1'),
+    condition: notCondition(providerCostAbove('provider1', 0.1))
+  },
+  {
+    strategy: new RoundRobinFallbackStrategy(),
+    condition: providerCostAbove('provider1', 0.1)
+  }
+]);
+```
+
+La condizione `providerCostAbove` permette di:
+- Monitorare il costo per token di un provider specifico
+- Attivare strategie alternative quando il costo supera una soglia
+- Ottimizzare l'utilizzo dei provider in base al budget disponibile
+
+#### Configurazione
+```typescript
+// Configurazione completa con monitoraggio costi
+const strategy = new AdaptiveFallbackStrategy([
+  {
+    name: 'low-cost',
+    strategy: new PreferredFallbackStrategy('provider1'),
+    condition: allConditions([
+      notCondition(providerCostAbove('provider1', 0.1)),
+      notCondition(providerFailedRecently('provider1'))
+    ])
+  },
+  {
+    name: 'high-cost-fallback',
+    strategy: new RoundRobinFallbackStrategy(),
+    condition: providerCostAbove('provider1', 0.1)
+  }
+]);
+```
+
+### Condizioni per la strategia adattiva
+
+La strategia adattiva supporta diverse condizioni configurabili, che possono essere combinate con operatori logici:
+
+#### Condizioni base
+- `failureRate`: Attiva quando il tasso di fallimento supera una soglia percentuale
+- `totalFailures`: Attiva quando il numero totale di fallimenti supera una soglia
+- `avgLatency`: Attiva quando la latenza media di tutti i provider supera una soglia
+- `providerLatency`: Attiva quando la latenza di un provider specifico supera una soglia
+- `providerFailed`: Attiva quando un provider specifico ha fallito recentemente
+- `timeWindow`: Attiva durante una finestra temporale specifica (es. orario di ufficio)
+
+#### Operatori logici
+- `and`: Combina più condizioni con AND logico (tutte devono essere vere)
+- `or`: Combina più condizioni con OR logico (almeno una deve essere vera)
+
+#### Esempio di condizione complessa
+```typescript
+{
+  type: 'and',
+  conditions: [
+    { type: 'timeWindow', startHour: 9, endHour: 17 }, // Durante l'orario di ufficio
+    { type: 'or', conditions: [
+      { type: 'providerLatency', providerId: 'openai', threshold: 500 }, // E OpenAI è lento
+      { type: 'providerFailed', providerId: 'openai' }                  // OPPURE ha fallito recentemente
+    ]}
+  ]
+}
+```
+
+### Utilizzo pratico del fallback manager
+
+// ... existing code ... 

@@ -155,7 +155,7 @@ export class JarvisProvider {
         };
         // Set the HTML content
         let htmlContent = "";
-        if (process.env.NODE_ENV === "development" && process.env.WEBVIEW_URL) {
+        if (process.env['NODE_ENV'] === "development" && process.env['WEBVIEW_URL']) {
             htmlContent = await this.getHMRHtmlContent(webviewView.webview);
         }
         else {
@@ -273,7 +273,7 @@ export class JarvisProvider {
     }
     async getHMRHtmlContent(webview) {
         // Generate HTML for development with Hot Module Replacement
-        const scriptUri = process.env.WEBVIEW_URL;
+        const scriptUri = process.env['WEBVIEW_URL'];
         const nonce = getNonce();
         // Get VSCode theme
         const theme = getTheme();

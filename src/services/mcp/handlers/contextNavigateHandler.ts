@@ -1,9 +1,9 @@
-import type { ContextItem, getMemoryContexts } from "../../memory/context.js.js";
+import type { ContextItem, getMemoryContexts } from "../../memory/context.js";
 import { readFile } from "fs/promises";
 import path from "path";
-import type { findSemanticPath } from '../core/navigation/semantic.js.js';
-import type { findExploratoryPath } from '../core/navigation/exploratory.js.js';
-import type { NavigationOptions } from '../utils/navigationGraph.js.js';
+import type { findSemanticPath } from '../core/navigation/semantic.js';
+import type { findExploratoryPath } from '../core/navigation/exploratory.js';
+import type { NavigationOptions } from '../utils/navigationGraph.js';
 
 interface ContextLink {
   id: string;

@@ -3,20 +3,20 @@
  * Permette di ottenere un'istanza di provider configurata in base al nome
  */
 
-import { BaseLLMProvider } from './BaseLLMProvider.js.js';
+import { BaseLLMProvider } from './BaseLLMProvider.js';
 
 // Provider locali
-import { OllamaProvider } from './local/OllamaProvider.js.js';
-import { LMStudioProvider } from './local/LMStudioProvider.js.js';
-import type { GGUFProvider, GGUFConfig } from './local/GGUFProvider.js.js';
-import { LMDeployProvider } from './local/LMDeployProvider.js.js';
+import { OllamaProvider } from './local/OllamaProvider.js';
+import { LMStudioProvider } from './local/LMStudioProvider.js';
+import type { GGUFProvider, GGUFConfig } from './local/GGUFProvider.js';
+import { LMDeployProvider } from './local/LMDeployProvider.js';
 
 // Provider remoti
-import { OpenAIProvider } from './remote/OpenAIProvider.js.js';
-import { AnthropicProvider } from './remote/AnthropicProvider.js.js';
-import { MistralProvider } from './remote/MistralProvider.js.js';
-import { GroqProvider } from './remote/GroqProvider.js.js';
-import { GoogleAIProvider } from './remote/GoogleAIProvider.js.js';
+import { OpenAIProvider } from './remote/OpenAIProvider.js';
+import { AnthropicProvider } from './remote/AnthropicProvider.js';
+import { MistralProvider } from './remote/MistralProvider.js';
+import { GroqProvider } from './remote/GroqProvider.js';
+import { GoogleAIProvider } from './remote/GoogleAIProvider.js';
 
 // Costanti per i nomi dei provider
 export const PROVIDER_NAMES = {

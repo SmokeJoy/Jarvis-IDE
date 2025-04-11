@@ -3,7 +3,7 @@
  * @description File di compatibilità che re-esporta i tipi API dal file src/shared/types/api.types.ts
  */
 
-import type { ConfigModelInfo } from './models.js.js';
+import type { ConfigModelInfo } from './models.js';
 
 // Ri-esporta tutti i tipi dal file src/shared/types/api.types.ts
 export type {
@@ -24,7 +24,7 @@ export type {
   LLMProvider,
   ChatCompletionContentPartText,
   ChatCompletionContentPartImage
-} from '../shared/types/api.types.js.js';
+} from '../shared/types/api.types.js';
 
 export type LLMProvider = 'openai' | 'anthropic' | 'openrouter' | 'together' | 'ollama';
 

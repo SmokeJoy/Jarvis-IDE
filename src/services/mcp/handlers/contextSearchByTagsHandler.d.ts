@@ -1,4 +1,4 @@
-import type { McpToolHandler } from "../../../shared/types/mcp.types.js.js";
+import type { McpToolHandler } from "../../../shared/types/mcp.types.js";
 /**
  * Cerca contesti che corrispondono ai tag specificati
  */

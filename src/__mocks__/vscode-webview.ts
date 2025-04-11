@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+
 export default {
   WebviewApi: class {
     postMessage = vi.fn();

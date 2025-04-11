@@ -1,5 +1,8 @@
 # Jarvis IDE
 
+![Test CI](https://github.com/jarvis-ide/jarvis-ide/actions/workflows/test.yml/badge.svg)
+[![codecov](https://codecov.io/gh/jarvis-ide/jarvis-ide/branch/main/graph/badge.svg)](https://codecov.io/gh/jarvis-ide/jarvis-ide)
+
 Assistente AI per sviluppatori con supporto import/export sessioni.
 
 ## Caratteristiche principali

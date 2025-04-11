@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import type { useExtensionState } from '../context/ExtensionStateContext.js.js';
-import type { ConfigModelInfo } from '../types/models.js.js';
+import type { useExtensionState } from '../context/ExtensionStateContext.js';
+import type { ConfigModelInfo } from '../types/models.js';
 
 export const useConfigModel = () => {
   const { state, setApiConfiguration } = useExtensionState();

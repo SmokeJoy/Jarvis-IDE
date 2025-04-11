@@ -11,7 +11,7 @@ import type {
 	ContentType, 
 	isTextBlock, 
 	isImageBlock 
-} from '../../types/chat.types.js.js';
+} from '../../types/chat.types.js';
 import type { 
 	OpenAIOptions, 
 	ChatCompletionOptions, 
@@ -20,9 +20,9 @@ import type {
 	ChatCompletion, 
 	ChatCompletionContentPartText, 
 	ChatCompletionContentPartImage 
-} from '../../types/provider-types/openai-types.js.js';
-import type { BaseTransformer, TokenUsage, BaseRequestOptions, ContentUtils } from './BaseTransformer.js.js';
-import { logger } from "../../utils/logger.js.js";
+} from '../../types/provider-types/openai-types.js';
+import type { BaseTransformer, TokenUsage, BaseRequestOptions, ContentUtils } from './BaseTransformer.js';
+import { logger } from "../../utils/logger.js";
 
 /**
  * Transformer per convertire tra il formato ChatMessage standard e il formato OpenAI

@@ -3,8 +3,8 @@
  * Include messaggi, impostazioni e altri metadati
  */
 
-import type { ChatMessage } from './index.js.js';
-import type { ChatSettings } from './settings.types.js.js';
+import type { ChatMessage } from './index.js';
+import type { ChatSettings } from './settings.types.js';
 
 /**
  * Interfaccia per una sessione di chat completa

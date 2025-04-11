@@ -1,10 +1,10 @@
 /**
  * @deprecated Tutti i tipi sono stati spostati in 'src/services/mcp/mcp.types.ts'
- * Utilizzare direttamente `import { ... } from '../mcp.types.js.js'`
+ * Utilizzare direttamente `import { ... } from '../mcp.types.js'`
  */
 
 // Re-export per retrocompatibilità temporanea
-export * from '../mcp.types.js.js';
+export * from '../mcp.types.js';
 
 export interface ProjectSummaryArgs {
   depth?: number;

@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, afterEach } from "mocha"
 import { expect } from "chai"
-import { getShell } from "../utils/shell.js.js"
+import { getShell } from "../utils/shell.js"
 import * as vscode from "vscode"
 import { userInfo } from "os"
 
@@ -34,8 +34,8 @@ describe("Shell Detection Tests", () => {
 		originalUserInfo = userInfo
 
 		// Clear environment variables for a clean test
-		delete process.env.SHELL
-		delete process.env.COMSPEC
+		delete process.env['SHELL']
+		delete process.env['COMSPEC']
 
 		// Default userInfo() mock
 		;(userInfo as any) = () => ({ shell: null })
@@ -113,7 +113,7 @@ describe("Shell Detection Tests", () => {
 
 		it("respects an odd COMSPEC if no userInfo shell is available", () => {
 			vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any
-			process.env.COMSPEC = "D:\\CustomCmd\\cmd.exe"
+			process.env['COMSPEC'] = "D:\\CustomCmd\\cmd.exe"
 
 			expect(getShell()).to.equal("D:\\CustomCmd\\cmd.exe")
 		})
@@ -143,7 +143,7 @@ describe("Shell Detection Tests", () => {
 
 		it("falls back to SHELL env var if no userInfo shell is found", () => {
 			vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any
-			process.env.SHELL = "/usr/local/bin/zsh"
+			process.env['SHELL'] = "/usr/local/bin/zsh"
 
 			expect(getShell()).to.equal("/usr/local/bin/zsh")
 		})
@@ -179,7 +179,7 @@ describe("Shell Detection Tests", () => {
 
 		it("falls back to SHELL env var if no userInfo shell is found", () => {
 			vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any
-			process.env.SHELL = "/usr/bin/fish"
+			process.env['SHELL'] = "/usr/bin/fish"
 
 			expect(getShell()).to.equal("/usr/bin/fish")
 		})
@@ -218,7 +218,7 @@ describe("Shell Detection Tests", () => {
 			;(userInfo as any) = () => {
 				throw new Error("userInfo error")
 			}
-			process.env.SHELL = "/bin/zsh"
+			process.env['SHELL'] = "/bin/zsh"
 
 			expect(getShell()).to.equal("/bin/zsh")
 		})
@@ -232,7 +232,7 @@ describe("Shell Detection Tests", () => {
 				throw new Error("userInfo error")
 			}
 			// No SHELL in env
-			delete process.env.SHELL
+			delete process.env['SHELL']
 
 			expect(getShell()).to.equal("/bin/bash")
 		})

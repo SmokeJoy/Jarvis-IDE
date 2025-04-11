@@ -2,7 +2,7 @@
 // https://openrouter.ai/docs/api-reference/errors
 
 import type { ChatCompletionMessageParam } from "openai";
-import type { BedrockModelId, JarvisIdeModelId, OpenRouterModelId, QwenModelId } from "../../shared/api.js.js";
+import type { BedrockModelId, JarvisIdeModelId, OpenRouterModelId, QwenModelId } from "../../shared/api.js";
 
 export interface ApiHandler {
 	streamChat(messages: ChatCompletionMessageParam[]): AsyncIterator<string>;

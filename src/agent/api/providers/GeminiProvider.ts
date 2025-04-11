@@ -1,7 +1,7 @@
-import type { ApiProvider, StreamHandler } from '../ApiProvider.js.js';
-import type { ChatMessage } from '../../../types/ChatMessage.js.js';
-import { GeminiTransformer } from '../../../api/transform/gemini-format.js.js';
-import { logger } from '../../../utils/logger.js.js';
+import type { ApiProvider, StreamHandler } from '../ApiProvider.js';
+import type { ChatMessage } from '../../../types/ChatMessage.js';
+import { GeminiTransformer } from '../../../api/transform/gemini-format.js';
+import { logger } from '../../../utils/logger.js';
 
 /**
  * Provider per Google Gemini API

@@ -11,9 +11,9 @@ import {
   VSCodeBadge,
   VSCodeCheckbox
 } from '@vscode/webview-ui-toolkit/react';
-import type { useSettings } from '../webview-ui/providers/settingsProvider.js.js';
-import { PromptEditor } from './components/PromptEditor.js.js';
-import { SystemPromptEditor } from './components/SystemPromptEditor.js.js';
+import type { useSettings } from '../webview-ui/providers/settingsProvider.js';
+import { PromptEditor } from './components/PromptEditor.js';
+import { SystemPromptEditor } from './components/SystemPromptEditor.js';
 
 // VSCode API
 declare const vscode: any;

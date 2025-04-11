@@ -1,7 +1,7 @@
-import type { findSemanticPath, findExploratoryPath } from './contextNavigateHandler.js.js';
-import type { ContextLink } from '../types.js.js';
-import type { getContextById } from '../../memory/context.js.js';
-import type { getContextLinks } from '../../memory/context_links.js.js';
+import { findSemanticPath, findExploratoryPath } from './contextNavigateHandler.js';
+import type { ContextLink } from '../types.js';
+import type { getContextById } from '../../memory/context.js';
+import type { getContextLinks } from '../../memory/context_links.js';
 
 // Mock dei contesti
 const mockContexts = {
@@ -176,6 +176,15 @@ describe('findExploratoryPath', () => {
     'ctx-4': { id: 'ctx-4', text: 'Contesto 4', tags: ['architettura', 'performance'] }
   };
 
+  // Definizione dell'interfaccia per i risultati degli archi (edge)
+  interface EdgeResult {
+    sourceId: string;
+    targetId: string;
+    relation: string;
+    strength?: number;
+    confidence?: number;
+  }
+
   const mockLinks = [
     {
       id: 'link-1',
@@ -236,9 +245,9 @@ describe('findExploratoryPath', () => {
     const result = await findExploratoryPath('ctx-1', {}, true, true, 'tree');
     
     expect(result.success).toBe(true);
-    expect(result.path?.edges.every(edge => 
+    expect(result.path?.edges.every((edge: EdgeResult) => 
       edge.sourceId === 'ctx-1' || 
-      result.path?.edges.some(e => e.targetId === edge.sourceId)
+      result.path?.edges.some((e: Pick<EdgeResult, 'targetId'>) => e.targetId === edge.sourceId)
     )).toBe(true);
   });
 
@@ -273,7 +282,7 @@ describe('findExploratoryPath', () => {
     });
     
     expect(result.success).toBe(true);
-    expect(result.path?.edges.every(edge => 
+    expect(result.path?.edges.every((edge: EdgeResult) => 
       edge.strength! >= 0.7 && edge.confidence! >= 0.8
     )).toBe(true);
   });

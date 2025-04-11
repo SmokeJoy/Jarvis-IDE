@@ -6,7 +6,7 @@ import * as cheerio from "cheerio"
 import TurndownService from "turndown"
 // @ts-ignore
 import PCR from "puppeteer-chromium-resolver"
-import type { fileExistsAtPath } from "../../utils/fs.js.js"
+import type { fileExistsAtPath } from "../../utils/fs.js"
 
 interface PCRStats {
 	puppeteer: { launch: typeof launch }

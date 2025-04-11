@@ -18,7 +18,7 @@ import {
   processFile,
   DEFAULT_EXTENSIONS,
   DEFAULT_EXCLUDED_DIRS
-} from '../fix-imports.js.js';
+} from '../fix-imports.js';
 
 describe('fix-imports.ts', () => {
   beforeEach(() => {
@@ -165,17 +165,17 @@ describe('fix-imports.ts', () => {
 
     test('dovrebbe correggere correttamente vari pattern di import', async () => {
       const content = `
-        import { foo } from '../utils/foo.js.js';
-        import type { Bar } from './types.js.js';
-        import default from '../components/default.js.js';
-        import * as helpers from '../helpers.js.js';
+        import { foo } from '../utils/foo.js';
+        import type { Bar } from './types.js';
+        import default from '../components/default.js';
+        import * as helpers from '../helpers.js';
       `;
       
       const expected = `
-        import { foo } from '../utils/foo.js.js';
-        import type { Bar } from './types.js.js';
-        import default from '../components/default.js.js';
-        import * as helpers from '../helpers.js.js';
+        import { foo } from '../utils/foo.js';
+        import type { Bar } from './types.js';
+        import default from '../components/default.js';
+        import * as helpers from '../helpers.js';
       `;
       
       (fs.readFile as jest.Mock).mockResolvedValue(content);
@@ -201,18 +201,18 @@ describe('fix-imports.ts', () => {
     
     test('dovrebbe gestire correttamente i commenti', async () => {
       const content = `
-        // import { foo } from '../utils/foo.js.js';
-        import { bar } from '../utils/bar.js.js';
+        // import { foo } from '../utils/foo.js';
+        import { bar } from '../utils/bar.js';
         /* 
-        import { baz } from '../utils/baz.js.js';
+        import { baz } from '../utils/baz.js';
         */
       `;
       
       const expected = `
-        // import { foo } from '../utils/foo.js.js';
-        import { bar } from '../utils/bar.js.js';
+        // import { foo } from '../utils/foo.js';
+        import { bar } from '../utils/bar.js';
         /* 
-        import { baz } from '../utils/baz.js.js';
+        import { baz } from '../utils/baz.js';
         */
       `;
       

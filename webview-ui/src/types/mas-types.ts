@@ -15,6 +15,7 @@ export interface AgentStatus {
   name: string;
   mode: AgentMode;
   isActive: boolean;
+  enabled: boolean;
   currentTask?: string;
   lastActivity?: Date | string;
   dependencies: string[];

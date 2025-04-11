@@ -1,7 +1,7 @@
-import type { ApiProvider, StreamHandler } from '../ApiProvider.js.js';
-import type { ChatMessage } from '../../../types/ChatMessage.js.js';
-import { MistralTransformer } from '../../../api/transform/mistral-format.js.js';
-import { logger } from '../../../utils/logger.js.js';
+import type { ApiProvider, StreamHandler } from '../ApiProvider.js';
+import type { ChatMessage } from '../../../types/ChatMessage.js';
+import { MistralTransformer } from '../../../api/transform/mistral-format.js';
+import { logger } from '../../../utils/logger.js';
 
 /**
  * Provider per Mistral AI API

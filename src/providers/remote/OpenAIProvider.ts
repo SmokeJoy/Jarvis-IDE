@@ -3,7 +3,7 @@
  * https://platform.openai.com/docs/api-reference
  */
 
-import type { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js.js';
+import type { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js';
 
 interface OpenAIChatCompletionRequest {
   model: string;

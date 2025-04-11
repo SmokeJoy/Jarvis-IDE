@@ -1,6 +1,6 @@
-import type { CoderAgent as ICoderAgent, CoderInstruction, AgentMessage } from './AgentTypes.js.js';
+import type { CoderAgent as ICoderAgent, CoderInstruction, AgentMessage } from './AgentTypes.js';
 import type { EventEmitter } from 'events';
-import { Logger } from '../../utils/logger.js.js';
+import { Logger } from '../../utils/logger.js';
 
 /**
  * Implementazione del CoderAgent che opera solo sotto le istruzioni del SupervisorAgent

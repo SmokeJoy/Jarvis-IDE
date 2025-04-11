@@ -1,0 +1,11 @@
+{
+  "theme": "dark",
+  "fontSize": 14,
+  "enableSpellCheck": true,
+  "messageHistory": 50,
+  "autoSave": true,
+  "notifications": {
+    "sound": true,
+    "desktop": true
+  }
+} 

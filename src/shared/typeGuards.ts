@@ -2,8 +2,8 @@
  * Utilità per la validazione e il casting di tipi sicuro
  */
 
-import type { WebviewMessage } from './WebviewMessage.js.js';
-import type { ExtensionMessage } from './ExtensionMessage.js.js';
+import type { WebviewMessage } from './WebviewMessage.js';
+import type { ExtensionMessage } from './ExtensionMessage.js';
 
 /**
  * Verifica se un oggetto è un messaggio WebView valido

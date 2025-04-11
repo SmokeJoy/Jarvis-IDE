@@ -159,7 +159,7 @@ function getShellFromUserInfo(): string | null {
 
 /** Returns the environment-based shell variable, or null if not set. */
 function getShellFromEnv(): string | null {
-	const env = process.env
+	const env: NodeJS.ProcessEnv = process.env
 
 	if (process.platform === "win32") {
 		// On Windows, COMSPEC typically holds cmd.exe
@@ -173,6 +173,13 @@ function getShellFromEnv(): string | null {
 
 	if (process.platform === "linux") {
 		// On Linux, SHELL is commonly the environment variable
+		if (env['SHELL']) {
+		  return env['SHELL'];
+		}
+		
+		if (env['COMSPEC']) {
+		  return env['COMSPEC'];
+		}
 		return env['SHELL'] || "/bin/bash"
 	}
 	return null

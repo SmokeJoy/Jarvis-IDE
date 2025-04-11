@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Switch } from '../components/ui/switch.js.js';
-import { Textarea } from '../components/ui/textarea.js.js';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select.js.js';
-import { getVsCodeApi } from '../vscode.js.js';
-import type { WebviewMessage } from '../../shared/WebviewMessage.js.js';
-import { SystemPromptEditor } from '../components/SystemPromptEditor.js.js';
+import { Switch } from '../components/ui/switch.js';
+import { Textarea } from '../components/ui/textarea.js';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select.js';
+import { getVsCodeApi } from '../vscode.js';
+import type { WebviewMessage } from '../../shared/WebviewMessage.js';
+import { SystemPromptEditor } from '../components/SystemPromptEditor.js';
 
 const vscode = getVsCodeApi();
 

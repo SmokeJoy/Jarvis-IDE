@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import type { getStoragePath } from '../StoragePath.js.js';
-import { BenchmarkSession, BenchmarkSessionDetail, ProviderStats, TimelineStats } from '../../shared/WebviewMessage.js.js';
+import type { getStoragePath } from '../StoragePath.js';
+import { BenchmarkSession, BenchmarkSessionDetail, ProviderStats, TimelineStats } from '../../shared/WebviewMessage.js';
 
 /**
  * Classe per la gestione dello storage dei dati di benchmark
@@ -94,7 +94,7 @@ export class BenchmarkStorage {
           duration: session.duration,
           testCount: session.results.length,
         };
-      }).sort((a, b) => b.timestamp - a.timestamp); // Ordina dal più recente
+      }).sort((a: BenchmarkSession, b: BenchmarkSession) => b.timestamp - a.timestamp); // Ordina dal più recente
     } catch (error) {
       console.error('Errore durante la lettura delle sessioni di benchmark:', error);
       return [];
@@ -158,7 +158,11 @@ export class BenchmarkStorage {
       }
 
       const fileName = `benchmark_${session.provider}_${new Date(session.timestamp).toISOString().split('T')[0]}.json`;
-      const filePath = exportPath || path.join(process.env.HOME || process.env.USERPROFILE || '', 'Downloads', fileName);
+      const filePath = exportPath || path.join(
+        process.env['HOME'] || process.env['USERPROFILE'] || '', 
+        'Downloads', 
+        fileName
+      );
       
       fs.writeFileSync(filePath, JSON.stringify(session, null, 2));
       return filePath;
@@ -284,7 +288,7 @@ export class BenchmarkStorage {
       }
       
       // Ordina per data
-      return timeline.sort((a, b) => a.date - b.date);
+      return timeline.sort((a: TimelineStats, b: TimelineStats) => a.date - b.date);
     } catch (error) {
       console.error(`Errore durante il calcolo della timeline per il provider ${provider}:`, error);
       return [];

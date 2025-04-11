@@ -1,10 +1,10 @@
-import type { DeepSeekHandler } from "./deepseek.js.js"
-import { createMockStream } from "../transform/stream.js.js"
+import type { DeepSeekHandler } from "./deepseek.js"
+import { createMockStream } from "../transform/stream.js"
 import { expect } from "chai"
 import { describe, it } from "mocha"
-import type { ApiHandlerOptions } from "../../shared/types/api.types.js.js"
-import { ApiStreamChunk } from "../transform/stream.js.js"
-import type { DeepSeekModelId } from "../../shared/api.js.js"
+import type { ApiHandlerOptions } from "../../shared/types/api.types.js"
+import { ApiStreamChunk } from "../transform/stream.js"
+import type { DeepSeekModelId } from "../../shared/api.js"
 import { Anthropic } from "@anthropic-ai/sdk"
 
 // Creiamo una versione più semplice della classe di test che evita tipi specifici di OpenAI

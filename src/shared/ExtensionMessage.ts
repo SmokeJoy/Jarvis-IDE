@@ -12,7 +12,7 @@ import type {
 	InvokeType,
 	Message,
 	BaseMessage,
-} from './types/webview.types.js.js';
+} from './types/webview.types.js';
 
 // Importa l'implementazione delle funzioni
 import type {
@@ -20,10 +20,10 @@ import type {
 	isWebviewMessage,
 	convertToWebviewMessage,
 	castAs
-} from './types/webview.types.js.js';
+} from './types/webview.types.js';
 
 // Importa ExtensionState da provider.types.ts per evitare import circolari
-import type { ExtensionState } from './types/provider.types.js.js';
+import type { ExtensionState } from './types/provider.types.js';
 
 // Ri-esporta le interfacce principali per retrocompatibilità
 export type { WebviewMessage };
@@ -39,17 +39,17 @@ export const DEFAULT_PLATFORM = "unknown";
 export type Platform = "aix" | "darwin" | "freebsd" | "linux" | "openbsd" | "sunos" | "win32" | "unknown";
 
 // Importa i tipi necessari per RetroCompatibilità
-import type { GitCommit } from "../utils/git.js.js";
-import type { ApiConfiguration, OpenAiCompatibleModelInfo, ModelInfo } from "./types/api.types.js.js";
-import type { AutoApprovalSettings } from "./AutoApprovalSettings.js.js";
-import type { BrowserSettings } from "./BrowserSettings.js.js";
-import type { ChatSettings } from "./ChatSettings.js.js";
-import type { HistoryItem } from "./HistoryItem.js.js";
-import type { McpServer, McpMarketplaceCatalog, McpMarketplaceItem, McpDownloadResponse } from "./mcp.js.js";
-import type { TelemetrySetting } from "./types.js.js";
-import type { BalanceResponse, UsageTransaction, PaymentTransaction } from "./JarvisAccount.js.js";
-import type { ChatMessage } from "./types.js.js";
-import type { LogLevel } from "../utils/logger.js.js";
+import type { GitCommit } from "../utils/git.js";
+import type { ApiConfiguration, OpenAiCompatibleModelInfo, ModelInfo } from "./types/api.types.js";
+import type { AutoApprovalSettings } from "./AutoApprovalSettings.js";
+import type { BrowserSettings } from "./BrowserSettings.js";
+import type { ChatSettings } from "./ChatSettings.js";
+import type { HistoryItem } from "./HistoryItem.js";
+import type { McpServer, McpMarketplaceCatalog, McpMarketplaceItem, McpDownloadResponse } from "./mcp.js";
+import type { TelemetrySetting } from "./types.js";
+import type { BalanceResponse, UsageTransaction, PaymentTransaction } from "./JarvisAccount.js";
+import type { ChatMessage } from "./types.js";
+import type { LogLevel } from "../utils/logger.js";
 
 /**
  * Import da webview.types.ts che sostituisce questa definizione

@@ -1,8 +1,8 @@
 // src/services/mcp/handlers/askDocsHandler.ts
-import type * as vscode from "vscode";
+import * as vscode from "vscode";
 import * as fs from "fs/promises";
 import * as path from "path";
-import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js.js";
+import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
 
 // Mock di vscode per ambienti non-VS Code
 const mockVscode = {

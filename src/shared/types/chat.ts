@@ -1,4 +1,4 @@
-import type { BaseMessage, ChatMessage } from "./message.js.js"
+import type { BaseMessage, ChatMessage } from "./message.js"
 
 export type { BaseMessage, ChatMessage }
 

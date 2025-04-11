@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { MasManager } from './MasManager.js.js';
-import { TaskQueueService } from './services/TaskQueueService.js.js';
-import { MasPersistenceService } from './services/MasPersistenceService.js.js';
-import { Logger } from '../utils/logger.js.js';
+import { MasManager } from './MasManager.js';
+import { TaskQueueService } from './services/TaskQueueService.js';
+import { MasPersistenceService } from './services/MasPersistenceService.js';
+import { Logger } from '../utils/logger.js';
 
 /**
  * Registra i comandi VS Code per il sistema MAS

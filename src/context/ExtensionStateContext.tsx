@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useReducer } from 'react';
-import type { ExtensionStateContextType, ExtensionStateProviderProps } from './types.js.js';
-import type { ExtensionState } from '../types/extension.js.js';
-import type { ApiConfiguration } from '../types/api.types.js.js';
-import type { ConfigModelInfo } from '../types/models.js.js';
+import type { ExtensionStateContextType, ExtensionStateProviderProps } from './types.js';
+import type { ExtensionState } from '../types/extension.js';
+import type { ApiConfiguration } from '../types/api.types.js';
+import type { ConfigModelInfo } from '../types/models.js';
 
 const ExtensionStateContext = createContext<ExtensionStateContextType | null>(null);
 

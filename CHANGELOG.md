@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.0.0-mas] - 2025-04-10
+
+### Aggiunto
+- **Multi-Agent System (MAS)**: Implementazione del fondamentale sistema multi-agente che forma la base della prossima generazione di Jarvis IDE
+- **Command Center**: Nuovo componente centrale per la gestione e il coordinamento degli agenti AI
+- **Heartbeat Protocol**: Sistema di monitoraggio dello stato degli agenti in tempo reale
+- **Documentazione MAS**: Notebook e documentazione completa dell'architettura MAS
+- **Diario di sviluppo**: Creato diario di sviluppo per il monitoraggio delle attività di AI1
+
+### Modificato
+- Ristrutturazione dell'architettura per supportare il sistema multi-agente
+- Migrazione completa da Jest a Vitest per tutti i test
+
+### Rimosso
+- File di test legacy basati su Jest
+- Componenti obsoleti non compatibili con la nuova architettura MAS
+
+### Sicurezza
+- Implementato sistema di autenticazione delle comunicazioni tra agenti
+
 ## [3.8.5]
 
 - Add multi-profile support for system prompts with UI for creating, editing and switching between profiles
@@ -503,3 +523,19 @@
 ## [0.0.6]
 
 -   Initial release
+
+## 2025-04-10
+
+### [M5] Verifica MAS Type-Safe
+- ✅ Completata verifica pattern Union Dispatcher Type-Safe sui componenti `AgentPanel.tsx` e `PromptEditor.tsx`
+- 🧩 Nessuna modifica richiesta al codice: già conforme agli standard
+- 📚 Aggiornata documentazione tecnica e logbook
+- 🖼️ Introdotto badge "MAS Type-Safe Verified"
+
+## 2025-04-05
+
+### [M4] Completamento Refactoring Frontend Type-Safe
+- 🔄 Refactoring di `useExtensionMessage.ts` per implementare il pattern Union Dispatcher
+- 🔄 Aggiornamento di `PromptEditor.tsx` con supporto type-safe
+- 📚 Creazione documentazione per la type safety frontend
+- ✅ Raggiunta copertura test >90%

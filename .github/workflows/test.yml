@@ -1,62 +1,222 @@
-name: Tests
+name: Test Suite
 
 on:
-    workflow_dispatch:
-    pull_request:
-        branches:
-            - main
-    workflow_call:
-
-# Set default permissions for all jobs
-permissions:
-    contents: read # Needed to check out code
-    checks: write # Needed to report test results
-    pull-requests: write # Needed to add comments/annotations to PRs
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  # Permette l'esecuzione manuale del workflow
+  workflow_dispatch:
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+  test:
+    name: Test & Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 15  # Imposto un timeout per evitare job bloccati
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2  # Per il calcolo accurato dei diff di coverage
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+      
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
-            - name: Setup Node.js environment
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 20.15.1
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
+      - name: Install dependencies
+        run: pnpm install
+      
+      - name: TypeScript check
+        run: pnpm tsc --noEmit
+        
+      - name: Run ESLint
+        run: pnpm eslint . --ext .ts,.tsx
+        
+      - name: Run Vitest (main project)
+        id: vitest-main
+        run: pnpm vitest run --coverage
+        continue-on-error: true  # Continua per raccogliere sempre il coverage
+        
+      - name: Run Vitest (webview-ui)
+        id: vitest-webview
+        run: cd webview-ui && pnpm vitest run --coverage
+        continue-on-error: true  # Continua per raccogliere sempre il coverage
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/lcov.info,./webview-ui/coverage/lcov.info
+          flags: unittests
+          name: codecov-jarvis-ide
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+          verbose: true  # Output dettagliato per il debug
+      
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: |
+            coverage/
+            webview-ui/coverage/
+          retention-days: 14  # Mantiene i report per 14 giorni
+      
+      - name: Check test results
+        run: |
+          if [ "${{ steps.vitest-main.outcome }}" == "failure" ] || [ "${{ steps.vitest-webview.outcome }}" == "failure" ]; then
+            echo "::error::Tests failed"
+            exit 1
+          fi
+      
+      - name: Generate coverage summary
+        id: coverage
+        run: |
+          echo "### Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Main project
+          MAIN_COVERAGE=$(cat coverage/coverage-summary.json | jq -r '.total.lines.pct')
+          echo "- Main project: ${MAIN_COVERAGE}%" >> $GITHUB_STEP_SUMMARY
+          
+          # Webview-UI
+          WEBVIEW_COVERAGE=$(cat webview-ui/coverage/coverage-summary.json | jq -r '.total.lines.pct')
+          echo "- Webview-UI: ${WEBVIEW_COVERAGE}%" >> $GITHUB_STEP_SUMMARY
+          
+          # Calcolo media
+          AVG_COVERAGE=$(echo "scale=2; ($MAIN_COVERAGE + $WEBVIEW_COVERAGE) / 2" | bc)
+          echo "- **Average: ${AVG_COVERAGE}%**" >> $GITHUB_STEP_SUMMARY
+          
+          echo "coverage=${AVG_COVERAGE}" >> $GITHUB_OUTPUT
+      
+      - name: Notify Slack on failure
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          author_name: "Jarvis IDE CI"
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+          mention: here
+          if_mention: always
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          
+  build:
+    name: Build VSIX Package
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10  # Imposto un timeout per evitare job bloccati
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+      
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
-            # Cache root dependencies - only reuse if package-lock.json exactly matches
-            - name: Cache root dependencies
-              uses: actions/cache@v4
-              id: root-cache
-              with:
-                  path: node_modules
-                  key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
-
-            # Cache webview-ui dependencies - only reuse if package-lock.json exactly matches
-            - name: Cache webview-ui dependencies
-              uses: actions/cache@v4
-              id: webview-cache
-              with:
-                  path: webview-ui/node_modules
-                  key: ${{ runner.os }}-npm-webview-${{ hashFiles('webview-ui/package-lock.json') }}
-
-            - name: Install root dependencies
-              if: steps.root-cache.outputs.cache-hit != 'true'
-              run: npm ci
-
-            - name: Install webview-ui dependencies
-              if: steps.webview-cache.outputs.cache-hit != 'true'
-              run: cd webview-ui && npm ci
-
-            - name: Type Check
-              run: npm run check-types
-
-            - name: ESLint Check
-              run: npm run lint
-
-            - name: Prettier / Format Check
-              run: npm run format
-
-            - name: Extension Tests
-              run: xvfb-run -a npm run test
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
+      - name: Install dependencies
+        run: pnpm install
+      
+      - name: Install vsce
+        run: pnpm install -g @vscode/vsce
+        
+      - name: Build package
+        run: node scripts/finalize-vsix.ts
+        
+      - name: Upload VSIX package
+        uses: actions/upload-artifact@v3
+        with:
+          name: vsix-package
+          path: "*.vsix"
+          retention-days: 30  # Mantiene i pacchetti per 30 giorni
+      
+      - name: Notify Slack on success
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          author_name: "Jarvis IDE CI"
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+          text: |
+            :rocket: *New VSIX package built successfully!*
+            Available as a download in GitHub Actions artifacts
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          
+  release:
+    name: Auto-release
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5  # Imposto un timeout per evitare job bloccati
+    
+    steps:
+      - name: Download VSIX package
+        uses: actions/download-artifact@v3
+        with:
+          name: vsix-package
+          
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./jarvis-ide-${{ github.ref_name }}.vsix
+          asset_name: jarvis-ide-${{ github.ref_name }}.vsix
+          asset_content_type: application/octet-stream

@@ -1,7 +1,7 @@
-import type { ApiProvider, StreamHandler } from '../ApiProvider.js.js';
-import type { ChatMessage } from '../../../types/ChatMessage.js.js';
-import { OllamaTransformer } from '../../../api/transform/ollama-format.js.js';
-import { logger } from '../../../utils/logger.js.js';
+import type { ApiProvider, StreamHandler } from '../ApiProvider.js';
+import type { ChatMessage } from '../../../types/ChatMessage.js';
+import { OllamaTransformer } from '../../../api/transform/ollama-format.js';
+import { logger } from '../../../utils/logger.js';
 
 type OllamaModel = {
   name: string;

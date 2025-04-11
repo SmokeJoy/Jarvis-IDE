@@ -1,14 +1,14 @@
-import { OpenAIProvider } from './providers/OpenAIProvider.js.js';
-import { OllamaProvider } from './providers/OllamaProvider.js.js';
-import { TogetherProvider } from './providers/TogetherProvider.js.js';
-import type { OpenRouterProvider } from './providers/OpenRouterProvider.js.js';
-import { VertexProvider } from './providers/VertexProvider.js.js';
-import { AnthropicProvider } from './providers/AnthropicProvider.js.js';
-import { GeminiProvider } from './providers/GeminiProvider.js.js';
-import { MistralProvider } from './providers/MistralProvider.js.js';
-import { LLMStudioProvider } from './providers/LLMStudioProvider.js.js';
-import { ApiProvider } from './ApiProvider.js.js';
-import { LLMProviderId } from '../../shared/types/api.types.js.js';
+import { OpenAIProvider } from './providers/OpenAIProvider.js';
+import { OllamaProvider } from './providers/OllamaProvider.js';
+import { TogetherProvider } from './providers/TogetherProvider.js';
+import type { OpenRouterProvider } from './providers/OpenRouterProvider.js';
+import { VertexProvider } from './providers/VertexProvider.js';
+import { AnthropicProvider } from './providers/AnthropicProvider.js';
+import { GeminiProvider } from './providers/GeminiProvider.js';
+import { MistralProvider } from './providers/MistralProvider.js';
+import { LLMStudioProvider } from './providers/LLMStudioProvider.js';
+import { ApiProvider } from './ApiProvider.js';
+import { LLMProviderId } from '../../shared/types/api.types.js';
 
 /**
  * Restituisce un'istanza del provider API appropriato in base all'ID

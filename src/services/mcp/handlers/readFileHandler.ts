@@ -1,7 +1,7 @@
 import * as fs from "fs/promises";
 import * as path from "path";
 import * as vscode from "vscode";
-import type { ReadFileArgs } from '../mcp.types.js.js';
+import type { ReadFileArgs } from '../mcp.types.js';
 
 // Mock di vscode per ambienti non-VS Code
 const mockVscode = {

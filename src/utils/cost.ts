@@ -1,4 +1,4 @@
-import type { ModelInfo } from "../shared/types/api.types.js.js"
+import type { ModelInfo } from "../shared/types/api.types.js"
 
 /**
  * Calcola il costo dell'API in base al modello e all'utilizzo dei token

@@ -2,9 +2,9 @@ import React, { useEffect, useState, useRef } from "react";
 import ReactMarkdown from 'react-markdown';
 import styled from "styled-components";
 import * as vscode from 'vscode-webview';
-import type { BaseMessage, MessageRole } from "../shared/types/message.js.js";
-import type { ApiConfiguration } from "../shared/types/global.js.js";
-import { McpView } from "./McpView.js.js";
+import type { BaseMessage, MessageRole } from "../shared/types/message.js";
+import type { ApiConfiguration } from "../shared/types/global.js";
+import { McpView } from "./McpView.js";
 
 const Container = styled.div`
   display: flex;

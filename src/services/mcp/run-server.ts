@@ -5,12 +5,19 @@
  * Questo script avvia il server MCP con gestione degli errori e supporto per graceful shutdown.
  */
 
-import { startMcpServer } from './toolsListServer.js.js';
+import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import { McpToolsServer } from './McpToolsServer.js';
+import type { WebviewMessage } from '../../shared/types/webview.types.js';
+import { startMcpServer } from './toolsListServer.js';
 
-// Controlla se la porta è stata specificata come argomento
-const PORT = process.env.MCP_SERVER_PORT 
-  ? parseInt(process.env.MCP_SERVER_PORT) 
-  : (process.argv[2] ? parseInt(process.argv[2]) : 3030);
+// Configurazione del server
+const app = express();
+const server = new McpToolsServer();
+const PORT = process.env['MCP_SERVER_PORT']
+  ? parseInt(process.env['MCP_SERVER_PORT'])
+  : 3001;
 
 console.log('=== MCP Server ===');
 console.log(`Avvio del server sulla porta ${PORT}`);

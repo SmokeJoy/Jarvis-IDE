@@ -1,7 +1,7 @@
 import React from "react";
 import { describe, expect, test, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { McpView } from "./McpView.js.js";
+import { McpView } from "./McpView.js";
 
 // Mock styled-components
 vi.mock('styled-components', () => {
@@ -32,7 +32,7 @@ vi.mock('styled-components', () => {
 
 // Mock react-syntax-highlighter
 vi.mock("react-syntax-highlighter", () => ({
-  Light: ({ children, style, customStyle, ...props }) => (
+  Light: ({ children, style, customStyle, ...props }: { children: React.ReactNode; style?: React.CSSProperties; customStyle?: string; [key: string]: any }) => (
     <pre data-testid="code-content" style={{ ...style, ...customStyle }} {...props}>
       {children}
     </pre>

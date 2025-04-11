@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import type { HandlerFunction } from '../types.js.js';
+import type { HandlerFunction } from '../types.js';
 import { readFile } from 'fs/promises';
 import { extname } from 'path';
 

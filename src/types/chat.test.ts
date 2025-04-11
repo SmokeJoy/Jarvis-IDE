@@ -6,7 +6,7 @@ import type {
   ChatResponse,
   StreamResponse,
   ErrorResponse,
-} from "./chat.js.js";
+} from "./chat.js";
 
 describe("Chat Types", () => {
   test("Message should have correct structure", () => {

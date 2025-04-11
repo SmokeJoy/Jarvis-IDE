@@ -34,6 +34,10 @@ import type { ChatMessage } from './shared/types/chat.types.js'
 import type { WebviewMessage, WebviewMessageType, ExtensionMessage } from './shared/types/webview.types.js'
 import type { JarvisSettings } from './types/settings.types.js'
 
+// Aggiungi l'importazione del Command Center e degli agenti
+import { commandCenter } from './core/command-center';
+import { initializeAgents, terminateAgents } from './core/mas/agents';
+
 // Definizione della modalità sviluppo
 const isDevelopmentMode = process.env['NODE_ENV'] === 'development';
 
@@ -1190,7 +1194,7 @@ ${fileContent}
 	);
 
 	// Inizializza il sistema MAS
-	initializeMasSystem(context);
+	initializeMAS(context);
 
 	return createJarvisAPI(outputChannel, provider)
 }
@@ -1199,6 +1203,9 @@ ${fileContent}
 export function deactivate() {
 	telemetryService?.shutdown()
 	Logger.log("Jarvis IDE extension deactivated")
+	
+	// Termina il sistema MAS
+	terminateAgents();
 }
 
 // TODO: Find a solution for automatically removing DEV related content from production builds.
@@ -1224,28 +1231,65 @@ if (IS_DEV && IS_DEV !== "false") {
  * Inizializza il sistema Multi-Agent
  * @param context Contesto dell'estensione VS Code
  */
-function initializeMasSystem(context: vscode.ExtensionContext): void {
-	// Inizializza il MAS Manager
-	const masManager = new MasManager(context);
+function initializeMAS(context: vscode.ExtensionContext) {
+	// Inizializza gli agenti
+	initializeAgents();
 	
-	// Inizializza il TaskQueueMessageHandler passando il MasManager
-	const webviewManager = WebviewManager.getInstance(context, masManager);
+	// Registra i comandi relativi al MAS
+	registerMASCommands(context);
 	
-	// Registra i comandi MAS
-	registerMasCommands(context, masManager);
-	
-	// Registra il comando per aprire il pannello di controllo MAS
+	console.log('Jarvis MAS system initialized');
+}
+
+/**
+ * Registra i comandi relativi al MAS
+ */
+function registerMASCommands(context: vscode.ExtensionContext) {
+	// Comando per ottenere lo stato del sistema MAS
 	context.subscriptions.push(
-		vscode.commands.registerCommand('jarvis-ide.openMasControlPanel', () => {
-			webviewManager.createOrShowWebview();
+		vscode.commands.registerCommand('jarvis.mas.status', () => {
+			const status = commandCenter.getSystemStatus();
+			vscode.window.showInformationMessage(`MAS Status: ${JSON.stringify(status)}`);
 		})
 	);
 	
-	// Avvia il sistema MAS
-	masManager.start();
-	
-	// Log dell'inizializzazione
-	logger.info('Sistema MAS inizializzato');
+	// Comando per creare un nuovo task
+	context.subscriptions.push(
+		vscode.commands.registerCommand('jarvis.mas.createTask', async () => {
+			const title = await vscode.window.showInputBox({
+				placeHolder: 'Titolo del task',
+				prompt: 'Inserisci un titolo per il nuovo task'
+			});
+			
+			if (!title) {
+				return;
+			}
+			
+			const description = await vscode.window.showInputBox({
+				placeHolder: 'Descrizione del task',
+				prompt: 'Inserisci una descrizione per il nuovo task'
+			});
+			
+			if (!description) {
+				return;
+			}
+			
+			// Invia il comando al Command Center
+			commandCenter.sendCommand({
+				type: 'create-task',
+				payload: {
+					title,
+					description,
+					requestId: `ui-request-${Date.now()}`
+				},
+				source: 'vscode-ui',
+				target: '',  // Il Command Center saprà a quale agente inoltrare il comando
+				priority: 1
+			});
+			
+			vscode.window.showInformationMessage(`Task "${title}" creato con successo`);
+		})
+	);
 }
 
 /**

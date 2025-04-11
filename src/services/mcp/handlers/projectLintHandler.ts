@@ -2,8 +2,8 @@ import * as path from "path";
 import * as fs from "fs/promises";
 import { exec } from "child_process";
 import { promisify } from "util";
-import type * as vscode from "vscode";
-import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js.js";
+import * as vscode from "vscode";
+import type { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
 
 // Supportiamo ESLint per TypeScript/JavaScript
 let ESLint: any;
@@ -25,7 +25,7 @@ const mockVscode = {
 const vscodeMod = typeof vscode !== 'undefined' ? vscode : mockVscode;
 
 // Rileva linguaggio dal file
-function detectLanguageFromPath(filePath: string): string | null {
+function detectLanguageFromPath(filePath: string): string {
   const ext = path.extname(filePath).toLowerCase();
   
   const languageMap: Record<string, string> = {
@@ -271,14 +271,15 @@ async function lintWithEslintCli(filePath: string, shouldFix: boolean): Promise<
 }
 
 // Mappa la severità di ESLint
-function mapEslintSeverity(eslintSeverity: number): string {
+function mapEslintSeverity(eslintSeverity: string | number): string {
   const severityMap: Record<number, string> = {
     0: 'info',    // off
     1: 'warning', // warning
     2: 'error'    // error
   };
   
-  return severityMap[eslintSeverity] || 'info';
+  const severityNum = typeof eslintSeverity === 'string' ? parseInt(eslintSeverity, 10) : eslintSeverity;
+  return severityMap[severityNum] || 'info';
 }
 
 // Handler principale per project.lint
@@ -371,4 +372,4 @@ export const projectLintHandler: McpToolHandler = async (args): Promise<McpToolR
       error: `Errore nell'esecuzione del linting: ${error.message}`
     };
   }
-}; 
+};

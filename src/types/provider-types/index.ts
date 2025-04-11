@@ -4,7 +4,7 @@
  */
 
 // Tipi OpenAI
-export * from './openai-types.js.js';
+export * from './openai-types.js';
 
 // Tipi Anthropic
-export * from './anthropic-types.js.js'; 
+export * from './anthropic-types.js'; 

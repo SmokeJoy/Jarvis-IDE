@@ -1,6 +1,6 @@
 import * as vscode from "vscode"
-import { JarvisProvider } from "../core/webview/JarvisProvider.js.js"
-import { JarvisAPI } from "./jarvis.js.js"
+import { JarvisProvider } from "../core/webview/JarvisProvider.js"
+import { JarvisAPI } from "./jarvis.js"
 
 export function createJarvisAPI(outputChannel: vscode.OutputChannel, sidebarProvider: JarvisProvider): JarvisAPI {
 	const api: JarvisAPI = {

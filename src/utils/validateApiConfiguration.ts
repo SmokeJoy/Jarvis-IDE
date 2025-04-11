@@ -1,4 +1,4 @@
-import type { ApiConfiguration } from "../shared/types/api.types.js.js"
+import type { ApiConfiguration } from "../shared/types/api.types.js"
 
 interface Agent {
   name: string

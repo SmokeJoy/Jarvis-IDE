@@ -1,15 +1,15 @@
 import * as vscode from "vscode"
 import * as path from "path"
-import { openFile } from "../../integrations/misc/open-file.js.js"
-import type { UrlContentFetcher } from "../../services/browser/UrlContentFetcher.js.js"
-import { mentionRegexGlobal } from "../../shared/context-mentions.js.js"
+import { openFile } from "../../integrations/misc/open-file.js"
+import type { UrlContentFetcher } from "../../services/browser/UrlContentFetcher.js"
+import { mentionRegexGlobal } from "../../shared/context-mentions.js"
 import fs from "fs/promises"
-import { extractTextFromFile } from "../../integrations/misc/extract-text.js.js"
+import { extractTextFromFile } from "../../integrations/misc/extract-text.js"
 import { isBinaryFile } from "isbinaryfile"
-import { diagnosticsToProblemsString } from "../../integrations/diagnostics.js.js"
-import { getLatestTerminalOutput } from "../../integrations/terminal/get-latest-output.js.js"
-import { getCommitInfo } from "../../utils/git.js.js"
-import type { getWorkingState } from "../../utils/git.js.js"
+import { diagnosticsToProblemsString } from "../../integrations/diagnostics.js"
+import { getLatestTerminalOutput } from "../../integrations/terminal/get-latest-output.js"
+import { getCommitInfo } from "../../utils/git.js"
+import type { getWorkingState } from "../../utils/git.js"
 
 export function openMention(mention?: string): void {
 	if (!mention) {

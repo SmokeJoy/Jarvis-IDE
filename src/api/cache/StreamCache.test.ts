@@ -1,8 +1,8 @@
 import { describe, it } from 'mocha';
 import { strict as assert } from 'assert';
-import { StreamCache } from './StreamCache.js.js';
-import streamUtils from '../transform/stream.js.js';
-import type { ApiStream, ApiStreamChunk } from '../transform/stream.js.js';
+import { StreamCache } from './StreamCache.js';
+import streamUtils from '../transform/stream.js';
+import type { ApiStream, ApiStreamChunk } from '../transform/stream.js';
 
 describe('StreamCache', () => {
   function createTestStream(chunks: ApiStreamChunk[]): ApiStream<ApiStreamChunk> {

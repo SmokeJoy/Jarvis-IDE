@@ -1,4 +1,4 @@
-import type { ChatCompletionMessageParam } from "./provider-types/openai-types.js.js";
+import type { ChatCompletionMessageParam } from "./provider-types/openai-types.js";
 
 export interface Message extends ChatCompletionMessageParam {
   timestamp: number;

@@ -33,4 +33,4 @@ export interface URLImageSource {
 export type ImageSource = Base64ImageSource | URLImageSource; 
 
 // Importazione per riferimento
-// import { ImageBlock, isImageBlock } from '../../types/chat.types.js.js'; 
+// import { ImageBlock, isImageBlock } from '../../types/chat.types.js'; 

@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { Logger } from '../utils/logger.js.js';
+import { Logger } from '../utils/logger.js';
 
 export interface ProjectContext {
   content: string;

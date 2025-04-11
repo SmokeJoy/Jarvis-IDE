@@ -14,7 +14,7 @@ import type {
 	phpQuery,
 	swiftQuery,
 	kotlinQuery,
-} from "./queries.js.js"
+} from "./queries.js"
 
 export interface LanguageParser {
 	parser: Parser

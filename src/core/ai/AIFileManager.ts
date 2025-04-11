@@ -1,7 +1,7 @@
-import { FileManager } from '../file-operations/FileManager.js.js';
+import { FileManager } from '../file-operations/FileManager.js';
 import * as vscode from 'vscode';
-import type { OpenAiCompatibleModelInfo } from '../../shared/types/api.types.js.js';
-import { ApiProvider } from '../../agent/api/ApiProvider.js.js';
+import type { OpenAiCompatibleModelInfo } from '../../shared/types/api.types.js';
+import { ApiProvider } from '../../agent/api/ApiProvider.js';
 
 interface AIFileOperation {
     type: 'read' | 'edit' | 'create' | 'delete' | 'list' | 'listRecursive';

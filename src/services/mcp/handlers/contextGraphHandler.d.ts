@@ -1,4 +1,4 @@
-import type { ContextItem } from "../../memory/context.js.js";
+import type { ContextItem } from "../../memory/context.js";
 interface ContextLink {
     id: string;
     sourceId: string;

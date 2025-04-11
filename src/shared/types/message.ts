@@ -1,4 +1,4 @@
-import type { ChatCompletionMessageParam } from "../../types/provider-types/openai-types.js.js"
+import type { ChatCompletionMessageParam } from "../../types/provider-types/openai-types.js"
 
 export type MessageRole = "user" | "assistant" | "system" | "tool"
 

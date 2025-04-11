@@ -1,4 +1,4 @@
-import { retryAsync } from "./retry.js.js"
+import { retryAsync } from "./retry.js"
 import { expect } from "chai"
 import { describe, it } from "mocha"
 

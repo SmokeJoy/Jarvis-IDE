@@ -1,7 +1,7 @@
-import type { ChatCompletionMessageParam } from "../../types/provider-types/openai-types.js.js";
-import type { ApiConfiguration } from "../../shared/types/api.types.js.js";
-import type { JarvisProvider } from "../../core/webview/JarvisProvider.js.js";
-import type { McpServer, McpConnection, McpTool, McpResource, McpResourceTemplate } from "../../shared/mcp.js.js";
+import type { ChatCompletionMessageParam } from "../../types/provider-types/openai-types.js";
+import type { ApiConfiguration } from "../../shared/types/api.types.js";
+import type { JarvisProvider } from "../../core/webview/JarvisProvider.js";
+import type { McpServer, McpConnection, McpTool, McpResource, McpResourceTemplate } from "../../shared/mcp.js";
 export interface StdioClientTransport {
     command: string;
     args: string[];

@@ -1,4 +1,4 @@
-import { JarvisIdeIgnoreController } from './JarvisIdeIgnoreController.js.js';
+import { JarvisIdeIgnoreController } from './JarvisIdeIgnoreController.js';
 import { Uri } from 'vscode';
 
 describe('JarvisIdeIgnoreController', () => {

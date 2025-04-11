@@ -1,12 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import type { SettingsManager, Settings } from '../shared/settings.js.js';
-import { FileManager } from './FileManager.js.js';
-import { sendPromptToLLM } from './sendPromptToLLM.js.js';
-import { Logger } from '../utils/logger.js.js';
-import { compileDotnetProject } from '../utils/compileDotnetProject.js.js';
-import type { AvailableModel } from '../shared/types/settings.types.js.js';
+import type { SettingsManager, Settings } from '../shared/settings.js';
+import { FileManager } from './FileManager.js';
+import { sendPromptToLLM } from './sendPromptToLLM.js';
+import { Logger } from '../utils/logger.js';
+import { compileDotnetProject } from '../utils/compileDotnetProject.js';
+import type { AvailableModel } from '../shared/types/settings.types.js';
 
 export interface AgentResponse {
   action: string;

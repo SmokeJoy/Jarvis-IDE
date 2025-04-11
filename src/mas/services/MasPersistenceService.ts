@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import { Task, AgentStatus } from '../../shared/types/mas.types.js.js';
-import { Logger } from '../../utils/logger.js.js';
+import { Task, AgentStatus } from '../../shared/types/mas.types.js';
+import { Logger } from '../../utils/logger.js';
 
 /**
  * Interfaccia per i dati persistenti del MAS

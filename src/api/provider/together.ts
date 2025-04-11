@@ -1,7 +1,7 @@
-import type { ApiProvider, ProviderOptions } from './base.js.js';
-import type { ChatCompletionOptions, ChatCompletion, LLMProviderId, StreamChunk } from '../../types/global.js.js';
-import type { ModelInfo } from '../../shared/types/api.types.js.js';
-import { Logger } from '../../utils/logger.js.js';
+import type { ApiProvider, ProviderOptions } from './base.js';
+import type { ChatCompletionOptions, ChatCompletion, LLMProviderId, StreamChunk } from '../../types/global.js';
+import type { ModelInfo } from '../../shared/types/api.types.js';
+import { Logger } from '../../utils/logger.js';
 import OpenAI from 'openai';
 
 /**

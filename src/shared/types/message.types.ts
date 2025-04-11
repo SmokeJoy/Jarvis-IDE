@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 
-import type { ContentBlock, ContentType } from './chat.types.js.js';
+import type { ContentBlock, ContentType } from './chat.types.js';
 
 /**
  * Interfaccia per i messaggi di chat

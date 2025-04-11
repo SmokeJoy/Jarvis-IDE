@@ -1,5 +1,5 @@
-import type { ChatMessage, ContentType, TextContent, ImageContent } from '../../types/chat.types.js.js';
-import { logger } from '../../utils/logger.js.js';
+import type { ChatMessage, ContentType, TextContent, ImageContent } from '../../types/chat.types.js';
+import { logger } from '../../utils/logger.js';
 
 /**
  * Tipo rappresentante un messaggio nel formato Ollama

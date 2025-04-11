@@ -10,28 +10,28 @@ export type {
   LLMProviderId,
   ModelInfo,
   TelemetrySetting
-} from '../shared/types/api.types.js.js';
+} from '../shared/types/api.types.js';
 
 // Esporta i tipi specifici da llm.types.js
 export type {
   ChatCompletionContentPartText,
   ChatCompletionContentPartImage
-} from '../shared/types/llm.types.js.js';
+} from '../shared/types/llm.types.js';
 
 // Esporta i tipi dalle impostazioni della chat
-export type { ChatSettings } from '../shared/types/user-settings.types.js.js';
+export type { ChatSettings } from '../shared/types/user-settings.types.js';
 
 // Esporta i tipi dalle impostazioni del browser
-export type { BrowserSettings } from '../shared/types/user-settings.types.js.js';
+export type { BrowserSettings } from '../shared/types/user-settings.types.js';
 
 // Esporta i tipi dalle impostazioni di approvazione automatica
-export type { AutoApprovalSettings } from '../shared/types/user-settings.types.js.js';
+export type { AutoApprovalSettings } from '../shared/types/user-settings.types.js';
 
 // Re-esporta i tipi dal WebviewMessage centralizzato
 export type {
   WebviewMessage,
   WebviewMessageBase
-} from '../shared/types/webview.types.js.js';
+} from '../shared/types/webview.types.js';
 
 /**
  * Enum per i livelli di log

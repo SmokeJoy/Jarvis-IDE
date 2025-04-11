@@ -1,5 +1,5 @@
-import type { ModelInfo } from "../../../shared/types/api.types.js.js"
-import type { openAiModelInfoSaneDefaults } from "../../../shared/api.js.js"
+import type { ModelInfo } from "../../../shared/types/api.types.js"
+import type { openAiModelInfoSaneDefaults } from "../../../shared/api.js"
 
 export interface OpenAiConfig {
     temperature?: number;

@@ -1,2 +1,2 @@
-import { logger } from "../../utils/logger.js.js"
+import { logger } from "../../utils/logger.js"
 // ... existing code ... 

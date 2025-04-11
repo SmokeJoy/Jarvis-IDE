@@ -17,7 +17,7 @@ import { t } from '../i18n';
 // Logger condiviso per il bridge webview
 const logger = {
   debug: (message: string, ...data: any[]) => {
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env['NODE_ENV'] === 'development') {
       console.log(`[WebviewBridge] ${message}`, ...data);
     }
   },

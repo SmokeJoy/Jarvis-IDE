@@ -6,13 +6,13 @@
  * consentire ai client esterni di scoprire e invocare i tool disponibili.
  */
 
-import * as express from 'express';
+import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import * as path from 'path';
 import type { fileURLToPath } from 'url';
-import type { McpDispatcher } from './McpDispatcher.js.js';
-import { McpToolCall } from '../../shared/types/mcp.types.js.js';
+import type { McpDispatcher } from './McpDispatcher.js';
+import { McpToolCall } from '../../shared/types/mcp.types.js';
 
 // Definisci __dirname equivalente per ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -46,7 +46,7 @@ setInterval(() => {
 }, 10000);
 
 // Crea un'app Express
-const app = express.default ? express.default() : express();
+const app = express();
 app.use(express.json());
 
 // Configurazione CORS per consentire richieste da origini diverse
@@ -186,7 +186,7 @@ export function startMcpServer(port: number = 3030) {
     console.log(`Server MCP in ascolto su http://localhost:${port}`);
     console.log(`- GET /tools/list`);
     console.log(`- POST /tools/call`);
-    console.log('Tools disponibili:', toolsSchema.tools.map(t => t.name).join(', '));
+    console.log('Tools disponibili:', toolsSchema.tools.map((t: { name: string }) => t.name).join(', '));
   });
   
   return server; // Restituisce il server per permettere l'arresto durante i test
@@ -194,6 +194,8 @@ export function startMcpServer(port: number = 3030) {
 
 // Se eseguito direttamente (non importato)
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const port = process.env.PORT ? parseInt(process.env.PORT) : 3030;
+  const PORT = process.env['MCP_SERVER_PORT']
+    ? parseInt(process.env['MCP_SERVER_PORT'])
+    : 3030;
   startMcpServer(port);
-} 
+}

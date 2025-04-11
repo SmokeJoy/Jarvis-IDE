@@ -1,12 +1,12 @@
 import React from "react";
 import { describe, expect, test, beforeEach, afterEach, vi } from "vitest";
-import type { render, screen, fireEvent, act } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { Webview } from "./webview.js.js";
-import type { ApiConfiguration } from "../types/global.js.js";
-import type { ChatMessage } from "../shared/types.js.js";
-import type { ExtensionMessage } from "../shared/ExtensionMessage.js.js";
-import { WebView } from "./WebView.js.js";
+import { Webview } from "./webview.js";
+import type { ApiConfiguration } from "../types/global.js";
+import type { ChatMessage } from "../shared/types.js";
+import type { ExtensionMessage } from "../shared/ExtensionMessage.js";
+import { WebView } from "./WebView.js";
 
 vi.mock("@vscode/webview-ui-toolkit/react");
 

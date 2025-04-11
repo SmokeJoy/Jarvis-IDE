@@ -8,7 +8,9 @@ import {
   FallbackStrategyFactory, 
   PreferredFallbackStrategy,
   RoundRobinFallbackStrategy,
-  ReliabilityFallbackStrategy
+  ReliabilityFallbackStrategy,
+  CompositeFallbackStrategy,
+  AdaptiveFallbackStrategy
 } from '../';
 
 describe('FallbackStrategyFactory', () => {
@@ -79,6 +81,161 @@ describe('FallbackStrategyFactory', () => {
     expect(availableStrategies).toContain('roundRobin');
     expect(availableStrategies).toContain('reliability');
     expect(availableStrategies).toContain('composite');
-    expect(availableStrategies.length).toBe(4);
+    expect(availableStrategies).toContain('adaptive');
+    expect(availableStrategies.length).toBe(5);
+  });
+  
+  it('dovrebbe creare una AdaptiveFallbackStrategy', () => {
+    const strategy = FallbackStrategyFactory.create('adaptive', {
+      adaptiveStrategies: [
+        {
+          type: 'preferred',
+          options: { preferredProvider: 'openai' },
+          condition: { type: 'failureRate', threshold: 20 },
+          name: 'defaultPreferred'
+        },
+        {
+          type: 'reliability',
+          condition: { type: 'failureRate', threshold: 20 },
+          name: 'fallbackReliability'
+        }
+      ]
+    });
+    
+    expect(strategy).toBeInstanceOf(AdaptiveFallbackStrategy);
+  });
+  
+  it('dovrebbe lanciare un errore se la strategia adaptive non ha strategie configurate', () => {
+    expect(() => {
+      FallbackStrategyFactory.create('adaptive', {});
+    }).toThrow('La strategia adaptive richiede almeno una strategia con condizione');
+    
+    expect(() => {
+      FallbackStrategyFactory.create('adaptive', { adaptiveStrategies: [] });
+    }).toThrow('La strategia adaptive richiede almeno una strategia con condizione');
+  });
+  
+  it('dovrebbe supportare condizioni composte con AND e OR', () => {
+    const strategy = FallbackStrategyFactory.create('adaptive', {
+      adaptiveStrategies: [
+        {
+          type: 'preferred',
+          options: { preferredProvider: 'openai' },
+          condition: { 
+            type: 'and',
+            conditions: [
+              { type: 'failureRate', threshold: 20 },
+              { type: 'avgLatency', threshold: 200 }
+            ]
+          },
+          name: 'complexCondition'
+        },
+        {
+          type: 'reliability',
+          condition: { 
+            type: 'or',
+            conditions: [
+              { type: 'totalFailures', threshold: 10 },
+              { type: 'providerLatency', providerId: 'openai', threshold: 300 }
+            ]
+          },
+          name: 'fallbackReliability'
+        }
+      ]
+    });
+    
+    expect(strategy).toBeInstanceOf(AdaptiveFallbackStrategy);
+  });
+  
+  it('dovrebbe supportare la configurazione di timeWindow', () => {
+    const strategy = FallbackStrategyFactory.create('adaptive', {
+      adaptiveStrategies: [
+        {
+          type: 'preferred',
+          options: { preferredProvider: 'openai' },
+          condition: { 
+            type: 'timeWindow',
+            startHour: 9,
+            endHour: 17
+          },
+          name: 'workHours'
+        },
+        {
+          type: 'reliability',
+          condition: { 
+            type: 'timeWindow',
+            startHour: 17,
+            endHour: 9
+          },
+          name: 'nightHours'
+        }
+      ]
+    });
+    
+    expect(strategy).toBeInstanceOf(AdaptiveFallbackStrategy);
+  });
+  
+  it('dovrebbe gestire correttamente le condizioni providerFailed', () => {
+    const strategy = FallbackStrategyFactory.create('adaptive', {
+      adaptiveStrategies: [
+        {
+          type: 'preferred',
+          options: { preferredProvider: 'openai' },
+          condition: { 
+            type: 'providerFailed',
+            providerId: 'anthropic',
+            timeWindowMs: 300000 // 5 minuti
+          },
+          name: 'anthropicFailedRecently'
+        }
+      ]
+    });
+    
+    expect(strategy).toBeInstanceOf(AdaptiveFallbackStrategy);
+  });
+  
+  it('dovrebbe lanciare errori se mancano parametri obbligatori nelle condizioni', () => {
+    expect(() => {
+      FallbackStrategyFactory.create('adaptive', {
+        adaptiveStrategies: [
+          {
+            type: 'preferred',
+            condition: { 
+              type: 'providerLatency',
+              threshold: 100
+              // Manca providerId
+            }
+          }
+        ]
+      });
+    }).toThrow('providerLatency richiede un providerId');
+    
+    expect(() => {
+      FallbackStrategyFactory.create('adaptive', {
+        adaptiveStrategies: [
+          {
+            type: 'preferred',
+            condition: { 
+              type: 'timeWindow'
+              // Mancano startHour e endHour
+            }
+          }
+        ]
+      });
+    }).toThrow('timeWindow richiede startHour e endHour');
+    
+    expect(() => {
+      FallbackStrategyFactory.create('adaptive', {
+        adaptiveStrategies: [
+          {
+            type: 'preferred',
+            condition: { 
+              type: 'and'
+              // Manca l'array di conditions
+            }
+          }
+        ]
+      });
+    }).toThrow('La condizione AND richiede un array di condizioni');
   });
 }); 

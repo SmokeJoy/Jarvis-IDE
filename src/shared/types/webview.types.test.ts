@@ -11,7 +11,7 @@ import type {
   WebviewMessageType,
   ExtensionMessage,
   WebviewMessage
-} from './webview.types.js.js';
+} from './webview.types.js';
 
 describe('Type guards per messaggi', () => {
   describe('isExtensionMessage', () => {

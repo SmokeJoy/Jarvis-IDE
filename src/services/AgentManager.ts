@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { sendPrompt } from './LMStudioService.js.js';
-import { runPython } from './pythonBridge.js.js';
+import { sendPrompt } from './LMStudioService.js';
+import { runPython } from './pythonBridge.js';
 
 // Interfaccia per definire la struttura di un agente
 export interface Agent {

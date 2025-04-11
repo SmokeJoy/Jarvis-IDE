@@ -3,4 +3,4 @@
  * Questo file esiste per supportare l'importazione relativa da validators.ts
  */
 
-export { Logger } from '../utils/logger.js.js'; 
+export { Logger } from '../utils/logger.js'; 

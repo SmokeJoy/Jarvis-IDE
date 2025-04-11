@@ -5,7 +5,7 @@
  * Risolve:
  * - TS2835: Relative import paths need explicit file extensions in EcmaScript imports
  * - TS1484: 'X' is a type and must be imported using a type-only import
- * - TS2307: Import paths with duplicate `.js.js` extensions
+ * - TS2307: Import paths with duplicate `.js` extensions
  * 
  * Uso:
  * ```
@@ -197,10 +197,10 @@ export async function processFile(
     let typeImportFixCount = 0;
     let doubleJsFixCount = 0;
     
-    // Corregge gli import con doppio .js.js
+    // Corregge gli import con doppio .js
     newContent = newContent.replace(DOUBLE_JS_REGEX, (match, importPath) => {
       doubleJsFixCount++;
-      return match.replace(`${importPath}.js.js`, `${importPath}.js`);
+      return match.replace(`${importPath}.js`, `${importPath}.js`);
     });
     
     // Corregge gli import senza estensione .js

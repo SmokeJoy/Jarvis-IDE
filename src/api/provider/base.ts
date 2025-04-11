@@ -1,6 +1,6 @@
-import type { ChatCompletionOptions, ChatCompletion, LLMProviderId, StreamChunk } from '../../types/global.js.js';
-import type { ModelInfo } from '../../shared/types/api.types.js.js';
-import { ApiProvider } from '../../agent/api/ApiProvider.js.js';
+import type { ChatCompletionOptions, ChatCompletion, LLMProviderId, StreamChunk } from '../../types/global.js';
+import type { ModelInfo } from '../../shared/types/api.types.js';
+import { ApiProvider } from '../../agent/api/ApiProvider.js';
 
 /**
  * Interfaccia base per un provider LLM

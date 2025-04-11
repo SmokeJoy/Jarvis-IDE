@@ -1,4 +1,4 @@
-import type { McpToolHandler } from "../../../shared/types/mcp.types.js.js";
+import type { McpToolHandler } from "../../../shared/types/mcp.types.js";
 /**
  * Handler per il comando fs.write
  * Scrive contenuto in un file, controllando prima i vincoli di sicurezza

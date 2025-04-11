@@ -3,7 +3,7 @@
  * https://github.com/InternLM/lmdeploy
  */
 
-import type { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js.js';
+import type { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js';
 
 interface LMDeployRequest {
   prompt: string;

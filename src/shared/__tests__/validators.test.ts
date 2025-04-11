@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import * as validators from '../validators.js.js';
-import type { ChatMessage } from '../types/index.js.js';
-import type { ChatSettings, ApiConfiguration } from '../../types/extension.js.js';
+import * as validators from '../validators.js';
+import type { ChatMessage } from '../types/index.js';
+import type { ChatSettings, ApiConfiguration } from '../../types/extension.js';
 
 // Mock degli schemi JSON
 vi.mock('../../../docs/schemas/ChatMessage.schema.json', () => ({}), { virtual: true });

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { JarvisAgent } from './JarvisAgent.js.js';
+import { JarvisAgent } from './JarvisAgent.js';
 import * as path from 'path';
 import * as fs from 'fs';
 

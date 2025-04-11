@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
-import { logger } from '../utils/logger.js.js';
-import { JarvisProvider } from '../core/webview/JarvisProvider.js.js';
-import { JarvisAgent } from '../agent/JarvisAgent.js.js';
-import { Logger } from '../utils/Logger.js.js';
-import { createMasSystem, SupervisorAgent } from '../core/mas.js.js';
+import { logger } from '../utils/logger.js';
+import { JarvisProvider } from '../core/webview/JarvisProvider.js';
+import { JarvisAgent } from '../agent/JarvisAgent.js';
+import { Logger } from '../utils/Logger.js';
+import { createMasSystem, SupervisorAgent } from '../core/mas.js';
 import { v4 as uuidv4 } from 'uuid';
 
 // Logger per i comandi degli agenti

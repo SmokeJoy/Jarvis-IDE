@@ -1,7 +1,7 @@
 import * as child_process from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
-import { Logger } from './logger.js.js';
+import { Logger } from './logger.js';
 
 /**
  * Compila un progetto .NET

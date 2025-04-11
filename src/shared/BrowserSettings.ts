@@ -3,7 +3,7 @@
  * @description Tipi e funzioni per le impostazioni del browser
  */
 
-import type { BrowserSettings } from './types/user-settings.types.js.js';
+import type { BrowserSettings } from './types/user-settings.types.js';
 
 // Esporta i tipi usando export type per evitare errori TS1205
 export type { BrowserSettings };

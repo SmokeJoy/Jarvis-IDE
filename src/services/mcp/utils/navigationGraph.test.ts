@@ -3,8 +3,8 @@ import type {
   buildNodeResult,
   buildEdgeResult,
   filterLinksByOptions
-} from './navigationGraph.js.js';
-import type { ContextLink } from '../types.js.js';
+} from './navigationGraph.js';
+import type { ContextLink } from '../types.js';
 
 describe('navigationGraph utils', () => {
   describe('calculateSemanticScore', () => {

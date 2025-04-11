@@ -1,11 +1,11 @@
 import { Anthropic } from "@anthropic-ai/sdk"
 import OpenAI, { ChatCompletionMessageParam } from "openai"
-import type { ApiHandler } from "../index.js.js"
-import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js.js"
-import type { openAiModelInfoSaneDefaults } from "../../shared/api.js.js"
-import type { convertToOpenAiMessages } from "../transform/openai-format.js.js"
-import { ApiStream } from "../transform/stream.js.js"
-import { logger } from "../../utils/logger.js.js"
+import type { ApiHandler } from "../index.js"
+import type { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
+import type { openAiModelInfoSaneDefaults } from "../../shared/api.js"
+import type { convertToOpenAiMessages } from "../transform/openai-format.js"
+import { ApiStream } from "../transform/stream.js"
+import { logger } from "../../utils/logger.js"
 
 export class LmStudioHandler implements ApiHandler {
 	private options: ApiHandlerOptions

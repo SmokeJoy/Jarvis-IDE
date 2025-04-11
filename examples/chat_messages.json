@@ -1,0 +1,14 @@
+[
+  {
+    "id": "msg123",
+    "role": "user",
+    "content": "Come posso implementare una validazione di schema in TypeScript?",
+    "timestamp": "2023-06-15T14:30:00Z"
+  },
+  {
+    "id": "msg124",
+    "role": "assistant",
+    "content": "Per implementare una validazione di schema in TypeScript, puoi utilizzare librerie come Ajv o Zod. Ecco un esempio con Ajv...",
+    "timestamp": "2023-06-15T14:31:00Z"
+  }
+] 

@@ -1,5 +1,5 @@
-import type { JarvisMessage } from "./ExtensionMessage.js.js"
-import type { ChatMessage } from "./types.js.js"
+import type { JarvisMessage } from "./ExtensionMessage.js"
+import type { ChatMessage } from "./types.js"
 
 /**
  * Combines sequences of command and command_output messages in an array of JarvisMessages.

@@ -1,42 +1,54 @@
 /**
- * Utility per la comunicazione con VS Code
+ * Utility per la comunicazione con l'estensione VSCode.
+ * Fornisce un'interfaccia per inviare messaggi alla WebView.
  */
+
+// Acquisisce il riferimento all'API VSCode
+const vscode = acquireVsCodeApi();
 
 /**
- * Interfaccia per l'API di VS Code per il WebView
+ * Invia un messaggio all'estensione VSCode e restituisce una promessa
+ * che si risolve quando viene ricevuta una risposta corrispondente.
+ * 
+ * @param message Il messaggio da inviare
+ * @param timeout Timeout in millisecondi dopo il quale la promessa viene rifiutata
+ * @returns Una promessa che si risolve con la risposta
  */
-interface VSCodeAPI {
-  postMessage(message: any): void;
-  getState(): any;
-  setState(state: any): void;
-}
+const postMessageWithResponse = (message: any, timeout = 5000): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    // Genera un ID univoco per questa richiesta
+    const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const messageWithId = { ...message, requestId };
+    
+    // Setup del listener per la risposta
+    const messageListener = (event: MessageEvent) => {
+      const response = event.data;
+      
+      // Verifica che la risposta corrisponda alla richiesta
+      if (response.requestId === requestId) {
+        // Rimuovi il listener quando la risposta è stata ricevuta
+        window.removeEventListener('message', messageListener);
+        
+        if (response.error) {
+          reject(new Error(response.error));
+        } else {
+          resolve(response.data);
+        }
+      }
+    };
+    
+    // Aggiungi il listener
+    window.addEventListener('message', messageListener);
+    
+    // Invia il messaggio
+    vscode.postMessage(messageWithId);
+    
+    // Setup del timeout
+    setTimeout(() => {
+      window.removeEventListener('message', messageListener);
+      reject(new Error(`Timeout superato di ${timeout}ms per la richiesta ${requestId}`));
+    }, timeout);
+  });
+};
 
-/**
- * Ottiene l'API di VS Code, garantendo che venga chiamata solo una volta
- */
-function getVSCodeAPI(): VSCodeAPI {
-  // @ts-ignore
-  return acquireVsCodeApi();
-}
-
-// Acquisisce e memorizza l'API VS Code per utilizzo futuro
-let _vscode: VSCodeAPI;
-try {
-  _vscode = getVSCodeAPI();
-} catch (error) {
-  // Fallback per l'uso al di fuori di VS Code (ad es. durante lo sviluppo)
-  _vscode = {
-    postMessage: (message: any) => {
-      console.log('VS Code API non disponibile. Messaggio:', message);
-    },
-    getState: () => {
-      console.log('VS Code API non disponibile. getState() chiamata');
-      return {};
-    },
-    setState: (state: any) => {
-      console.log('VS Code API non disponibile. setState() chiamata con:', state);
-    }
-  };
-}
-
-export const vscode = _vscode; 
+export { vscode, postMessageWithResponse }; 

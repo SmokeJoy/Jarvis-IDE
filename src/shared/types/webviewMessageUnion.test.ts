@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import type { WebviewMessageType, ActionType } from './webview.types.js.js';
+import type { WebviewMessageType, ActionType } from './webview.types.js';
 import type {
   isSendPromptMessage,
   isActionMessage,
@@ -15,7 +15,7 @@ import type {
   isInstructionCompletedMessage,
   safeCastAs,
   validators
-} from './webviewMessageUnion.js.js';
+} from './webviewMessageUnion.js';
 
 describe('Type guards specifici per WebviewMessage', () => {
   describe('isSendPromptMessage', () => {

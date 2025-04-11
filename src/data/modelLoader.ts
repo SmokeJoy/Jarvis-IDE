@@ -27,13 +27,13 @@ export async function fetchModels(
   try {
     // Utilizza direttamente il fetchModels dal providerRegistry
     // che implementa già la logica di cache, fetch e fallback
-    const models = await fetchModelsFromRegistry(provider, apiKey, forceRefresh);
+    const models: OpenAiCompatibleModelInfo[] = await fetchModelsFromRegistry(provider, apiKey, forceRefresh);
     
     // Validazione dei modelli restituiti per garantire conformità con OpenAiCompatibleModelInfo
     validateModelsType(models, provider);
     
     return models;
-  } catch (error) {
+  } catch (error: unknown) {
     Logger.error(`Errore nel caricamento dei modelli dal provider ${provider}:`, error);
     
     // Ultimo tentativo: restituisci un array vuoto se tutto fallisce
@@ -54,7 +54,7 @@ function validateModelsType(models: OpenAiCompatibleModelInfo[], provider: LLMPr
     return;
   }
   
-  const invalidModels = models.filter(model => 
+  const invalidModels: OpenAiCompatibleModelInfo[] = models.filter((model: OpenAiCompatibleModelInfo) => 
     !model.id || 
     !model.name || 
     !model.provider ||
@@ -79,7 +79,7 @@ export async function getDefaultModel(
 ): Promise<OpenAiCompatibleModelInfo | undefined> {
   try {
     // Ottieni modelli dal provider
-    const models = await fetchModels(provider, apiKey);
+    const models: OpenAiCompatibleModelInfo[] = await fetchModels(provider, apiKey);
     
     if (models.length === 0) {
       return undefined;
@@ -88,7 +88,7 @@ export async function getDefaultModel(
     // Strategia di selezione modello predefinito (può essere migliorata in futuro)
     // Attualmente seleziona il primo modello disponibile
     return models[0];
-  } catch (error) {
+  } catch (error: unknown) {
     Logger.error(`Errore nel recupero del modello predefinito per ${provider}:`, error);
     return undefined;
   }

@@ -6,9 +6,9 @@ import * as vscode from 'vscode';
 let JarvisProvider: any;
 let appendLogToFile: (filename: string, content: string) => Promise<void>;
 
-// Determinazione dell'ambiente di esecuzione
-const isTestEnvironment = process.env.NODE_ENV === 'test';
-const sendToWebView = process.env.LOG_TO_WEBVIEW !== 'false' && !isTestEnvironment;
+// Development mode flag
+const isTestEnvironment = process.env['NODE_ENV'] === 'test';
+const sendToWebView = process.env['LOG_TO_WEBVIEW'] !== 'false' && !isTestEnvironment;
 
 if (!isTestEnvironment) {
     import('../core/webview/JarvisProvider.js').then(module => {

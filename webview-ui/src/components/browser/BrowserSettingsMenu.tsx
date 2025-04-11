@@ -4,7 +4,8 @@ import { useClickAway } from "react-use"
 import styled from "styled-components"
 import { BROWSER_VIEWPORT_PRESETS } from "../../../../src/shared/BrowserSettings"
 import { useExtensionState } from "../../context/ExtensionStateContext"
-import { vscode } from "../../utils/vscode"
+import { useExtensionMessage } from "../../hooks/useExtensionMessage"
+import { BrowserSettingsMessageType, UpdateBrowserSettingsMessage } from "../../types/browser-settings-message"
 import { CODE_BLOCK_BG_COLOR } from "../common/CodeBlock"
 
 interface BrowserSettingsMenuProps {
@@ -14,6 +15,7 @@ interface BrowserSettingsMenuProps {
 
 export const BrowserSettingsMenu: React.FC<BrowserSettingsMenuProps> = ({ disabled = false, maxWidth }) => {
 	const { browserSettings } = useExtensionState()
+	const { postMessage } = useExtensionMessage()
 	const [showMenu, setShowMenu] = useState(false)
 	const [hasMouseEntered, setHasMouseEntered] = useState(false)
 	const containerRef = useRef<HTMLDivElement>(null)
@@ -62,8 +64,8 @@ export const BrowserSettingsMenu: React.FC<BrowserSettingsMenuProps> = ({ disabl
 		const target = event.target as HTMLSelectElement
 		const selectedSize = BROWSER_VIEWPORT_PRESETS[target.value as keyof typeof BROWSER_VIEWPORT_PRESETS]
 		if (selectedSize) {
-			vscode.postMessage({
-				type: "browserSettings",
+			postMessage<UpdateBrowserSettingsMessage>({
+				type: BrowserSettingsMessageType.UPDATE_BROWSER_SETTINGS,
 				browserSettings: {
 					...browserSettings,
 					viewport: selectedSize,
@@ -73,8 +75,8 @@ export const BrowserSettingsMenu: React.FC<BrowserSettingsMenuProps> = ({ disabl
 	}
 
 	const updateHeadless = (headless: boolean) => {
-		vscode.postMessage({
-			type: "browserSettings",
+		postMessage<UpdateBrowserSettingsMessage>({
+			type: BrowserSettingsMessageType.UPDATE_BROWSER_SETTINGS,
 			browserSettings: {
 				...browserSettings,
 				headless,
@@ -83,8 +85,8 @@ export const BrowserSettingsMenu: React.FC<BrowserSettingsMenuProps> = ({ disabl
 	}
 
 	// const updateChromeType = (chromeType: BrowserSettings["chromeType"]) => {
-	// 	vscode.postMessage({
-	// 		type: "browserSettings",
+	// 	postMessage<UpdateBrowserSettingsMessage>({
+	// 		type: BrowserSettingsMessageType.UPDATE_BROWSER_SETTINGS,
 	// 		browserSettings: {
 	// 			...browserSettings,
 	// 			chromeType,
@@ -93,8 +95,8 @@ export const BrowserSettingsMenu: React.FC<BrowserSettingsMenuProps> = ({ disabl
 	// }
 
 	// const relaunchChromeDebugMode = () => {
-	// 	vscode.postMessage({
-	// 		type: "relaunchChromeDebugMode",
+	// 	postMessage<RelaunchChromeDebugModeMessage>({
+	// 		type: BrowserSettingsMessageType.RELAUNCH_CHROME_DEBUG_MODE,
 	// 	})
 	// }
 

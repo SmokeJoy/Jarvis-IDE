@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import type { MasConfig, AgentConfig, CodeStyle } from '../shared/types/mas.types.js.js';
+import type { MasConfig, AgentConfig, CodeStyle } from '../shared/types/mas.types.js';
 
 /**
  * Gestisce la persistenza dello stato del sistema Multi-Agent

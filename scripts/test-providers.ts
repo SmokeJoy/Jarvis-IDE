@@ -33,48 +33,48 @@ const TEST_PROMPT: LLMMessage[] = [
 // Configurazioni specifiche per ogni provider
 const providerConfigs: Record<string, any> = {
   [PROVIDER_NAMES.OLLAMA]: {
-    baseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
+    baseUrl: process.env['OLLAMA_BASE_URL'] || 'http://localhost:11434',
     model: 'llama3'
   },
   [PROVIDER_NAMES.LM_STUDIO]: {
-    baseUrl: process.env.LM_STUDIO_BASE_URL || 'http://localhost:1234/v1',
+    baseUrl: process.env['LM_STUDIO_BASE_URL'] || 'http://localhost:1234/v1',
     model: 'default'
   },
   [PROVIDER_NAMES.GGUF]: {
     ggufConfig: {
-      binaryPath: process.env.GGUF_BINARY_PATH || './bin/llm',
-      modelsPath: process.env.GGUF_MODELS_PATH || './models',
+      binaryPath: process.env['GGUF_BINARY_PATH'] || './bin/llm',
+      modelsPath: process.env['GGUF_MODELS_PATH'] || './models',
       model: 'llama3'
     },
     model: 'llama3'
   },
   [PROVIDER_NAMES.LM_DEPLOY]: {
-    baseUrl: process.env.LM_DEPLOY_BASE_URL || 'http://localhost:23333/v1',
+    baseUrl: process.env['LM_DEPLOY_BASE_URL'] || 'http://localhost:23333/v1',
     model: 'default'
   },
   [PROVIDER_NAMES.OPENAI]: {
-    apiKey: process.env.OPENAI_API_KEY || process.env.TEST_API_KEY,
-    baseUrl: process.env.OPENAI_BASE_URL,
+    apiKey: process.env['OPENAI_API_KEY'] || process.env['TEST_API_KEY'],
+    baseUrl: process.env['OPENAI_BASE_URL'],
     model: 'gpt-3.5-turbo'
   },
   [PROVIDER_NAMES.ANTHROPIC]: {
-    apiKey: process.env.ANTHROPIC_API_KEY || process.env.TEST_API_KEY,
-    baseUrl: process.env.ANTHROPIC_BASE_URL,
+    apiKey: process.env['ANTHROPIC_API_KEY'] || process.env['TEST_API_KEY'],
+    baseUrl: process.env['ANTHROPIC_BASE_URL'],
     model: 'claude-3-haiku-20240307'
   },
   [PROVIDER_NAMES.MISTRAL]: {
-    apiKey: process.env.MISTRAL_API_KEY || process.env.TEST_API_KEY,
-    baseUrl: process.env.MISTRAL_BASE_URL,
+    apiKey: process.env['MISTRAL_API_KEY'] || process.env['TEST_API_KEY'],
+    baseUrl: process.env['MISTRAL_BASE_URL'],
     model: 'mistral-small-latest'
   },
   [PROVIDER_NAMES.GROQ]: {
-    apiKey: process.env.GROQ_API_KEY || process.env.TEST_API_KEY,
-    baseUrl: process.env.GROQ_BASE_URL,
+    apiKey: process.env['GROQ_API_KEY'] || process.env['TEST_API_KEY'],
+    baseUrl: process.env['GROQ_BASE_URL'],
     model: 'llama3-70b-8192'
   },
   [PROVIDER_NAMES.GOOGLE_AI]: {
-    apiKey: process.env.GOOGLE_AI_API_KEY || process.env.TEST_API_KEY,
-    baseUrl: process.env.GOOGLE_AI_BASE_URL,
+    apiKey: process.env['GOOGLE_AI_API_KEY'] || process.env['TEST_API_KEY'],
+    baseUrl: process.env['GOOGLE_AI_BASE_URL'],
     model: 'gemini-pro'
   }
 };

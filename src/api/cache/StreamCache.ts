@@ -1,6 +1,6 @@
-import streamUtils from '../transform/stream.js.js'
-import type { ApiStream, ApiStreamChunk } from '../transform/stream.js.js'
-import { logger } from "../../utils/logger.mock.js.js"
+import streamUtils from '../transform/stream.js'
+import type { ApiStream, ApiStreamChunk } from '../transform/stream.js'
+import { logger } from "../../utils/logger.mock.js"
 
 /**
  * Interfaccia per la configurazione della cache

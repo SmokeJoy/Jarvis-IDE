@@ -47,33 +47,78 @@ const providerRegistry: Record<LLMProviderId, ProviderInfo> = {
   },
   // Provider OpenAI (ancora placeholder)
   openai: {
-    loader: async () => {
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => {
       Logger.warn("Provider OpenAI non ancora implementato");
       return [];
     },
-    fallback: () => []
+    fallback: (): OpenAiCompatibleModelInfo[] => []
   },
   // Provider di default (implementazione vuota)
   default: {
-    loader: async () => [],
-    fallback: () => []
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [],
+    fallback: (): OpenAiCompatibleModelInfo[] => []
   },
   // Implementazioni vuote per gli altri provider richiesti dal tipo LLMProviderId
-  azureopenai: { loader: async () => [], fallback: () => [] },
-  vertex: { loader: async () => [], fallback: () => [] },
-  aws: { loader: async () => [], fallback: () => [] },
-  gemini: { loader: async () => [], fallback: () => [] },
-  ollama: { loader: async () => [], fallback: () => [] },
-  lmstudio: { loader: async () => [], fallback: () => [] },
-  deepseek: { loader: async () => [], fallback: () => [] },
-  qwen: { loader: async () => [], fallback: () => [] },
-  mistral: { loader: async () => [], fallback: () => [] },
-  litellm: { loader: async () => [], fallback: () => [] },
-  asksage: { loader: async () => [], fallback: () => [] },
-  sambanova: { loader: async () => [], fallback: () => [] },
-  xai: { loader: async () => [], fallback: () => [] },
-  'jarvis-ide': { loader: async () => [], fallback: () => [] },
-  zero: { loader: async () => [], fallback: () => [] }
+  azureopenai: { 
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
+    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  },
+  vertex: { 
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
+    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  },
+  aws: { 
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
+    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  },
+  gemini: { 
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
+    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  },
+  ollama: { 
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
+    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  },
+  lmstudio: { 
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
+    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  },
+  deepseek: { 
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
+    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  },
+  qwen: { 
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
+    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  },
+  mistral: { 
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
+    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  },
+  litellm: { 
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
+    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  },
+  asksage: { 
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
+    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  },
+  sambanova: { 
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
+    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  },
+  xai: { 
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
+    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  },
+  'jarvis-ide': { 
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
+    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  },
+  zero: { 
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
+    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  }
 };
 
 /**
@@ -135,7 +180,7 @@ export async function fetchModels(
     }
 
     return models;
-  } catch (error) {
+  } catch (error: unknown) {
     Logger.error(`Errore nel recupero dei modelli dal provider ${provider}:`, error);
     
     // Recupera i modelli dalla cache se disponibili

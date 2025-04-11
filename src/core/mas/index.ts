@@ -9,11 +9,11 @@
  */
 
 // Esporta i tipi
-export * from './AgentTypes.js.js';
+export * from './AgentTypes.js';
 
 // Esporta gli agenti
-export { SupervisorAgent } from './SupervisorAgent.js.js';
-export { CoderAgent } from './CoderAgent.js.js';
+export { SupervisorAgent } from './SupervisorAgent.js';
+export { CoderAgent } from './CoderAgent.js';
 
 /**
  * Crea e inizializza un'istanza del sistema MAS

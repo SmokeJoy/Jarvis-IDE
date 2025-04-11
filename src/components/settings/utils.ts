@@ -1,5 +1,5 @@
-import type { ApiConfiguration } from '../../types/extension.js.js'
-import type { ModelInfo } from '../../types/models.js.js'
+import type { ApiConfiguration } from '../../types/extension.js'
+import type { ModelInfo } from '../../types/models.js'
 
 export function getModelInfo(apiConfiguration: ApiConfiguration): ModelInfo {
   return {

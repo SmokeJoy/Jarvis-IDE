@@ -4,14 +4,14 @@
  */
 
 import Ajv from 'ajv';
-import type { WebviewMessage } from './WebviewMessage.js.js';
-import type { ExtensionMessage } from './ExtensionMessage.js.js';
-import type { ChatMessage } from './types/index.js.js';
-import type { ChatSettings, ApiConfiguration } from '../types/extension.js.js';
-import { Logger } from './logger.js.js';
-import type { ChatSession } from './types/session.js.js';
-import { isChatSession } from './types/session.js.js';
-import type { OpenRouterModelInfo } from './types/api.types.js.js';
+import type { WebviewMessage } from './WebviewMessage.js';
+import type { ExtensionMessage } from './ExtensionMessage.js';
+import type { ChatMessage } from './types/index.js';
+import type { ChatSettings, ApiConfiguration } from '../types/extension.js';
+import { Logger } from './logger.js';
+import type { ChatSession } from './types/session.js';
+import { isChatSession } from './types/session.js';
+import type { OpenRouterModelInfo } from './types/api.types.js';
 
 // Usa require per importare gli schemi JSON 
 // (assicurati che i path siano corretti rispetto a dove verranno generati)
@@ -105,7 +105,7 @@ export function getWebviewMessageErrors(message: unknown): string[] | null {
   
   validateWebviewMessage(message);
   return validateWebviewMessage.errors ? 
-    validateWebviewMessage.errors.map(e => `${e.instancePath} ${e.message}`) : 
+    validateWebviewMessage.errors.map((e: Ajv.ErrorObject) => `${e.instancePath} ${e.message}`) : 
     null;
 }
 
@@ -121,7 +121,7 @@ export function getExtensionMessageErrors(message: unknown): string[] | null {
   
   validateExtensionMessage(message);
   return validateExtensionMessage.errors ? 
-    validateExtensionMessage.errors.map(e => `${e.instancePath} ${e.message}`) : 
+    validateExtensionMessage.errors.map((e: Ajv.ErrorObject) => `${e.instancePath} ${e.message}`) : 
     null;
 }
 
@@ -238,7 +238,7 @@ export function getChatMessageErrors(message: unknown): string[] | null {
   
   validateChatMessage(message);
   return validateChatMessage.errors ? 
-    validateChatMessage.errors.map(e => `${e.instancePath} ${e.message}`) : 
+    validateChatMessage.errors.map((e: Ajv.ErrorObject) => `${e.instancePath} ${e.message}`) : 
     null;
 }
 
@@ -254,7 +254,7 @@ export function getChatMessageArrayErrors(messages: unknown): string[] | null {
   
   validateChatMessageArray(messages);
   return validateChatMessageArray.errors ? 
-    validateChatMessageArray.errors.map(e => `${e.instancePath} ${e.message}`) : 
+    validateChatMessageArray.errors.map((e: Ajv.ErrorObject) => `${e.instancePath} ${e.message}`) : 
     null;
 }
 
@@ -270,7 +270,7 @@ export function getChatSettingsErrors(settings: unknown): string[] | null {
   
   validateChatSettings(settings);
   return validateChatSettings.errors ? 
-    validateChatSettings.errors.map(e => `${e.instancePath} ${e.message}`) : 
+    validateChatSettings.errors.map((e: Ajv.ErrorObject) => `${e.instancePath} ${e.message}`) : 
     null;
 }
 
@@ -286,7 +286,7 @@ export function getApiConfigurationErrors(config: unknown): string[] | null {
   
   validateApiConfiguration(config);
   return validateApiConfiguration.errors ? 
-    validateApiConfiguration.errors.map(e => `${e.instancePath} ${e.message}`) : 
+    validateApiConfiguration.errors.map((e: Ajv.ErrorObject) => `${e.instancePath} ${e.message}`) : 
     null;
 }
 
@@ -402,7 +402,7 @@ export function getChatSessionErrors(obj: unknown): string[] {
   if (validateChatSession) {
     validateChatSession(obj);
     if (validateChatSession.errors) {
-      return validateChatSession.errors.map(err => {
+      return validateChatSession.errors.map((err: Ajv.ErrorObject) => {
         return `${err.instancePath} ${err.message}`;
       });
     }

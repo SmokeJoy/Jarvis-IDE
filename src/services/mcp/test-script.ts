@@ -10,9 +10,9 @@
  */
 
 import * as vscode from 'vscode';
-import type { McpDispatcher } from './McpDispatcher.js.js';
-import type { WebviewMessage } from '../../shared/protocols.js.js';
-import { McpToolCall } from '../../shared/types/mcp.types.js.js';
+import type { McpDispatcher } from './McpDispatcher.js';
+import type { WebviewMessage } from '../../shared/protocols.js';
+import { McpToolCall } from '../../shared/types/mcp.types.js';
 
 // Funzione di test
 export async function testMcpDispatcher() {

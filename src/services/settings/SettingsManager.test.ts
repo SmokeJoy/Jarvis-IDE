@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import type { SettingsManager, JarvisSettings } from './SettingsManager.js.js';
+import type { SettingsManager, JarvisSettings } from './SettingsManager.js';
 import { afterEach, beforeEach, describe, expect, it, jest, test } from '@jest/globals';
 
 // Mock di vscode

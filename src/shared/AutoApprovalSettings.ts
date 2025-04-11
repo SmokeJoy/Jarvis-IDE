@@ -3,7 +3,7 @@
  * @description Tipi e funzioni per le impostazioni di approvazione automatica
  */
 
-import type { AutoApprovalSettings as BaseAutoApprovalSettings } from './types/user-settings.types.js.js';
+import type { AutoApprovalSettings as BaseAutoApprovalSettings } from './types/user-settings.types.js';
 
 /**
  * Estensione dell'interfaccia AutoApprovalSettings per retrocompatibilità
