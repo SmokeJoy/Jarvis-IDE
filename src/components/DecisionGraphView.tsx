@@ -11,42 +11,93 @@ import { useDecisionGraphData } from '../hooks/useDecisionGraphData';
 import { useProviderBlacklist } from '../hooks/useProviderBlacklist';
 import { AIDebuggerOverlayProps } from './AIDebuggerOverlay';
 import { exportGraphAsPNG, exportGraphAsJSON, downloadFile } from '../lib/exportGraph';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Tooltip } from '@radix-ui/react-tooltip';
 
 interface DecisionGraphViewProps {
   entry: AIDebuggerOverlayProps;
 }
 
 const ProviderNode = React.memo(({ data }: { data: any }) => {
-  const { isBlocked } = useProviderBlacklist();
+  const { isBlocked, getBlockReason } = useProviderBlacklist();
   const isBlockedProvider = isBlocked(data.id);
+  const blockReason = isBlockedProvider ? getBlockReason(data.id) : null;
 
   return (
-    <div 
-      className={`px-4 py-2 rounded-lg shadow-lg ${
-        isBlockedProvider ? 'bg-red-800' :
-        data.status === 'selected' ? 'bg-green-600' :
-        data.status === 'excluded' ? 'bg-red-600' :
-        'bg-gray-600'
-      }`}
-      title={isBlockedProvider ? "Provider bloccato tramite auto-mitigation" : undefined}
+    <motion.div 
+      initial={{ scale: 1 }}
+      animate={{ 
+        scale: isBlockedProvider ? [1, 1.05, 1] : 1,
+        backgroundColor: isBlockedProvider ? '#991b1b' : 
+          data.status === 'selected' ? '#059669' :
+          data.status === 'excluded' ? '#dc2626' :
+          '#4b5563'
+      }}
+      transition={{ 
+        duration: 0.3,
+        repeat: isBlockedProvider ? Infinity : 0,
+        repeatDelay: 2
+      }}
+      className="px-4 py-2 rounded-lg shadow-lg"
     >
-      <div className="text-white font-medium">{data.label}</div>
-      {isBlockedProvider && (
-        <div className="text-xs font-bold text-red-300 bg-red-900/40 rounded px-1 mt-1">
-          🚫 Bloccato
-        </div>
-      )}
-      {data.score && (
-        <div className="text-xs text-gray-200">score: {data.score}</div>
-      )}
-      {data.stats && (
-        <div className="text-xs text-gray-200">
-          <div>latency: {data.stats.latency}ms</div>
-          <div>success: {(data.stats.successRate * 100).toFixed(1)}%</div>
-        </div>
-      )}
-    </div>
+      <div className="text-white font-medium flex items-center justify-between">
+        <span>{data.label}</span>
+        {isBlockedProvider && (
+          <Tooltip.Root>
+            <Tooltip.Trigger asChild>
+              <div className="text-xs font-bold text-red-300 bg-red-900/40 rounded px-2 py-1 cursor-help">
+                🚫 Bloccato
+              </div>
+            </Tooltip.Trigger>
+            <Tooltip.Content 
+              className="bg-gray-900 text-white p-2 rounded shadow-lg max-w-xs"
+              side="top"
+            >
+              <div className="text-sm font-medium">Provider Bloccato</div>
+              <div className="text-xs text-gray-300 mt-1">
+                {blockReason || "Provider bloccato tramite auto-mitigation"}
+              </div>
+              <div className="text-xs text-gray-400 mt-1">
+                Ultimo aggiornamento: {new Date().toLocaleTimeString()}
+              </div>
+            </Tooltip.Content>
+          </Tooltip.Root>
+        )}
+      </div>
+      
+      <AnimatePresence>
+        {data.score && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="text-xs text-gray-200 mt-1"
+          >
+            score: {data.score}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {data.stats && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="text-xs text-gray-200 mt-1"
+          >
+            <div className="flex items-center gap-1">
+              <span>⏱️</span>
+              <span>latency: {data.stats.latency}ms</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span>✅</span>
+              <span>success: {(data.stats.successRate * 100).toFixed(1)}%</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 });
 

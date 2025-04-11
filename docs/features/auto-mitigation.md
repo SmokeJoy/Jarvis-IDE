@@ -91,4 +91,13 @@ test('should trigger mitigation when confidence > threshold', () => {
 ## Troubleshooting
 1. Verificare che l'EventBus sia correttamente configurato
 2. Controllare i log per pattern di errore non rilevati
-3. Aggiustare la soglia di confidenza se necessario 
+3. Aggiustare la soglia di confidenza se necessario
+
+## 🧩 Visualizzazione nel grafo decisionale
+
+- I nodi `provider` bloccati sono evidenziati in rosso (`bg-red-800`)
+- Viene applicata un'animazione pulsante per visibilità
+- Il badge `🚫 Bloccato` include un tooltip interattivo:
+  - Motivo del blocco (es: auto-mitigation)
+  - Timestamp aggiornamento
+- Tooltip implementato con `@radix-ui/react-tooltip` 
