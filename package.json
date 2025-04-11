@@ -69,7 +69,9 @@
     "fix-double-js": "node scripts/fix-double-js.js",
     "schema:webview": "ts-node scripts/generate-schema.ts",
     "schema:all": "ts-node scripts/generate-schema-extended.ts",
-    "test:payload": "ts-node scripts/test-payloads.ts"
+    "test:payload": "ts-node scripts/test-payloads.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "contributes": {
     "viewsContainers": {
@@ -282,8 +284,10 @@
     "chai": "^5.2.0",
     "clsx": "^2.1.1",
     "express": "^5.1.0",
+    "framer-motion": "^12.6.5",
     "get-folder-size": "^5.0.0",
     "globby": "^14.1.0",
+    "html-to-image": "^1.11.13",
     "monaco-vscode-textmate-theme-converter": "^0.1.7",
     "ollama": "^0.5.14",
     "openai": "^4.91.1",
@@ -293,6 +297,7 @@
     "react-dom": "^18.2.0",
     "react-markdown": "^10.1.0",
     "react-syntax-highlighter": "^15.5.0",
+    "recharts": "^2.15.2",
     "styled-components": "^6.1.8",
     "tailwind-merge": "^3.2.0",
     "typescript-json-schema": "^0.65.1",
@@ -303,6 +308,7 @@
     "@babel/core": "^7.26.10",
     "@babel/preset-env": "^7.26.9",
     "@babel/preset-typescript": "^7.27.0",
+    "@playwright/test": "^1.51.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^14.2.1",
     "@types/cheerio": "^0.22.35",

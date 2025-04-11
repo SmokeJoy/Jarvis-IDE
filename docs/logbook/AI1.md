@@ -2066,3 +2066,361 @@ feat(ui): aggiunto monitor fallback con hook + pannello + simulazione eventi
 ```
 
 // ... existing code ...
+
+# Logbook AI1 - Sviluppatore Frontend
+
+## 2025-04-11 - Integrazione Grafici Storici in Audit Panel
+
+### 📊 Aggiunta Visualizzazione Analytics
+
+Ho integrato un nuovo sistema di visualizzazione grafica nel pannello di audit, aggiungendo un tab dedicato "Analytics" che mostra metriche storiche in tempo reale.
+
+#### Componenti Principali
+
+1. **Nuovo Tab Analytics**
+   - Integrato nel `FallbackAuditPanel`
+   - UI coerente con il design esistente
+   - Transizioni fluide tra i tab
+
+2. **Hook `useFallbackChartData`**
+   - Trasformazione efficiente dei dati audit
+   - Calcolo metriche in tempo reale
+   - Ottimizzazione performance con `useMemo`
+
+3. **Conversione Dati**
+   - Mappatura automatica snapshot → audit
+   - Gestione valori mancanti con fallback
+   - Supporto per metriche future
+
+4. **Componente `FallbackChartPanel`**
+   - 4 grafici interattivi:
+     - 📈 Latenza media per provider
+     - ✅ Successi/Fallimenti
+     - 💰 Costi totali
+     - 📊 Volume richieste
+   - Tooltip personalizzati
+   - Tema scuro coerente
+   - Responsive design
+
+#### Estendibilità
+
+Il sistema è progettato per essere facilmente estendibile:
+- Aggiunta nuove metriche
+- Personalizzazione grafici
+- Integrazione con altri sistemi di monitoraggio
+
+#### Commit
+```bash
+feat(audit): integrazione grafici storici nel pannello audit
+```
+
+### Prossimi Step
+- Preparazione modulo Visix per bundle finale
+- Documentazione API e esempi
+- Testing end-to-end
+
+// ... existing code ...
+
+## 2025-04-11 - Build e Integrazione VSCode
+
+### 🏗️ Configurazione Build e Packaging
+
+Ho completato la configurazione del build system per il modulo Visix, preparandolo per l'integrazione nel fork VSCode.
+
+#### Componenti Principali
+
+1. **Configurazione Build (`visix.build.config.ts`)**
+   - Bundling con `tsup`
+   - Output duale (CJS + ESM)
+   - Source maps per debug
+   - Minificazione in produzione
+   - External: React, ReactDOM, Recharts
+
+2. **Struttura Output**
+   ```
+   dist/
+     ├── visix.cjs.js    # CommonJS bundle
+     ├── visix.esm.js    # ESM bundle
+     ├── visix.d.ts      # TypeScript definitions
+   ```
+
+3. **Integrazione VSCode (`visix-plugin.ts`)**
+   - WebView panel per il monitor
+   - Gestione lifecycle del componente
+   - Stili coerenti con VSCode
+   - Hot-reload in sviluppo
+
+#### Setup Sviluppo
+
+1. **Link Locale**
+   ```bash
+   # Nel modulo Visix
+   pnpm build
+   pnpm link
+
+   # Nel progetto VSCode
+   pnpm link @jarvis/visix
+   ```
+
+2. **Script Disponibili**
+   ```bash
+   pnpm dev        # Watch mode
+   pnpm build      # Build produzione
+   pnpm test       # Test unitari
+   pnpm lint       # Lint codice
+   ```
+
+#### Documentazione
+
+Ho creato `docs/dev/visix-dev.md` con:
+- Setup sviluppo
+- Configurazione build
+- Integrazione VSCode
+- Debug e testing
+- CI/CD workflow
+
+#### Commit
+```bash
+feat(visix): setup build config + integrazione vscode + docs dev
+```
+
+### Prossimi Step Proposti
+
+1. **Test E2E**
+   - Setup Cypress/Playwright
+   - Test integrazione VSCode
+   - Performance monitoring
+
+2. **Registry Privato**
+   - Setup Verdaccio locale
+   - Publish workflow
+   - Versioning semantico
+
+3. **Plugin Sandbox**
+   - Ambiente isolato per test
+   - Mock eventBus e strategy
+   - Scenario testing
+
+### Roadmap Moduli Futuri
+
+1. **AI Debugger Overlay**
+   - Analisi errori in tempo reale
+   - Suggerimenti automatici
+   - Visualizzazione grafo decisionale
+
+2. **Dev Log Analysis**
+   - Pattern recognition
+   - Metriche avanzate
+   - Report automatizzati
+
+3. **Performance Profiler**
+   - Timeline rendering
+   - Memory usage
+   - Network latency
+
+// ... existing code ...
+
+## 2025-04-11 - Setup Registry Privato e Test E2E
+
+### 📦 Setup Registry Privato (Verdaccio)
+
+Ho configurato un registry NPM privato per il testing locale del modulo Visix:
+
+1. **Installazione Verdaccio**
+   ```bash
+   npm install -g verdaccio
+   ```
+
+2. **Documentazione**
+   - Creato `docs/dev/visix-publish.md`
+   - Processo di pubblicazione dettagliato
+   - Configurazione sicurezza
+   - Versioning semantico
+
+3. **Configurazione Registry**
+   ```bash
+   # ~/.npmrc
+   registry=http://localhost:4873/
+   ```
+
+4. **Processo Pubblicazione**
+   - Build modulo
+   - Login al registry locale
+   - Pubblicazione pacchetto
+   - Verifica installazione
+
+#### Commit
+```bash
+feat(visix): setup registry privato + docs pubblicazione
+```
+
+### Prossimi Step
+
+1. **Test E2E con Playwright**
+   - Setup ambiente test
+   - Validazione WebView
+   - Screenshot comparison
+
+2. **AI Debugger Overlay**
+   - Prototipo componente
+   - Visualizzazione decisioni
+   - Tree-view interattivo
+
+// ... existing code ...
+
+## 2025-04-11 - Test End-to-End con Playwright
+
+### 🧪 Setup Test E2E
+
+Ho implementato i test end-to-end per validare l'integrazione dei componenti Visix nel WebView di VSCode:
+
+1. **Setup Ambiente**
+   ```bash
+   pnpm add -D @playwright/test
+   npx playwright install
+   ```
+
+2. **Struttura Test**
+   - `visix-embed.spec.ts`: Test integrazione WebView
+   - `mock-event-bus.ts`: Mock EventBus per test
+   - `mock-strategy.ts`: Mock Strategy per test
+
+3. **Test Cases**
+   - Rendering componenti nel WebView
+   - Risposta agli eventi del bus
+   - Aggiornamento grafici in tempo reale
+   - Screenshot regression testing
+
+4. **Documentazione**
+   - Creato `docs/dev/visix-e2e.md`
+   - Best practices per test E2E
+   - Setup e configurazione
+   - Debug e troubleshooting
+
+#### Commit
+```bash
+feat(test): setup test e2e con playwright + docs
+```
+
+### Prossimi Step
+
+1. **AI Debugger Overlay**
+   - Prototipo componente React
+   - Visualizzazione grafo decisionale
+   - Integrazione con EventBus
+
+2. **Performance Profiling**
+   - Timeline rendering
+   - Memory usage
+   - Network latency
+
+// ... existing code ...
+
+# Logbook AI1
+
+## 2025-04-12 - Replay Snapshot Decisionale
+
+### ✨ Feature: Replay Interattivo
+- Introdotta funzione per rieseguire snapshot storici
+- Emulazione completa via EventBus
+- Logging real-time
+- Tracciamento replay nella timeline
+- Pulsante dedicato in SnapshotDetail
+
+### Dettagli Implementazione
+- **Utility `replaySnapshot`**: Gestisce l'emulazione degli eventi
+- **Componente `ReplayButton`**: UI per avviare il replay
+- **Badge Timeline**: Indicatore visivo per snapshot replayed
+- **Logging**: Tracciamento completo degli eventi
+
+### Commit
+```bash
+feat(debugger): replay decision snapshot con eventBus live
+```
+
+### Note Tecniche
+- Eventi emulati: `provider:failure`, `strategy:adaptive:change`, `provider:success`
+- Flag `__replayed` per tracciamento
+- Logging strutturato con timestamp
+- UI coerente con tema Visix
+
+## 2025-04-12 - Predictive Fallback System
+
+### 🔮 Feature: Avvisi Predittivi
+- Analisi segni precoci di degrado
+- Identificazione proattiva per ogni provider
+- UI di avviso in tempo reale
+- Simulazione fallimento da alert
+- Badge `🔮 Predictive` nella timeline
+
+### Dettagli Implementazione
+- **Hook `usePredictiveWarnings`**: Analisi pattern di fallimento
+- **Componente `PredictiveWarningPanel`**: UI per avvisi in tempo reale
+- **Simulazione Fallimento**: Generazione eventi predittivi
+- **Timeline Integration**: Badge e flag per eventi predittivi
+
+### Soglie di Allerta
+- Latency: >500ms per 3 richieste consecutive
+- Success Rate: <75% in finestra mobile
+- Failure Streak: 3+ fallimenti consecutivi
+
+### Commit
+```bash
+feat(predictive): sistema di fallback predittivo + simulazione warning
+```
+
+### Note Tecniche
+- Finestra di analisi: ultimi 10 eventi per provider
+- Livelli di allerta: moderate, high, critical
+- Eventi predittivi: flag `__predicted` per tracciamento
+- UI: colori e icone per livello di gravità
+
+## 2025-04-12 - Success Rate Sparkline
+
+### 📈 Feature: Trend Success Rate
+- Sparkline per ogni provider predittivo
+- Colore dinamico in base a soglia
+- Area gradient per lettura intuitiva
+- Finestra mobile: ultimi 10 eventi
+
+### Moduli
+- **`SparklineChart`**: Componente compatto con `recharts`
+- **`useProviderSeries`**: Hook per analisi per provider
+- **`PredictiveWarningPanel`**: Layout aggiornato con trend + alert
+- **Colori**: 🟢 >80%, 🟠 50–80%, 🔴 <50%
+
+### Commit
+```bash
+feat(predictive): sparkline success rate per provider nel warning panel
+```
+
+## 2025-04-12 - Release Debugger v2.0.0
+
+### 🚀 Feature Complete
+- **Decision Graph**: Visualizzazione grafica delle decisioni
+- **Timeline + Snapshot**: Analisi storica e dettagli
+- **Replay + Simula**: Debug interattivo
+- **Predictive Fallback**: Avvisi proattivi con sparkline
+
+### Componenti Principali
+- **`DecisionGraphView`**: Grafo decisionale con export
+- **`TimelineEntry`**: Entry con badge replay/predictive
+- **`PredictiveWarningPanel`**: UI predittiva con trend
+- **`SparklineChart`**: Visualizzazione trend success rate
+
+### Commit
+```bash
+release(debugger): debugger v2.0.0 with predictive sparkline
+```
+
+### Note Tecniche
+- UI/UX coerente con tema Visix
+- Performance ottimizzata con `useMemo`
+- Logging strutturato per debug
+- Animazioni fluide con Framer Motion
+
+### Prossima Milestone
+- `predictive-auto-mitigation`: Sistema di auto-fallback
+- Monitoraggio critico
+- Badge `🛡️ AutoFallback`
+- Notifiche visive
