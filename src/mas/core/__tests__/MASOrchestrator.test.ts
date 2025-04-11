@@ -11,6 +11,7 @@ import { Agent, AgentRole, AgentContext, AgentOutput } from '../types';
 import { LLMProviderHandler } from '../../providers/provider-registry';
 import { ZodSchemaMap } from '../../../utils/validation';
 import { WebviewMessageUnion } from '../../../shared/types/webviewMessageUnion';
+import { getMemoryUsage, measureExecutionTime } from '../../../test/helpers/perf';
 
 // Mock delle classi dipendenti
 vi.mock('../AgentManager');
@@ -558,5 +559,160 @@ describe('MASOrchestrator E2E', () => {
         expect.anything()
       );
     }
+  });
+
+  // ----------- NUOVI TEST DI PROFILING DELLE PRESTAZIONI -----------
+
+  // Test per misurare il tempo di esecuzione di ogni agente
+  it('Dovrebbe registrare il tempo di esecuzione di ogni agente', async () => {
+    // Sovrascriviamo i metodi execute degli agenti per registrare i tempi
+    const agentPerformance: Record<string, number> = {};
+    
+    // Mock degli agent.execute per misurare il tempo
+    Object.entries(mockAgents).forEach(([role, agent]) => {
+      const originalExecute = agent.execute;
+      agent.execute = vi.fn().mockImplementation(async (context) => {
+        const start = performance.now();
+        const result = await originalExecute(context);
+        const duration = performance.now() - start;
+        
+        // Salva il tempo di esecuzione
+        agentPerformance[role] = duration;
+        
+        // Aggiungi informazioni di performance al contesto
+        return {
+          ...result,
+          context: {
+            ...result.context,
+            performance: {
+              ...(result.context.performance || {}),
+              [role]: duration
+            }
+          }
+        };
+      });
+    });
+    
+    // Input iniziale
+    const query = "Test delle performance degli agenti";
+    
+    // Esecuzione dell'orchestratore
+    const result = await orchestrator.run({
+      query,
+      conversationId: 'test-performance',
+      maxTurns: 10
+    });
+    
+    // Verifica che tutti gli agenti abbiano un tempo di esecuzione registrato
+    expect(Object.keys(agentPerformance)).toContain('planner');
+    expect(Object.keys(agentPerformance)).toContain('researcher');
+    expect(Object.keys(agentPerformance)).toContain('analyzer');
+    expect(Object.keys(agentPerformance)).toContain('writer');
+    
+    // Verifica che i tempi siano numerici
+    Object.values(agentPerformance).forEach(time => {
+      expect(typeof time).toBe('number');
+      expect(time).toBeGreaterThanOrEqual(0);
+    });
+    
+    // Verifica che le informazioni di performance siano presenti nel contesto finale
+    expect(result).toHaveProperty('performance');
+    expect(result.performance).toHaveProperty('planner');
+    expect(result.performance).toHaveProperty('researcher');
+    expect(result.performance).toHaveProperty('analyzer');
+    expect(result.performance).toHaveProperty('writer');
+    
+    // Log dei tempi di esecuzione per debugging
+    console.log('Tempi di esecuzione per agente (ms):', agentPerformance);
+  });
+
+  // Test per verificare il memory footprint durante l'esecuzione
+  it('Dovrebbe mantenere un footprint di memoria controllato durante più turni', async () => {
+    // Array per registrare l'utilizzo della memoria
+    const memoryProfile: number[] = [];
+    
+    // Input iniziale
+    const baseQuery = "Test del footprint di memoria turno";
+    
+    // Registra la memoria iniziale
+    memoryProfile.push(getMemoryUsage());
+    
+    // Esegui 3 turni consecutivi
+    for (let i = 0; i < 3; i++) {
+      await orchestrator.run({
+        query: `${baseQuery} ${i+1}`,
+        conversationId: `test-memory-footprint-${i}`,
+        maxTurns: 3
+      });
+      
+      // Registra la memoria dopo ogni turno
+      memoryProfile.push(getMemoryUsage());
+    }
+    
+    // Verifica che ci siano 4 misurazioni (iniziale + 3 turni)
+    expect(memoryProfile.length).toBe(4);
+    
+    // Log dell'utilizzo della memoria
+    console.log('Utilizzo memoria per turno (bytes):', memoryProfile);
+    
+    // Calcola la crescita di memoria tra il primo e l'ultimo turno
+    const memoryGrowth = memoryProfile[3] - memoryProfile[0];
+    
+    // La crescita di memoria dovrebbe essere ragionevole (meno di 500KB per turno)
+    expect(memoryGrowth).toBeLessThan(500_000 * 3);
+    
+    // La crescita di memoria non dovrebbe essere eccessiva ad ogni turno
+    for (let i = 1; i < memoryProfile.length; i++) {
+      const growthPerTurn = memoryProfile[i] - memoryProfile[i-1];
+      expect(growthPerTurn).toBeLessThan(500_000);
+    }
+  });
+
+  // Test per simulare sessioni parallele e verificare l'isolamento della memoria
+  it('Dovrebbe mantenere i dati di sessione isolati in esecuzioni parallele', async () => {
+    // Configura l'orchestratore per supportare esecuzione parallela
+    orchestrator = new MASOrchestrator({
+      agentManager,
+      memoryManager,
+      maxConcurrentAgents: 3,
+      parallelExecution: true
+    });
+    
+    // Esegui tre sessioni parallelamente
+    const sessionIds = ['session-A', 'session-B', 'session-C'];
+    const query = "Test di isolamento delle sessioni";
+    
+    // Esegui le sessioni in parallelo
+    await Promise.all(
+      sessionIds.map((id, index) => 
+        orchestrator.run({
+          query: `${query} per ${id}`,
+          conversationId: id,
+          maxTurns: 10
+        })
+      )
+    );
+    
+    // Verifica che ogni sessione abbia i suoi dati in memoria
+    for (const id of sessionIds) {
+      expect(mockMemory).toHaveProperty(id);
+    }
+    
+    // Verifica che i dati delle sessioni siano diversi tra loro
+    expect(mockMemory['session-A']).not.toEqual(mockMemory['session-B']);
+    expect(mockMemory['session-A']).not.toEqual(mockMemory['session-C']);
+    expect(mockMemory['session-B']).not.toEqual(mockMemory['session-C']);
+    
+    // Verifica che ogni sessione abbia il proprio contesto di esecuzione
+    const uniqueValues = new Set();
+    for (const id of sessionIds) {
+      // Usa una proprietà specifica per il confronto (query è diversa per ogni sessione)
+      const queryValue = mockMemory[id].query;
+      expect(queryValue).toContain(id); // Il query contiene l'ID della sessione
+      uniqueValues.add(queryValue);
+    }
+    
+    // Verifica che ci siano effettivamente 3 valori unici
+    expect(uniqueValues.size).toBe(3);
   });
 }); 
