@@ -540,4 +540,102 @@ describe('LLMFallbackManager', () => {
       expect(listener).not.toHaveBeenCalled();
     });
   });
+  
+  // Test per la funzionalità di cooldown
+  it('dovrebbe mettere in cooldown un provider dopo un fallimento', async () => {
+    // Crea un event bus simulato
+    const eventBus = new LLMEventBus();
+    const cooldownListener = vi.fn();
+    eventBus.on('provider:cooldown', cooldownListener);
+    
+    // Imposta un tempo di cooldown di 5 secondi per il test
+    const fallbackManager = new LLMFallbackManager({
+      providers: [mockProviders[0], mockProviders[1], mockProviders[2]],
+      preferredProvider: 'openai',
+      eventBus,
+      cooldownMs: 5000 // 5 secondi
+    });
+    
+    // Forza un fallimento per il provider OpenAI
+    mockProviders[0].handle = vi.fn().mockRejectedValueOnce(new Error('Errore di test'));
+    
+    try {
+      await fallbackManager.executeWithFallback(provider => provider.handleRequest({} as any));
+    } catch (error) {
+      // Ignora l'errore per questo test
+    }
+    
+    // Verifica che il provider sia in cooldown
+    expect(fallbackManager.isProviderInCooldown('openai')).toBe(true);
+    
+    // Prova ad eseguire un'altra richiesta
+    mockProviders[1].handle = vi.fn().mockResolvedValueOnce({ result: 'Successo da Anthropic' });
+    
+    const result = await fallbackManager.executeWithFallback(provider => provider.handleRequest({} as any));
+    
+    // Verifica che abbia usato Anthropic invece di OpenAI
+    expect(mockProviders[0].handle).toHaveBeenCalledTimes(1); // Solo la prima chiamata
+    expect(mockProviders[1].handle).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({ result: 'Successo da Anthropic' });
+    
+    // Verifica che l'evento di cooldown sia stato emesso
+    expect(cooldownListener).toHaveBeenCalledWith(expect.objectContaining({
+      providerId: 'openai',
+      cooldownUntil: expect.any(Number)
+    }));
+  });
+  
+  it('dovrebbe riprovare un provider dopo il periodo di cooldown', async () => {
+    // Usa vi.useFakeTimers per simulare il passaggio del tempo
+    vi.useFakeTimers();
+    
+    const eventBus = new LLMEventBus();
+    const cooldownListener = vi.fn();
+    eventBus.on('provider:cooldown', cooldownListener);
+    
+    // Imposta un cooldown di 30 secondi
+    const fallbackManager = new LLMFallbackManager({
+      providers: [mockProviders[0], mockProviders[1]],
+      preferredProvider: 'openai',
+      eventBus,
+      cooldownMs: 30000 // 30 secondi
+    });
+    
+    // Forza un fallimento iniziale
+    mockProviders[0].handle = vi.fn().mockRejectedValueOnce(new Error('Errore di test'));
+    mockProviders[1].handle = vi.fn().mockResolvedValueOnce({ result: 'Fallback a Anthropic' });
+    
+    await fallbackManager.executeWithFallback(provider => provider.handleRequest({} as any));
+    
+    // Verifica che l'OpenAI sia in cooldown
+    expect(fallbackManager.isProviderInCooldown('openai')).toBe(true);
+    expect(cooldownListener).toHaveBeenCalledTimes(1);
+    
+    // Reset le mock
+    mockProviders[0].handle = vi.fn().mockReset();
+    mockProviders[1].handle = vi.fn().mockReset();
+    cooldownListener.mockReset();
+    
+    // Prepara OpenAI per avere successo la prossima volta
+    mockProviders[0].handle = vi.fn().mockResolvedValueOnce({ result: 'Successo da OpenAI' });
+    
+    // Avanza il tempo di 31 secondi (oltre il periodo di cooldown)
+    vi.advanceTimersByTime(31000);
+    
+    // Esegui una nuova richiesta
+    mockProviders[1].handle = vi.fn().mockResolvedValueOnce({ result: 'Successo da Anthropic' });
+    const result = await fallbackManager.executeWithFallback(provider => provider.handleRequest({} as any));
+    
+    // OpenAI dovrebbe essere stata usata perché il cooldown è terminato
+    expect(fallbackManager.isProviderInCooldown('openai')).toBe(false);
+    expect(mockProviders[0].handle).toHaveBeenCalledTimes(1);
+    expect(mockProviders[1].handle).toHaveBeenCalledTimes(0);
+    expect(result).toEqual({ result: 'Successo da OpenAI' });
+    
+    // Nessun evento di cooldown dovrebbe essere stato emesso
+    expect(cooldownListener).toHaveBeenCalledTimes(0);
+    
+    // Ripristina il timer normale
+    vi.useRealTimers();
+  });
 });

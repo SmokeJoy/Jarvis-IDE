@@ -22,6 +22,8 @@ export interface ProviderStats {
   avgResponseTime: number;
   /** Timestamp dell'ultimo utilizzo */
   lastUsed: number;
+  /** Timestamp dell'ultimo fallimento (ms) */
+  lastFailureTimestamp: number;
 }
 
 /**
@@ -61,6 +63,13 @@ export interface LLMFallbackOptions {
    * Se non specificato, viene creato un nuovo event bus
    */
   eventBus?: LLMEventBus;
+
+  /**
+   * Tempo di cooldown in millisecondi dopo un fallimento
+   * Durante questo periodo, il provider non verrà utilizzato
+   * @default 60000 (1 minuto)
+   */
+  cooldownMs?: number;
 }
 
 /**
@@ -76,6 +85,7 @@ export class LLMFallbackManager {
   private maxRetries: number;
   private collectStats: boolean;
   private eventBus: LLMEventBus;
+  private cooldownMs: number;
   
   // Statistiche per provider
   private stats: Map<string, ProviderStats> = new Map();
@@ -90,6 +100,7 @@ export class LLMFallbackManager {
     this.maxRetries = options.maxRetries || 1;
     this.collectStats = options.collectStats !== false; // True di default
     this.eventBus = options.eventBus || new LLMEventBus(); // Usa l'event bus fornito o ne crea uno nuovo
+    this.cooldownMs = options.cooldownMs || 60_000; // 1 minuto di default
     
     // Inizializza le statistiche per tutti i provider
     this.initializeStats();
@@ -113,7 +124,8 @@ export class LLMFallbackManager {
         failureCount: 0,
         successRate: 0,
         avgResponseTime: 0,
-        lastUsed: 0
+        lastUsed: 0,
+        lastFailureTimestamp: 0
       });
     });
   }
@@ -142,6 +154,7 @@ export class LLMFallbackManager {
       providerStats.successCount++;
     } else {
       providerStats.failureCount++;
+      providerStats.lastFailureTimestamp = Date.now();
     }
     
     const totalAttempts = providerStats.successCount + providerStats.failureCount;
@@ -207,7 +220,8 @@ export class LLMFallbackManager {
           failureCount: 0,
           successRate: 0,
           avgResponseTime: 0,
-          lastUsed: 0
+          lastUsed: 0,
+          lastFailureTimestamp: 0
         });
       }
     }
@@ -282,6 +296,21 @@ export class LLMFallbackManager {
   }
 
   /**
+   * Verifica se un provider è in cooldown
+   * @param providerId ID del provider da verificare
+   * @returns true se il provider è in cooldown, false altrimenti
+   */
+  public isProviderInCooldown(providerId: string): boolean {
+    if (!this.collectStats) return false;
+    
+    const providerStats = this.stats.get(providerId);
+    if (!providerStats || providerStats.lastFailureTimestamp === 0) return false;
+    
+    const now = Date.now();
+    return (now - providerStats.lastFailureTimestamp) < this.cooldownMs;
+  }
+
+  /**
    * Esegue un'operazione usando il provider ottimale con fallback automatico
    * @param callback Funzione da eseguire con un provider
    * @returns Risultato dell'operazione
@@ -293,51 +322,60 @@ export class LLMFallbackManager {
     
     // Prima prova con il provider preferito se esiste
     if (this.lastSuccessfulProvider) {
-      try {
-        // Esegui più tentativi se configurato
-        for (let attempt = 0; attempt < this.maxRetries; attempt++) {
-          try {
-            const startTime = Date.now();
-            const result = await callback(this.lastSuccessfulProvider);
-            const responseTime = Date.now() - startTime;
-            
-            // Registra il successo nelle statistiche
-            this.recordAttempt(this.lastSuccessfulProvider.id, true, responseTime);
-            
-            // Emetti evento di successo
-            this.eventBus.emit('provider:success', {
-              providerId: this.lastSuccessfulProvider.id,
-              responseTime,
-              attempt
-            });
-            
-            return result;
-          } catch (error) {
-            if (attempt === this.maxRetries - 1) {
-              // Registra il fallimento nelle statistiche
-              this.recordAttempt(this.lastSuccessfulProvider.id, false, 0);
+      // Verifica se il provider preferito è in cooldown
+      if (this.isProviderInCooldown(this.lastSuccessfulProvider.id)) {
+        // Emetti evento di cooldown
+        this.eventBus.emit('provider:cooldown', {
+          providerId: this.lastSuccessfulProvider.id,
+          cooldownUntil: this.stats.get(this.lastSuccessfulProvider.id)!.lastFailureTimestamp + this.cooldownMs
+        });
+      } else {
+        try {
+          // Esegui più tentativi se configurato
+          for (let attempt = 0; attempt < this.maxRetries; attempt++) {
+            try {
+              const startTime = Date.now();
+              const result = await callback(this.lastSuccessfulProvider);
+              const responseTime = Date.now() - startTime;
               
-              // Emetti evento di fallimento
-              this.eventBus.emit('provider:failure', {
+              // Registra il successo nelle statistiche
+              this.recordAttempt(this.lastSuccessfulProvider.id, true, responseTime);
+              
+              // Emetti evento di successo
+              this.eventBus.emit('provider:success', {
                 providerId: this.lastSuccessfulProvider.id,
-                error: error as Error,
-                attempts: attempt + 1
+                responseTime,
+                attempt
               });
               
-              throw error; // Rilancia l'errore all'ultimo tentativo
+              return result;
+            } catch (error) {
+              if (attempt === this.maxRetries - 1) {
+                // Registra il fallimento nelle statistiche
+                this.recordAttempt(this.lastSuccessfulProvider.id, false, 0);
+                
+                // Emetti evento di fallimento
+                this.eventBus.emit('provider:failure', {
+                  providerId: this.lastSuccessfulProvider.id,
+                  error: error as Error,
+                  attempts: attempt + 1
+                });
+                
+                throw error; // Rilancia l'errore all'ultimo tentativo
+              }
+              // Altrimenti continua con il prossimo tentativo
             }
-            // Altrimenti continua con il prossimo tentativo
           }
+        } catch (error) {
+          console.error(`Il provider preferito ${this.lastSuccessfulProvider.id} ha fallito:`, error);
+          errors.push(error as Error);
+          
+          // Se arriviamo qui, il provider preferito ha fallito e dobbiamo fare fallback
+          // Memorizziamo il provider fallito per riferimento
+          const failedProviderId = this.lastSuccessfulProvider.id;
+          
+          // Continua con il fallback
         }
-      } catch (error) {
-        console.error(`Il provider preferito ${this.lastSuccessfulProvider.id} ha fallito:`, error);
-        errors.push(error as Error);
-        
-        // Se arriviamo qui, il provider preferito ha fallito e dobbiamo fare fallback
-        // Memorizziamo il provider fallito per riferimento
-        const failedProviderId = this.lastSuccessfulProvider.id;
-        
-        // Continua con il fallback
       }
     }
 
@@ -353,6 +391,17 @@ export class LLMFallbackManager {
 
     // Prova con ogni provider disponibile
     for (const provider of availableProviders) {
+      // Verifica se il provider è in cooldown
+      if (this.isProviderInCooldown(provider.id)) {
+        // Emetti evento di cooldown
+        this.eventBus.emit('provider:cooldown', {
+          providerId: provider.id,
+          cooldownUntil: this.stats.get(provider.id)!.lastFailureTimestamp + this.cooldownMs
+        });
+        // Salta al prossimo provider
+        continue;
+      }
+      
       // Emetti evento di fallback quando passiamo a un altro provider
       if (this.lastSuccessfulProvider) {
         this.eventBus.emit('provider:fallback', {

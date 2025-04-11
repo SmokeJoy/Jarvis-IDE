@@ -1553,3 +1553,181 @@ Ho inoltre creato una libreria di utilità (`src/test/helpers/perf.ts`) per stan
 - Implementare benchmark automatici per monitorare le performance nel tempo
 - Aggiungere avvisi di regressione delle performance in CI/CD
 - Ottimizzare l'utilizzo della memoria in scenari con molti agenti
+
+# Logbook AI1 - Sviluppatore
+
+## 2023-11-23: Refactoring del sistema MASOrchestrator e miglioramento dei test
+
+### Task completati
+
+- [x] Aumentata la copertura di test per `MASOrchestrator.ts`
+- [x] Refactoring del sistema di fallback dei provider LLM
+- [x] Documentazione del comportamento di fallback
+- [x] Creazione di test specifici per il nuovo `LLMFallbackManager`
+
+### Dettaglio delle attività
+
+#### 1. Implementazione di nuovi test per MASOrchestrator
+
+Per aumentare la copertura dei test di MASOrchestrator, ho implementato quattro nuovi test che coprono scenari importanti precedentemente non testati:
+
+1. **Test per cicli tra agenti**: Verifica che l'orchestratore rilevi e gestisca correttamente i cicli tra agenti (es. planner → analyzer → planner).
+   - Implementato un test che simula un ciclo creando un agente analyzer che ritorna al planner
+   - Verificato che il ciclo venga rilevato correttamente e memorizzato (flag `cycleDetected`)
+   - Verificato che l'esecuzione termini correttamente nonostante il ciclo
+
+2. **Test per interruzione al superamento di maxTurns**: Verifica che l'orchestratore rispetti il limite massimo di turni.
+   - Creato un agente che si richiama ricorsivamente per simulare un'esecuzione infinita
+   - Verificato che l'esecuzione si interrompa esattamente dopo il numero di turni specificato
+
+3. **Test per utilizzo di fallbackAgent**: Verifica il corretto funzionamento dell'agente di fallback in caso di errore.
+   - Implementato un agente specializzato per la gestione degli errori
+   - Simulato un errore nell'agente analyzer
+   - Verificato che l'agente di fallback venga chiamato correttamente
+   - Verificato che il contesto preservi sia l'errore che i dati accumulati prima dell'errore
+
+4. **Test per la scrittura in memoria del contesto**: Verifica che il contesto venga aggiornato correttamente dopo ogni agente.
+   - Tracciato ogni aggiornamento della memoria durante l'esecuzione della catena di agenti
+   - Verificato che gli aggiornamenti siano incrementali e contengano i dati di ogni agente
+
+#### 2. Refactoring del sistema di fallback dei provider LLM
+
+Ho effettuato un importante refactoring del sistema di fallback dei provider LLM:
+
+1. **Creazione di una classe dedicata**: Estratto la logica dalla classe interna `ProviderFallbackHandler` in una nuova classe `LLMFallbackManager` nel modulo `src/mas/core/fallback`.
+
+2. **Miglioramento dell'API**: La nuova classe offre:
+   - Configurazione flessibile dei provider
+   - Gestione del provider preferito
+   - Possibilità di configurare il numero di tentativi per provider
+   - Metodi per aggiungere/rimuovere provider dinamicamente
+
+3. **Miglioramento della gestione degli errori**: Il nuovo sistema:
+   - Raccoglie tutti gli errori per diagnostica
+   - Fornisce messaggi di errore più dettagliati
+   - Gestisce i tentativi multipli per ogni provider
+
+4. **Maggiore flessibilità**: MASOrchestrator ora può:
+   - Accettare provider personalizzati
+   - Configurare un provider preferito all'inizializzazione
+   - Ottimizzare il fallback in base alle esigenze
+
+#### 3. Test per il nuovo LLMFallbackManager
+
+Ho creato una suite completa di test per il nuovo gestore di fallback:
+
+1. **Test di funzionalità di base**:
+   - Inizializzazione corretta
+   - Impostazione e recupero del provider preferito
+   - Aggiunta e rimozione di provider
+
+2. **Test dei meccanismi di fallback**:
+   - Verifica del comportamento con provider preferito
+   - Verifica del fallback quando il primo provider fallisce
+   - Verifica dell'errore quando tutti i provider falliscono
+
+3. **Test delle opzioni di configurazione**:
+   - Test con rememberSuccessful=false
+   - Test di tentativi multipli con maxRetries
+
+#### 4. Documentazione
+
+Ho aggiornato la documentazione per spiegare il sistema di fallback:
+
+1. **Documento architetturale**: Creato/aggiornato `docs/architecture/orchestrator.md` con:
+   - Spiegazione generale dell'architettura dell'orchestratore
+   - Sezione dedicata al sistema di fallback dei provider LLM
+   - Esempi pratici e scenari d'uso
+   - Dettagli di configurazione con esempi di codice
+
+### File modificati
+
+1. `src/mas/core/__tests__/MASOrchestrator.test.ts` - Aggiunti nuovi test
+2. `src/mas/core/MASOrchestrator.ts` - Refactoring per utilizzare il nuovo LLMFallbackManager
+3. `src/mas/core/fallback/LLMFallbackManager.ts` - Nuovo file per la gestione del fallback
+4. `src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts` - Test per il nuovo gestore
+5. `docs/architecture/orchestrator.md` - Documentazione aggiornata
+6. `docs/logbook/AI1.md` - Questo file di log
+
+### Osservazioni
+
+Durante l'implementazione, ho notato:
+
+1. La copertura dei test per MASOrchestrator è notevolmente migliorata, coprendo ora tutti i principali scenari d'uso.
+
+2. Il refactoring del sistema di fallback ha portato a un codice più modulare e testabile, con una separazione chiara delle responsabilità.
+
+3. Il nuovo sistema di fallback è più robusto e configurabile, permettendo una maggiore flessibilità nell'integrazione con diversi provider LLM.
+
+4. La documentazione ora fornisce esempi chiari e spiegazioni in linguaggio semplice, rendendo il sistema più accessibile anche a non tecnici.
+
+### Prossimi passi
+
+Potenziali miglioramenti futuri:
+
+1. Aggiungere supporto per strategie di fallback più complesse (es. round-robin, priorità)
+2. Implementare un sistema di rate limiting integrato per ogni provider
+3. Aggiungere metriche e logging dettagliato per le performance dei provider
+4. Estendere i test per coprire scenari di errore più specifici
+
+# Logbook - AI Sviluppatore 1
+
+## Data: 2024-07-13
+
+### Attività: Implementazione del Cooldown per Provider LLM
+
+Oggi ho implementato un'importante funzionalità di resilienza per il sistema di orchestrazione multi-agente: il meccanismo di cooldown per i provider LLM che falliscono.
+
+#### Problema affrontato
+
+Ho identificato che quando un provider LLM fallisce, il sistema continuava a provare a utilizzarlo immediatamente nelle richieste successive, causando:
+- Ritardi inutili nelle risposte
+- Carico eccessivo su provider potenzialmente già in difficoltà
+- Possibile saturazione di limiti di rate in caso di guasti
+
+#### Soluzione implementata
+
+Ho progettato e implementato un meccanismo di cooldown che:
+1. Registra il timestamp dell'ultimo fallimento di ciascun provider
+2. Esclude temporaneamente i provider falliti per un periodo configurabile
+3. Notifica gli eventi di cooldown tramite il sistema di eventi esistente
+4. Permette il ripristino automatico dei provider al termine del periodo di cooldown
+
+#### File modificati
+
+- `src/mas/core/fallback/LLMEventBus.ts`: Aggiunto il nuovo tipo di evento `provider:cooldown`
+- `src/mas/core/fallback/LLMFallbackManager.ts`:
+  - Aggiunto campo `lastFailureTimestamp` all'interfaccia `ProviderStats`
+  - Implementato metodo `isProviderInCooldown` per verificare lo stato
+  - Aggiunto parametro `cooldownMs` alle opzioni di configurazione
+  - Modificato `executeWithFallback` per gestire la logica di cooldown
+  - Aggiornato `recordAttempt` per registrare i timestamp dei fallimenti
+- `src/mas/core/fallback/__tests__/LLMEventBus.test.ts`: Aggiunti test per l'evento di cooldown
+- `src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts`: Aggiunti test per il meccanismo di cooldown
+- `docs/architecture/orchestrator.md`: Aggiornata documentazione con sezione sul cooldown
+
+#### Test implementati
+
+Ho sviluppato test specifici per verificare che:
+- Un provider venga correttamente messo in cooldown dopo un fallimento
+- L'evento `provider:cooldown` venga emesso con il payload corretto
+- Il provider venga automaticamente ripristinato dopo il periodo di cooldown
+- La funzione `isProviderInCooldown` funzioni correttamente
+
+#### Risultato
+
+Il sistema ora è più resiliente e intelligente nella gestione dei fallimenti:
+- Riduce i tentativi inutili verso provider problematici
+- Diminuisce la latenza complessiva privilegiando provider funzionanti
+- Fornisce visibilità in tempo reale sullo stato di cooldown dei provider
+- Permette strategie avanzate di fallback basate sulla storia recente dei provider
+
+#### Prossimi passi
+
+- Implementare lo Strategy Pattern per rendere la strategia di fallback intercambiabile
+- Creare un semplice dashboard in React per visualizzare gli eventi in tempo reale
+- Espandere i test di integrazione per verificare scenari di fallimento più complessi
+
+### Impatto sul sistema
+
+Questa implementazione migliora significativamente la resilienza e l'osservabilità del MASOrchestrator, contribuendo a renderlo più affidabile in scenari di produzione reale dove i provider LLM possono avere problemi temporanei di disponibilità.

@@ -193,4 +193,60 @@ describe('LLMEventBus', () => {
       eventBus.emit('provider:success', { providerId: 'openai' });
     }).not.toThrow();
   });
+  
+  // Test per l'evento provider:cooldown
+  it('dovrebbe emettere e gestire correttamente eventi di cooldown', () => {
+    const cooldownListener = vi.fn();
+    eventBus.on('provider:cooldown', cooldownListener);
+    
+    const cooldownPayload = {
+      providerId: 'openai',
+      cooldownUntil: Date.now() + 60000 // 1 minuto di cooldown
+    };
+    
+    eventBus.emit('provider:cooldown', cooldownPayload);
+    
+    expect(cooldownListener).toHaveBeenCalledTimes(1);
+    expect(cooldownListener).toHaveBeenCalledWith(expect.objectContaining({
+      providerId: 'openai',
+      cooldownUntil: expect.any(Number),
+      timestamp: expect.any(Number)
+    }));
+  });
+  
+  // Test di rimozione di tutti i listener
+  it('dovrebbe permettere di rimuovere tutti i listener', () => {
+    const listener1 = vi.fn();
+    const listener2 = vi.fn();
+    
+    eventBus.on('provider:success', listener1);
+    eventBus.on('provider:failure', listener2);
+    
+    expect(eventBus.listenerCount('provider:success')).toBe(1);
+    expect(eventBus.listenerCount('provider:failure')).toBe(1);
+    
+    eventBus.removeAllListeners();
+    
+    expect(eventBus.listenerCount('provider:success')).toBe(0);
+    expect(eventBus.listenerCount('provider:failure')).toBe(0);
+  });
+  
+  // Test di rimozione di tutti i listener per un evento specifico
+  it('dovrebbe permettere di rimuovere tutti i listener per un evento specifico', () => {
+    const listener1 = vi.fn();
+    const listener2 = vi.fn();
+    const listener3 = vi.fn();
+    
+    eventBus.on('provider:success', listener1);
+    eventBus.on('provider:success', listener2);
+    eventBus.on('provider:failure', listener3);
+    
+    expect(eventBus.listenerCount('provider:success')).toBe(2);
+    expect(eventBus.listenerCount('provider:failure')).toBe(1);
+    
+    eventBus.removeAllListeners('provider:success');
+    
+    expect(eventBus.listenerCount('provider:success')).toBe(0);
+    expect(eventBus.listenerCount('provider:failure')).toBe(1);
+  });
 }); 

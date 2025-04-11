@@ -10,7 +10,8 @@ export type LLMEventName =
   | 'provider:success'    // Emesso quando un provider ha eseguito con successo
   | 'provider:failure'    // Emesso quando un provider ha fallito
   | 'provider:fallback'   // Emesso quando viene selezionato un provider di fallback
-  | 'provider:statsUpdated'; // Emesso quando le statistiche vengono aggiornate
+  | 'provider:statsUpdated' // Emesso quando le statistiche vengono aggiornate
+  | 'provider:cooldown';  // Emesso quando un provider è in cooldown dopo un fallimento
 
 /**
  * Struttura standard di payload per gli eventi

@@ -122,6 +122,57 @@ Il sistema di fallback dei provider LLM è progettato per garantire alta disponi
 3. **Memorizzazione del Successo**: il sistema tiene traccia dell'ultimo provider che ha avuto successo e lo utilizza come preferito per le future richieste
 4. **Resilienza**: se un provider diventa nuovamente disponibile dopo un errore, il sistema può tornare a utilizzarlo
 
+### Cooldown dei Provider
+
+Il sistema implementa un meccanismo di cooldown per evitare di sovraccaricare provider che falliscono frequentemente:
+
+1. **Rilevamento Fallimenti**: Quando un provider fallisce, viene registrato il timestamp del fallimento
+2. **Periodo di Cooldown**: Durante un periodo configurabile (default: 60 secondi), il provider viene temporaneamente escluso dalle richieste
+3. **Notifica Eventi**: Il sistema emette l'evento `provider:cooldown` quando un provider viene messo in cooldown, con dettagli sul periodo di esclusione
+4. **Autoripristino**: Al termine del periodo di cooldown, il provider viene automaticamente reinserito nel pool di disponibilità
+
+Questo approccio permette di:
+- Ridurre il carico su provider instabili, dando loro tempo per riprendersi
+- Accelerare le risposte evitando tentativi verso provider con alta probabilità di fallimento
+- Implementare strategie di backoff esponenziale per gestire errori temporanei
+
+#### Configurazione del Cooldown
+
+Il periodo di cooldown può essere configurato durante l'inizializzazione del manager:
+
+```typescript
+const fallbackManager = new LLMFallbackManager({
+  providers: [openaiProvider, anthropicProvider, mistralProvider],
+  cooldownMs: 120000 // 2 minuti di cooldown
+});
+```
+
+#### Verifica dello Stato di Cooldown
+
+È possibile verificare se un provider è attualmente in cooldown:
+
+```typescript
+// Verifica se OpenAI è in cooldown
+const isInCooldown = fallbackManager.isProviderInCooldown('openai');
+
+if (isInCooldown) {
+  console.log('OpenAI è temporaneamente non disponibile');
+}
+```
+
+#### Monitoraggio dei Cooldown
+
+Gli eventi di cooldown possono essere monitorati per tenere traccia dei provider problematici:
+
+```typescript
+fallbackManager.getEventBus().on('provider:cooldown', (payload) => {
+  console.log(`Provider ${payload.providerId} in cooldown fino a ${new Date(payload.cooldownUntil).toISOString()}`);
+  
+  // Aggiorna il dashboard con lo stato di cooldown
+  updateProviderStatus(payload.providerId, 'cooling');
+});
+```
+
 ### Esempio Pratico
 
 Immaginiamo di avere tre provider LLM configurati: OpenAI, Anthropic e Mistral.
