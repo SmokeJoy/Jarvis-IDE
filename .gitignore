@@ -26,3 +26,8 @@ full-error-log*.txt
 # Backup files
 *.bak
 *~
+
+# Reports di refactoring semantico
+reports/*
+!reports/badges/
+!reports/badges/safe-message-status.svg
