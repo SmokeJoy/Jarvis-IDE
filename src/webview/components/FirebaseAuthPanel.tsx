@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react';
-import { FirebaseAuthMessageType, FirebaseAuthMessageUnion } from '../messages/firebase-auth-message';
-import { isAuthStateChangedMessage, isSignInWithTokenMessage, isLogoutMessage } from '../messages/firebase-auth-message-guards';
+import {
+  FirebaseAuthMessageType,
+  FirebaseAuthMessageUnion,
+} from '../messages/firebase-auth-message';
+import {
+  isAuthStateChangedMessage,
+  isSignInWithTokenMessage,
+  isLogoutMessage,
+} from '../messages/firebase-auth-message-guards';
 
 type FirebaseAuthPanelProps = {
   dispatch: (message: FirebaseAuthMessageUnion) => void;
@@ -13,7 +20,7 @@ export const FirebaseAuthPanel = ({ dispatch }: FirebaseAuthPanelProps) => {
     dispatch({
       type: FirebaseAuthMessageType.SIGN_IN_WITH_TOKEN,
       timestamp: Date.now(),
-      payload: { token }
+      payload: { token },
     });
   };
 
@@ -21,7 +28,7 @@ export const FirebaseAuthPanel = ({ dispatch }: FirebaseAuthPanelProps) => {
     dispatch({
       type: FirebaseAuthMessageType.LOGOUT,
       timestamp: Date.now(),
-      payload: null
+      payload: null,
     });
   };
 

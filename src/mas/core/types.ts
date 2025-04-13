@@ -39,4 +39,4 @@ export interface Agent {
   description: string;
   execute: (context: AgentContext) => Promise<AgentOutput>;
   getSystemPrompt: () => string;
-} 
+}

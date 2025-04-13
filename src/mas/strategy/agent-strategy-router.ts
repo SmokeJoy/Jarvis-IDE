@@ -1,4 +1,4 @@
-import { MASInputMessage, MASOutputMessage } from '../types/mas.types.js';
+import { MASInputMessage, MASOutputMessage } from '../types/mas.types';
 
 export interface StrategyHandler {
   id: 'sequential' | 'parallel' | 'fallback-only' | 'stream-first';
@@ -7,7 +7,7 @@ export interface StrategyHandler {
 
 export class SequentialStrategy implements StrategyHandler {
   id = 'sequential' as const;
-  
+
   async run(input: MASInputMessage): Promise<MASOutputMessage> {
     // Implementazione sequenziale
     return { ...input, strategy: this.id };
@@ -43,10 +43,10 @@ export class StreamFirstStrategy implements StrategyHandler {
 
 export function selectAgentStrategy(agentId: string): StrategyHandler {
   const strategyMap: Record<string, StrategyHandler> = {
-    'agent1': new SequentialStrategy(),
-    'agent2': new ParallelStrategy(),
-    'fallback': new FallbackOnlyStrategy(),
-    'stream': new StreamFirstStrategy()
+    agent1: new SequentialStrategy(),
+    agent2: new ParallelStrategy(),
+    fallback: new FallbackOnlyStrategy(),
+    stream: new StreamFirstStrategy(),
   };
 
   return strategyMap[agentId] || new FallbackOnlyStrategy();

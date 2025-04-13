@@ -3,25 +3,26 @@
  * @module utils/exporters/examples
  */
 
-import { exportSession, exportSessionToFile } from '../index.js';
-import { ExportableSession, ExportFormat } from '../types.js';
+import { exportSession, exportSessionToFile } from '../index';
+import { ExportableSession, ExportFormat } from '../types';
+import { createSafeMessage } from "../../../shared/types/message";
 
 // Esempio di sessione di chat
 const sessionExample: ExportableSession = {
   messages: [
-    { role: 'system', content: 'Sei un assistente AI disponibile in italiano.' },
-    { role: 'user', content: 'Ciao, come funziona l\'esportazione?' },
-    { role: 'assistant', content: 'L\'esportazione permette di salvare la conversazione in vari formati come JSON o YAML. È utile per il backup o la condivisione dei dati.' }
+    createSafeMessage({role: 'system', content: 'Sei un assistente AI disponibile in italiano.'}),
+    createSafeMessage({role: 'user', content: "Ciao, come funziona l'esportazione?"}),
+    createSafeMessage({role: 'assistant', content: "L'esportazione permette di salvare la conversazione in vari formati come JSON o YAML. È utile per il backup o la condivisione dei dati."}),
   ],
   settings: {
     temperature: 0.7,
     model: 'gpt-4',
-    maxTokens: 1000
+    maxTokens: 1000,
   },
   systemPrompt: 'Sei un assistente AI disponibile in italiano.',
   contextFiles: ['README.md', 'documentation.md'],
   modelId: 'gpt-4',
-  timestamp: Date.now()
+  timestamp: Date.now(),
 };
 
 /**
@@ -33,10 +34,10 @@ function esportazioneJSON() {
     const result = exportSession(sessionExample);
     console.log('Contenuto JSON:', result.content);
     console.log('Timestamp esportazione:', new Date(result.timestamp).toISOString());
-    
+
     return result;
   } catch (error) {
-    console.error('Errore nell\'esempio di esportazione JSON:', error);
+    console.error("Errore nell'esempio di esportazione JSON:", error);
   }
 }
 
@@ -51,14 +52,14 @@ function esportazioneYAML() {
       removeNull: true,
       removeUndefined: true,
       maxStringLength: 50, // Limita lunghezza stringhe
-      maxArrayLength: 5,   // Limita numero elementi negli array
-      maxDepth: 3          // Limita profondità oggetti
+      maxArrayLength: 5, // Limita numero elementi negli array
+      maxDepth: 3, // Limita profondità oggetti
     });
-    
+
     console.log('Contenuto YAML:', result.content);
     return result;
   } catch (error) {
-    console.error('Errore nell\'esempio di esportazione YAML:', error);
+    console.error("Errore nell'esempio di esportazione YAML:", error);
   }
 }
 
@@ -70,17 +71,17 @@ async function esportazioneSuFile() {
     // Definisci il formato e il percorso
     const formato: ExportFormat = 'JSON';
     const percorso = './output/sessione-chat.json';
-    
+
     // Esporta e salva su file
     const filePath = await exportSessionToFile(sessionExample, percorso, formato, {
       pretty: true,
-      removeNull: true
+      removeNull: true,
     });
-    
+
     console.log(`File salvato in: ${filePath}`);
     return filePath;
   } catch (error) {
-    console.error('Errore nell\'esempio di esportazione su file:', error);
+    console.error("Errore nell'esempio di esportazione su file:", error);
   }
 }
 
@@ -88,10 +89,10 @@ async function esportazioneSuFile() {
 async function eseguiEsempi() {
   console.log('=== ESEMPIO 1: ESPORTAZIONE JSON ===');
   esportazioneJSON();
-  
+
   console.log('\n=== ESEMPIO 2: ESPORTAZIONE YAML ===');
   esportazioneYAML();
-  
+
   console.log('\n=== ESEMPIO 3: ESPORTAZIONE SU FILE ===');
   await esportazioneSuFile();
 }
@@ -100,5 +101,5 @@ async function eseguiEsempi() {
 if (require.main === module) {
   eseguiEsempi()
     .then(() => console.log('Tutti gli esempi completati.'))
-    .catch(err => console.error('Errore durante l\'esecuzione degli esempi:', err));
-} 
+    .catch((err) => console.error("Errore durante l'esecuzione degli esempi:", err));
+}

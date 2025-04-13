@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { ChatMessage } from '../types/extension.js';
-// import type { ApiConfiguration } from '../shared/types/api.types.js';
-// import type { ExtensionMessage } from '../shared/ExtensionMessage.js';
+import { ChatMessage } from '../types/extension';
+// import type { ApiConfiguration } from '../shared/types/api.types';
+// import type { ExtensionMessage } from '../shared/ExtensionMessage';
 // import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 
@@ -40,10 +40,10 @@ export async function saveChatMessage(message: ChatMessage): Promise<void> {
 
     const historyPath = path.join(workspaceFolder.uri.fsPath, CHAT_HISTORY_FILE);
     const history = await loadChatHistory();
-    
+
     // Se il messaggio è in streaming, aggiorna il messaggio esistente
     if (message.streaming) {
-      const existingIndex = history.findIndex(m => m.id === message.id);
+      const existingIndex = history.findIndex((m) => m.id === message.id);
       if (existingIndex !== -1) {
         history[existingIndex] = message;
       } else {
@@ -74,10 +74,7 @@ export async function clearChatHistory(): Promise<void> {
     }
 
     const historyPath = path.join(workspaceFolder.uri.fsPath, CHAT_HISTORY_FILE);
-    await vscode.workspace.fs.writeFile(
-      vscode.Uri.file(historyPath),
-      Buffer.from('[]')
-    );
+    await vscode.workspace.fs.writeFile(vscode.Uri.file(historyPath), Buffer.from('[]'));
   } catch (error) {
     console.error('Errore nella cancellazione della cronologia:', error);
   }
@@ -88,8 +85,8 @@ export async function clearChatHistory(): Promise<void> {
  * @returns JSON stringificato della chat history
  */
 export async function exportChatHistory(): Promise<string> {
-    const history = await loadChatHistory();
-    return JSON.stringify(history, null, 2);
+  const history = await loadChatHistory();
+  return JSON.stringify(history, null, 2);
 }
 
 /**
@@ -100,8 +97,8 @@ export async function exportChatHistoryAsMarkdown(): Promise<string> {
   try {
     const history = await loadChatHistory();
     let markdown = '# Cronologia Chat\n\n';
-    
-    history.forEach(message => {
+
+    history.forEach((message) => {
       markdown += `## ${message.role === 'user' ? 'Utente' : 'Assistente'}\n`;
       markdown += `*${new Date(message.timestamp).toLocaleString()}*\n\n`;
       markdown += `${message.content}\n\n`;
@@ -110,7 +107,7 @@ export async function exportChatHistoryAsMarkdown(): Promise<string> {
 
     return markdown;
   } catch (error) {
-    console.error('Errore nell\'esportazione in Markdown:', error);
-    return '# Errore nell\'esportazione della cronologia';
+    console.error("Errore nell'esportazione in Markdown:", error);
+    return "# Errore nell'esportazione della cronologia";
   }
-} 
+}

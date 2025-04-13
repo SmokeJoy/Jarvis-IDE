@@ -3,10 +3,10 @@ import ReactMarkdown from 'react-markdown';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import * as vscode from 'vscode-webview';
-import { Message } from '../types/messages.js';
-import { WebviewMessage } from '../types/webview.types.js';
-import { ApiConfiguration } from '../shared/types/api.types.js';
-import { ExtensionMessage } from '../shared/ExtensionMessage.js';
+import { Message } from '../types/messages';
+import { WebviewMessage } from '../types/webview.types';
+import { ApiConfiguration } from '../shared/types/api.types';
+import { ExtensionMessage } from '../shared/ExtensionMessage';
 import { VSCodeButton } from '@vscode/webview-ui-toolkit/react';
 import styled from 'styled-components';
 
@@ -50,17 +50,17 @@ const CodeBlock = styled.div`
   overflow: hidden;
 `;
 
-export function McpView({ code, language = "typescript" }: McpViewProps) {
+export function McpView({ code, language = 'typescript' }: McpViewProps) {
   return (
     <Container data-testid="mcp-container">
       <Title>MCP View</Title>
       <CodeBlock data-testid="code-block">
-                    <SyntaxHighlighter
+        <SyntaxHighlighter
           language={language}
           style={docco}
           customStyle={{
-            background: "var(--vscode-editor-background)",
-            padding: "16px",
+            background: 'var(--vscode-editor-background)',
+            padding: '16px',
           }}
         >
           {code}

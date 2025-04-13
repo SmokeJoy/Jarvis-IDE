@@ -1,27 +1,37 @@
-import { ContextLink } from '../types.js';
+import { ContextLink } from '../types';
 export interface NodeResult {
-    id: string;
-    text?: string;
-    tags?: string[];
+  id: string;
+  text?: string;
+  tags?: string[];
 }
 export interface EdgeResult {
-    id: string;
-    sourceId: string;
-    targetId: string;
-    relation: string;
-    strength?: number;
-    confidence?: number;
+  id: string;
+  sourceId: string;
+  targetId: string;
+  relation: string;
+  strength?: number;
+  confidence?: number;
 }
 export interface NavigationOptions {
-    maxSteps?: number;
-    requireTags?: string[];
-    excludeTags?: string[];
-    preferredRelations?: string[];
-    minStrength?: number;
-    minConfidence?: number;
+  maxSteps?: number;
+  requireTags?: string[];
+  excludeTags?: string[];
+  preferredRelations?: string[];
+  minStrength?: number;
+  minConfidence?: number;
 }
-export declare function calculateSemanticScore(link: ContextLink, options: NavigationOptions): number;
-export declare function buildNodeResult(context: any, includeContent: boolean, includeMetadata: boolean): NodeResult;
+export declare function calculateSemanticScore(
+  link: ContextLink,
+  options: NavigationOptions
+): number;
+export declare function buildNodeResult(
+  context: any,
+  includeContent: boolean,
+  includeMetadata: boolean
+): NodeResult;
 export declare function buildEdgeResult(link: ContextLink, includeMetadata: boolean): EdgeResult;
-export declare function filterLinksByOptions(links: ContextLink[], options: NavigationOptions): ContextLink[];
+export declare function filterLinksByOptions(
+  links: ContextLink[],
+  options: NavigationOptions
+): ContextLink[];
 //# sourceMappingURL=navigationGraph.d.ts.map

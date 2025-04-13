@@ -9,14 +9,14 @@
  * Interfaccia che definisce la struttura di un oggetto memoria
  */
 interface Memory {
-    /** Il ruolo associato alla memoria (user, assistant, system) */
-    role: string;
-    /** Il contenuto testuale della memoria */
-    text: string;
-    /** Il timestamp di creazione della memoria */
-    timestamp: number;
-    /** L'ambito della memoria (chat, project, agent) */
-    scope: string;
+  /** Il ruolo associato alla memoria (user, assistant, system) */
+  role: string;
+  /** Il contenuto testuale della memoria */
+  text: string;
+  /** Il timestamp di creazione della memoria */
+  timestamp: number;
+  /** L'ambito della memoria (chat, project, agent) */
+  scope: string;
 }
 /**
  * Handler per la query di memoria
@@ -24,9 +24,9 @@ interface Memory {
  * @returns Array di oggetti memoria che corrispondono ai criteri di ricerca
  */
 export declare function memoryQueryHandler(args: {
-    scope?: string;
-    filter?: string;
-    limit?: number;
+  scope?: string;
+  filter?: string;
+  limit?: number;
 }): Promise<Memory[]>;
 export {};
 //# sourceMappingURL=memoryQueryHandler.d.ts.map

@@ -1,5 +1,6 @@
 import { LLMStudioProvider } from '../../../src/agent/api/providers/LLMStudioProvider';
 import { ChatMessage } from '../../../src/types/chat.types';
+import { createSafeMessage } from "@/shared/types/message-adapter";
 
 // Mock di fetch globale per simulare le risposte di LLM Studio
 global.fetch = jest.fn();
@@ -10,11 +11,7 @@ describe('LLMStudioProvider', () => {
   const mockBaseUrl = 'http://localhost:1234';
   
   // Messaggio di test
-  const sampleMessage: ChatMessage = {
-    role: 'user',
-    content: [{ type: 'text', text: 'Scrivi una funzione che calcola il fattoriale in Python' }],
-    timestamp: new Date().toISOString()
-  };
+  const sampleMessage: ChatMessage = createSafeMessage('user', 'text', { timestamp: new Date().toISOString() });
 
   beforeEach(() => {
     provider = new LLMStudioProvider();
@@ -37,10 +34,7 @@ describe('LLMStudioProvider', () => {
         model: 'deepseek-coder-6.7b',
         choices: [
           {
-            message: {
-              role: 'assistant',
-              content: 'Ecco una funzione per calcolare il fattoriale in Python:\n\n```python\ndef factorial(n):\n    if n == 0 or n == 1:\n        return 1\n    else:\n        return n * factorial(n-1)\n```\n\nQuesta implementazione usa la ricorsione. In alternativa, puoi anche usare un approccio iterativo:'
-            },
+            message: createSafeMessage({role: 'assistant', content: 'Ecco una funzione per calcolare il fattoriale in Python:\n\n```python\ndef factorial(n):\n    if n == 0 or n == 1:\n        return 1\n    else:\n        return n * factorial(n-1)\n```\n\nQuesta implementazione usa la ricorsione. In alternativa, puoi anche usare un approccio iterativo:'}),
             finish_reason: 'stop',
             index: 0
           }
@@ -81,19 +75,14 @@ describe('LLMStudioProvider', () => {
       }));
 
       // Verifica della risposta trasformata
-      expect(result).toEqual(expect.objectContaining({
-        role: 'assistant',
-        content: expect.arrayContaining([
-          expect.objectContaining({
-            type: 'text',
-            text: expect.stringContaining('Ecco una funzione per calcolare il fattoriale in Python')
-          })
-        ]),
-        timestamp: expect.any(String),
-        providerFields: expect.objectContaining({
-          model: 'deepseek-coder-6.7b'
-        })
-      }));
+      expect(result).toEqual(expect.objectContaining(createSafeMessage({role: 'assistant', content: expect.arrayContaining([
+                                                expect.objectContaining({
+                                                  type: 'text',
+                                                  text: expect.stringContaining('Ecco una funzione per calcolare il fattoriale in Python')
+                                                })
+                                              ]), timestamp: expect.any(String), providerFields: expect.objectContaining({
+                                                model: 'deepseek-coder-6.7b'
+                                              })})));
     });
 
     it('dovrebbe gestire correttamente gli errori di rete', async () => {

@@ -1,24 +1,24 @@
-import * as path from "path";
-import * as fs from "fs/promises";
-import { exec } from "child_process";
-import { promisify } from "util";
-import * as vscode from "vscode";
-import { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
+import * as path from 'path';
+import * as fs from 'fs/promises';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import * as vscode from 'vscode';
+import { McpToolHandler, McpToolResult } from '../../../shared/types/mcp.types';
 
 // Supportiamo ESLint per TypeScript/JavaScript
 let ESLint: any;
 try {
-  const eslintModule = require("eslint");
+  const eslintModule = require('eslint');
   ESLint = eslintModule.ESLint;
 } catch (error) {
-  console.warn("ESLint non disponibile come modulo. Utilizzeremo il fallback CLI.");
+  console.warn('ESLint non disponibile come modulo. Utilizzeremo il fallback CLI.');
 }
 
 // Mock di vscode per ambienti non-VS Code
 const mockVscode = {
   workspace: {
-    workspaceFolders: null
-  }
+    workspaceFolders: null,
+  },
 };
 
 // Usa il vscode reale se disponibile, altrimenti usa il mock
@@ -27,7 +27,7 @@ const vscodeMod = typeof vscode !== 'undefined' ? vscode : mockVscode;
 // Rileva linguaggio dal file
 function detectLanguageFromPath(filePath: string): string {
   const ext = path.extname(filePath).toLowerCase();
-  
+
   const languageMap: Record<string, string> = {
     '.ts': 'typescript',
     '.tsx': 'typescript',
@@ -37,7 +37,7 @@ function detectLanguageFromPath(filePath: string): string {
     '.html': 'html',
     '.css': 'css',
     '.scss': 'scss',
-    '.json': 'json'
+    '.json': 'json',
   };
 
   return languageMap[ext] || null;
@@ -56,22 +56,22 @@ async function fileExists(filePath: string): Promise<boolean> {
 // Eseguo comando di linting Python
 async function lintPythonFile(filePath: string, shouldFix: boolean): Promise<any[]> {
   const execAsync = promisify(exec);
-  
+
   // Determina il comando di linting
-  const fixFlag = shouldFix ? "--fix-errors" : "";
+  const fixFlag = shouldFix ? '--fix-errors' : '';
   const cmd = `pylint ${filePath} --output-format=json ${fixFlag}`;
-  
+
   try {
     const { stdout, stderr } = await execAsync(cmd);
-    
+
     if (stderr) {
       console.warn(`Avviso nell'esecuzione del linting Python: ${stderr}`);
     }
-    
+
     if (!stdout.trim()) {
       return []; // Nessun problema trovato
     }
-    
+
     try {
       // Converti l'output JSON in array di problemi
       const rawIssues = JSON.parse(stdout);
@@ -82,18 +82,20 @@ async function lintPythonFile(filePath: string, shouldFix: boolean): Promise<any
         severity: mapPylintSeverity(issue.type),
         message: issue.message,
         rule: issue.symbol || issue.message_id,
-        fixApplied: shouldFix && issue.fix !== undefined
+        fixApplied: shouldFix && issue.fix !== undefined,
       }));
     } catch (parseError) {
       console.error("Errore nel parsing dell'output pylint:", parseError);
-      return [{
-        path: filePath,
-        line: 0,
-        column: 0,
-        severity: "error",
-        message: `Errore nel parsing dell'output: ${parseError}`,
-        rule: "parser-error"
-      }];
+      return [
+        {
+          path: filePath,
+          line: 0,
+          column: 0,
+          severity: 'error',
+          message: `Errore nel parsing dell'output: ${parseError}`,
+          rule: 'parser-error',
+        },
+      ];
     }
   } catch (error: any) {
     // Pylint può uscire con codice diverso da 0 quando trova problemi
@@ -107,35 +109,37 @@ async function lintPythonFile(filePath: string, shouldFix: boolean): Promise<any
           severity: mapPylintSeverity(issue.type),
           message: issue.message,
           rule: issue.symbol || issue.message_id,
-          fixApplied: shouldFix && issue.fix !== undefined
+          fixApplied: shouldFix && issue.fix !== undefined,
         }));
       } catch {
         // Fallback se l'output non è JSON valido
       }
     }
-    
-    return [{
-      path: filePath,
-      line: 0,
-      column: 0,
-      severity: "error",
-      message: `Errore nell'esecuzione di pylint: ${error.message}`,
-      rule: "execution-error"
-    }];
+
+    return [
+      {
+        path: filePath,
+        line: 0,
+        column: 0,
+        severity: 'error',
+        message: `Errore nell'esecuzione di pylint: ${error.message}`,
+        rule: 'execution-error',
+      },
+    ];
   }
 }
 
 // Mappa la severità di pylint
 function mapPylintSeverity(pylintType: string): string {
   const severityMap: Record<string, string> = {
-    'fatal': 'error',
-    'error': 'error',
-    'warning': 'warning',
-    'convention': 'info',
-    'refactor': 'info',
-    'info': 'info'
+    fatal: 'error',
+    error: 'error',
+    warning: 'warning',
+    convention: 'info',
+    refactor: 'info',
+    info: 'info',
   };
-  
+
   return severityMap[pylintType.toLowerCase()] || 'info';
 }
 
@@ -146,35 +150,37 @@ async function lintJavaScriptFile(filePath: string, shouldFix: boolean): Promise
       // Fallback a CLI se il modulo non è disponibile
       return await lintWithEslintCli(filePath, shouldFix);
     }
-    
+
     // Utilizzo il modulo ESLint
     const eslint = new ESLint({ fix: shouldFix });
-    
+
     // Check se il file è ignorato
     const isIgnored = await eslint.isPathIgnored(filePath);
     if (isIgnored) {
-      return [{
-        path: filePath,
-        line: 0,
-        column: 0,
-        severity: "info",
-        message: "File ignorato da ESLint",
-        rule: "eslint-ignore"
-      }];
+      return [
+        {
+          path: filePath,
+          line: 0,
+          column: 0,
+          severity: 'info',
+          message: 'File ignorato da ESLint',
+          rule: 'eslint-ignore',
+        },
+      ];
     }
-    
+
     // Lint file
     const results = await eslint.lintFiles([filePath]);
-    
+
     // Scrittura correzioni se necessario
     if (shouldFix) {
       await ESLint.outputFixes(results);
     }
-    
+
     if (results.length === 0) {
       return [];
     }
-    
+
     // Formatta risultati
     const issues: any[] = [];
     for (const result of results) {
@@ -185,51 +191,53 @@ async function lintJavaScriptFile(filePath: string, shouldFix: boolean): Promise
           column: message.column || 0,
           severity: mapEslintSeverity(message.severity),
           message: message.message,
-          rule: message.ruleId || "unknown",
-          fixApplied: shouldFix && message.fix !== undefined
+          rule: message.ruleId || 'unknown',
+          fixApplied: shouldFix && message.fix !== undefined,
         });
       }
     }
-    
+
     return issues;
   } catch (error: any) {
     console.error("Errore nell'esecuzione di ESLint:", error);
-    return [{
-      path: filePath,
-      line: 0,
-      column: 0,
-      severity: "error",
-      message: `Errore nell'esecuzione di ESLint: ${error.message}`,
-      rule: "execution-error"
-    }];
+    return [
+      {
+        path: filePath,
+        line: 0,
+        column: 0,
+        severity: 'error',
+        message: `Errore nell'esecuzione di ESLint: ${error.message}`,
+        rule: 'execution-error',
+      },
+    ];
   }
 }
 
 // Fallback a CLI per ESLint
 async function lintWithEslintCli(filePath: string, shouldFix: boolean): Promise<any[]> {
   const execAsync = promisify(exec);
-  
-  const fixFlag = shouldFix ? "--fix" : "";
+
+  const fixFlag = shouldFix ? '--fix' : '';
   const cmd = `npx eslint ${filePath} --format json ${fixFlag}`;
-  
+
   try {
     const { stdout, stderr } = await execAsync(cmd);
-    
+
     if (stderr) {
       console.warn(`Avviso nell'esecuzione di ESLint CLI: ${stderr}`);
     }
-    
+
     if (!stdout.trim()) {
       return []; // Nessun problema trovato
     }
-    
+
     try {
       const results = JSON.parse(stdout);
-      
+
       if (!results || results.length === 0) {
         return [];
       }
-      
+
       // Formatta risultati
       const issues: any[] = [];
       for (const result of results) {
@@ -240,45 +248,50 @@ async function lintWithEslintCli(filePath: string, shouldFix: boolean): Promise<
             column: message.column || 0,
             severity: mapEslintSeverity(message.severity),
             message: message.message,
-            rule: message.ruleId || "unknown",
-            fixApplied: shouldFix && message.fix !== undefined
+            rule: message.ruleId || 'unknown',
+            fixApplied: shouldFix && message.fix !== undefined,
           });
         }
       }
-      
+
       return issues;
     } catch (parseError) {
       console.error("Errore nel parsing dell'output ESLint:", parseError);
-      return [{
+      return [
+        {
+          path: filePath,
+          line: 0,
+          column: 0,
+          severity: 'error',
+          message: `Errore nel parsing dell'output ESLint: ${parseError}`,
+          rule: 'parser-error',
+        },
+      ];
+    }
+  } catch (error: any) {
+    return [
+      {
         path: filePath,
         line: 0,
         column: 0,
-        severity: "error",
-        message: `Errore nel parsing dell'output ESLint: ${parseError}`,
-        rule: "parser-error"
-      }];
-    }
-  } catch (error: any) {
-    return [{
-      path: filePath,
-      line: 0,
-      column: 0,
-      severity: "error",
-      message: `Errore nell'esecuzione di ESLint CLI: ${error.message}`,
-      rule: "execution-error"
-    }];
+        severity: 'error',
+        message: `Errore nell'esecuzione di ESLint CLI: ${error.message}`,
+        rule: 'execution-error',
+      },
+    ];
   }
 }
 
 // Mappa la severità di ESLint
 function mapEslintSeverity(eslintSeverity: string | number): string {
   const severityMap: Record<number, string> = {
-    0: 'info',    // off
+    0: 'info', // off
     1: 'warning', // warning
-    2: 'error'    // error
+    2: 'error', // error
   };
-  
-  const severityNum = typeof eslintSeverity === 'string' ? parseInt(eslintSeverity, 10) : eslintSeverity;
+
+  const severityNum =
+    typeof eslintSeverity === 'string' ? parseInt(eslintSeverity, 10) : eslintSeverity;
   return severityMap[severityNum] || 'info';
 }
 
@@ -288,37 +301,35 @@ export const projectLintHandler: McpToolHandler = async (args): Promise<McpToolR
   const filePath = args?.path;
   let language = args?.language;
   const shouldFix = args?.fix === true;
-  
+
   if (!filePath || typeof filePath !== 'string') {
     return {
       success: false,
       output: null,
-      error: "Parametro 'path' mancante o non valido"
+      error: "Parametro 'path' mancante o non valido",
     };
   }
-  
+
   try {
     // Ottieni il percorso workspace
     let workspacePath = process.cwd();
     if (vscodeMod.workspace.workspaceFolders && vscodeMod.workspace.workspaceFolders.length > 0) {
       workspacePath = vscodeMod.workspace.workspaceFolders[0].uri.fsPath;
     }
-    
+
     // Risolvi path completo
-    const fullPath = path.isAbsolute(filePath) 
-      ? filePath 
-      : path.join(workspacePath, filePath);
-    
+    const fullPath = path.isAbsolute(filePath) ? filePath : path.join(workspacePath, filePath);
+
     // Verifica esistenza file
     const exists = await fileExists(fullPath);
     if (!exists) {
       return {
         success: false,
         output: null,
-        error: `Il file o directory '${filePath}' non esiste`
+        error: `Il file o directory '${filePath}' non esiste`,
       };
     }
-    
+
     // Auto-rileva il linguaggio se non specificato
     if (!language) {
       language = detectLanguageFromPath(fullPath);
@@ -326,14 +337,15 @@ export const projectLintHandler: McpToolHandler = async (args): Promise<McpToolR
         return {
           success: false,
           output: null,
-          error: "Impossibile rilevare automaticamente il linguaggio. Specificare il parametro 'language'"
+          error:
+            "Impossibile rilevare automaticamente il linguaggio. Specificare il parametro 'language'",
         };
       }
     }
-    
+
     // Esegui il linting in base al linguaggio
     let issues: any[] = [];
-    
+
     if (language === 'javascript' || language === 'typescript') {
       issues = await lintJavaScriptFile(fullPath, shouldFix);
     } else if (language === 'python') {
@@ -342,34 +354,34 @@ export const projectLintHandler: McpToolHandler = async (args): Promise<McpToolR
       return {
         success: false,
         output: null,
-        error: `Linguaggio '${language}' non supportato per il linting`
+        error: `Linguaggio '${language}' non supportato per il linting`,
       };
     }
-    
+
     // Genera riassunto
-    const errorCount = issues.filter(i => i.severity === 'error').length;
-    const warningCount = issues.filter(i => i.severity === 'warning').length;
-    const infoCount = issues.filter(i => i.severity === 'info').length;
-    
+    const errorCount = issues.filter((i) => i.severity === 'error').length;
+    const warningCount = issues.filter((i) => i.severity === 'warning').length;
+    const infoCount = issues.filter((i) => i.severity === 'info').length;
+
     const summary = `Trovati ${errorCount} errori, ${warningCount} warning e ${infoCount} info in ${path.basename(fullPath)}`;
-    
+
     const result = {
       success: true,
       issues,
       summary,
-      fixApplied: shouldFix
+      fixApplied: shouldFix,
     };
-    
+
     return {
       success: true,
-      output: JSON.stringify(result)
+      output: JSON.stringify(result),
     };
   } catch (error: any) {
     console.error("Errore nell'esecuzione del linting:", error);
     return {
       success: false,
       output: null,
-      error: `Errore nell'esecuzione del linting: ${error.message}`
+      error: `Errore nell'esecuzione del linting: ${error.message}`,
     };
   }
 };

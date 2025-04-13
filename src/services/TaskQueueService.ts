@@ -1,10 +1,59 @@
 import * as vscode from 'vscode';
-import { Logger } from '../utils/logger.js';
-import { Task, TaskQueueState, TaskStatus } from '../../webview-ui/shared/types.js';
+import { Logger } from '../utils/logger';
+import { Task, TaskQueueState, TaskStatus } from '../../webview-ui/shared/types';
 
 /**
  * Servizio per la gestione della coda dei task
  */
+export interface TaskQueueService {
+  state: TaskQueueState;
+  clear(): void;
+  abort(): void;
+  removeTask(taskId: string): void;
+  updateTaskStatus(taskId: string, status: TaskStatus): void;
+}
+
+export class DefaultTaskQueueService implements TaskQueueService {
+  private _state: TaskQueueState = {
+    tasks: [],
+    running: false,
+    aborted: false,
+    lastUpdated: Date.now(),
+  };
+
+  get state(): TaskQueueState {
+    return this._state;
+  }
+
+  clear(): void {
+    this._state = {
+      tasks: [],
+      running: false,
+      aborted: false,
+      lastUpdated: Date.now(),
+    };
+  }
+
+  abort(): void {
+    this._state.aborted = true;
+    this._state.running = false;
+    this._state.lastUpdated = Date.now();
+  }
+
+  removeTask(taskId: string): void {
+    this._state.tasks = this._state.tasks.filter((task) => task.id !== taskId);
+    this._state.lastUpdated = Date.now();
+  }
+
+  updateTaskStatus(taskId: string, status: TaskStatus): void {
+    const task = this._state.tasks.find((task) => task.id === taskId);
+    if (task) {
+      task.status = status;
+      this._state.lastUpdated = Date.now();
+    }
+  }
+}
+
 export class TaskQueueService {
   private static instance: TaskQueueService;
   private _tasks: Task[] = [];
@@ -47,7 +96,7 @@ export class TaskQueueService {
    * @param taskId ID del task da ottenere
    */
   getTask(taskId: string): Task | undefined {
-    return this._tasks.find(task => task.id === taskId);
+    return this._tasks.find((task) => task.id === taskId);
   }
 
   /**
@@ -58,41 +107,20 @@ export class TaskQueueService {
   }
 
   /**
-   * Rimuove un task dalla coda
-   * @param taskId ID del task da rimuovere
-   */
-  removeTask(taskId: string): boolean {
-    const initialLength = this._tasks.length;
-    this._tasks = this._tasks.filter(task => task.id !== taskId);
-    
-    if (this._tasks.length !== initialLength) {
-      this._logger.debug(`Task rimosso dalla coda: ${taskId}`);
-      this.notifyQueueChanged();
-      return true;
-    }
-    
-    return false;
-  }
-
-  /**
    * Aggiorna lo stato di un task
    * @param taskId ID del task da aggiornare
    * @param status Nuovo stato del task
    * @param details Dettagli aggiuntivi per l'aggiornamento
    */
-  updateTaskStatus(
-    taskId: string, 
-    status: TaskStatus, 
-    details?: Partial<Task>
-  ): boolean {
+  updateTaskStatus(taskId: string, status: TaskStatus, details?: Partial<Task>): boolean {
     const task = this.getTask(taskId);
-    
+
     if (!task) {
       return false;
     }
 
     task.status = status;
-    
+
     if (details) {
       Object.assign(task, details);
     }
@@ -123,13 +151,14 @@ export class TaskQueueService {
   getNextPendingTask(): Task | null {
     // Prima cerca task con priorità alta
     let nextTask = this._tasks.find(
-      task => task.status === 'pending' && task.instruction.priority === 'high'
+      (task) => task.status === 'pending' && task.instruction.priority === 'high'
     );
 
     // Se non ci sono task con priorità alta, cerca quelli con priorità normale
     if (!nextTask) {
       nextTask = this._tasks.find(
-        task => task.status === 'pending' && 
+        (task) =>
+          task.status === 'pending' &&
           (task.instruction.priority === 'normal' || !task.instruction.priority)
       );
     }
@@ -137,7 +166,7 @@ export class TaskQueueService {
     // Se non ci sono task con priorità normale, cerca quelli con priorità bassa
     if (!nextTask) {
       nextTask = this._tasks.find(
-        task => task.status === 'pending' && task.instruction.priority === 'low'
+        (task) => task.status === 'pending' && task.instruction.priority === 'low'
       );
     }
 
@@ -148,20 +177,18 @@ export class TaskQueueService {
    * Ottiene lo stato corrente della coda
    */
   getQueueState(): TaskQueueState {
-    const pendingTasks = this._tasks.filter(task => task.status === 'pending');
-    const completedTasks = this._tasks.filter(task => task.status === 'completed');
-    const failedTasks = this._tasks.filter(task => task.status === 'failed' || task.status === 'aborted');
+    const pendingTasks = this._tasks.filter((task) => task.status === 'pending');
+    const completedTasks = this._tasks.filter((task) => task.status === 'completed');
+    const failedTasks = this._tasks.filter(
+      (task) => task.status === 'failed' || task.status === 'aborted'
+    );
 
     // Raggruppa i task per priorità
-    const highPriorityTasks = pendingTasks.filter(
-      task => task.instruction.priority === 'high'
-    );
+    const highPriorityTasks = pendingTasks.filter((task) => task.instruction.priority === 'high');
     const normalPriorityTasks = pendingTasks.filter(
-      task => task.instruction.priority === 'normal' || !task.instruction.priority
+      (task) => task.instruction.priority === 'normal' || !task.instruction.priority
     );
-    const lowPriorityTasks = pendingTasks.filter(
-      task => task.instruction.priority === 'low'
-    );
+    const lowPriorityTasks = pendingTasks.filter((task) => task.instruction.priority === 'low');
 
     return {
       total: this._tasks.length,
@@ -172,8 +199,8 @@ export class TaskQueueService {
       priorityDistribution: {
         high: highPriorityTasks,
         normal: normalPriorityTasks,
-        low: lowPriorityTasks
-      }
+        low: lowPriorityTasks,
+      },
     };
   }
 
@@ -183,9 +210,9 @@ export class TaskQueueService {
   clearCompletedTasks(): void {
     const initialLength = this._tasks.length;
     this._tasks = this._tasks.filter(
-      task => task.status !== 'completed' && task.status !== 'failed' && task.status !== 'aborted'
+      (task) => task.status !== 'completed' && task.status !== 'failed' && task.status !== 'aborted'
     );
-    
+
     if (this._tasks.length !== initialLength) {
       this._logger.debug('Task completati rimossi dalla coda');
       this.notifyQueueChanged();
@@ -198,4 +225,4 @@ export class TaskQueueService {
   private notifyQueueChanged(): void {
     this._onQueueChanged.fire(this.getQueueState());
   }
-} 
+}

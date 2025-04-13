@@ -36,7 +36,7 @@ export class MemoryManager {
     if (!this.memory.has(key)) {
       this.memory.set(key, []);
     }
-    
+
     const arr = this.memory.get(key);
     if (Array.isArray(arr)) {
       arr.push(value);
@@ -59,4 +59,4 @@ export class MemoryManager {
   public async clear(): Promise<void> {
     this.memory.clear();
   }
-} 
+}

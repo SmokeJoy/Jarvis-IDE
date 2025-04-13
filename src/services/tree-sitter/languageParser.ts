@@ -1,37 +1,37 @@
-import Parser from "web-tree-sitter"
-import { join } from "path"
+import Parser from 'web-tree-sitter';
+import { join } from 'path';
 import {
-	javascriptQuery,
-	typescriptQuery,
-	pythonQuery,
-	rustQuery,
-	goQuery,
-	cppQuery,
-	cQuery,
-	csharpQuery,
-	rubyQuery,
-	javaQuery,
-	phpQuery,
-	swiftQuery,
-	kotlinQuery,
-} from "./queries.js"
+  javascriptQuery,
+  typescriptQuery,
+  pythonQuery,
+  rustQuery,
+  goQuery,
+  cppQuery,
+  cQuery,
+  csharpQuery,
+  rubyQuery,
+  javaQuery,
+  phpQuery,
+  swiftQuery,
+  kotlinQuery,
+} from './queries';
 
 export interface LanguageParser {
-	parser: Parser
-	language: Parser.Language
+  parser: Parser;
+  language: Parser.Language;
 }
 
 async function loadLanguage(langName: string) {
-	return await Parser.Language.load(join(__dirname, `tree-sitter-${langName}.wasm`))
+  return await Parser.Language.load(join(__dirname, `tree-sitter-${langName}.wasm`));
 }
 
-let isParserInitialized = false
+let isParserInitialized = false;
 
 async function initializeParser() {
-	if (!isParserInitialized) {
-		await Parser.init()
-		isParserInitialized = true
-	}
+  if (!isParserInitialized) {
+    await Parser.init();
+    isParserInitialized = true;
+  }
 }
 
 /*
@@ -57,31 +57,31 @@ Sources:
 - https://github.com/tree-sitter/tree-sitter/blob/master/lib/binding_web/test/query-test.js
 */
 export async function loadRequiredLanguageParsers(): Promise<LanguageParser[]> {
-	const parsers: LanguageParser[] = []
-	const languages = ["javascript", "typescript", "python", "java", "cpp"]
+  const parsers: LanguageParser[] = [];
+  const languages = ['javascript', 'typescript', 'python', 'java', 'cpp'];
 
-	for (const lang of languages) {
-		try {
-			const parser = await loadLanguageParser(lang)
-			if (parser) {
-				parsers.push(parser)
-			}
-		} catch (error) {
-			console.error(`Failed to load ${lang} parser:`, error)
-		}
-	}
+  for (const lang of languages) {
+    try {
+      const parser = await loadLanguageParser(lang);
+      if (parser) {
+        parsers.push(parser);
+      }
+    } catch (error) {
+      console.error(`Failed to load ${lang} parser:`, error);
+    }
+  }
 
-	return parsers
+  return parsers;
 }
 
 async function loadLanguageParser(langName: string): Promise<LanguageParser | null> {
-	try {
-		const parser = new Parser()
-		const language = await Parser.Language.load(join(__dirname, `tree-sitter-${langName}.wasm`))
-		parser.setLanguage(language)
-		return { parser, language }
-	} catch (error) {
-		console.error(`Failed to load ${langName} parser:`, error)
-		return null
-	}
+  try {
+    const parser = new Parser();
+    const language = await Parser.Language.load(join(__dirname, `tree-sitter-${langName}.wasm`));
+    parser.setLanguage(language);
+    return { parser, language };
+  } catch (error) {
+    console.error(`Failed to load ${langName} parser:`, error);
+    return null;
+  }
 }

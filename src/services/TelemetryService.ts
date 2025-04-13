@@ -1,15 +1,15 @@
-import { PostHog } from "posthog-node";
-import { TelemetrySetting } from "../types/global.js";
+import { PostHog } from 'posthog-node';
+import { TelemetrySetting } from '../types/global';
 
 export class TelemetryService {
   private client: PostHog | null = null;
-  private telemetrySetting: TelemetrySetting = "ask";
+  private telemetrySetting: TelemetrySetting = 'ask';
 
   constructor(apiKey: string, telemetrySetting: TelemetrySetting) {
     this.telemetrySetting = telemetrySetting;
-    if (telemetrySetting === "enabled") {
+    if (telemetrySetting === 'enabled') {
       this.client = new PostHog(apiKey, {
-        host: "https://app.posthog.com",
+        host: 'https://app.posthog.com',
       });
     }
   }
@@ -20,11 +20,15 @@ export class TelemetryService {
    */
   async initialize(context: any): Promise<void> {
     // In futuro potrebbe essere necessario inizializzare ulteriormente il servizio di telemetria
-    console.log("Telemetria inizializzata");
+    console.log('Telemetria inizializzata');
   }
 
-  async capture(event: string, properties: Record<string, any> = {}, distinctId: string = "anonymous"): Promise<void> {
-    if (this.telemetrySetting === "enabled" && this.client) {
+  async capture(
+    event: string,
+    properties: Record<string, any> = {},
+    distinctId: string = 'anonymous'
+  ): Promise<void> {
+    if (this.telemetrySetting === 'enabled' && this.client) {
       try {
         await this.client.capture({
           distinctId,
@@ -32,7 +36,7 @@ export class TelemetryService {
           properties,
         });
       } catch (error) {
-        console.error("Error capturing telemetry event:", error);
+        console.error('Error capturing telemetry event:', error);
       }
     }
   }
@@ -42,8 +46,8 @@ export class TelemetryService {
       try {
         await this.client.shutdownAsync();
       } catch (error) {
-        console.error("Error shutting down telemetry client:", error);
+        console.error('Error shutting down telemetry client:', error);
       }
     }
   }
-} 
+}

@@ -1,7 +1,10 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ModelSelector } from '../ModelSelector';
 import { useExtensionMessage } from '../../../../hooks/useExtensionMessage';
-import { ModelSelectorMessageType, ModelSelectorMessageUnion } from '../../../../../webview/messages/model-selector-message';
+import {
+  ModelSelectorMessageType,
+  ModelSelectorMessageUnion,
+} from '../../../../../webview/messages/model-selector-message';
 import { isModelListUpdatedMessage } from '../../../../../webview/messages/model-selector-message-guards';
 
 jest.mock('../../../../hooks/useExtensionMessage');
@@ -19,10 +22,10 @@ describe('ModelSelector', () => {
   it('invia messaggio modelSelected alla selezione', () => {
     render(<ModelSelector />);
     fireEvent.click(screen.getByTestId('model-1'));
-    
+
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: ModelSelectorMessageType.MODEL_SELECTED,
-      payload: { modelId: 'model-1' }
+      payload: { modelId: 'model-1' },
     });
   });
 
@@ -34,28 +37,30 @@ describe('ModelSelector', () => {
   it('gestisce aggiornamento lista modelli', () => {
     const testModels = [{ id: 'model-1', name: 'Test Model' }];
     render(<ModelSelector />);
-    
+
     // Simula ricezione messaggio dall'estensione
     const messageHandler = (useExtensionMessage as jest.Mock).mock.calls[0][0];
     messageHandler({
       type: ModelSelectorMessageType.MODEL_LIST_UPDATED,
-      payload: testModels
+      payload: testModels,
     });
 
-    expect(isModelListUpdatedMessage({
-      type: ModelSelectorMessageType.MODEL_LIST_UPDATED,
-      payload: testModels
-    })).toBe(true);
+    expect(
+      isModelListUpdatedMessage({
+        type: ModelSelectorMessageType.MODEL_LIST_UPDATED,
+        payload: testModels,
+      })
+    ).toBe(true);
     expect(screen.getByText('Test Model')).toBeInTheDocument();
   });
 
   it('gestisce errori nel caricamento modelli', () => {
     render(<ModelSelector />);
-    
+
     const messageHandler = (useExtensionMessage as jest.Mock).mock.calls[0][0];
     messageHandler({
       type: ModelSelectorMessageType.MODEL_LOAD_ERROR,
-      payload: { error: 'Errore di connessione' }
+      payload: { error: 'Errore di connessione' },
     });
 
     expect(screen.getByText(/Errore di caricamento modelli/)).toBeInTheDocument();
@@ -63,28 +68,30 @@ describe('ModelSelector', () => {
 
   it('valida i modelli con SecurityManager prima della selezione', () => {
     render(<ModelSelector />);
-    
-    const testModels = [{ 
-      id: 'model-1', 
-      name: 'Test Model',
-      securityLevel: 'trusted',
-      provider: 'approved-vendor'
-    }];
-    
+
+    const testModels = [
+      {
+        id: 'model-1',
+        name: 'Test Model',
+        securityLevel: 'trusted',
+        provider: 'approved-vendor',
+      },
+    ];
+
     const messageHandler = (useExtensionMessage as jest.Mock).mock.calls[0][0];
     messageHandler({
       type: ModelSelectorMessageType.MODEL_LIST_UPDATED,
-      payload: testModels
+      payload: testModels,
     });
 
     fireEvent.click(screen.getByTestId('model-1'));
-    
+
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: ModelSelectorMessageType.MODEL_SELECTED,
         payload: expect.objectContaining({
-          securityCheck: true
-        })
+          securityCheck: true,
+        }),
       })
     );
   });
@@ -92,23 +99,23 @@ describe('ModelSelector', () => {
   it('implementa fallback automatico su modelli compatibili', () => {
     const testModels = [
       { id: 'model-1', name: 'Primary Model', status: 'unavailable' },
-      { id: 'model-2', name: 'Fallback Model', status: 'active' }
+      { id: 'model-2', name: 'Fallback Model', status: 'active' },
     ];
-    
+
     render(<ModelSelector />);
-    
+
     const messageHandler = (useExtensionMessage as jest.Mock).mock.calls[0][0];
     messageHandler({
       type: ModelSelectorMessageType.MODEL_LIST_UPDATED,
-      payload: testModels
+      payload: testModels,
     });
 
     fireEvent.click(screen.getByTestId('model-1'));
-    
+
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: ModelSelectorMessageType.MODEL_SELECTED,
-        payload: { modelId: 'model-2' }
+        payload: { modelId: 'model-2' },
       })
     );
   });

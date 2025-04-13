@@ -1,17 +1,17 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, test } from 'vitest';
 import {
   ExtensionMessage,
   ExtensionCommand,
   ExtensionConfiguration,
   ExtensionState,
   ExtensionContext,
-} from "./extension.js";
+} from './extension';
 
-describe("Extension Types", () => {
-  test("ExtensionMessage should have correct structure", () => {
+describe('Extension Types', () => {
+  test('ExtensionMessage should have correct structure', () => {
     const message: ExtensionMessage = {
-      type: "test",
-      payload: { data: "test" },
+      type: 'test',
+      payload: { data: 'test' },
     };
     expect(message).toMatchObject({
       type: expect.any(String),
@@ -19,12 +19,12 @@ describe("Extension Types", () => {
     });
   });
 
-  test("ExtensionCommand should have correct structure", () => {
+  test('ExtensionCommand should have correct structure', () => {
     const command: ExtensionCommand = {
-      command: "test.command",
-      title: "Test Command",
-      category: "Test Category",
-      when: "test-condition",
+      command: 'test.command',
+      title: 'Test Command',
+      category: 'Test Category',
+      when: 'test-condition',
     };
     expect(command).toMatchObject({
       command: expect.any(String),
@@ -34,20 +34,20 @@ describe("Extension Types", () => {
     });
   });
 
-  test("ExtensionConfiguration should have correct structure", () => {
+  test('ExtensionConfiguration should have correct structure', () => {
     const config: ExtensionConfiguration = {
       api: {
-        provider: "openai",
-        apiKey: "test-key",
+        provider: 'openai',
+        apiKey: 'test-key',
       },
       telemetry: {
         enabled: true,
-        apiKey: "test-telemetry-key",
+        apiKey: 'test-telemetry-key',
       },
       ui: {
-        theme: "dark",
+        theme: 'dark',
         fontSize: 14,
-        fontFamily: "Consolas",
+        fontFamily: 'Consolas',
       },
     };
     expect(config).toMatchObject({
@@ -67,21 +67,21 @@ describe("Extension Types", () => {
     });
   });
 
-  test("ExtensionState should have correct structure", () => {
+  test('ExtensionState should have correct structure', () => {
     const state: ExtensionState = {
       messages: [],
       config: {
         api: {
-          provider: "openai",
-          apiKey: "test-key",
+          provider: 'openai',
+          apiKey: 'test-key',
         },
         telemetry: {
           enabled: true,
         },
         ui: {
-          theme: "dark",
+          theme: 'dark',
           fontSize: 14,
-          fontFamily: "Consolas",
+          fontFamily: 'Consolas',
         },
       },
       isLoading: false,
@@ -93,24 +93,24 @@ describe("Extension Types", () => {
     });
   });
 
-  test("ExtensionContext should have correct structure", () => {
+  test('ExtensionContext should have correct structure', () => {
     const context: ExtensionContext = {
-      extensionPath: "/test/path",
+      extensionPath: '/test/path',
       subscriptions: [],
       workspaceState: {
         messages: [],
         config: {
           api: {
-            provider: "openai",
-            apiKey: "test-key",
+            provider: 'openai',
+            apiKey: 'test-key',
           },
           telemetry: {
             enabled: true,
           },
           ui: {
-            theme: "dark",
+            theme: 'dark',
             fontSize: 14,
-            fontFamily: "Consolas",
+            fontFamily: 'Consolas',
           },
         },
         isLoading: false,
@@ -119,16 +119,16 @@ describe("Extension Types", () => {
         messages: [],
         config: {
           api: {
-            provider: "openai",
-            apiKey: "test-key",
+            provider: 'openai',
+            apiKey: 'test-key',
           },
           telemetry: {
             enabled: true,
           },
           ui: {
-            theme: "dark",
+            theme: 'dark',
             fontSize: 14,
-            fontFamily: "Consolas",
+            fontFamily: 'Consolas',
           },
         },
         isLoading: false,
@@ -141,4 +141,4 @@ describe("Extension Types", () => {
       globalState: expect.any(Object),
     });
   });
-}); 
+});

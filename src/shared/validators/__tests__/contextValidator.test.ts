@@ -12,7 +12,7 @@ import {
   validateContextData,
   validateContextMetadata,
   isValidContextId,
-  validateContextArray
+  validateContextArray,
 } from '../contextValidator';
 
 // Mock del logger
@@ -20,8 +20,8 @@ vi.mock('../../logging', () => ({
   Logger: {
     error: vi.fn(),
     warn: vi.fn(),
-    debug: vi.fn()
-  }
+    debug: vi.fn(),
+  },
 }));
 
 describe('Context Validators', () => {
@@ -37,8 +37,8 @@ describe('Context Validators', () => {
         type: 'text',
         metadata: {
           timestamp: Date.now(),
-          source: 'user'
-        }
+          source: 'user',
+        },
       };
 
       const result = validateContextData(validContext);
@@ -49,7 +49,7 @@ describe('Context Validators', () => {
     it('dovrebbe rifiutare dati di contesto non validi', () => {
       const invalidContext = {
         content: 'Missing ID',
-        type: 'text'
+        type: 'text',
       };
 
       const result = validateContextData(invalidContext as ContextData);
@@ -61,15 +61,15 @@ describe('Context Validators', () => {
 
     it('dovrebbe validare tipi di contesto supportati', () => {
       const validTypes = ['text', 'code', 'image', 'file'];
-      
-      validTypes.forEach(type => {
+
+      validTypes.forEach((type) => {
         const context: ContextData = {
           id: 'ctx_123',
           content: 'Test content',
           type,
-          metadata: { timestamp: Date.now() }
+          metadata: { timestamp: Date.now() },
         };
-        
+
         const result = validateContextData(context);
         expect(result.isValid).toBe(true);
       });
@@ -79,7 +79,7 @@ describe('Context Validators', () => {
         id: 'ctx_123',
         content: 'Test content',
         type: 'invalid_type' as any,
-        metadata: { timestamp: Date.now() }
+        metadata: { timestamp: Date.now() },
       };
 
       const result = validateContextData(invalidContext);
@@ -94,7 +94,7 @@ describe('Context Validators', () => {
         id: 'ctx_123',
         content: longContent,
         type: 'text',
-        metadata: { timestamp: Date.now() }
+        metadata: { timestamp: Date.now() },
       };
 
       const result = validateContextData(context);
@@ -109,7 +109,7 @@ describe('Context Validators', () => {
       const validMetadata = {
         timestamp: Date.now(),
         source: 'user',
-        tags: ['test', 'validation']
+        tags: ['test', 'validation'],
       };
 
       const result = validateContextMetadata(validMetadata);
@@ -119,7 +119,7 @@ describe('Context Validators', () => {
     it('dovrebbe rifiutare metadata non validi', () => {
       const invalidMetadata = {
         timestamp: 'not a number',
-        tags: 'not an array'
+        tags: 'not an array',
       };
 
       const result = validateContextMetadata(invalidMetadata);
@@ -151,14 +151,14 @@ describe('Context Validators', () => {
           id: 'ctx_1',
           content: 'Test 1',
           type: 'text',
-          metadata: { timestamp: Date.now() }
+          metadata: { timestamp: Date.now() },
         },
         {
           id: 'ctx_2',
           content: 'Test 2',
           type: 'code',
-          metadata: { timestamp: Date.now() }
-        }
+          metadata: { timestamp: Date.now() },
+        },
       ];
 
       const result = validateContextArray(contexts);
@@ -172,20 +172,20 @@ describe('Context Validators', () => {
           id: 'ctx_1',
           content: 'Valid',
           type: 'text',
-          metadata: { timestamp: Date.now() }
+          metadata: { timestamp: Date.now() },
         },
         {
           // ID mancante
           content: 'Invalid',
           type: 'text',
-          metadata: { timestamp: Date.now() }
-        }
+          metadata: { timestamp: Date.now() },
+        },
       ];
 
       const result = validateContextArray(contexts as ContextData[]);
       expect(result.isValid).toBe(false);
       expect(result.errors).toBeDefined();
-      expect(result.errors).toContain('Contesto non valido all\'indice 1');
+      expect(result.errors).toContain("Contesto non valido all'indice 1");
     });
 
     it('dovrebbe gestire input non array', () => {
@@ -201,4 +201,4 @@ describe('Context Validators', () => {
       expect(result.errors).toBeUndefined();
     });
   });
-}); 
+});

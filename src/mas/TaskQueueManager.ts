@@ -1,5 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Task, TaskResult, TaskStatus, PriorityLevel, Instruction } from '../shared/types/mas.types.js';
+import {
+  Task,
+  TaskResult,
+  TaskStatus,
+  PriorityLevel,
+  Instruction,
+} from '../shared/types/mas.types';
 
 /**
  * Interfaccia che rappresenta lo stato della coda dei task
@@ -25,29 +31,29 @@ export class TaskQueueManager {
   private highPriorityQueue: Task[] = [];
   private normalPriorityQueue: Task[] = [];
   private lowPriorityQueue: Task[] = [];
-  
+
   // Task attualmente in esecuzione
   private activeTask: Task | null = null;
-  
+
   // Storico dei task completati e falliti
   private completedTasks: Task[] = [];
   private failedTasks: Task[] = [];
-  
+
   // Statistiche
   private stats = {
     addedCount: 0,
     completedCount: 0,
     failedCount: 0,
-    abortedCount: 0
+    abortedCount: 0,
   };
-  
+
   /**
    * Costruttore del TaskQueueManager
    */
   constructor() {
     // Inizializzazione se necessaria
   }
-  
+
   /**
    * Aggiunge un nuovo task alla coda appropriata in base alla sua priorità
    * @param task Il task da aggiungere
@@ -63,13 +69,13 @@ export class TaskQueueManager {
       instruction: {
         ...task.instruction,
         // Assicura che l'istruzione abbia un ID
-        id: task.instruction.id || uuidv4()
-      }
+        id: task.instruction.id || uuidv4(),
+      },
     };
-    
+
     // Determina in quale coda aggiungere il task in base alla priorità
     const priority = task.instruction.priority || 'normal';
-    
+
     switch (priority) {
       case 'high':
         this.highPriorityQueue.push(newTask);
@@ -83,13 +89,13 @@ export class TaskQueueManager {
       default:
         this.normalPriorityQueue.push(newTask);
     }
-    
+
     // Aggiorna le statistiche
     this.stats.addedCount++;
-    
+
     return newTask;
   }
-  
+
   /**
    * Ottiene e avvia il prossimo task dalla coda con la priorità più alta
    * @returns Il task avviato o null se non ci sono task in attesa
@@ -99,10 +105,10 @@ export class TaskQueueManager {
     if (this.activeTask) {
       return null;
     }
-    
+
     // Preleva il prossimo task dalla coda con priorità più alta
     let nextTask: Task | undefined;
-    
+
     if (this.highPriorityQueue.length > 0) {
       nextTask = this.highPriorityQueue.shift();
     } else if (this.normalPriorityQueue.length > 0) {
@@ -110,21 +116,21 @@ export class TaskQueueManager {
     } else if (this.lowPriorityQueue.length > 0) {
       nextTask = this.lowPriorityQueue.shift();
     }
-    
+
     if (nextTask) {
       // Aggiorna lo stato del task
       nextTask.status = 'active';
       nextTask.startedAt = new Date();
-      
+
       // Imposta il task come attivo
       this.activeTask = nextTask;
-      
+
       return nextTask;
     }
-    
+
     return null;
   }
-  
+
   /**
    * Completa il task attualmente attivo
    * @param result Risultato dell'elaborazione del task
@@ -134,27 +140,27 @@ export class TaskQueueManager {
     if (!this.activeTask) {
       return null;
     }
-    
+
     // Copia il task attivo
     const completedTask = { ...this.activeTask };
-    
+
     // Aggiorna lo stato e il risultato
     completedTask.status = 'completed';
     completedTask.result = result;
     completedTask.completedAt = new Date();
-    
+
     // Aggiungi alla lista dei task completati
     this.completedTasks.push(completedTask);
-    
+
     // Aggiorna le statistiche
     this.stats.completedCount++;
-    
+
     // Reimposta il task attivo
     this.activeTask = null;
-    
+
     return completedTask;
   }
-  
+
   /**
    * Fallisce il task attualmente attivo
    * @param error Messaggio di errore o ragione del fallimento
@@ -164,27 +170,27 @@ export class TaskQueueManager {
     if (!this.activeTask) {
       return null;
     }
-    
+
     // Copia il task attivo
     const failedTask = { ...this.activeTask };
-    
+
     // Aggiorna lo stato e aggiungi l'errore
     failedTask.status = 'failed';
     failedTask.error = error;
     failedTask.completedAt = new Date();
-    
+
     // Aggiungi alla lista dei task falliti
     this.failedTasks.push(failedTask);
-    
+
     // Aggiorna le statistiche
     this.stats.failedCount++;
-    
+
     // Reimposta il task attivo
     this.activeTask = null;
-    
+
     return failedTask;
   }
-  
+
   /**
    * Annulla un task specifico
    * @param taskId ID del task da annullare
@@ -196,50 +202,50 @@ export class TaskQueueManager {
       // Aggiorna lo stato e azzera il task attivo
       this.activeTask.status = 'aborted';
       this.activeTask.completedAt = new Date();
-      
+
       // Aggiungi alla lista dei task falliti
       this.failedTasks.push({ ...this.activeTask });
-      
+
       // Aggiorna le statistiche
       this.stats.abortedCount++;
-      
+
       // Reimposta il task attivo
       this.activeTask = null;
-      
+
       return true;
     }
-    
+
     // Cerca nelle varie code di priorità
     const findAndRemove = (queue: Task[]): boolean => {
-      const index = queue.findIndex(task => task.id === taskId);
-      
+      const index = queue.findIndex((task) => task.id === taskId);
+
       if (index !== -1) {
         // Aggiorna lo stato del task
         queue[index].status = 'aborted';
         queue[index].completedAt = new Date();
-        
+
         // Aggiungi alla lista dei task falliti
         this.failedTasks.push({ ...queue[index] });
-        
+
         // Rimuovi dalla coda
         queue.splice(index, 1);
-        
+
         // Aggiorna le statistiche
         this.stats.abortedCount++;
-        
+
         return true;
       }
-      
+
       return false;
     };
-    
+
     return (
       findAndRemove(this.highPriorityQueue) ||
       findAndRemove(this.normalPriorityQueue) ||
       findAndRemove(this.lowPriorityQueue)
     );
   }
-  
+
   /**
    * Ottiene il task attualmente in esecuzione
    * @returns Il task attivo o null se non ce n'è nessuno
@@ -247,23 +253,23 @@ export class TaskQueueManager {
   public getActiveTask(): Task | null {
     return this.activeTask;
   }
-  
+
   /**
    * Ottiene lo stato corrente della coda dei task
    * @returns Stato della coda dei task
    */
   public getQueueState(): TaskQueueState {
     return {
-      total: 
-        this.highPriorityQueue.length + 
-        this.normalPriorityQueue.length + 
+      total:
+        this.highPriorityQueue.length +
+        this.normalPriorityQueue.length +
         this.lowPriorityQueue.length +
         (this.activeTask ? 1 : 0) +
         this.completedTasks.length +
         this.failedTasks.length,
-      pending: 
-        this.highPriorityQueue.length + 
-        this.normalPriorityQueue.length + 
+      pending:
+        this.highPriorityQueue.length +
+        this.normalPriorityQueue.length +
         this.lowPriorityQueue.length,
       active: this.activeTask,
       completed: this.completedTasks.length,
@@ -271,11 +277,11 @@ export class TaskQueueManager {
       priorityDistribution: {
         high: this.highPriorityQueue.length,
         normal: this.normalPriorityQueue.length,
-        low: this.lowPriorityQueue.length
-      }
+        low: this.lowPriorityQueue.length,
+      },
     };
   }
-  
+
   /**
    * Ottiene tutti i task, inclusi quelli completati e falliti
    * @returns Un array di tutti i task
@@ -287,10 +293,10 @@ export class TaskQueueManager {
       ...this.lowPriorityQueue,
       ...(this.activeTask ? [this.activeTask] : []),
       ...this.completedTasks,
-      ...this.failedTasks
+      ...this.failedTasks,
     ];
   }
-  
+
   /**
    * Ottiene la storia dei task completati
    * @param limit Numero massimo di task da restituire (opzionale)
@@ -300,10 +306,10 @@ export class TaskQueueManager {
     const sorted = [...this.completedTasks].sort((a, b) => {
       return (b.completedAt?.getTime() || 0) - (a.completedAt?.getTime() || 0);
     });
-    
+
     return limit ? sorted.slice(0, limit) : sorted;
   }
-  
+
   /**
    * Ottiene la storia dei task falliti
    * @param limit Numero massimo di task da restituire (opzionale)
@@ -313,10 +319,10 @@ export class TaskQueueManager {
     const sorted = [...this.failedTasks].sort((a, b) => {
       return (b.completedAt?.getTime() || 0) - (a.completedAt?.getTime() || 0);
     });
-    
+
     return limit ? sorted.slice(0, limit) : sorted;
   }
-  
+
   /**
    * Ottiene le statistiche della coda
    * @returns Statistiche dei task elaborati
@@ -324,7 +330,7 @@ export class TaskQueueManager {
   public getStats() {
     return { ...this.stats };
   }
-  
+
   /**
    * Pulisce la cronologia dei task completati e falliti
    */
@@ -332,7 +338,7 @@ export class TaskQueueManager {
     this.completedTasks = [];
     this.failedTasks = [];
   }
-  
+
   /**
    * Ripristina completamente la coda dei task
    */
@@ -347,10 +353,10 @@ export class TaskQueueManager {
       addedCount: 0,
       completedCount: 0,
       failedCount: 0,
-      abortedCount: 0
+      abortedCount: 0,
     };
   }
-  
+
   /**
    * Ottiene tutti i task attualmente in coda ad alta priorità
    * @returns Array dei task ad alta priorità
@@ -358,7 +364,7 @@ export class TaskQueueManager {
   public getHighPriorityTasks(): Task[] {
     return [...this.highPriorityQueue];
   }
-  
+
   /**
    * Ottiene tutti i task attualmente in coda a priorità normale
    * @returns Array dei task a priorità normale
@@ -366,7 +372,7 @@ export class TaskQueueManager {
   public getNormalPriorityTasks(): Task[] {
     return [...this.normalPriorityQueue];
   }
-  
+
   /**
    * Ottiene tutti i task attualmente in coda a bassa priorità
    * @returns Array dei task a bassa priorità
@@ -374,4 +380,4 @@ export class TaskQueueManager {
   public getLowPriorityTasks(): Task[] {
     return [...this.lowPriorityQueue];
   }
-} 
+}

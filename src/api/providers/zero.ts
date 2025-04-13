@@ -1,9 +1,9 @@
-import { ApiHandler } from "../index.js"
-import { ApiHandlerOptions, ModelInfo } from "../../shared/types/api.types.js"
-import { calculateApiCostOpenAI } from "../../utils/cost.js"
-import { convertToOpenAiMessages } from "../transform/openai-format.js"
-import { ApiStream, ApiStreamChunk } from "../transform/stream.js"
-import { convertToR1Format } from "../transform/r1-format.js"
-import { BaseStreamHandler } from "../handlers/BaseStreamHandler.js"
-import { logger } from "../../utils/logger.js"
-// ... existing code ... 
+import { ApiHandler } from '../index';
+import { ApiHandlerOptions, ModelInfo } from '../../shared/types/api.types';
+import { calculateApiCostOpenAI } from '../../utils/cost';
+import { convertToOpenAiMessages } from '../transform/openai-format';
+import { ApiStream, ApiStreamChunk } from '../transform/stream';
+import { convertToR1Format } from '../transform/r1-format';
+import { BaseStreamHandler } from '../handlers/BaseStreamHandler';
+import { logger } from '../../utils/logger';
+// ... existing code ...

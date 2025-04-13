@@ -1,8 +1,12 @@
-import { McpToolHandler } from "../../../shared/types/mcp.types.js";
+import { McpToolHandler } from '../../../shared/types/mcp.types';
 /**
  * Cerca contesti che corrispondono ai tag specificati
  */
-export declare function searchContextsByTags(tags: string[], scope?: string, similarityThreshold?: number): any[];
+export declare function searchContextsByTags(
+  tags: string[],
+  scope?: string,
+  similarityThreshold?: number
+): any[];
 /**
  * Handler principale per context.searchByTags
  */

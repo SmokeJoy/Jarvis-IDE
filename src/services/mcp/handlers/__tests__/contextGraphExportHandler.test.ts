@@ -10,11 +10,11 @@ import { getMemoryContexts } from '../../../memory/context';
 
 // Mock delle dipendenze
 vi.mock('../../../memory/context', () => ({
-  getMemoryContexts: vi.fn()
+  getMemoryContexts: vi.fn(),
 }));
 
 vi.mock('fs/promises', () => ({
-  readFile: vi.fn()
+  readFile: vi.fn(),
 }));
 
 describe('contextGraphExportHandler', () => {
@@ -23,20 +23,20 @@ describe('contextGraphExportHandler', () => {
       id: 'root',
       text: 'Test root',
       tags: ['test'],
-      timestamp: Date.now()
+      timestamp: Date.now(),
     },
     {
       id: 'child1',
       text: 'Test child 1',
       tags: ['test'],
-      timestamp: Date.now()
+      timestamp: Date.now(),
     },
     {
       id: 'child2',
       text: 'Test child 2',
       tags: ['test'],
-      timestamp: Date.now()
-    }
+      timestamp: Date.now(),
+    },
   ];
 
   const mockLinks: ContextLink[] = [
@@ -50,8 +50,8 @@ describe('contextGraphExportHandler', () => {
       metadata: {
         confidence: 0.9,
         source: 'test',
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     },
     {
       id: 'link2',
@@ -63,9 +63,9 @@ describe('contextGraphExportHandler', () => {
       metadata: {
         confidence: 0.8,
         source: 'test',
-        timestamp: new Date().toISOString()
-      }
-    }
+        timestamp: new Date().toISOString(),
+      },
+    },
   ];
 
   beforeEach(() => {
@@ -84,7 +84,7 @@ describe('contextGraphExportHandler', () => {
     it('dovrebbe rifiutare formati non supportati', async () => {
       const result = await contextGraphExportHandler({
         rootId: 'root',
-        format: 'invalid' as any
+        format: 'invalid' as any,
       });
       expect(result.success).toBe(false);
       expect(result.error).toContain('Formato non supportato');
@@ -93,7 +93,7 @@ describe('contextGraphExportHandler', () => {
     it('dovrebbe rifiutare valori di strength non validi', async () => {
       const result = await contextGraphExportHandler({
         rootId: 'root',
-        minStrength: 2
+        minStrength: 2,
       });
       expect(result.success).toBe(false);
       expect(result.error).toContain('minStrength deve essere tra');
@@ -102,7 +102,7 @@ describe('contextGraphExportHandler', () => {
     it('dovrebbe rifiutare valori di confidence non validi', async () => {
       const result = await contextGraphExportHandler({
         rootId: 'root',
-        minConfidence: -1
+        minConfidence: -1,
       });
       expect(result.success).toBe(false);
       expect(result.error).toContain('minConfidence deve essere tra');
@@ -113,7 +113,7 @@ describe('contextGraphExportHandler', () => {
     it('dovrebbe esportare in formato DOT', async () => {
       const result = await contextGraphExportHandler({
         rootId: 'root',
-        format: 'dot'
+        format: 'dot',
       });
       expect(result.success).toBe(true);
       expect(result.output).toContain('digraph');
@@ -125,7 +125,7 @@ describe('contextGraphExportHandler', () => {
     it('dovrebbe esportare in formato Mermaid', async () => {
       const result = await contextGraphExportHandler({
         rootId: 'root',
-        format: 'mermaid'
+        format: 'mermaid',
       });
       expect(result.success).toBe(true);
       expect(result.output).toContain('graph');
@@ -137,7 +137,7 @@ describe('contextGraphExportHandler', () => {
     it('dovrebbe esportare in formato GraphML', async () => {
       const result = await contextGraphExportHandler({
         rootId: 'root',
-        format: 'graphml'
+        format: 'graphml',
       });
       expect(result.success).toBe(true);
       expect(result.output).toContain('<?xml');
@@ -150,7 +150,7 @@ describe('contextGraphExportHandler', () => {
     it('dovrebbe esportare in formato JSON-LD', async () => {
       const result = await contextGraphExportHandler({
         rootId: 'root',
-        format: 'json-ld'
+        format: 'json-ld',
       });
       expect(result.success).toBe(true);
       expect(result.output).toContain('@context');
@@ -165,7 +165,7 @@ describe('contextGraphExportHandler', () => {
     it('dovrebbe filtrare per direzione incoming', async () => {
       const result = await contextGraphExportHandler({
         rootId: 'child1',
-        direction: 'incoming'
+        direction: 'incoming',
       });
       expect(result.success).toBe(true);
       expect(result.output).toContain('root');
@@ -175,7 +175,7 @@ describe('contextGraphExportHandler', () => {
     it('dovrebbe filtrare per direzione outgoing', async () => {
       const result = await contextGraphExportHandler({
         rootId: 'root',
-        direction: 'outgoing'
+        direction: 'outgoing',
       });
       expect(result.success).toBe(true);
       expect(result.output).toContain('child1');
@@ -185,7 +185,7 @@ describe('contextGraphExportHandler', () => {
     it('dovrebbe filtrare per relazione', async () => {
       const result = await contextGraphExportHandler({
         rootId: 'root',
-        relation: 'contains'
+        relation: 'contains',
       });
       expect(result.success).toBe(true);
       expect(result.output).toContain('child1');
@@ -195,7 +195,7 @@ describe('contextGraphExportHandler', () => {
     it('dovrebbe filtrare per strength minima', async () => {
       const result = await contextGraphExportHandler({
         rootId: 'root',
-        minStrength: 0.75
+        minStrength: 0.75,
       });
       expect(result.success).toBe(true);
       expect(result.output).toContain('child1');
@@ -205,7 +205,7 @@ describe('contextGraphExportHandler', () => {
     it('dovrebbe filtrare per confidence minima', async () => {
       const result = await contextGraphExportHandler({
         rootId: 'root',
-        minConfidence: 0.85
+        minConfidence: 0.85,
       });
       expect(result.success).toBe(true);
       expect(result.output).toContain('child1');
@@ -217,19 +217,19 @@ describe('contextGraphExportHandler', () => {
     it('dovrebbe gestire errori di lettura file', async () => {
       (readFile as any).mockRejectedValue(new Error('File not found'));
       const result = await contextGraphExportHandler({
-        rootId: 'root'
+        rootId: 'root',
       });
       expect(result.success).toBe(false);
-      expect(result.error).toContain('Errore durante l\'esportazione del grafo');
+      expect(result.error).toContain("Errore durante l'esportazione del grafo");
     });
 
     it('dovrebbe gestire contesto radice non trovato', async () => {
       (getMemoryContexts as any).mockResolvedValue([]);
       const result = await contextGraphExportHandler({
-        rootId: 'nonexistent'
+        rootId: 'nonexistent',
       });
       expect(result.success).toBe(false);
       expect(result.error).toContain('non trovato');
     });
   });
-}); 
+});

@@ -1,6 +1,6 @@
-import { ChatCompletionOptions } from "openai/resources/chat/completions.mjs"
+import { ChatCompletionOptions } from 'openai/resources/chat/completions.mjs';
 
-declare module "openai/resources/chat/completions.mjs" {
+declare module 'openai/resources/chat/completions.mjs' {
   interface ChatCompletionOptions {
     model: string;
     messages: ChatCompletionMessageParam[];
@@ -14,4 +14,4 @@ declare module "openai/resources/chat/completions.mjs" {
   }
 }
 
-export type { ChatCompletionOptions }; 
+export type { ChatCompletionOptions };

@@ -4,10 +4,10 @@
  */
 
 // Esporta tutti i tipi dal file di protocollo
-export * from './webview.protocol.js';
+export * from './webview.protocol';
 
 // Esporta la funzione di validazione
-export { validateWebviewMessage } from './validateWebviewMessage.test.js';
+export { validateWebviewMessage } from './validateWebviewMessage.test';
 
 // Esporta la funzione di conversione
-export { convertToWebviewMessage } from './convertToWebviewMessage.js'; 
+export { convertToWebviewMessage } from './convertToWebviewMessage';

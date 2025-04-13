@@ -1,12 +1,12 @@
-import React from 'react'
-import { TaskQueueState, AgentStatus, Task } from '../../shared/types.js'
-import { TaskTable } from './TaskTable.js'
+import React from 'react';
+import { TaskQueueState, AgentStatus, Task } from '../../shared/types';
+import { TaskTable } from './TaskTable';
 
 interface TaskQueueViewProps {
-  state: TaskQueueState
-  onTaskSelect: (task: Task) => void
-  onAbortTask: (taskId: string) => void
-  onRerunTask: (task: Task) => void
+  state: TaskQueueState;
+  onTaskSelect: (task: Task) => void;
+  onAbortTask: (taskId: string) => void;
+  onRerunTask: (task: Task) => void;
 }
 
 export const TaskQueueView: React.FC<TaskQueueViewProps> = ({
@@ -15,19 +15,23 @@ export const TaskQueueView: React.FC<TaskQueueViewProps> = ({
   onAbortTask,
   onRerunTask,
 }) => {
-  const [statusFilter, setStatusFilter] = React.useState<'all' | 'pending' | 'running' | 'completed' | 'failed'>('all')
-  const [priorityFilter, setPriorityFilter] = React.useState<'all' | 'high' | 'medium' | 'low'>('all')
-  const [agentFilter, setAgentFilter] = React.useState<string>('all')
+  const [statusFilter, setStatusFilter] = React.useState<
+    'all' | 'pending' | 'running' | 'completed' | 'failed'
+  >('all');
+  const [priorityFilter, setPriorityFilter] = React.useState<'all' | 'high' | 'medium' | 'low'>(
+    'all'
+  );
+  const [agentFilter, setAgentFilter] = React.useState<string>('all');
 
   const handleSetFilters = (filters: {
-    status?: typeof statusFilter
-    priority?: typeof priorityFilter
-    agent?: string
+    status?: typeof statusFilter;
+    priority?: typeof priorityFilter;
+    agent?: string;
   }) => {
-    if (filters.status) setStatusFilter(filters.status)
-    if (filters.priority) setPriorityFilter(filters.priority)
-    if (filters.agent) setAgentFilter(filters.agent)
-  }
+    if (filters.status) setStatusFilter(filters.status);
+    if (filters.priority) setPriorityFilter(filters.priority);
+    if (filters.agent) setAgentFilter(filters.agent);
+  };
 
   return (
     <div>
@@ -43,5 +47,5 @@ export const TaskQueueView: React.FC<TaskQueueViewProps> = ({
         agentFilter={agentFilter}
       />
     </div>
-  )
-} 
+  );
+};

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useFallbackTelemetry } from '../hooks/useFallbackTelemetry';
 import { LLMProviderHandler } from '../providers/provider-registry-stub';
-import { LLMEventBus } from '../mas/core/fallback/LLMEventBus';
+import { LLMEventBus } from '@/mas/types/llm-events';
 import { FallbackStrategy } from '../mas/core/fallback/strategies/FallbackStrategy';
 
 interface FallbackMonitorPanelProps {
@@ -32,25 +32,20 @@ export const FallbackMonitorPanel: React.FC<FallbackMonitorPanelProps> = ({
   eventBus,
   strategy,
   providers,
-  className = ''
+  className = '',
 }) => {
-  const {
-    activeStrategy,
-    currentProvider,
-    recentEvents,
-    activeConditions,
-    providerStats
-  } = useFallbackTelemetry({
-    eventBus,
-    strategy,
-    providers,
-    debug: true
-  });
+  const { activeStrategy, currentProvider, recentEvents, activeConditions, providerStats } =
+    useFallbackTelemetry({
+      eventBus,
+      strategy,
+      providers,
+      debug: true,
+    });
 
   return (
     <div className={`bg-gray-900 text-white p-4 rounded-lg shadow-lg ${className}`}>
       <h2 className="text-xl font-bold mb-4">Fallback Monitor</h2>
-      
+
       {/* Sezione Strategia e Provider */}
       <div className="mb-6">
         <div className="grid grid-cols-2 gap-4">
@@ -90,17 +85,12 @@ export const FallbackMonitorPanel: React.FC<FallbackMonitorPanelProps> = ({
         <h3 className="text-sm font-semibold text-gray-400 mb-2">Eventi Recenti</h3>
         <div className="space-y-2 max-h-60 overflow-y-auto">
           {recentEvents.map((event, index) => (
-            <div
-              key={index}
-              className={`p-2 rounded ${getEventColor(event.type)} bg-gray-800`}
-            >
+            <div key={index} className={`p-2 rounded ${getEventColor(event.type)} bg-gray-800`}>
               <div className="flex justify-between text-xs text-gray-400">
                 <span>{event.type}</span>
                 <span>{formatTimestamp(event.timestamp)}</span>
               </div>
-              <div className="mt-1 text-sm">
-                {JSON.stringify(event.payload, null, 2)}
-              </div>
+              <div className="mt-1 text-sm">{JSON.stringify(event.payload, null, 2)}</div>
             </div>
           ))}
         </div>
@@ -137,4 +127,4 @@ export const FallbackMonitorPanel: React.FC<FallbackMonitorPanelProps> = ({
       </div>
     </div>
   );
-}; 
+};

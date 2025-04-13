@@ -1,0 +1,349 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+---
+
+### 📄 `typescript-react-guide.md`
+
+```markdown
+# TypeScript + React Development Guide
+
+## TypeScript Rules
+
+### Typing
+
+- Avoid `any`. Prefer `unknown` and narrow with type guards.
+- Use `type` for unions, `interface` for structured public APIs.
+- Never use `Function`, `object`, or `{}` as types.
+- Prefer `readonly` where applicable.
+
+```ts
+type ToolInput = Record<string, string | number | boolean | null>;
+```
+
+### Imports
+
+- Use `import type` for types only.
+- Group imports: Node > external > internal.
+
+### File Structure
+
+- One main type per file.
+- File names: `kebab-case`, types: `PascalCase`.
+- Use named exports only.
+
+## React Rules
+
+### Component Structure
+
+```tsx
+type ButtonProps = {
+  label: string;
+  onClick?: () => void;
+};
+
+export const Button = ({ label, onClick }: ButtonProps) => (
+  <button onClick={onClick}>{label}</button>
+);
+```
+
+### Best Practices
+
+- Always type props.
+- Never use `any` or `React.FC<any>`.
+- Avoid class components.
+- Use stateless functional components when possible.
+- Separate dumb and smart components.
+
+## JSX / TSX & File Layout
+
+- React components use `.tsx`
+- One folder per component
+
+```
+components/
+└── Button/
+    ├── Button.tsx
+    ├── Button.types.ts
+    └── __tests__/Button.test.tsx
+```
+
+## Testing (Vitest + Testing Library)
+
+```tsx
+import { render, screen } from '@testing-library/react';
+import { Button } from './Button';
+
+test('renders button with label', () => {
+  render(<Button label="Click Me" />);
+  expect(screen.getByText('Click Me')).toBeInTheDocument();
+});
+```
+
+### Testing Rules
+
+- All components must have tests.
+- Tests go in `__tests__/Component.test.tsx`.
+- Avoid `console.log`.
+
+## Linting & Formatting
+
+- No ignored warnings allowed.
+- Always run `pnpm lint --fix && pnpm tsc --noEmit`.
+- Use shared Prettier config.
+
+## Security & Robustness
+
+- Validate all external input.
+- Use `zod` or `io-ts` for runtime validation.
+- Use `Partial`, `Readonly`, `Pick` thoughtfully.
+
+## Naming & Structure
+
+- Props: `PascalCase`
+- Types: `PascalCase`
+- Group types by domain:
+
+```
+types/
+├── chat.types.ts
+├── message.types.ts
+└── api.types.ts
+```
+
+## Example
+
+```tsx
+import { ChatMessage } from '@/types/chat.types';
+
+type Props = {
+  messages: ChatMessage[];
+};
+
+export const MessageList = ({ messages }: Props) => (
+  <div>
+    {messages.map((m) => (
+      <p key={m.id}>
+        {typeof m.content === 'string' ? m.content : '[complex content]'}
+      </p>
+    ))}
+  </div>
+);
+```
+
+## Tech Stack
+
+| Tool                   | Purpose            |
+|------------------------|--------------------|
+| vite                   | Build tool         |
+| vitest                 | Unit testing       |
+| eslint                 | Linting            |
+| prettier               | Formatting         |
+| typescript             | Type checking      |
+| zod                    | Runtime validation |
+| @testing-library/react | UI testing         |
+
+## Final Notes
+
+> “The best code is no surprise.”
+
+Write code that is explicit, testable, and durable.
+```
+
+---
+
+### 📄 `typescript-type-safety-guide.md`
+
+```markdown
+# TypeScript Type Safety Guide
+
+## Avoiding `any`
+
+### Never use `any`
+Replace `any` with:
+
+- `unknown` if the structure is unknown
+- `Record<string, unknown>` if it’s a dictionary
+- Custom types or interfaces for specific payloads
+
+### Examples
+
+```ts
+// ❌ Avoid this
+function handleMessage(msg: any): void {}
+
+// ✅ Prefer this
+function handleMessage(msg: unknown): void {
+  if (typeof msg === 'object' && msg !== null) {
+    // Narrow safely
+  }
+}
+```
+
+---
+
+## Discriminated Unions
+
+Use a `type` field to distinguish union types.
+
+```ts
+type Message =
+  | { type: 'text'; text: string }
+  | { type: 'image'; url: string };
+
+function isTextMessage(msg: Message): msg is Extract<Message, { type: 'text' }> {
+  return msg.type === 'text';
+}
+```
+
+---
+
+## Type Guards
+
+Use type predicates to narrow unknown types.
+
+```ts
+function isValidUser(obj: unknown): obj is { id: string; name: string } {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof (obj as any).id === 'string' &&
+    typeof (obj as any).name === 'string'
+  );
+}
+```
+
+---
+
+## Typed Payloads
+
+Create safe types for message payloads:
+
+```ts
+type UnknownPayload = Record<string, unknown>;
+
+type MessageType = 'success' | 'error' | 'progress';
+
+interface AgentResponse {
+  type: MessageType;
+  message: string;
+  data?: Record<string, unknown>;
+}
+```
+
+---
+
+## Settings Payload
+
+```ts
+type SettingValue = string | number | boolean | string[] | null;
+
+interface IDESettings {
+  use_docs?: boolean;
+  coder_mode?: boolean;
+  selectedModel?: string;
+  [key: string]: SettingValue | undefined;
+}
+```
+
+---
+
+## Validating Payloads
+
+```ts
+function validateMemoryItem(payload: unknown): payload is MemoryItem {
+  return (
+    typeof payload === 'object' &&
+    payload !== null &&
+    typeof (payload as any).id === 'string' &&
+    Array.isArray((payload as any).tags)
+  );
+}
+```
+
+---
+
+## File Conventions
+
+```
+types/
+├── agent-memory-message-guards.ts
+├── settings-message.ts
+├── suggestions-message-guards.ts
+```
+
+---
+
+## Best Practices
+
+- Use `unknown` over `any` and narrow it
+- Always use `isXYZ` guards for discriminated unions
+- Add runtime validation for external input
+- Avoid optional chaining in type guards (can mask runtime errors)
+
+---
+
+## Naming Conventions
+
+| Element           | Convention   |
+|------------------|--------------|
+| Types & Interfaces | PascalCase  |
+| Variables         | camelCase   |
+| Enums             | PascalCase  |
+| Files             | kebab-case  |
+
+---
+
+## Tools
+
+- `pnpm lint --fix`
+- `pnpm tsc --noEmit`
+- `@typescript-eslint`
+- `zod` for runtime validation
+
+```
+
+---# Typescript & React Code Standards
+
+## 🧠 General Rules
+
+- Avoid `any` entirely; use `unknown`, `Record<string, unknown>`, or specific types
+- All object shapes must use `interface` or `type`
+- Prefer `readonly` for props that never mutate
+- Use union types for discriminated values (`type: 'text' | 'image'`)
+
+## 🧩 Component Rules
+
+- Props must be strictly typed (no implicit `any`)
+- Always declare prop types as interfaces, not inline
+- Hook return values should use tuple typing (`[value, setter]`)
+- State setters must be typed via generic (`useState<Type>()`)
+
+## 🛠️ API Types
+
+- API responses must use `ApiResponse<T>`
+- No API handler can return or receive `any`
+- Use generics for request/response types in transformers
+
+## 🎛 Webview Messages
+
+- Every WebviewMessage must use `WebviewMessage<T>`
+- Create discriminated union types in `webviewMessageUnion.ts`
+- Payloads must be validated before usage
+
+## 🔐 Safety
+
+- Always use `Array.isArray()` before mapping
+- Narrow types using type guards before access
+- Avoid unsafe coercions like `as any`
+
+## 🚫 Disallowed
+
+- `any`, `Function`, `Object`, `{}`
+- Inline `any` casting in JSX
+- Unstructured API responses (e.g. `data: any`)
+
+

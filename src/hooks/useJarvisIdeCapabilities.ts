@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { WebviewMessage } from '../types/webview.js';
+import { WebviewMessage } from '../types/webview';
 
 declare const vscode: {
   postMessage: (message: WebviewMessage) => void;
@@ -14,8 +14,8 @@ export const useJarvisIdeCapabilities = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          capabilities: newCapabilities
-        }
+          capabilities: newCapabilities,
+        },
       });
 
       setCapabilities(newCapabilities);
@@ -32,8 +32,8 @@ export const useJarvisIdeCapabilities = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          capabilities: defaultCapabilities
-        }
+          capabilities: defaultCapabilities,
+        },
       });
 
       setCapabilities(defaultCapabilities);
@@ -46,6 +46,6 @@ export const useJarvisIdeCapabilities = () => {
   return {
     capabilities,
     updateCapabilities,
-    resetCapabilities
+    resetCapabilities,
   };
 };

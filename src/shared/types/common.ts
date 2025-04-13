@@ -17,7 +17,7 @@ export interface BaseMessage {
 /**
  * Tipi di risposta dell'API
  */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -30,7 +30,7 @@ export interface ApiResponse<T = any> {
 export interface ErrorResponse {
   code: string;
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 /**
@@ -72,7 +72,7 @@ export interface PerformanceMetrics {
 /**
  * Funzione per type-guard generica
  */
-export function isOfType<T>(value: any, property: keyof T): value is T {
+export function isOfType<T>(value: unknown, property: keyof T): value is T {
   return value && typeof value === 'object' && property in value;
 }
 
@@ -86,6 +86,6 @@ export function safeCast<T>(value: unknown, typeName: string): T | null {
     console.warn(`[safeCast] Null or undefined value for ${typeName}`);
     return null;
   }
-  
+
   return value as T;
-} 
+}

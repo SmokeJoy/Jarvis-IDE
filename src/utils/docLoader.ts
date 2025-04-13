@@ -20,4 +20,4 @@ export function loadDocsFromFolder(): string {
   }
 
   return content;
-} 
+}

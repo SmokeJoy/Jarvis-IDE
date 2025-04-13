@@ -1,103 +1,143 @@
-import * as vscode from 'vscode';
-import { WebviewMessage } from '../../shared/types/webview.types.js';
-import { WebviewMessageUnion } from '../../shared/types/webviewMessageUnion.js';
-import { WebviewMessageType } from '../../shared/types/webview.types.js';
+import { Webview, ExtensionContext } from 'vscode';
+import {
+  WebviewMessageType,
+  WebviewMessageBase,
+  ActionMessage,
+  ResponseMessage,
+  InstructionMessage,
+  SendPromptMessage,
+  StateUpdateMessage,
+  WebviewMessage,
+} from '../../shared/types/webview.types';
+import { BaseWebviewMessageHandler } from './BaseWebviewMessageHandler';
 
-/**
- * Interfaccia per gli handler di messaggi della WebView
- */
-export interface WebviewMessageHandler {
-  /**
-   * Inizializza l'handler con la webview
-   * @param webview La webview a cui collegarsi
-   */
-  initialize(webview: vscode.Webview): void;
-  
-  /**
-   * Gestisce un messaggio ricevuto dalla webview
-   * @param message Il messaggio ricevuto dalla webview
-   */
-  handleMessage(message: WebviewMessage): void;
-  
-  /**
-   * Libera le risorse utilizzate dall'handler
-   */
-  dispose(): void;
-}
-
-/**
- * Implementazione base del WebviewMessageHandler con supporto per dispatch type-safe
- */
-export abstract class BaseWebviewMessageHandler implements WebviewMessageHandler {
-  protected _webview: vscode.Webview | null = null;
-  
-  /**
-   * Inizializza l'handler con la webview
-   * @param webview La webview a cui collegarsi
-   */
-  public initialize(webview: vscode.Webview): void {
-    this._webview = webview;
+export class WebviewMessageHandler extends BaseWebviewMessageHandler {
+  constructor(webview: Webview, context: ExtensionContext) {
+    super(webview, context);
   }
-  
-  /**
-   * Gestisce un messaggio ricevuto dalla webview
-   * Implementa un dispatch type-safe utilizzando il pattern Extract<T>
-   * @param message Il messaggio ricevuto dalla webview
-   */
-  public handleMessage(message: WebviewMessage): void {
+
+  handleMessage(message: WebviewMessageBase): void {
     if (!message || !message.type) {
-      console.warn('Ricevuto messaggio senza tipo');
-      return;
-    }
-    
-    try {
-      // Dispatcher type-safe
-      this.dispatchMessage(message as WebviewMessageUnion);
-    } catch (error) {
-      console.error(`Errore durante la gestione del messaggio: ${error}`);
-      this.handleError({
-        type: WebviewMessageType.ERROR,
-        payload: {
-          message: error instanceof Error ? error.message : 'Errore sconosciuto',
-          code: 'MESSAGE_HANDLER_ERROR'
-        }
+      this._sendError({
+        error: new Error('Invalid message format'),
+        timestamp: Date.now(),
       });
-    }
-  }
-  
-  /**
-   * Dispatcher type-safe per i messaggi WebView
-   * @param message Messaggio WebView da dispatchare
-   */
-  protected abstract dispatchMessage(message: WebviewMessageUnion): void;
-
-  /**
-   * Gestisce un messaggio di errore
-   * @param errorMessage Messaggio di errore
-   */
-  protected abstract handleError(errorMessage: Extract<WebviewMessageUnion, { type: typeof WebviewMessageType.ERROR }>): void;
-  
-  /**
-   * Libera le risorse utilizzate dall'handler
-   */
-  public dispose(): void {
-    this._webview = null;
-  }
-  
-  /**
-   * Invia un messaggio alla WebView
-   * @param message Messaggio da inviare alla WebView
-   */
-  protected postMessageToWebview(message: WebviewMessage): void {
-    if (!this._webview) {
-      console.warn('WebView non disponibile, impossibile inviare il messaggio');
       return;
     }
-    
-    try {
-      this._webview.postMessage(message);
-    } catch (error) {
-      console.error('Errore durante invio messaggio a Webview:', error);
+
+    switch (message.type) {
+      case WebviewMessageType.SEND_PROMPT:
+        this._handleSendPrompt(message as SendPromptMessage);
+        break;
+      case WebviewMessageType.ACTION:
+        this._handleAction(message as ActionMessage);
+        break;
+      case WebviewMessageType.RESPONSE:
+        this._handleResponse(message as ResponseMessage);
+        break;
+      case WebviewMessageType.STATE_UPDATE:
+        this._handleStateUpdate(message as StateUpdateMessage);
+        break;
+      case WebviewMessageType.INSTRUCTION:
+        this._handleInstruction(message as InstructionMessage);
+        break;
+      default:
+        console.warn('Unhandled message type:', message.type);
     }
+  }
+
+  protected _handleSendPrompt(message: SendPromptMessage): void {
+    if (!message.payload?.prompt) {
+      this._sendError({
+        error: new Error('Missing prompt in message payload'),
+        timestamp: Date.now(),
+      });
+      return;
+    }
+
+    this._updateState({
+      ...this.state,
+      lastPrompt: message.payload.prompt,
+      timestamp: Date.now(),
+    });
+  }
+
+  protected _handleAction(message: ActionMessage): void {
+    if (!message.payload?.action) {
+      this._sendError({
+        error: new Error('Missing action in message payload'),
+        timestamp: Date.now(),
+      });
+      return;
+    }
+
+    this._updateState({
+      ...this.state,
+      lastAction: message.payload.action,
+      timestamp: Date.now(),
+    });
+  }
+
+  protected _handleResponse(message: ResponseMessage): void {
+    if (!message.payload?.response) {
+      this._sendError({
+        error: new Error('Missing response in message payload'),
+        timestamp: Date.now(),
+      });
+      return;
+    }
+
+    this._updateState({
+      ...this.state,
+      lastResponse: message.payload.response,
+      timestamp: Date.now(),
+    });
+  }
+
+  protected _handleStateUpdate(message: StateUpdateMessage): void {
+    if (!message.payload) {
+      this._sendError({
+        error: new Error('Missing payload in state update message'),
+        timestamp: Date.now(),
+      });
+      return;
+    }
+
+    this._updateState({
+      ...this.state,
+      ...message.payload,
+      timestamp: Date.now(),
+    });
+  }
+
+  protected _handleInstruction(message: InstructionMessage): void {
+    if (!message.payload?.instruction) {
+      this._sendError({
+        error: new Error('Missing instruction in message payload'),
+        timestamp: Date.now(),
+      });
+      return;
+    }
+
+    // Process instruction
+    const response: WebviewMessage = {
+      type: WebviewMessageType.INSTRUCTION,
+      id: message.id,
+      agentId: message.agentId,
+      payload: {
+        instruction: message.payload.instruction,
+        result: 'Instruction processed successfully',
+      },
+      timestamp: Date.now(),
+    };
+
+    // Update state with instruction result
+    this._updateState({
+      ...this.state,
+      lastInstructionResult: response.payload.result,
+      timestamp: response.timestamp,
+    });
+
+    this._sendMessage(response);
   }
 }

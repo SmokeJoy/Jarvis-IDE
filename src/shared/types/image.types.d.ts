@@ -10,18 +10,18 @@
  * Sorgente immagine codificata in base64
  */
 export interface Base64ImageSource {
-    type: 'base64';
-    media_type: string;
-    data: string;
+  type: 'base64';
+  media_type: string;
+  data: string;
 }
 /**
  * Sorgente immagine basata su URL
  */
 export interface URLImageSource {
-    type: 'url';
-    url: string;
-    media_type?: string;
-    data?: string | object;
+  type: 'url';
+  url: string;
+  media_type?: string;
+  data?: string | object;
 }
 /**
  * Tipo unione per le diverse sorgenti di immagini

@@ -36,7 +36,7 @@ describe('MemoryManager', () => {
         numero: 42,
         booleano: true,
         oggetto: { nome: 'test' },
-        array: [1, 2, 3]
+        array: [1, 2, 3],
       };
 
       for (const [key, value] of Object.entries(testValues)) {
@@ -49,7 +49,7 @@ describe('MemoryManager', () => {
     it('dovrebbe gestire valori null e undefined', async () => {
       await memoryManager.set('nullo', null);
       await memoryManager.set('undefined', undefined);
-      
+
       expect(await memoryManager.get('nullo')).toBeNull();
       expect(await memoryManager.get('undefined')).toBeNull();
     });
@@ -136,7 +136,7 @@ describe('MemoryManager', () => {
       await memoryManager.set('chiave1', 'valore1');
       await memoryManager.set('chiave2', 'valore2');
       await memoryManager.clear();
-      
+
       expect(await memoryManager.get('chiave1')).toBeNull();
       expect(await memoryManager.get('chiave2')).toBeNull();
     });
@@ -150,17 +150,19 @@ describe('MemoryManager', () => {
   describe('concorrenza', () => {
     it('dovrebbe gestire operazioni concorrenti correttamente', async () => {
       const operations = Array.from({ length: 100 }, (_, i) => i);
-      
-      await Promise.all(operations.map(async (i) => {
-        await memoryManager.set(`chiave${i}`, `valore${i}`);
-        await memoryManager.append('lista', i);
-      }));
+
+      await Promise.all(
+        operations.map(async (i) => {
+          await memoryManager.set(`chiave${i}`, `valore${i}`);
+          await memoryManager.append('lista', i);
+        })
+      );
 
       expect(await memoryManager.get('lista')).toHaveLength(100);
-      
+
       for (let i = 0; i < 100; i++) {
         expect(await memoryManager.get(`chiave${i}`)).toBe(`valore${i}`);
       }
     });
   });
-}); 
+});

@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { SettingsView } from './SettingsView.js';
-import { SettingsProvider, useSettings } from '../webview-ui/providers/settingsProvider.js';
+import { SettingsView } from './SettingsView';
+import { SettingsProvider, useSettings } from '../webview-ui/providers/settingsProvider';
 
 // Mock di acquireVsCodeApi
 (global as any).acquireVsCodeApi = () => ({
   postMessage: vi.fn(),
   getState: vi.fn(),
-  setState: vi.fn()
+  setState: vi.fn(),
 });
 
 // Mock del provider di impostazioni
@@ -15,7 +15,7 @@ vi.mock('../webview-ui/providers/settingsProvider', () => {
   const actual = vi.importActual('../webview-ui/providers/settingsProvider');
   return {
     ...actual,
-    useSettings: vi.fn()
+    useSettings: vi.fn(),
   };
 });
 
@@ -46,7 +46,7 @@ vi.mock('@vscode/webview-ui-toolkit/react', () => ({
     <div data-testid="vscode-toggle" onClick={() => onChange({ target: { checked: !checked } })}>
       {children}
     </div>
-  )
+  ),
 }));
 
 describe('SettingsView', () => {
@@ -64,10 +64,10 @@ describe('SettingsView', () => {
         coder_mode: true,
         use_docs: false,
         contextPrompt: 'Test context prompt',
-        systemPrompt: 'Test system prompt'
+        systemPrompt: 'Test system prompt',
       },
       updateSetting: mockUpdateSetting,
-      saveSystemPrompt: mockSaveSystemPrompt
+      saveSystemPrompt: mockSaveSystemPrompt,
     });
   });
 
@@ -127,4 +127,4 @@ describe('SettingsView', () => {
     fireEvent.change(textarea, { target: { value: 'New system prompt' } });
     expect(mockUpdateSetting).toHaveBeenCalledWith('systemPrompt', 'New system prompt');
   });
-}); 
+});

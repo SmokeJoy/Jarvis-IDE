@@ -1,5 +1,5 @@
-import { ApiConfiguration } from './api.types.js';
-import { TelemetrySetting } from './telemetry.types.js';
+import { ApiConfiguration } from './api.types';
+import { TelemetrySetting } from './telemetry.types';
 
 /**
  * Rappresenta un modello LLM disponibile
@@ -26,4 +26,4 @@ export interface Settings {
   systemPromptPath?: string;
   availableModels?: AvailableModel[]; // nuovo campo persistente
   code_style?: 'standard' | 'concise' | 'verbose';
-} 
+}

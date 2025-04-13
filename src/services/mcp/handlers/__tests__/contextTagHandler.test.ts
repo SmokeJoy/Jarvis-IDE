@@ -13,7 +13,7 @@ import * as memoryUtils from '../contextInjectHandler';
 vi.mock('../contextInjectHandler', () => ({
   getAllMemory: vi.fn(),
   persistMemoryToDisk: vi.fn().mockResolvedValue(undefined),
-  findContextById: vi.fn()
+  findContextById: vi.fn(),
 }));
 
 describe('contextTagHandler', () => {
@@ -22,18 +22,18 @@ describe('contextTagHandler', () => {
     scope: 'test',
     text: 'Test content',
     timestamp: Date.now(),
-    tags: ['existing-tag']
+    tags: ['existing-tag'],
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
     // Setup default mock responses
     (memoryUtils.getAllMemory as any).mockReturnValue({
-      test: [mockContext]
+      test: [mockContext],
     });
     (memoryUtils.findContextById as any).mockReturnValue({
       item: mockContext,
-      scope: 'test'
+      scope: 'test',
     });
   });
 
@@ -44,7 +44,7 @@ describe('contextTagHandler', () => {
   describe('Validazione input', () => {
     it('dovrebbe rifiutare chiamate senza ID', async () => {
       const args = {
-        tags: ['test-tag']
+        tags: ['test-tag'],
       } as unknown as ContextTagArgs;
 
       const result = await contextTagHandler(args);
@@ -54,7 +54,7 @@ describe('contextTagHandler', () => {
 
     it('dovrebbe rifiutare chiamate senza tags', async () => {
       const args = {
-        id: 'test-123'
+        id: 'test-123',
       } as unknown as ContextTagArgs;
 
       const result = await contextTagHandler(args);
@@ -65,7 +65,7 @@ describe('contextTagHandler', () => {
     it('dovrebbe rifiutare tags non validi', async () => {
       const args: ContextTagArgs = {
         id: 'test-123',
-        tags: ['   ', '!!!', '']
+        tags: ['   ', '!!!', ''],
       };
 
       const result = await contextTagHandler(args);
@@ -78,7 +78,7 @@ describe('contextTagHandler', () => {
     it('dovrebbe aggiungere nuovi tag con successo', async () => {
       const args: ContextTagArgs = {
         id: 'test-123',
-        tags: ['new-tag-1', 'new-tag-2']
+        tags: ['new-tag-1', 'new-tag-2'],
       };
 
       const result = await contextTagHandler(args);
@@ -86,7 +86,7 @@ describe('contextTagHandler', () => {
       expect(JSON.parse(result.output!)).toMatchObject({
         id: 'test-123',
         addedTags: expect.arrayContaining(['new-tag-1', 'new-tag-2']),
-        allTags: expect.arrayContaining(['existing-tag', 'new-tag-1', 'new-tag-2'])
+        allTags: expect.arrayContaining(['existing-tag', 'new-tag-1', 'new-tag-2']),
       });
       expect(memoryUtils.persistMemoryToDisk).toHaveBeenCalled();
     });
@@ -94,7 +94,7 @@ describe('contextTagHandler', () => {
     it('dovrebbe normalizzare i tag in input', async () => {
       const args: ContextTagArgs = {
         id: 'test-123',
-        tags: ['  Tag With Spaces  ', 'UPPERCASE-TAG', 'special@#chars']
+        tags: ['  Tag With Spaces  ', 'UPPERCASE-TAG', 'special@#chars'],
       };
 
       const result = await contextTagHandler(args);
@@ -108,7 +108,7 @@ describe('contextTagHandler', () => {
     it('dovrebbe gestire tag duplicati', async () => {
       const args: ContextTagArgs = {
         id: 'test-123',
-        tags: ['existing-tag', 'existing-tag', 'new-tag']
+        tags: ['existing-tag', 'existing-tag', 'new-tag'],
       };
 
       const result = await contextTagHandler(args);
@@ -124,7 +124,7 @@ describe('contextTagHandler', () => {
       const args: ContextTagArgs & { replace: boolean } = {
         id: 'test-123',
         tags: ['new-tag-1', 'new-tag-2'],
-        replace: true
+        replace: true,
       };
 
       const result = await contextTagHandler(args);
@@ -141,7 +141,7 @@ describe('contextTagHandler', () => {
 
       const args: ContextTagArgs = {
         id: 'non-existent',
-        tags: ['test-tag']
+        tags: ['test-tag'],
       };
 
       const result = await contextTagHandler(args);
@@ -154,7 +154,7 @@ describe('contextTagHandler', () => {
 
       const args: ContextTagArgs = {
         id: 'test-123',
-        tags: ['test-tag']
+        tags: ['test-tag'],
       };
 
       const result = await contextTagHandler(args);
@@ -165,7 +165,9 @@ describe('contextTagHandler', () => {
     it('dovrebbe limitare il numero massimo di tag', async () => {
       const args: ContextTagArgs = {
         id: 'test-123',
-        tags: Array(15).fill(0).map((_, i) => `tag-${i}`)
+        tags: Array(15)
+          .fill(0)
+          .map((_, i) => `tag-${i}`),
       };
 
       const result = await contextTagHandler(args);
@@ -174,4 +176,4 @@ describe('contextTagHandler', () => {
       expect(output.allTags.length).toBeLessThanOrEqual(10);
     });
   });
-}); 
+});

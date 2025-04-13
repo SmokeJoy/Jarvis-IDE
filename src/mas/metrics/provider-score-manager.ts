@@ -13,24 +13,27 @@ export interface ProviderStats {
 }
 
 export class InMemoryProviderScoreManager implements ProviderScoreManager {
-  private providerMetrics = new Map<LLMProviderId, {
-    successes: number;
-    total: number;
-    totalTime: number;
-    retries: number;
-  }>();
+  private providerMetrics = new Map<
+    LLMProviderId,
+    {
+      successes: number;
+      total: number;
+      totalTime: number;
+      retries: number;
+    }
+  >();
 
   updateScore(providerId: LLMProviderId, success: boolean, duration: number): void {
     const metrics = this.providerMetrics.get(providerId) || {
       successes: 0,
       total: 0,
       totalTime: 0,
-      retries: 0
+      retries: 0,
     };
 
     metrics.total++;
     metrics.totalTime += duration;
-    
+
     if (success) {
       metrics.successes++;
       metrics.retries = 0; // Reset retry counter on success
@@ -67,13 +70,13 @@ export class InMemoryProviderScoreManager implements ProviderScoreManager {
       successes: 0,
       total: 0,
       totalTime: 0,
-      retries: 0
+      retries: 0,
     };
 
     return {
       successRate: metrics.total > 0 ? metrics.successes / metrics.total : 0,
       averageTime: metrics.total > 0 ? metrics.totalTime / metrics.total : 0,
-      retryCount: metrics.retries
+      retryCount: metrics.retries,
     };
   }
 }

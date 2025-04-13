@@ -1,5 +1,5 @@
-import { ApiConfiguration } from '../../types/extension.js'
-import { ModelInfo } from '../../types/models.js'
+import { ApiConfiguration } from '../../types/extension';
+import { ModelInfo } from '../../types/models';
 
 export function getModelInfo(apiConfiguration: ApiConfiguration): ModelInfo {
   return {
@@ -7,6 +7,6 @@ export function getModelInfo(apiConfiguration: ApiConfiguration): ModelInfo {
     name: apiConfiguration.selectedModel || '',
     maxTokens: 4096,
     tokenLimit: 4096,
-    supportsFunctionCalling: true
-  }
-} 
+    supportsFunctionCalling: true,
+  };
+}

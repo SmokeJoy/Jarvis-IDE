@@ -1,3 +1,6 @@
+import React, { createContext, useState, useCallback, ReactNode } from 'react';
+import { Settings } from '../shared/types';
+
 /**
  * Interfaccia per le impostazioni dell'applicazione
  */
@@ -6,6 +9,8 @@ interface Settings {
   fontSize: number;
   enableNotifications: boolean;
   language: string;
+  systemPrompt: string;
+  availableModels: string[];
 }
 
 /**
@@ -26,21 +31,35 @@ interface SettingsUpdateMessage {
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
-export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [settings, setSettings] = useState<Settings>({
     theme: 'system',
     fontSize: 14,
     enableNotifications: true,
-    language: 'en'
+    language: 'en',
+    systemPrompt: '',
+    availableModels: [],
   });
 
   const updateSettings = useCallback((newSettings: Partial<Settings>) => {
-    setSettings(prev => ({ ...prev, ...newSettings }));
-    vscode.postMessage({
-      type: 'updateSettings',
-      payload: newSettings
-    } as SettingsUpdateMessage);
+    setSettings((prev) => ({ ...prev, ...newSettings }));
+    window.vscode?.postMessage({
+      type: 'updateSetting',
+      ...newSettings,
+    });
   }, []);
 
-  // ... existing code ...
-}; 
+  return (
+    <SettingsContext.Provider value={{ settings, updateSettings }}>
+      {children}
+    </SettingsContext.Provider>
+  );
+};
+
+export const useSettings = (): SettingsContextType => {
+  const context = React.useContext(SettingsContext);
+  if (!context) {
+    throw new Error('useSettings must be used within a SettingsProvider');
+  }
+  return context;
+};

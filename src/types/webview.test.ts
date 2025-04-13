@@ -1,19 +1,19 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, test } from 'vitest';
 import {
   WebviewState,
   WebviewMessage,
   WebviewCommand,
   WebviewTheme,
   WebviewConfiguration,
-} from "./webview.js";
+} from './webview';
 
-describe("Webview Types", () => {
-  test("WebviewState should have correct structure", () => {
+describe('Webview Types', () => {
+  test('WebviewState should have correct structure', () => {
     const state: WebviewState = {
       messages: [],
       config: {
-        provider: "openai",
-        apiKey: "test-key",
+        provider: 'openai',
+        apiKey: 'test-key',
       },
       isLoading: false,
       mcpConnected: false,
@@ -29,10 +29,10 @@ describe("Webview Types", () => {
     });
   });
 
-  test("WebviewMessage should have correct structure", () => {
+  test('WebviewMessage should have correct structure', () => {
     const message: WebviewMessage = {
-      type: "test",
-      payload: { data: "test" },
+      type: 'test',
+      payload: { data: 'test' },
     };
     expect(message).toMatchObject({
       type: expect.any(String),
@@ -40,12 +40,12 @@ describe("Webview Types", () => {
     });
   });
 
-  test("WebviewCommand should have correct structure", () => {
+  test('WebviewCommand should have correct structure', () => {
     const command: WebviewCommand = {
-      command: "test.command",
-      title: "Test Command",
-      icon: "test-icon",
-      when: "test-condition",
+      command: 'test.command',
+      title: 'Test Command',
+      icon: 'test-icon',
+      when: 'test-condition',
     };
     expect(command).toMatchObject({
       command: expect.any(String),
@@ -55,13 +55,13 @@ describe("Webview Types", () => {
     });
   });
 
-  test("WebviewTheme should have correct structure", () => {
+  test('WebviewTheme should have correct structure', () => {
     const theme: WebviewTheme = {
-      name: "Test Theme",
-      type: "dark",
+      name: 'Test Theme',
+      type: 'dark',
       colors: {
-        background: "#000000",
-        foreground: "#ffffff",
+        background: '#000000',
+        foreground: '#ffffff',
       },
     };
     expect(theme).toMatchObject({
@@ -71,26 +71,26 @@ describe("Webview Types", () => {
     });
   });
 
-  test("WebviewConfiguration should have correct structure", () => {
+  test('WebviewConfiguration should have correct structure', () => {
     const config: WebviewConfiguration = {
       theme: {
-        name: "Test Theme",
-        type: "dark",
+        name: 'Test Theme',
+        type: 'dark',
         colors: {},
       },
       fontSize: 14,
-      fontFamily: "Consolas",
+      fontFamily: 'Consolas',
       showLineNumbers: true,
       wordWrap: true,
       tabSize: 2,
-      renderWhitespace: "none",
+      renderWhitespace: 'none',
       scrollBeyondLastLine: false,
       minimap: {
         enabled: true,
         maxColumn: 120,
         renderCharacters: true,
-        showSlider: "always",
-        side: "right",
+        showSlider: 'always',
+        side: 'right',
       },
     };
     expect(config).toMatchObject({
@@ -111,4 +111,4 @@ describe("Webview Types", () => {
       }),
     });
   });
-}); 
+});

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import {
-  VSCodeToggle,
   VSCodeTextArea,
   VSCodeTextField,
   VSCodeDropdown,
@@ -9,245 +9,269 @@ import {
   VSCodeDivider,
   VSCodeOption,
   VSCodeBadge,
-  VSCodeCheckbox
+  VSCodeCheckbox,
 } from '@vscode/webview-ui-toolkit/react';
-import { useSettings } from '../webview-ui/providers/settingsProvider.js';
-import { PromptEditor } from './components/PromptEditor.js';
-import { SystemPromptEditor } from './components/SystemPromptEditor.js';
+import { useSettings } from '../webview-ui/providers/settingsProvider';
+import { PromptEditor } from './components/PromptEditor';
+import { SystemPromptEditor } from './components/SystemPromptEditor';
 
-// VSCode API
-declare const vscode: any;
+interface Model {
+  id: string;
+  name: string;
+  provider: string;
+  apiKey?: string;
+  baseUrl?: string;
+  coderMode?: boolean;
+}
+
+interface Settings {
+  model: string;
+  coder_mode: boolean;
+  use_docs: boolean;
+  contextPrompt: string;
+  systemPrompt: string;
+  systemPromptPath?: string;
+  availableModels: string[];
+}
 
 const SettingsContainer = styled.div`
   padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
 `;
 
 const Section = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-`;
-
-const Warning = styled.div`
-  color: #f1fa8c;
-  margin-top: 5px;
-  font-style: italic;
-`;
-
-const InfoBadge = styled.span`
-  display: inline-flex;
-  align-items: center;
-  margin-left: 8px;
-  font-size: 0.8rem;
-`;
-
-const ModelOption = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  margin-bottom: 20px;
 `;
 
 const FormGroup = styled.div`
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 `;
 
 export const SettingsView: React.FC = () => {
-  const { settings, updateSetting, selectModel, saveSystemPrompt, openSystemPromptFile, setSystemPromptPath } = useSettings();
-  
-  // Stati per il form di aggiunta modello
-  const [label, setLabel] = useState('');
-  const [value, setValue] = useState('');
-  const [provider, setProvider] = useState('');
-  const [coderMode, setCoderMode] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [endpoint, setEndpoint] = useState('');
+  const { settings, updateSettings } = useSettings();
+  const [newModel, setNewModel] = useState<Model>({
+    name: '',
+    id: '',
+    provider: '',
+    apiKey: '',
+    baseUrl: '',
+    coderMode: false,
+  });
 
-  const availableModels = settings.availableModels || [];
-  const isCoderModel = settings.coder_mode;
-  
-  // Handler per l'aggiunta di un nuovo modello
-  const handleAddModel = () => {
-    if (!label || !value || !provider) {
-      // Mostra errore se i campi obbligatori non sono stati inseriti
-      vscode.postMessage({
-        type: 'error',
-        message: 'Devi inserire nome, ID modello e provider'
-      });
-      return;
-    }
-    
-    const newModel = {
-      label,
-      value,
-      provider,
-      coder: coderMode,
-      apiKey: apiKey || undefined,
-      endpoint: endpoint || undefined
-    };
-    
-    // Invia il comando al backend
-    vscode.postMessage({
-      type: 'command',
-      command: 'jarvis.addCustomModel',
-      payload: newModel
-    });
-    
-    // Reset del form
-    setLabel('');
-    setValue('');
-    setProvider('');
-    setCoderMode(false);
-    setApiKey('');
-    setEndpoint('');
+  const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    updateSettings({ model: e.target.value });
   };
 
-  return (
-    <SettingsContainer>
-      <Section>
-        <h2>Configurazione LLM</h2>
-        <VSCodeDropdown
-          id="model"
-          value={settings.model}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => selectModel(e.target.value)}
-        >
-          {availableModels.map((model: string) => (
-            <option key={model} value={model}>
-              {model} 
-            </option>
-          ))}
-        </VSCodeDropdown>
-        
-        <div>
-          {isCoderModel ? (
-            <InfoBadge>
-              <VSCodeBadge>⚙️ Modalità Coder</VSCodeBadge>
-            </InfoBadge>
-          ) : (
-            <InfoBadge>
-              <VSCodeBadge>🧠 Modalità Reasoning</VSCodeBadge>
-            </InfoBadge>
-          )}
-        </div>
-        
-        {!isCoderModel && (
-          <Warning>
-            ⚠️ Modello non ottimizzato per codice. Usare per compiti di reasoning, traduzione e compiti generali.
-          </Warning>
-        )}
-      </Section>
+  const handleCheckboxChange =
+    (key: keyof Settings) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      updateSettings({ [key]: e.target.checked });
+    };
 
-      <VSCodeDivider />
-      
-      <Section>
-        <h2>➕ Aggiungi Modello Personalizzato</h2>
-        <FormGroup>
-          <VSCodeTextField 
-            placeholder="Nome visibile" 
-            value={label}
-            onInput={(e: React.ChangeEvent<HTMLInputElement>) => setLabel(e.target.value)} 
-          />
-        </FormGroup>
-        <FormGroup>
-          <VSCodeTextField 
-            placeholder="ID modello (es. deepseek-coder)" 
-            value={value}
-            onInput={(e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value)} 
-          />
-        </FormGroup>
-        <FormGroup>
-          <VSCodeTextField 
-            placeholder="Provider (es. local, openai, ollama)" 
-            value={provider}
-            onInput={(e: React.ChangeEvent<HTMLInputElement>) => setProvider(e.target.value)} 
-          />
-        </FormGroup>
-        <FormGroup>
-          <VSCodeCheckbox 
-            checked={coderMode}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCoderMode(e.target.checked)}
-          >
-            Coder Mode
-          </VSCodeCheckbox>
-        </FormGroup>
-        <FormGroup>
-          <VSCodeTextField 
-            placeholder="API Key (opzionale)" 
-            value={apiKey}
-            onInput={(e: React.ChangeEvent<HTMLInputElement>) => setApiKey(e.target.value)} 
-          />
-        </FormGroup>
-        <FormGroup>
-          <VSCodeTextField 
-            placeholder="Endpoint URL (opzionale)" 
-            value={endpoint}
-            onInput={(e: React.ChangeEvent<HTMLInputElement>) => setEndpoint(e.target.value)} 
-          />
-        </FormGroup>
-        <VSCodeButton onClick={handleAddModel}>Aggiungi Modello</VSCodeButton>
-      </Section>
+  const handlePromptChange = (key: keyof Settings) => (value: string) => {
+    updateSettings({ [key]: value });
+  };
 
-      <VSCodeDivider />
+  const handleNewModelChange = (key: keyof Model) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (key === 'coderMode') {
+      setNewModel({ ...newModel, [key]: e.target.checked });
+    } else {
+      setNewModel({ ...newModel, [key]: e.target.value });
+    }
+  };
 
-      <Section>
-        <h2>Modalità e Documentazione</h2>
-        <VSCodeToggle
-          checked={settings.coder_mode}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateSetting('coder_mode', e.target.checked)}
-        >
-          Modalità Coder (struttura prompt per LLM tecnico)
-        </VSCodeToggle>
-        <VSCodeToggle
-          checked={settings.use_docs}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateSetting('use_docs', e.target.checked)}
-        >
-          Usa documentazione come contesto
-        </VSCodeToggle>
-      </Section>
+  const handleAddModel = () => {
+    const { name, id, provider } = newModel;
+    if (!name || !id || !provider) return;
 
-      <VSCodeDivider />
+    updateSettings({
+      availableModels: [...settings.availableModels, id],
+    });
 
-      <Section>
-        <h2>Provider Selezionato</h2>
-        <div>
-          Provider attivo: <strong>{settings.provider}</strong>
-        </div>
-        <div>
-          Modello attivo: <strong>{settings.model}</strong>
-        </div>
-      </Section>
+    setNewModel({
+      name: '',
+      id: '',
+      provider: '',
+      apiKey: '',
+      baseUrl: '',
+      coderMode: false,
+    });
+  };
 
-      <VSCodeDivider />
+  return React.createElement(
+    SettingsContainer,
+    null,
+    React.createElement(
+      Section,
+      null,
+      React.createElement('h2', null, '🤖 Modello'),
+      React.createElement(
+        FormGroup,
+        null,
+        React.createElement(
+          VSCodeDropdown,
+          {
+            value: settings.model,
+            onChange: handleModelChange,
+          },
+          settings.availableModels.map((model) =>
+            React.createElement(
+              VSCodeOption,
+              {
+                key: model,
+                value: model,
+              },
+              model
+            )
+          )
+        )
+      )
+    ),
 
-      <Section>
-        <h2>Prompt di Contesto</h2>
-        <PromptEditor
-          value={settings.contextPrompt}
-          onChange={(value) => updateSetting('contextPrompt', value)}
-          description="Questo contesto viene inviato al modello per guidare il suo comportamento. È utile per specificare regole di formattazione, preferenze di stile o altri vincoli da seguire."
-        />
-        <div style={{ marginTop: '8px' }}>
-          <VSCodeButton onClick={() => updateSetting('contextPrompt', settings.contextPrompt)}>
-            Applica Prompt
-          </VSCodeButton>
-        </div>
-      </Section>
+    React.createElement(
+      Section,
+      null,
+      React.createElement('h2', null, '⚙️ Impostazioni'),
+      React.createElement(
+        FormGroup,
+        null,
+        React.createElement(
+          VSCodeCheckbox,
+          {
+            checked: settings.coder_mode,
+            onChange: handleCheckboxChange('coder_mode'),
+          },
+          'Modalità Coder'
+        )
+      ),
 
-      <VSCodeDivider />
+      React.createElement(
+        FormGroup,
+        null,
+        React.createElement(
+          VSCodeCheckbox,
+          {
+            checked: settings.use_docs,
+            onChange: handleCheckboxChange('use_docs'),
+          },
+          'Usa Documentazione'
+        )
+      )
+    ),
 
-      <Section>
-        <h2>System Prompt</h2>
-        <SystemPromptEditor 
-          value={settings.systemPrompt}
-          onChange={(value) => updateSetting('systemPrompt', value)}
-          onSave={saveSystemPrompt}
-          onOpenFile={openSystemPromptFile}
-          filePath={settings.systemPromptPath}
-          description="Il System Prompt definisce le principali istruzioni e comportamenti per il modello. Le modifiche verranno salvate nel file system_prompt.md."
-        />
-      </Section>
-    </SettingsContainer>
+    React.createElement(
+      Section,
+      null,
+      React.createElement('h2', null, '➕ Aggiungi Modello Personalizzato'),
+      React.createElement(
+        FormGroup,
+        null,
+        React.createElement(VSCodeTextField, {
+          placeholder: 'Nome visibile',
+          value: newModel.name,
+          onChange: handleNewModelChange('name'),
+        })
+      ),
+
+      React.createElement(
+        FormGroup,
+        null,
+        React.createElement(VSCodeTextField, {
+          placeholder: 'ID modello (es. deepseek-coder)',
+          value: newModel.id,
+          onChange: handleNewModelChange('id'),
+        })
+      ),
+
+      React.createElement(
+        FormGroup,
+        null,
+        React.createElement(VSCodeTextField, {
+          placeholder: 'Provider (es. local, openai, ollama)',
+          value: newModel.provider,
+          onChange: handleNewModelChange('provider'),
+        })
+      ),
+
+      React.createElement(
+        FormGroup,
+        null,
+        React.createElement(
+          VSCodeCheckbox,
+          {
+            checked: newModel.coderMode,
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+              setNewModel({ ...newModel, coderMode: e.target.checked });
+            },
+          },
+          'Modalità Coder'
+        )
+      ),
+
+      React.createElement(
+        FormGroup,
+        null,
+        React.createElement(VSCodeTextField, {
+          placeholder: 'API Key (opzionale)',
+          value: newModel.apiKey,
+          onChange: handleNewModelChange('apiKey'),
+        })
+      ),
+
+      React.createElement(
+        FormGroup,
+        null,
+        React.createElement(VSCodeTextField, {
+          placeholder: 'Endpoint URL (opzionale)',
+          value: newModel.baseUrl,
+          onChange: handleNewModelChange('baseUrl'),
+        })
+      ),
+
+      React.createElement(
+        FormGroup,
+        null,
+        React.createElement(
+          VSCodeButton,
+          {
+            onClick: handleAddModel,
+          },
+          'Aggiungi Modello'
+        )
+      )
+    ),
+
+    React.createElement(VSCodeDivider),
+
+    React.createElement(
+      Section,
+      null,
+      React.createElement('h2', null, '📝 Prompt di Sistema'),
+      React.createElement(
+        FormGroup,
+        null,
+        React.createElement(SystemPromptEditor, {
+          value: settings.systemPrompt,
+          onChange: handlePromptChange('systemPrompt'),
+          description: "Il prompt di sistema definisce il comportamento base dell'assistente",
+        })
+      )
+    ),
+
+    React.createElement(VSCodeDivider),
+
+    React.createElement(
+      Section,
+      null,
+      React.createElement('h2', null, '🔍 Prompt di Contesto'),
+      React.createElement(
+        FormGroup,
+        null,
+        React.createElement(PromptEditor, {
+          value: settings.contextPrompt,
+          onChange: handlePromptChange('contextPrompt'),
+          description:
+            "Il prompt di contesto definisce come l'assistente deve utilizzare il contesto del codice",
+        })
+      )
+    )
   );
-}; 
+};

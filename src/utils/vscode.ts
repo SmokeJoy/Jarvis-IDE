@@ -1,4 +1,4 @@
-import { WebviewApi } from 'vscode-webview'
+import { WebviewApi } from 'vscode-webview';
 
 declare const acquireVsCodeApi: () => {
   postMessage: (message: any) => void;
@@ -15,7 +15,7 @@ try {
   vscode = {
     postMessage: () => {},
     getState: () => ({}),
-    setState: () => {}
+    setState: () => {},
   };
 }
 
@@ -29,7 +29,7 @@ export const setState = (state: any) => vscode.setState(state);
 
 export function getVSCodeApi(): WebviewApi<Record<string, unknown>> {
   // @ts-ignore
-  return acquireVsCodeApi()
+  return acquireVsCodeApi();
 }
 
-export default vscode; 
+export default vscode;

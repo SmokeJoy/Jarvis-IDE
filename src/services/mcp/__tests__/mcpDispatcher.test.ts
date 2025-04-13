@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { mcpDispatcher } from '../mcpDispatcher.js';
-import * as typeGuards from '../../../shared/typeGuards.js';
-import { Logger } from '../../../shared/logger.js';
+import { mcpDispatcher } from '../mcpDispatcher';
+import * as typeGuards from '../../../shared/typeGuards';
+import { Logger } from '../../../shared/logger';
 
 // Mock delle dipendenze
 vi.mock('../../../shared/typeGuards', () => ({
@@ -36,7 +36,7 @@ describe('mcpDispatcher', () => {
     const malformedRequest = {
       // Manca il campo 'method' obbligatorio
       params: { path: '/some/path' },
-      id: 123
+      id: 123,
     };
 
     // Esegue il dispatcher con la richiesta malformata
@@ -44,7 +44,7 @@ describe('mcpDispatcher', () => {
 
     // Verifica che safeCastAs sia stato chiamato
     expect(typeGuards.safeCastAs).toHaveBeenCalled();
-    
+
     // Verifica che l'errore sia stato registrato
     expect(Logger.error).toHaveBeenCalledWith(
       expect.stringContaining('InvalidMcpRequest'),
@@ -63,22 +63,22 @@ describe('mcpDispatcher', () => {
     const validRequest = {
       method: 'readFile',
       params: { path: '/valid/path.txt' },
-      id: 456
+      id: 456,
     };
-    
+
     vi.spyOn(typeGuards, 'safeCastAs').mockReturnValue(validRequest);
 
     // Mock della funzione handler (da implementare secondo la strutura reale)
     // Questo dipende dall'implementazione specifica di mcpDispatcher
-    
+
     // Esegue il dispatcher con la richiesta valida
     const result = await mcpDispatcher(validRequest);
 
     // Verifica che safeCastAs sia stato chiamato
     expect(typeGuards.safeCastAs).toHaveBeenCalled();
-    
+
     // Le asserzioni precise dipendono dall'implementazione di mcpDispatcher
     // Ma dovrebbe elaborare la richiesta con successo
     expect(result.success).toBe(true);
   });
-}); 
+});

@@ -1,6 +1,12 @@
 test('Tutti i provider noti sono registrabili', () => {
   const knownProviders: LLMProviderId[] = [
-    'openai', 'openrouter', 'ollama', 'anthropic', 'mistral', 'google', 'cohere'
+    'openai',
+    'openrouter',
+    'ollama',
+    'anthropic',
+    'mistral',
+    'google',
+    'cohere',
   ];
 
   class MockValidProvider {

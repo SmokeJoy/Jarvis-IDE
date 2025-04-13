@@ -1,6 +1,6 @@
-import { ContextItem, getMemoryContexts } from "../../memory/context.js";
-import { readFile } from "fs/promises";
-import path from "path";
+import { ContextItem, getMemoryContexts } from '../../memory/context';
+import { readFile } from 'fs/promises';
+import path from 'path';
 
 interface ContextLink {
   id: string;
@@ -18,7 +18,7 @@ interface ContextLink {
 
 interface LinksOfOptions {
   id: string;
-  direction?: "incoming" | "outgoing" | "both";
+  direction?: 'incoming' | 'outgoing' | 'both';
   relation?: string;
   minStrength?: number;
   minConfidence?: number;
@@ -31,25 +31,22 @@ interface LinksOfResult {
 
 async function getContextLinks(): Promise<ContextLink[]> {
   try {
-    const linksPath = path.join(__dirname, "../../data/context_links.json");
-    const data = await readFile(linksPath, "utf-8");
+    const linksPath = path.join(__dirname, '../../data/context_links.json');
+    const data = await readFile(linksPath, 'utf-8');
     return JSON.parse(data);
   } catch (error) {
     return [];
   }
 }
 
-function filterLinks(
-  links: ContextLink[],
-  options: LinksOfOptions
-): ContextLink[] {
+function filterLinks(links: ContextLink[], options: LinksOfOptions): ContextLink[] {
   return links.filter((link) => {
     // Filtra per direzione
     const isIncoming = link.targetId === options.id;
     const isOutgoing = link.sourceId === options.id;
-    if (options.direction === "incoming" && !isIncoming) return false;
-    if (options.direction === "outgoing" && !isOutgoing) return false;
-    if (options.direction === "both" && !isIncoming && !isOutgoing) return false;
+    if (options.direction === 'incoming' && !isIncoming) return false;
+    if (options.direction === 'outgoing' && !isOutgoing) return false;
+    if (options.direction === 'both' && !isIncoming && !isOutgoing) return false;
 
     // Filtra per tipo di relazione
     if (options.relation && link.relation !== options.relation) return false;
@@ -58,10 +55,7 @@ function filterLinks(
     if (options.minStrength && link.strength < options.minStrength) return false;
 
     // Filtra per confidenza minima
-    if (
-      options.minConfidence &&
-      link.metadata.confidence < options.minConfidence
-    ) return false;
+    if (options.minConfidence && link.metadata.confidence < options.minConfidence) return false;
 
     return true;
   });
@@ -101,4 +95,4 @@ export async function contextLinksOfHandler(
       error: `Errore durante il recupero dei link: ${error.message}`,
     };
   }
-} 
+}

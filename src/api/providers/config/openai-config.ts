@@ -1,25 +1,26 @@
-import { ModelInfo } from "../../../shared/types/api.types.js"
-import { openAiModelInfoSaneDefaults } from "../../../shared/api.js"
+import { ModelInfo } from '../../../shared/types/api.types';
+import { openAiModelInfoSaneDefaults } from '../../../shared/api';
 
 export interface OpenAiConfig {
-    temperature?: number;
-    maxTokens?: number;
-    reasoningEffort?: string;
+  temperature?: number;
+  maxTokens?: number;
+  reasoningEffort?: string;
 }
 
 export function getOpenAiConfig(modelId: string, modelInfo?: ModelInfo): OpenAiConfig {
-    const isDeepseekReasoner = modelId.includes("deepseek-reasoner")
-    const isO3Mini = modelId.includes("o3-mini")
-    
-    const config: OpenAiConfig = {
-        temperature: modelInfo?.temperature ?? openAiModelInfoSaneDefaults.temperature,
-        maxTokens: modelInfo?.maxTokens && modelInfo.maxTokens > 0 ? Number(modelInfo.maxTokens) : undefined,
-    }
+  const isDeepseekReasoner = modelId.includes('deepseek-reasoner');
+  const isO3Mini = modelId.includes('o3-mini');
 
-    if (isO3Mini) {
-        config.temperature = undefined
-        config.reasoningEffort = "medium"
-    }
+  const config: OpenAiConfig = {
+    temperature: modelInfo?.temperature ?? openAiModelInfoSaneDefaults.temperature,
+    maxTokens:
+      modelInfo?.maxTokens && modelInfo.maxTokens > 0 ? Number(modelInfo.maxTokens) : undefined,
+  };
 
-    return config
-} 
+  if (isO3Mini) {
+    config.temperature = undefined;
+    config.reasoningEffort = 'medium';
+  }
+
+  return config;
+}

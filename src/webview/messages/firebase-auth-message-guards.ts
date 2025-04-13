@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { FirebaseAuthMessageType, FirebaseAuthMessageUnion, SignInWithTokenPayload, AuthStateChangedPayload } from './firebase-auth-message';
+import {
+  FirebaseAuthMessageType,
+  FirebaseAuthMessageUnion,
+  SignInWithTokenPayload,
+  AuthStateChangedPayload,
+} from './firebase-auth-message';
 
 export const isAuthStateChangedMessage = (
   message: FirebaseAuthMessageUnion

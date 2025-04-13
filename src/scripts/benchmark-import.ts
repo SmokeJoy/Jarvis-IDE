@@ -3,7 +3,7 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
-import { BenchmarkStorage } from '../storage/benchmark/BenchmarkStorage.js';
+import { BenchmarkStorage } from '../storage/benchmark/BenchmarkStorage';
 
 // Controlla gli argomenti
 const args = process.argv.slice(2);
@@ -31,10 +31,10 @@ if (!filePath.toLowerCase().endsWith('.json')) {
 try {
   const storage = new BenchmarkStorage();
   const sessionId = storage.importSession(filePath);
-  
+
   console.log(`Sessione di benchmark importata con successo! ID: ${sessionId}`);
   console.log(`File: ${path.resolve(filePath)}`);
 } catch (error) {
-  console.error('Errore durante l\'importazione:', error.message);
+  console.error("Errore durante l'importazione:", error.message);
   process.exit(1);
-} 
+}

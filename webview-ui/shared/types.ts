@@ -2,6 +2,8 @@
  * Tipi condivisi tra il backend e la WebView
  */
 
+import { TaskStatus } from '../../src/shared/types/task-queue.types';
+
 /**
  * Livello di priorità dei task
  */
@@ -16,11 +18,6 @@ export type AgentMode = 'autonomous' | 'supervised' | 'interactive';
  * Stile di codice utilizzato dagli agenti
  */
 export type CodeStyle = 'standard' | 'compact' | 'verbose' | 'documented';
-
-/**
- * Stato di un task
- */
-export type TaskStatus = 'pending' | 'active' | 'completed' | 'failed' | 'aborted';
 
 /**
  * Stato di un agente
@@ -88,43 +85,22 @@ export interface Task {
   id: string;
   /** Stato del task */
   status: TaskStatus;
-  /** Timestamp di creazione */
-  createdAt: Date;
-  /** Timestamp di inizio esecuzione */
-  startedAt?: Date;
-  /** Timestamp di completamento */
-  completedAt?: Date;
-  /** Agente a cui è assegnato il task */
-  assignedTo?: string;
-  /** Istruzione da eseguire */
-  instruction: Instruction;
-  /** Risultato dell'elaborazione */
-  result?: TaskResult;
   /** Errore in caso di fallimento */
   error?: string;
+  /** Timestamp di creazione */
+  timestamp: number;
 }
 
 /**
  * Stato della coda dei task per la WebView
  */
 export interface TaskQueueState {
-  /** Numero totale di task */
-  total: number;
-  /** Numero di task in attesa */
-  pending: number;
-  /** Task attualmente attivo */
-  active: Task | null;
-  /** Numero di task completati */
-  completed: number;
-  /** Numero di task falliti */
-  failed: number;
-  /** Distribuzione dei task per priorità */
-  priorityDistribution: {
-    /** Task con priorità alta */
-    high: Task[];
-    /** Task con priorità normale */
-    normal: Task[];
-    /** Task con priorità bassa */
-    low: Task[];
-  };
+  /** Lista dei task */
+  tasks: Task[];
+  /** Indica se la coda è in esecuzione */
+  running: boolean;
+  /** Indica se la coda è stata interrotta */
+  aborted: boolean;
+  /** Timestamp dell'ultimo aggiornamento */
+  lastUpdated: number;
 } 

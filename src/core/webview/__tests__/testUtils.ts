@@ -7,8 +7,9 @@ import {
   LogLevel,
   ModelStatus,
   ChatStatus,
-  MockMessageCreator
+  MockMessageCreator,
 } from '@/shared/types/test-utils.types';
+import { createSafeMessage } from "@/shared/types/message-adapter";
 
 export const mockModelInfo: ModelInfo = {
   id: 'test-model',
@@ -19,7 +20,7 @@ export const mockModelInfo: ModelInfo = {
   supportsImages: false,
   inputPrice: 0.0001,
   outputPrice: 0.0002,
-  description: 'A test model for testing purposes'
+  description: 'A test model for testing purposes',
 };
 
 export const mockExtensionSettings: ExtensionSettings = {
@@ -29,26 +30,11 @@ export const mockExtensionSettings: ExtensionSettings = {
   language: 'en',
   defaultModel: 'test-model',
   apiKeys: {
-    'test-provider': 'test-api-key'
-  }
+    'test-provider': 'test-api-key',
+  },
 };
 
-export const mockChatMessages: MockedChatMessage[] = [
-  {
-    id: 'msg1',
-    role: 'user',
-    content: 'Hello, how are you?',
-    timestamp: Date.now(),
-    metadata: {}
-  },
-  {
-    id: 'msg2',
-    role: 'assistant',
-    content: 'I am fine, thank you!',
-    timestamp: Date.now() + 1000,
-    metadata: {}
-  }
-];
+export const mockChatMessages: MockedChatMessage[] = [createSafeMessage('user', 'Hello, how are you?', { id: 'msg1', timestamp: Date.now(), metadata: {} }), createSafeMessage('assistant', 'I am fine, thank you!', { id: 'msg2', timestamp: Date.now() + 1000, metadata: {} })];
 
 export const mockMessageCreator: MockMessageCreator = {
   createMessage: <T extends ExtensionMessageType>(
@@ -57,7 +43,7 @@ export const mockMessageCreator: MockMessageCreator = {
   ): ExtensionMessage<T> => ({
     type,
     timestamp: Date.now(),
-    payload
+    payload,
   }),
 
   createError: (error: Error): ExtensionMessage<'error'> => ({
@@ -67,55 +53,70 @@ export const mockMessageCreator: MockMessageCreator = {
       code: 'TEST_ERROR',
       message: error.message,
       details: {
-        stack: error.stack
-      }
-    }
+        stack: error.stack,
+      },
+    },
   }),
 
-  createInfoMessage: (message: string, severity: MessageSeverity = 'info'): ExtensionMessage<'info'> => ({
+  createInfoMessage: (
+    message: string,
+    severity: MessageSeverity = 'info'
+  ): ExtensionMessage<'info'> => ({
     type: 'info',
     timestamp: Date.now(),
     payload: {
       message,
-      severity
-    }
+      severity,
+    },
   }),
 
-  createLogMessage: (level: LogLevel, message: string, context: Record<string, unknown> = {}): ExtensionMessage<'log.update'> => ({
+  createLogMessage: (
+    level: LogLevel,
+    message: string,
+    context: Record<string, unknown> = {}
+  ): ExtensionMessage<'log.update'> => ({
     type: 'log.update',
     timestamp: Date.now(),
     payload: {
       level,
       message,
-      context
-    }
+      context,
+    },
   }),
 
-  createModelUpdate: (modelId: string, modelInfo: ModelInfo, status: ModelStatus = 'ready'): ExtensionMessage<'model.update'> => ({
+  createModelUpdate: (
+    modelId: string,
+    modelInfo: ModelInfo,
+    status: ModelStatus = 'ready'
+  ): ExtensionMessage<'model.update'> => ({
     type: 'model.update',
     timestamp: Date.now(),
     payload: {
       modelId,
       modelInfo,
-      status
-    }
+      status,
+    },
   }),
 
   createSettingsUpdate: (settings: ExtensionSettings): ExtensionMessage<'settings.update'> => ({
     type: 'settings.update',
     timestamp: Date.now(),
     payload: {
-      settings
-    }
+      settings,
+    },
   }),
 
-  createChatUpdate: (threadId: string, messages: MockedChatMessage[], status: ChatStatus = 'active'): ExtensionMessage<'chat.update'> => ({
+  createChatUpdate: (
+    threadId: string,
+    messages: MockedChatMessage[],
+    status: ChatStatus = 'active'
+  ): ExtensionMessage<'chat.update'> => ({
     type: 'chat.update',
     timestamp: Date.now(),
     payload: {
       threadId,
       messages,
-      status
-    }
-  })
-}; 
+      status,
+    },
+  }),
+};

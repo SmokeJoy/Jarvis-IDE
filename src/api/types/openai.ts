@@ -35,4 +35,4 @@ export interface OpenAIStreamResponse {
   created: number;
   model: string;
   choices: OpenAIStreamChoice[];
-} 
+}

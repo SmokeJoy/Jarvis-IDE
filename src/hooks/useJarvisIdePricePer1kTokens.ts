@@ -1,6 +1,4 @@
-// Dichiarazione per l'API vscode WebView
-declare const vscode: { postMessage: (message: any) => void };
-
+import './vscode-api';
 import { useCallback, useState } from 'react';
 
 export const useJarvisIdePricePer1kTokens = () => {
@@ -12,8 +10,8 @@ export const useJarvisIdePricePer1kTokens = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          pricePer1kTokens: newPricePer1kTokens
-        }
+          pricePer1kTokens: newPricePer1kTokens,
+        },
       });
 
       setPricePer1kTokens(newPricePer1kTokens);
@@ -30,8 +28,8 @@ export const useJarvisIdePricePer1kTokens = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          pricePer1kTokens: defaultPricePer1kTokens
-        }
+          pricePer1kTokens: defaultPricePer1kTokens,
+        },
       });
 
       setPricePer1kTokens(defaultPricePer1kTokens);
@@ -44,6 +42,6 @@ export const useJarvisIdePricePer1kTokens = () => {
   return {
     pricePer1kTokens,
     updatePricePer1kTokens,
-    resetPricePer1kTokens
+    resetPricePer1kTokens,
   };
-}; 
+};

@@ -1,10 +1,10 @@
-import { describe, expect, test, beforeEach, afterEach, vi } from "vitest";
-import * as vscode from "vscode";
-import { FileManager } from "../core/file-operations/FileManager.js";
+import { describe, expect, test, beforeEach, afterEach, vi } from 'vitest';
+import * as vscode from 'vscode';
+import { FileManager } from '../core/file-operations/FileManager';
 
-vi.mock("vscode");
+vi.mock('vscode');
 
-describe("FileManager", () => {
+describe('FileManager', () => {
   let fileManager: FileManager;
   let workspaceState: any;
 
@@ -25,18 +25,18 @@ describe("FileManager", () => {
     vi.clearAllMocks();
   });
 
-  test("should create file", async () => {
-    const filePath = "test.txt";
-    const content = "test content";
+  test('should create file', async () => {
+    const filePath = 'test.txt';
+    const content = 'test content';
 
     await fileManager.createFile(filePath, content);
     expect(vscode.workspace.getConfiguration).toHaveBeenCalled();
   });
 
-  test("should delete file", async () => {
-    const filePath = "test.txt";
+  test('should delete file', async () => {
+    const filePath = 'test.txt';
 
     await fileManager.deleteFile(filePath);
     expect(vscode.workspace.getConfiguration).toHaveBeenCalled();
   });
-}); 
+});

@@ -21,7 +21,7 @@ export class CompositeFallbackStrategy implements FallbackStrategy {
       throw new Error('CompositeFallbackStrategy richiede almeno una strategia');
     }
   }
-  
+
   /**
    * Seleziona il provider consultando ogni strategia in sequenza
    * Restituisce il primo provider valido trovato da una delle strategie
@@ -33,18 +33,16 @@ export class CompositeFallbackStrategy implements FallbackStrategy {
   ): LLMProviderHandler | null {
     try {
       // Filtra i provider validi (abilitati e non falliti)
-      const validProviders = providers.filter(
-        p => p.isEnabled && !failedProviders.has(p.id)
-      );
-      
+      const validProviders = providers.filter((p) => p.isEnabled && !failedProviders.has(p.id));
+
       if (validProviders.length === 0) return null;
-      
+
       // Consulta ogni strategia in sequenza
       for (const strategy of this.strategies) {
         const provider = strategy.selectProvider(validProviders, stats, failedProviders);
         if (provider) return provider;
       }
-      
+
       // Se nessuna strategia ha restituito un provider valido, usa il primo disponibile
       return validProviders[0];
     } catch (err) {
@@ -53,7 +51,7 @@ export class CompositeFallbackStrategy implements FallbackStrategy {
       throw error;
     }
   }
-  
+
   /**
    * Ottiene i provider in ordine combinando gli ordinamenti di tutte le strategie
    * e rimuovendo i duplicati
@@ -64,20 +62,18 @@ export class CompositeFallbackStrategy implements FallbackStrategy {
     failedProviders: Set<string> = new Set()
   ): LLMProviderHandler[] {
     // Filtra i provider validi (abilitati e non falliti)
-    const validProviders = providers.filter(
-      p => p.isEnabled && !failedProviders.has(p.id)
-    );
-    
+    const validProviders = providers.filter((p) => p.isEnabled && !failedProviders.has(p.id));
+
     if (validProviders.length === 0) return [];
-    
+
     // Set per tracciare i provider già inclusi (per rimuovere duplicati)
     const includedProviderIds = new Set<string>();
     const result: LLMProviderHandler[] = [];
-    
+
     // Per ogni strategia, ottieni i provider ordinati e aggiungi quelli non ancora inclusi
     for (const strategy of this.strategies) {
       const orderedProviders = strategy.getProvidersInOrder(validProviders, stats, failedProviders);
-      
+
       for (const provider of orderedProviders) {
         if (!includedProviderIds.has(provider.id)) {
           result.push(provider);
@@ -85,7 +81,7 @@ export class CompositeFallbackStrategy implements FallbackStrategy {
         }
       }
     }
-    
+
     // Aggiungi eventuali provider validi rimanenti che non sono stati inclusi da nessuna strategia
     for (const provider of validProviders) {
       if (!includedProviderIds.has(provider.id)) {
@@ -93,10 +89,10 @@ export class CompositeFallbackStrategy implements FallbackStrategy {
         includedProviderIds.add(provider.id);
       }
     }
-    
+
     return result;
   }
-  
+
   /**
    * Notifica tutte le strategie interne di un successo
    */
@@ -106,7 +102,7 @@ export class CompositeFallbackStrategy implements FallbackStrategy {
       strategy.notifySuccess(providerId);
     }
   }
-  
+
   /**
    * Notifica tutte le strategie interne di un fallimento
    */
@@ -116,14 +112,14 @@ export class CompositeFallbackStrategy implements FallbackStrategy {
       strategy.notifyFailure(providerId);
     }
   }
-  
+
   /**
    * Restituisce l'array di strategie contenute in questa strategia composita
    */
   getStrategies(): FallbackStrategy[] {
     return [...this.strategies];
   }
-  
+
   /**
    * Aggiunge una strategia alla composizione
    * @param strategy Strategia da aggiungere
@@ -131,7 +127,7 @@ export class CompositeFallbackStrategy implements FallbackStrategy {
   addStrategy(strategy: FallbackStrategy): void {
     this.strategies.push(strategy);
   }
-  
+
   /**
    * Rimuove una strategia dalla composizione
    * @param index Indice della strategia da rimuovere
@@ -141,12 +137,12 @@ export class CompositeFallbackStrategy implements FallbackStrategy {
     if (index < 0 || index >= this.strategies.length) {
       return undefined;
     }
-    
+
     // Verifica che rimanga almeno una strategia
     if (this.strategies.length <= 1) {
       throw new Error('CompositeFallbackStrategy deve mantenere almeno una strategia');
     }
-    
+
     return this.strategies.splice(index, 1)[0];
   }
-} 
+}

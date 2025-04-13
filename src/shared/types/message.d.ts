@@ -1,49 +1,51 @@
-import { ChatCompletionMessageParam } from "../../types/provider-types/openai-types.js";
-export type MessageRole = "user" | "assistant" | "system" | "tool";
+import { ChatCompletionMessageParam } from '../../types/provider-types/openai-types';
+export type MessageRole = 'user' | 'assistant' | 'system' | 'tool';
 export interface BaseMessage {
-    role: MessageRole;
-    content: string | Array<{
-        type: "text" | "image";
+  role: MessageRole;
+  content:
+    | string
+    | Array<{
+        type: 'text' | 'image';
         text?: string;
         url?: string;
-    }>;
-    timestamp: number;
-    streaming?: boolean;
+      }>;
+  timestamp: number;
+  streaming?: boolean;
 }
 export interface ChatMessage extends ChatCompletionMessageParam {
-    timestamp: number;
-    streaming?: boolean;
+  timestamp: number;
+  streaming?: boolean;
 }
 export interface WebviewMessage {
-    type: string;
-    payload?: unknown;
+  type: string;
+  payload?: unknown;
 }
 /**
  * Payload di messaggio di chat
  */
 export interface MessagePayload {
-    messages: ChatCompletionMessageParam[];
-    functions?: Function[];
-    function_call?: FunctionCall;
+  messages: ChatCompletionMessageParam[];
+  functions?: Function[];
+  function_call?: FunctionCall;
 }
 /**
  * Definizione di una funzione chiamabile dall'LLM
  */
 export interface Function {
-    name: string;
-    description: string;
-    parameters: {
-        type: string;
-        properties: Record<string, unknown>;
-        required?: string[];
-    };
+  name: string;
+  description: string;
+  parameters: {
+    type: string;
+    properties: Record<string, unknown>;
+    required?: string[];
+  };
 }
 /**
  * Specifica una chiamata di funzione
  */
 export interface FunctionCall {
-    name: string;
-    arguments?: string;
+  name: string;
+  arguments?: string;
 }
 /**
  * Specifica un parametro di messaggio di chat completo

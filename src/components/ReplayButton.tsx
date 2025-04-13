@@ -9,16 +9,12 @@ interface ReplayButtonProps {
   onReplayComplete?: (success: boolean) => void;
 }
 
-export const ReplayButton = ({ 
-  entry, 
-  onReplayStart,
-  onReplayComplete 
-}: ReplayButtonProps) => {
+export const ReplayButton = ({ entry, onReplayStart, onReplayComplete }: ReplayButtonProps) => {
   const handleReplay = async () => {
     onReplayStart?.();
-    
+
     const success = await replaySnapshot(entry);
-    
+
     onReplayComplete?.(success);
   };
 
@@ -33,4 +29,4 @@ export const ReplayButton = ({
       <span>Replay Decisione</span>
     </motion.button>
   );
-}; 
+};

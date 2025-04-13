@@ -34,8 +34,8 @@ export const themes: Record<string, Theme> = {
       success: '#4caf50',
       error: '#f44336',
       warning: '#ff9800',
-      info: '#2196f3'
-    }
+      info: '#2196f3',
+    },
   },
   light: {
     name: 'Light',
@@ -51,9 +51,9 @@ export const themes: Record<string, Theme> = {
       success: '#4caf50',
       error: '#f44336',
       warning: '#ff9800',
-      info: '#2196f3'
-    }
-  }
+      info: '#2196f3',
+    },
+  },
 };
 
 export class ThemeManager {
@@ -110,4 +110,4 @@ export class ThemeManager {
   public getAvailableThemes(): string[] {
     return Object.keys(themes);
   }
-} 
+}

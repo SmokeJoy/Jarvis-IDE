@@ -43,4 +43,4 @@ const vscode = {
   },
 };
 
-export = vscode; 
+export = vscode;

@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import { SettingsProvider } from './settingsProvider.js';
-import { useSettings } from './settingsProvider.js';
+import { SettingsProvider } from './settingsProvider';
+import { useSettings } from './settingsProvider';
 
 // Mock di acquireVsCodeApi
 (global as any).acquireVsCodeApi = () => ({
   postMessage: vi.fn(),
   getState: vi.fn(),
-  setState: vi.fn()
+  setState: vi.fn(),
 });
 
 const TestComponent = () => {
@@ -15,9 +15,7 @@ const TestComponent = () => {
   return (
     <div>
       <div data-testid="provider">{settings.provider}</div>
-      <button onClick={() => updateSetting('provider', 'openai')}>
-        Change Provider
-      </button>
+      <button onClick={() => updateSetting('provider', 'openai')}>Change Provider</button>
     </div>
   );
 };
@@ -48,8 +46,8 @@ describe('SettingsProvider', () => {
         new MessageEvent('message', {
           data: {
             type: 'settings',
-            payload: { provider: 'openai' }
-          }
+            payload: { provider: 'openai' },
+          },
         })
       );
     });
@@ -62,7 +60,7 @@ describe('SettingsProvider', () => {
     (global as any).acquireVsCodeApi = () => ({
       postMessage,
       getState: vi.fn(),
-      setState: vi.fn()
+      setState: vi.fn(),
     });
 
     render(
@@ -75,7 +73,7 @@ describe('SettingsProvider', () => {
 
     expect(postMessage).toHaveBeenCalledWith({
       type: 'settingUpdated',
-      payload: { key: 'provider', value: 'openai' }
+      payload: { key: 'provider', value: 'openai' },
     });
   });
-}); 
+});

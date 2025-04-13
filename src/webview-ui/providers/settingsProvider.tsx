@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { vscode } from '../vscode.js';
+import { vscode } from '../vscode';
 
 // Definizione del modello disponibile
 interface AvailableModel {
@@ -38,8 +38,8 @@ const defaultSettings: Settings = {
   systemPrompt: '',
   systemPromptPath: 'config/system_prompt.md',
   availableModels: [
-    { label: 'DeepSeek Coder (Local)', value: 'deepseek-coder', provider: 'local', coder: true }
-  ]
+    { label: 'DeepSeek Coder (Local)', value: 'deepseek-coder', provider: 'local', coder: true },
+  ],
 };
 
 const SettingsContext = createContext<SettingsContextType>({
@@ -48,7 +48,7 @@ const SettingsContext = createContext<SettingsContextType>({
   selectModel: () => {},
   saveSystemPrompt: () => {},
   openSystemPromptFile: () => {},
-  setSystemPromptPath: () => {}
+  setSystemPromptPath: () => {},
 });
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -58,7 +58,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     // Richiedi le impostazioni al backend
     vscode.postMessage({ type: 'getSettings' });
-    
+
     // Richiedi il system prompt all'avvio
     vscode.postMessage({ type: 'command', command: 'jarvis.readSystemPrompt' });
 
@@ -67,22 +67,22 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const message = event.data;
       switch (message.type) {
         case 'settings':
-          setSettings(prev => ({
+          setSettings((prev) => ({
             ...prev,
-            ...message.payload
+            ...message.payload,
           }));
           break;
         case 'systemPrompt':
-          setSettings(prev => ({
+          setSettings((prev) => ({
             ...prev,
-            systemPrompt: message.payload.content
+            systemPrompt: message.payload.content,
           }));
           break;
         case 'systemPromptSaved':
           // Aggiorna lo stato dopo il salvataggio
-          setSettings(prev => ({
+          setSettings((prev) => ({
             ...prev,
-            systemPrompt: message.payload.content
+            systemPrompt: message.payload.content,
           }));
           break;
       }
@@ -93,24 +93,24 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   const updateSetting = (key: keyof Settings, value: any) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+    setSettings((prev) => ({ ...prev, [key]: value }));
     vscode.postMessage({
       type: 'settingUpdated',
-      payload: { key, value }
+      payload: { key, value },
     });
   };
 
   // Funzione per selezionare un modello e aggiornare automaticamente provider e coder_mode
   const selectModel = (modelValue: string) => {
-    const selectedModel = settings.availableModels?.find(model => model.value === modelValue);
-    
+    const selectedModel = settings.availableModels?.find((model) => model.value === modelValue);
+
     if (selectedModel) {
       // Aggiorna il modello
       updateSetting('model', modelValue);
-      
+
       // Aggiorna il provider associato al modello
       updateSetting('provider', selectedModel.provider);
-      
+
       // Aggiorna la modalità coder basata sul modello
       updateSetting('coder_mode', selectedModel.coder);
     }
@@ -120,14 +120,14 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     vscode.postMessage({
       type: 'command',
       command: 'jarvis.saveSystemPrompt',
-      payload: content
+      payload: content,
     });
   };
 
   const openSystemPromptFile = () => {
     vscode.postMessage({
       type: 'command',
-      command: 'jarvis-ide.openSystemPromptFile'
+      command: 'jarvis-ide.openSystemPromptFile',
     });
   };
 
@@ -135,27 +135,29 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     vscode.postMessage({
       type: 'command',
       command: 'jarvis-ide.setSystemPromptPath',
-      payload: path
+      payload: path,
     });
     // Aggiorna il valore locale subito per feedback immediato all'utente
-    setSettings(prev => ({
+    setSettings((prev) => ({
       ...prev,
-      systemPromptPath: path
+      systemPromptPath: path,
     }));
   };
 
   return (
-    <SettingsContext.Provider value={{ 
-      settings, 
-      updateSetting, 
-      selectModel, 
-      saveSystemPrompt,
-      openSystemPromptFile,
-      setSystemPromptPath
-    }}>
+    <SettingsContext.Provider
+      value={{
+        settings,
+        updateSetting,
+        selectModel,
+        saveSystemPrompt,
+        openSystemPromptFile,
+        setSystemPromptPath,
+      }}
+    >
       {children}
     </SettingsContext.Provider>
   );
 };
 
-export const useSettings = () => useContext(SettingsContext); 
+export const useSettings = () => useContext(SettingsContext);

@@ -1,0 +1,9 @@
+lastUpdated: '2025-04-12T12:57:18.904Z'
+totalAnyCount: 0
+totalJsImports: 1
+files:
+  - path: E:\cline-main\src\extension.ts
+    anyCount: 0
+    jsImports: 1
+    priority: low
+    status: pending

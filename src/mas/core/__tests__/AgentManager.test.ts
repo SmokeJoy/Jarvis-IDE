@@ -59,7 +59,7 @@ describe('AgentManager', () => {
       expect(() => agentManager.registerAgent(undefined)).toThrow();
     });
 
-    it('dovrebbe lanciare un errore se l\'agente non ha un ruolo valido', () => {
+    it("dovrebbe lanciare un errore se l'agente non ha un ruolo valido", () => {
       const invalidAgent = {
         ...mockAgent,
         role: '' as AgentRole,
@@ -69,7 +69,7 @@ describe('AgentManager', () => {
   });
 
   describe('getAgent', () => {
-    it('dovrebbe restituire l\'agente corretto in base al ruolo', async () => {
+    it("dovrebbe restituire l'agente corretto in base al ruolo", async () => {
       const mockAgent1: MockAgent = {
         ...mockAgent,
         role: 'role1' as AgentRole,
@@ -154,8 +154,8 @@ describe('AgentManager', () => {
     });
   });
 
-  describe('comportamento dell\'agente', () => {
-    it('dovrebbe poter chiamare il metodo execute dell\'agente', async () => {
+  describe("comportamento dell'agente", () => {
+    it("dovrebbe poter chiamare il metodo execute dell'agente", async () => {
       const mockContext: AgentContext = {
         query: 'test query',
         history: [],
@@ -174,7 +174,7 @@ describe('AgentManager', () => {
       expect(mockAgent.execute).toHaveBeenCalledWith(mockContext);
     });
 
-    it('dovrebbe poter chiamare il metodo getSystemPrompt dell\'agente', async () => {
+    it("dovrebbe poter chiamare il metodo getSystemPrompt dell'agente", async () => {
       agentManager.registerAgent(mockAgent);
       const agent = await agentManager.getAgent(mockAgent.role);
 
@@ -183,16 +183,16 @@ describe('AgentManager', () => {
       expect(mockAgent.getSystemPrompt).toHaveBeenCalled();
     });
 
-    it('dovrebbe gestire correttamente gli errori durante l\'esecuzione', async () => {
+    it("dovrebbe gestire correttamente gli errori durante l'esecuzione", async () => {
       const error = new Error('Test error');
       mockAgent.execute.mockRejectedValueOnce(error);
 
       agentManager.registerAgent(mockAgent);
       const agent = await agentManager.getAgent(mockAgent.role);
 
-      await expect(agent?.execute({ query: 'test', history: [], memory: {} }))
-        .rejects
-        .toThrow('Test error');
+      await expect(agent?.execute({ query: 'test', history: [], memory: {} })).rejects.toThrow(
+        'Test error'
+      );
     });
   });
-}); 
+});

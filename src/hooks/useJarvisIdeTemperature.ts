@@ -1,6 +1,4 @@
-// Dichiarazione per l'API vscode WebView
-declare const vscode: { postMessage: (message: any) => void };
-
+import './vscode-api';
 import { useCallback, useState } from 'react';
 
 export const useJarvisIdeTemperature = () => {
@@ -12,8 +10,8 @@ export const useJarvisIdeTemperature = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          temperature: newTemperature
-        }
+          temperature: newTemperature,
+        },
       });
 
       setTemperature(newTemperature);
@@ -30,8 +28,8 @@ export const useJarvisIdeTemperature = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          temperature: defaultTemperature
-        }
+          temperature: defaultTemperature,
+        },
       });
 
       setTemperature(defaultTemperature);
@@ -44,6 +42,6 @@ export const useJarvisIdeTemperature = () => {
   return {
     temperature,
     updateTemperature,
-    resetTemperature
+    resetTemperature,
   };
-}; 
+};

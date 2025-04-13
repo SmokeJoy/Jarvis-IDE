@@ -104,7 +104,12 @@ describe('modelLoader', () => {
         { id: 'valid-model', name: 'Valid Model', provider: 'anthropic', contextLength: 100000 },
         { id: 'missing-name', provider: 'anthropic', contextLength: 100000 }, // Manca il nome
         { id: 'missing-provider', name: 'Missing Provider', contextLength: 100000 }, // Manca il provider
-        { id: 'invalid-context', name: 'Invalid Context', provider: 'anthropic', contextLength: '100000' as any }, // Tipo non valido
+        {
+          id: 'invalid-context',
+          name: 'Invalid Context',
+          provider: 'anthropic',
+          contextLength: '100000' as any,
+        }, // Tipo non valido
       ];
 
       // Configura la mock
@@ -114,7 +119,9 @@ describe('modelLoader', () => {
       const models = await fetchModels('anthropic');
 
       // Verifica che il warning sia stato registrato per i modelli non validi
-      expect(Logger.warn).toHaveBeenCalledWith(expect.stringContaining('antropic ha restituito 3 modelli con struttura non valida'));
+      expect(Logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('antropic ha restituito 3 modelli con struttura non valida')
+      );
 
       // I modelli vengono comunque restituiti (responsabilità del chiamante filtrare)
       expect(models.length).toBe(4);
@@ -174,7 +181,9 @@ describe('modelLoader', () => {
       expect(models).toEqual(mockOpenRouterModels);
 
       // Verifica che sia stato registrato un messaggio di deprecation
-      expect(Logger.debug).toHaveBeenCalledWith(expect.stringContaining('Chiamata loadModels deprecata'));
+      expect(Logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Chiamata loadModels deprecata')
+      );
     });
   });
-}); 
+});

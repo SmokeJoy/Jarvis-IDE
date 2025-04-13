@@ -4,15 +4,15 @@
 		"outDir": "../dist/webview-ui",
 		"rootDir": "..",
 		"module": "ESNext",
-		"moduleResolution": "Bundler",
+		"moduleResolution": "bundler",
 		"jsx": "react-jsx",
 		"baseUrl": ".",
 		"paths": {
-			"@/*": ["../src/*"],
+			"@/*": ["src/*"],
 			"@shared/*": ["../src/shared/*"],
-			"@components/*": ["./components/*"],
-			"@utils/*": ["./utils/*"],
-			"@types/*": ["./types/*"]
+			"@components/*": ["src/components/*"],
+			"@utils/*": ["src/utils/*"],
+			"@types/*": ["src/types/*"]
 		},
 		"strict": true,
 		"verbatimModuleSyntax": true,
@@ -21,8 +21,9 @@
 		"esModuleInterop": true,
 		"resolveJsonModule": true,
 		"allowSyntheticDefaultImports": true,
-		"forceConsistentCasingInFileNames": true
+		"forceConsistentCasingInFileNames": true,
+		"types": ["node", "vscode-webview"]
 	},
-	"include": ["**/*", "../src/shared/**/*"],
+	"include": ["src/**/*", "../src/shared/**/*"],
 	"exclude": ["node_modules", "dist"]
 }

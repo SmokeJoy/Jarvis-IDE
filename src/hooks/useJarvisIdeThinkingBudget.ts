@@ -1,6 +1,4 @@
-// Dichiarazione per l'API vscode WebView
-declare const vscode: { postMessage: (message: any) => void };
-
+import './vscode-api';
 import { useCallback, useState } from 'react';
 
 export const useJarvisIdeThinkingBudget = () => {
@@ -12,8 +10,8 @@ export const useJarvisIdeThinkingBudget = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          thinkingBudget: newBudget
-        }
+          thinkingBudget: newBudget,
+        },
       });
 
       setThinkingBudget(newBudget);
@@ -30,8 +28,8 @@ export const useJarvisIdeThinkingBudget = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          thinkingBudget: defaultBudget
-        }
+          thinkingBudget: defaultBudget,
+        },
       });
 
       setThinkingBudget(defaultBudget);
@@ -44,6 +42,6 @@ export const useJarvisIdeThinkingBudget = () => {
   return {
     thinkingBudget,
     updateThinkingBudget,
-    resetThinkingBudget
+    resetThinkingBudget,
   };
-}; 
+};

@@ -4,12 +4,12 @@
  * @version 1.0.0
  */
 
-import { ApiConfiguration } from '../shared/types/api.types.js'
-import { WebviewMessage, WebviewMessageType } from '../shared/types/webview.types.js'
+import { ApiConfiguration } from '../shared/types/api.types';
+import { WebviewMessage, WebviewMessageType } from '../shared/types/webview.types';
 
 export interface WebviewMessageBase {
-  type: WebviewMessageType
+  type: WebviewMessageType;
 }
 
 // Esporto tipi core dalla definizione condivisa
-export type { WebviewMessage, WebviewMessageType }
+export type { WebviewMessage, WebviewMessageType };

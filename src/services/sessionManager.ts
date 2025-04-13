@@ -33,7 +33,7 @@ export class SessionManager {
       id: Date.now().toString(),
       name,
       timestamp: Date.now(),
-      messages: []
+      messages: [],
     };
 
     this.saveSession(session);
@@ -44,7 +44,7 @@ export class SessionManager {
   // Carica una sessione esistente
   public loadSession(sessionId: string): Session | null {
     const filePath = path.join(this.sessionsPath, `${sessionId}.json`);
-    
+
     if (fs.existsSync(filePath)) {
       try {
         const content = fs.readFileSync(filePath, 'utf-8');
@@ -79,7 +79,7 @@ export class SessionManager {
       this.currentSession.messages.push({
         role,
         message,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
       this.saveSession(this.currentSession);
     }
@@ -107,7 +107,7 @@ export class SessionManager {
         }
         return true;
       } catch (error) {
-        console.error('❌ Errore nell\'eliminazione della sessione:', error);
+        console.error("❌ Errore nell'eliminazione della sessione:", error);
         return false;
       }
     }
@@ -119,8 +119,8 @@ export class SessionManager {
     try {
       const files = fs.readdirSync(this.sessionsPath);
       return files
-        .filter(file => file.endsWith('.json'))
-        .map(file => {
+        .filter((file) => file.endsWith('.json'))
+        .map((file) => {
           const content = fs.readFileSync(path.join(this.sessionsPath, file), 'utf-8');
           return JSON.parse(content);
         })
@@ -149,7 +149,7 @@ export class SessionManager {
   public importSession(jsonContent: string): Session | null {
     try {
       const session = JSON.parse(jsonContent);
-      
+
       // Validazione della struttura
       if (!session.id || !session.name || !session.messages) {
         throw new Error('Formato sessione non valido');
@@ -163,7 +163,7 @@ export class SessionManager {
       this.saveSession(session);
       return session;
     } catch (error) {
-      console.error('❌ Errore nell\'importazione della sessione:', error);
+      console.error("❌ Errore nell'importazione della sessione:", error);
       return null;
     }
   }
@@ -182,7 +182,7 @@ export class SessionManager {
         throw new Error('Formato non valido: array di sessioni atteso');
       }
 
-      sessions.forEach(session => {
+      sessions.forEach((session) => {
         if (session.id && session.name && session.messages) {
           session.id = Date.now().toString();
           session.timestamp = Date.now();
@@ -192,8 +192,8 @@ export class SessionManager {
 
       return true;
     } catch (error) {
-      console.error('❌ Errore nell\'importazione delle sessioni:', error);
+      console.error("❌ Errore nell'importazione delle sessioni:", error);
       return false;
     }
   }
-} 
+}

@@ -3,7 +3,7 @@
  * Richiede una configurazione specifica e dipende da un'implementazione locale.
  */
 
-import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js';
+import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider';
 import * as fs from 'fs';
 import * as path from 'path';
 import { spawn } from 'child_process';
@@ -36,27 +36,27 @@ export class GGUFProvider extends BaseLLMProvider {
    */
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
-    
+
     try {
       // Verifica che il binario esista
       if (!fs.existsSync(this.config.binaryPath)) {
         throw new Error(`Binario non trovato: ${this.config.binaryPath}`);
       }
-      
+
       // Verifica che la cartella dei modelli esista
       if (!fs.existsSync(this.config.modelsPath)) {
         throw new Error(`Cartella modelli non trovata: ${this.config.modelsPath}`);
       }
-      
+
       // Scansiona la cartella per i modelli GGUF
       const files = fs.readdirSync(this.config.modelsPath);
       this.availableModels = files
-        .filter(file => file.endsWith('.gguf') || file.endsWith('.bin'))
-        .map(file => path.basename(file, path.extname(file)));
-      
+        .filter((file) => file.endsWith('.gguf') || file.endsWith('.bin'))
+        .map((file) => path.basename(file, path.extname(file)));
+
       this.isInitialized = true;
     } catch (error) {
-      console.error('Errore nell\'inizializzazione del provider GGUF:', error);
+      console.error("Errore nell'inizializzazione del provider GGUF:", error);
       throw error;
     }
   }
@@ -65,10 +65,12 @@ export class GGUFProvider extends BaseLLMProvider {
    * Verifica che il provider sia configurato correttamente
    */
   isConfigured(): boolean {
-    return this.isInitialized && 
-           !!this.config.binaryPath && 
-           !!this.config.modelsPath && 
-           this.availableModels.length > 0;
+    return (
+      this.isInitialized &&
+      !!this.config.binaryPath &&
+      !!this.config.modelsPath &&
+      this.availableModels.length > 0
+    );
   }
 
   /**
@@ -84,35 +86,42 @@ export class GGUFProvider extends BaseLLMProvider {
 
     // Applica le opzioni MCP
     const processedMessages = this.applyMCPOptions(messages, options);
-    
+
     try {
       const prompt = this.formatMessagesToString(processedMessages);
-      
+
       // Determina quale modello usare
       const modelName = options?.model || this.availableModels[0];
       const modelPath = path.join(this.config.modelsPath, `${modelName}.gguf`);
-      
+
       if (!fs.existsSync(modelPath)) {
         throw new Error(`Modello non trovato: ${modelPath}`);
       }
-      
+
       // Costruisci gli argomenti per il processo
       const args = [
-        '-m', modelPath,
-        '--temp', String(options?.temperature || 0.7),
-        '-c', String(this.config.contextSize || 2048),
-        '-n', String(options?.max_tokens || 512),
-        '-t', String(this.config.threads || 4),
-        '--color', 'false',
-        '--prompt', prompt
+        '-m',
+        modelPath,
+        '--temp',
+        String(options?.temperature || 0.7),
+        '-c',
+        String(this.config.contextSize || 2048),
+        '-n',
+        String(options?.max_tokens || 512),
+        '-t',
+        String(this.config.threads || 4),
+        '--color',
+        'false',
+        '--prompt',
+        prompt,
       ];
-      
+
       // Se ci sono stop tokens
       if (options?.stop && options.stop.length > 0) {
         args.push('--stop');
         args.push(options.stop.join(','));
       }
-      
+
       // Esegui il processo
       const result = await this.runProcess(this.config.binaryPath, args);
       return result;
@@ -134,65 +143,71 @@ export class GGUFProvider extends BaseLLMProvider {
 
     // Applica le opzioni MCP
     const processedMessages = this.applyMCPOptions(messages, options);
-    
+
     try {
       const prompt = this.formatMessagesToString(processedMessages);
-      
+
       // Determina quale modello usare
       const modelName = options?.model || this.availableModels[0];
       const modelPath = path.join(this.config.modelsPath, `${modelName}.gguf`);
-      
+
       if (!fs.existsSync(modelPath)) {
         throw new Error(`Modello non trovato: ${modelPath}`);
       }
-      
+
       // Costruisci gli argomenti per il processo
       const args = [
-        '-m', modelPath,
-        '--temp', String(options?.temperature || 0.7),
-        '-c', String(this.config.contextSize || 2048),
-        '-n', String(options?.max_tokens || 512),
-        '-t', String(this.config.threads || 4),
-        '--color', 'false',
-        '--prompt', prompt
+        '-m',
+        modelPath,
+        '--temp',
+        String(options?.temperature || 0.7),
+        '-c',
+        String(this.config.contextSize || 2048),
+        '-n',
+        String(options?.max_tokens || 512),
+        '-t',
+        String(this.config.threads || 4),
+        '--color',
+        'false',
+        '--prompt',
+        prompt,
       ];
-      
+
       // Se ci sono stop tokens
       if (options?.stop && options.stop.length > 0) {
         args.push('--stop');
         args.push(options.stop.join(','));
       }
-      
+
       // Esegui il processo con streaming
       const process = spawn(this.config.binaryPath, args);
       let buffer = '';
-      
+
       // Imposta l'encoding per l'output
       process.stdout.setEncoding('utf-8');
-      
+
       for await (const chunk of process.stdout) {
         // Divide l'output in token per simulare lo streaming
         const tokens = (chunk as string).split(/\s+/);
         for (const token of tokens) {
           if (token.trim() !== '') {
             yield token + ' ';
-            
+
             // Pausa artificiale per simulare output naturale
-            await new Promise(resolve => setTimeout(resolve, 20));
+            await new Promise((resolve) => setTimeout(resolve, 20));
           }
         }
       }
-      
+
       // Raccogli eventuali errori
       for await (const chunk of process.stderr) {
         buffer += chunk;
       }
-      
+
       // Se c'è stato un errore, lancialo
       if (buffer.length > 0) {
         console.warn(`Errore GGUF: ${buffer}`);
       }
-      
     } catch (error) {
       throw new Error(`Errore nello stream GGUF: ${error.message}`);
     }
@@ -220,7 +235,7 @@ export class GGUFProvider extends BaseLLMProvider {
    */
   private formatMessagesToString(messages: LLMMessage[]): string {
     let formattedPrompt = '';
-    
+
     for (const message of messages) {
       switch (message.role) {
         case 'system':
@@ -234,13 +249,13 @@ export class GGUFProvider extends BaseLLMProvider {
           break;
       }
     }
-    
+
     // Aggiunge una richiesta finale che suggerisce al modello di rispondere
     formattedPrompt += '### Assistente:\n';
-    
+
     return formattedPrompt;
   }
-  
+
   /**
    * Esegue un processo e restituisce l'output
    */
@@ -249,15 +264,15 @@ export class GGUFProvider extends BaseLLMProvider {
       const process = spawn(command, args);
       let stdout = '';
       let stderr = '';
-      
+
       process.stdout.on('data', (data) => {
         stdout += data.toString();
       });
-      
+
       process.stderr.on('data', (data) => {
         stderr += data.toString();
       });
-      
+
       process.on('close', (code) => {
         if (code !== 0) {
           reject(new Error(`Processo terminato con codice ${code}: ${stderr}`));
@@ -265,10 +280,10 @@ export class GGUFProvider extends BaseLLMProvider {
           resolve(stdout);
         }
       });
-      
+
       process.on('error', (err) => {
         reject(err);
       });
     });
   }
-} 
+}

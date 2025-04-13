@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { createMockEventBus } from './fixtures/mock-event-bus';
 import { createMockStrategy } from './fixtures/mock-strategy';
+import { LLMEventType } from '../src/mas/core/fallback/LLMEventBus';
 
 test.describe('Visix WebView Integration', () => {
   test('FallbackMonitorPanel renders correctly', async ({ page }) => {
@@ -23,11 +24,9 @@ test.describe('Visix WebView Integration', () => {
     await page.goto('http://localhost:5173/preview/fallback-audit');
 
     // Simula evento di successo
-    await eventBus.emit('fallback:success', {
-      provider: 'openai',
-      latency: 450,
-      timestamp: Date.now(),
-      cost: 0.02
+    await eventBus.emit(LLMEventType.PROVIDER_SUCCESS, {
+      providerId: 'openai',
+      timestamp: Date.now()
     });
 
     // Verifica aggiornamento UI
@@ -48,9 +47,8 @@ test.describe('Visix WebView Integration', () => {
 
     // Simula serie di eventi
     for (let i = 0; i < 5; i++) {
-      await eventBus.emit('fallback:success', {
-        provider: ['openai', 'anthropic', 'mistral'][i % 3],
-        latency: 300 + Math.random() * 200,
+      await eventBus.emit(LLMEventType.PROVIDER_SUCCESS, {
+        providerId: ['openai', 'anthropic', 'mistral'][i % 3],
         timestamp: Date.now() + i * 1000,
         cost: 0.01 + Math.random() * 0.02
       });

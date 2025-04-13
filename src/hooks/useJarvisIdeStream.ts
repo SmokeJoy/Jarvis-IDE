@@ -1,6 +1,4 @@
-// Dichiarazione per l'API vscode WebView
-declare const vscode: { postMessage: (message: any) => void };
-
+import './vscode-api';
 import { useCallback, useState } from 'react';
 
 export const useJarvisIdeStream = () => {
@@ -12,8 +10,8 @@ export const useJarvisIdeStream = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          stream: true
-        }
+          stream: true,
+        },
       });
 
       setIsStreaming(true);
@@ -29,8 +27,8 @@ export const useJarvisIdeStream = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          stream: false
-        }
+          stream: false,
+        },
       });
 
       setIsStreaming(false);
@@ -43,6 +41,6 @@ export const useJarvisIdeStream = () => {
   return {
     isStreaming,
     startStreaming,
-    stopStreaming
+    stopStreaming,
   };
-}; 
+};

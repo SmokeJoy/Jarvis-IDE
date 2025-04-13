@@ -296,6 +296,26 @@ export interface AgentToggleDashboardMessage extends MasMessageBase {
 }
 
 /**
+ * Type for agent memory result
+ */
+export type AgentMemoryResult = {
+  success: boolean;
+  output?: string;
+  error?: string;
+  metadata?: Record<string, unknown>;
+};
+
+/**
+ * Type for error details
+ */
+export type ErrorDetails = {
+  stack?: string;
+  cause?: string;
+  context?: Record<string, unknown>;
+  timestamp?: number;
+};
+
+/**
  * Messaggio di risposta con la memoria/cronologia di un agente
  */
 export interface AgentMemoryResponseMessage extends MasMessageBase {
@@ -306,7 +326,7 @@ export interface AgentMemoryResponseMessage extends MasMessageBase {
       id: string;
       timestamp: number;
       task: Task;
-      result?: any;
+      result?: AgentMemoryResult;
     }>;
     total: number;
   };
@@ -346,7 +366,7 @@ export interface ErrorMessage extends MasMessageBase {
   payload: {
     message: string;
     code?: string;
-    details?: any;
+    details?: ErrorDetails;
   };
 }
 

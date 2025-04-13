@@ -3,7 +3,7 @@
  * @description Test unitari per la funzione di conversione convertToWebviewMessage
  */
 
-import { convertToWebviewMessage, ExtensionMessage, WebviewMessage } from './webview.types.js';
+import { convertToWebviewMessage, ExtensionMessage, WebviewMessage } from './webview.types';
 
 describe('convertToWebviewMessage', () => {
   it('should return null for null input', () => {
@@ -33,7 +33,7 @@ describe('convertToWebviewMessage', () => {
   it('should convert a valid ExtensionMessage to WebviewMessage', () => {
     const msg: ExtensionMessage = {
       type: 'chat.reply',
-      payload: { text: 'Hello' }
+      payload: { text: 'Hello' },
     };
     const result = convertToWebviewMessage(msg);
     expect(result).not.toBeNull();
@@ -44,7 +44,7 @@ describe('convertToWebviewMessage', () => {
   it('should handle message with action field', () => {
     const msg: ExtensionMessage = {
       type: 'action',
-      action: 'chatButtonClicked'
+      action: 'chatButtonClicked',
     };
     const result = convertToWebviewMessage(msg);
     expect(result).not.toBeNull();
@@ -55,7 +55,7 @@ describe('convertToWebviewMessage', () => {
   it('should handle message with error field', () => {
     const msg: ExtensionMessage = {
       type: 'error',
-      error: 'Something went wrong'
+      error: 'Something went wrong',
     };
     const result = convertToWebviewMessage(msg);
     expect(result).not.toBeNull();
@@ -64,14 +64,14 @@ describe('convertToWebviewMessage', () => {
   });
 
   it('should handle message with apiConfiguration field', () => {
-    const apiConfig = { 
+    const apiConfig = {
       provider: 'openai',
       apiKey: 'test-key',
-      modelId: 'gpt-3.5-turbo'
+      modelId: 'gpt-3.5-turbo',
     };
     const msg = {
       type: 'api.configuration',
-      apiConfiguration: apiConfig
+      apiConfiguration: apiConfig,
     } as ExtensionMessage;
     const result = convertToWebviewMessage(msg);
     expect(result).not.toBeNull();
@@ -80,10 +80,10 @@ describe('convertToWebviewMessage', () => {
   });
 
   it('should handle message with state containing apiConfiguration', () => {
-    const apiConfig = { 
+    const apiConfig = {
       provider: 'openai',
       apiKey: 'test-key',
-      modelId: 'gpt-3.5-turbo'
+      modelId: 'gpt-3.5-turbo',
     };
     const msg: ExtensionMessage = {
       type: 'state',
@@ -91,8 +91,8 @@ describe('convertToWebviewMessage', () => {
         apiConfiguration: apiConfig,
         use_docs: true,
         contextPrompt: '',
-        coder_mode: false
-      }
+        coder_mode: false,
+      },
     };
     const result = convertToWebviewMessage(msg);
     expect(result).not.toBeNull();
@@ -103,11 +103,11 @@ describe('convertToWebviewMessage', () => {
   it('should handle message with null payload', () => {
     const msg: ExtensionMessage = {
       type: 'response',
-      payload: null as any
+      payload: null as any,
     };
     const result = convertToWebviewMessage(msg);
     expect(result).not.toBeNull();
     expect(result?.type).toBe(msg.type);
     expect(result?.payload).toEqual({});
   });
-}); 
+});

@@ -6,7 +6,7 @@
 import { fetchModels } from '../modelLoader';
 import { cacheModels, clearAllCachedModels, getCachedModels } from '../modelCache';
 import { OPENROUTER_MODELS } from '../openrouterModels';
-import { OpenAiCompatibleModelInfo } from '../../shared/types/api.types.js';
+import { OpenAiCompatibleModelInfo } from '../../shared/types/api.types';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock di fetch per simulare chiamate API
@@ -73,12 +73,14 @@ describe('modelLoader - comportamento fallback', () => {
 
     // Verifica che i modelli siano stati convertiti correttamente
     expect(result).toHaveLength(1);
-    expect(result[0]).toEqual(expect.objectContaining({
-      id: 'test-model-1',
-      name: 'Test Model 1',
-      contextLength: 4096,
-      provider: 'openrouter',
-    }));
+    expect(result[0]).toEqual(
+      expect.objectContaining({
+        id: 'test-model-1',
+        name: 'Test Model 1',
+        contextLength: 4096,
+        provider: 'openrouter',
+      })
+    );
 
     // Verifica che i modelli siano stati salvati in cache
     expect(cacheModels).toHaveBeenCalledWith('openrouter', expect.any(Array));

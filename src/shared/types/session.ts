@@ -3,8 +3,8 @@
  * Include messaggi, impostazioni e altri metadati
  */
 
-import { ChatMessage } from './index.js';
-import { ChatSettings } from './settings.types.js';
+import { ChatMessage } from './index';
+import { ChatSettings } from './settings.types';
 
 /**
  * Interfaccia per una sessione di chat completa
@@ -12,28 +12,28 @@ import { ChatSettings } from './settings.types.js';
 export interface ChatSession {
   /** ID univoco della sessione */
   id: string;
-  
+
   /** Titolo della sessione */
   title: string;
-  
+
   /** Timestamp di creazione */
   createdAt: number;
-  
+
   /** Array di messaggi della chat */
   messages: ChatMessage[];
-  
+
   /** Impostazioni della chat */
   settings: ChatSettings;
-  
+
   /** Prompt di sistema (opzionale) */
   systemPrompt?: string;
-  
+
   /** File di contesto utilizzati (opzionale) */
   contextFiles?: string[];
-  
+
   /** ID del modello utilizzato (opzionale) */
   modelId?: string;
-  
+
   /** Timestamp dell'ultimo aggiornamento (opzionale) */
   updatedAt?: number;
 }
@@ -57,7 +57,7 @@ export interface CreateSessionOptions {
  */
 export function createChatSession(options: CreateSessionOptions = {}): ChatSession {
   const timestamp = Date.now();
-  
+
   return {
     id: `session_${timestamp}_${Math.random().toString(36).substring(2, 7)}`,
     title: options.title || `Sessione ${new Date(timestamp).toLocaleString()}`,
@@ -67,7 +67,7 @@ export function createChatSession(options: CreateSessionOptions = {}): ChatSessi
     systemPrompt: options.systemPrompt,
     contextFiles: options.contextFiles,
     modelId: options.modelId,
-    updatedAt: timestamp
+    updatedAt: timestamp,
   };
 }
 
@@ -78,9 +78,9 @@ export function createChatSession(options: CreateSessionOptions = {}): ChatSessi
  */
 export function isChatSession(obj: unknown): obj is ChatSession {
   if (!obj || typeof obj !== 'object') return false;
-  
+
   const session = obj as ChatSession;
-  
+
   return (
     typeof session.id === 'string' &&
     typeof session.title === 'string' &&
@@ -89,4 +89,4 @@ export function isChatSession(obj: unknown): obj is ChatSession {
     session.settings !== undefined &&
     typeof session.settings === 'object'
   );
-} 
+}

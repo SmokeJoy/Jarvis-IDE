@@ -1,8 +1,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import { getStoragePath } from '../StoragePath.js';
-import { BenchmarkSession, BenchmarkSessionDetail, ProviderStats, TimelineStats } from '../../shared/WebviewMessage.js';
+import { getStoragePath } from '../StoragePath';
+import {
+  BenchmarkSession,
+  BenchmarkSessionDetail,
+  ProviderStats,
+  TimelineStats,
+} from '../../shared/WebviewMessage';
 
 /**
  * Classe per la gestione dello storage dei dati di benchmark
@@ -24,7 +29,7 @@ export class BenchmarkStorage {
     if (!fs.existsSync(this.storagePath)) {
       fs.mkdirSync(this.storagePath, { recursive: true });
     }
-    
+
     if (!fs.existsSync(this.sessionsDir)) {
       fs.mkdirSync(this.sessionsDir, { recursive: true });
     }
@@ -79,22 +84,24 @@ export class BenchmarkStorage {
 
     try {
       const files = fs.readdirSync(this.sessionsDir);
-      const jsonFiles = files.filter(file => file.endsWith('.json'));
+      const jsonFiles = files.filter((file) => file.endsWith('.json'));
 
-      return jsonFiles.map(file => {
-        const filePath = path.join(this.sessionsDir, file);
-        const content = fs.readFileSync(filePath, 'utf-8');
-        const session = JSON.parse(content) as BenchmarkSessionDetail;
+      return jsonFiles
+        .map((file) => {
+          const filePath = path.join(this.sessionsDir, file);
+          const content = fs.readFileSync(filePath, 'utf-8');
+          const session = JSON.parse(content) as BenchmarkSessionDetail;
 
-        // Estrae solo le informazioni di riepilogo
-        return {
-          id: session.id,
-          provider: session.provider,
-          timestamp: session.timestamp,
-          duration: session.duration,
-          testCount: session.results.length,
-        };
-      }).sort((a: BenchmarkSession, b: BenchmarkSession) => b.timestamp - a.timestamp); // Ordina dal più recente
+          // Estrae solo le informazioni di riepilogo
+          return {
+            id: session.id,
+            provider: session.provider,
+            timestamp: session.timestamp,
+            duration: session.duration,
+            testCount: session.results.length,
+          };
+        })
+        .sort((a: BenchmarkSession, b: BenchmarkSession) => b.timestamp - a.timestamp); // Ordina dal più recente
     } catch (error) {
       console.error('Errore durante la lettura delle sessioni di benchmark:', error);
       return [];
@@ -109,7 +116,7 @@ export class BenchmarkStorage {
   public getSession(id: string): BenchmarkSessionDetail | null {
     try {
       const filePath = path.join(this.sessionsDir, `${id}.json`);
-      
+
       if (!fs.existsSync(filePath)) {
         return null;
       }
@@ -130,7 +137,7 @@ export class BenchmarkStorage {
   public deleteSession(id: string): boolean {
     try {
       const filePath = path.join(this.sessionsDir, `${id}.json`);
-      
+
       if (!fs.existsSync(filePath)) {
         return false;
       }
@@ -152,18 +159,16 @@ export class BenchmarkStorage {
   public exportSession(id: string, exportPath?: string): string | null {
     try {
       const session = this.getSession(id);
-      
+
       if (!session) {
         return null;
       }
 
       const fileName = `benchmark_${session.provider}_${new Date(session.timestamp).toISOString().split('T')[0]}.json`;
-      const filePath = exportPath || path.join(
-        process.env['HOME'] || process.env['USERPROFILE'] || '', 
-        'Downloads', 
-        fileName
-      );
-      
+      const filePath =
+        exportPath ||
+        path.join(process.env['HOME'] || process.env['USERPROFILE'] || '', 'Downloads', fileName);
+
       fs.writeFileSync(filePath, JSON.stringify(session, null, 2));
       return filePath;
     } catch (error) {
@@ -182,48 +187,51 @@ export class BenchmarkStorage {
       const sessions = this.getSessions();
       const now = Date.now();
       const cutoffTime = now - days * 24 * 60 * 60 * 1000;
-      
+
       // Filtra le sessioni per il periodo specificato
-      const filteredSessions = sessions.filter(session => session.timestamp >= cutoffTime);
-      
+      const filteredSessions = sessions.filter((session) => session.timestamp >= cutoffTime);
+
       // Raggruppa le sessioni per provider
       const providers: Record<string, BenchmarkSession[]> = {};
-      
+
       for (const session of filteredSessions) {
         if (!providers[session.provider]) {
           providers[session.provider] = [];
         }
         providers[session.provider].push(session);
       }
-      
+
       const stats: Record<string, ProviderStats> = {};
-      
+
       // Calcola le statistiche per ogni provider
       for (const [provider, providerSessions] of Object.entries(providers)) {
-        const sessionIds = providerSessions.map(session => session.id);
+        const sessionIds = providerSessions.map((session) => session.id);
         const detailedSessions = sessionIds
-          .map(id => this.getSession(id))
-          .filter(session => session !== null) as BenchmarkSessionDetail[];
-        
+          .map((id) => this.getSession(id))
+          .filter((session) => session !== null) as BenchmarkSessionDetail[];
+
         // Raccogli tutti i risultati di test
-        const allResults = detailedSessions.flatMap(session => session.results);
-        
+        const allResults = detailedSessions.flatMap((session) => session.results);
+
         if (allResults.length === 0) {
           continue;
         }
-        
+
         // Calcola le statistiche
-        const responseTimes = allResults.map(result => result.responseTime);
-        const avgResponseTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
+        const responseTimes = allResults.map((result) => result.responseTime);
+        const avgResponseTime =
+          responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
         const fastestResponseTime = Math.min(...responseTimes);
         const slowestResponseTime = Math.max(...responseTimes);
-        
-        const inputTokens = allResults.map(result => result.tokens.inputTokens);
-        const outputTokens = allResults.map(result => result.tokens.outputTokens);
-        
-        const avgInputTokens = inputTokens.reduce((sum, tokens) => sum + tokens, 0) / inputTokens.length;
-        const avgOutputTokens = outputTokens.reduce((sum, tokens) => sum + tokens, 0) / outputTokens.length;
-        
+
+        const inputTokens = allResults.map((result) => result.tokens.inputTokens);
+        const outputTokens = allResults.map((result) => result.tokens.outputTokens);
+
+        const avgInputTokens =
+          inputTokens.reduce((sum, tokens) => sum + tokens, 0) / inputTokens.length;
+        const avgOutputTokens =
+          outputTokens.reduce((sum, tokens) => sum + tokens, 0) / outputTokens.length;
+
         stats[provider] = {
           avgResponseTime,
           fastestResponseTime,
@@ -234,7 +242,7 @@ export class BenchmarkStorage {
           testCount: allResults.length,
         };
       }
-      
+
       return stats;
     } catch (error) {
       console.error('Errore durante il calcolo delle statistiche:', error);
@@ -253,31 +261,34 @@ export class BenchmarkStorage {
       const sessions = this.getSessions();
       const now = Date.now();
       const cutoffTime = now - days * 24 * 60 * 60 * 1000;
-      
+
       // Filtra le sessioni per provider e periodo
       const filteredSessions = sessions.filter(
-        session => session.provider === provider && session.timestamp >= cutoffTime
+        (session) => session.provider === provider && session.timestamp >= cutoffTime
       );
-      
+
       const timeline: TimelineStats[] = [];
-      
+
       // Elabora ogni sessione per ottenere i dati della timeline
       for (const session of filteredSessions) {
         const detailedSession = this.getSession(session.id);
-        
+
         if (!detailedSession || detailedSession.results.length === 0) {
           continue;
         }
-        
-        const responseTimes = detailedSession.results.map(result => result.responseTime);
-        const avgResponseTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
-        
-        const inputTokens = detailedSession.results.map(result => result.tokens.inputTokens);
-        const outputTokens = detailedSession.results.map(result => result.tokens.outputTokens);
-        
-        const avgInputTokens = inputTokens.reduce((sum, tokens) => sum + tokens, 0) / inputTokens.length;
-        const avgOutputTokens = outputTokens.reduce((sum, tokens) => sum + tokens, 0) / outputTokens.length;
-        
+
+        const responseTimes = detailedSession.results.map((result) => result.responseTime);
+        const avgResponseTime =
+          responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
+
+        const inputTokens = detailedSession.results.map((result) => result.tokens.inputTokens);
+        const outputTokens = detailedSession.results.map((result) => result.tokens.outputTokens);
+
+        const avgInputTokens =
+          inputTokens.reduce((sum, tokens) => sum + tokens, 0) / inputTokens.length;
+        const avgOutputTokens =
+          outputTokens.reduce((sum, tokens) => sum + tokens, 0) / outputTokens.length;
+
         timeline.push({
           date: detailedSession.timestamp,
           avgResponseTime,
@@ -286,7 +297,7 @@ export class BenchmarkStorage {
           testCount: detailedSession.results.length,
         });
       }
-      
+
       // Ordina per data
       return timeline.sort((a: TimelineStats, b: TimelineStats) => a.date - b.date);
     } catch (error) {
@@ -294,4 +305,4 @@ export class BenchmarkStorage {
       return [];
     }
   }
-} 
+}

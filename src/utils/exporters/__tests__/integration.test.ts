@@ -1,22 +1,22 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { sanitizeExportObject } from '../sanitize.js';
+import { sanitizeExportObject } from '../sanitize';
 import fs from 'fs';
 import path from 'path';
-import { ExportOptions } from '../types.js';
+import { ExportOptions } from '../types';
 
 // Mock di fs
 vi.mock('fs', () => ({
   promises: {
     writeFile: vi.fn().mockResolvedValue(undefined),
-    mkdir: vi.fn().mockResolvedValue(undefined)
+    mkdir: vi.fn().mockResolvedValue(undefined),
   },
-  existsSync: vi.fn().mockReturnValue(false)
+  existsSync: vi.fn().mockReturnValue(false),
 }));
 
 // Mock di path
 vi.mock('path', () => ({
-  dirname: vi.fn(p => p.split('/').slice(0, -1).join('/')),
-  join: vi.fn((...args) => args.join('/'))
+  dirname: vi.fn((p) => p.split('/').slice(0, -1).join('/')),
+  join: vi.fn((...args) => args.join('/')),
 }));
 
 describe('Integrazione del sistema di esportazione', () => {
@@ -28,7 +28,7 @@ describe('Integrazione del sistema di esportazione', () => {
     vi.resetAllMocks();
   });
 
-  it('dovrebbe sanitizzare correttamente i dati prima dell\'esportazione', () => {
+  it("dovrebbe sanitizzare correttamente i dati prima dell'esportazione", () => {
     const testData = {
       name: 'Test User',
       createdAt: new Date('2023-01-01T12:00:00Z'),
@@ -37,10 +37,10 @@ describe('Integrazione del sistema di esportazione', () => {
         theme: 'dark',
         notifications: undefined,
         preferences: {
-          veryDeepSetting: 'value'
-        }
+          veryDeepSetting: 'value',
+        },
       },
-      items: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      items: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     };
 
     const exportOptions: Partial<ExportOptions> = {
@@ -48,7 +48,7 @@ describe('Integrazione del sistema di esportazione', () => {
       removeUndefined: true,
       maxDepth: 2,
       maxStringLength: 10,
-      maxArrayLength: 5
+      maxArrayLength: 5,
     };
 
     const sanitizedData = sanitizeExportObject(testData, exportOptions);
@@ -59,9 +59,9 @@ describe('Integrazione del sistema di esportazione', () => {
       createdAt: '2023-01-01T12:00:00.000Z',
       settings: {
         theme: 'dark',
-        preferences: '[Oggetto]'
+        preferences: '[Oggetto]',
       },
-      items: [1, 2, 3, 4, 5, '... (5 elementi omessi)']
+      items: [1, 2, 3, 4, 5, '... (5 elementi omessi)'],
     });
   });
 
@@ -77,20 +77,22 @@ describe('Integrazione del sistema di esportazione', () => {
           username: 'utente123',
           profile: {
             bio: 'Una biografia molto lunga che dovrebbe essere troncata in base alle impostazioni di sanitizzazione',
-            socialLinks: ['link1', 'link2', 'link3', 'link4', 'link5', 'link6']
-          }
+            socialLinks: ['link1', 'link2', 'link3', 'link4', 'link5', 'link6'],
+          },
         },
         created: new Date('2023-05-15T08:30:00Z'),
         updated: new Date('2023-06-20T15:45:00Z'),
-        tags: ['javascript', 'typescript', 'react', 'test', 'export', 'sanitize', 'data']
+        tags: ['javascript', 'typescript', 'react', 'test', 'export', 'sanitize', 'data'],
       },
       config: undefined,
       stats: {
         views: 1000,
         likes: 250,
-        shares: null
+        shares: null,
       },
-      specialFunction: function() { return 'test'; }
+      specialFunction: function () {
+        return 'test';
+      },
     };
 
     // Funzione di esportazione che utilizza sanitizeExportObject
@@ -99,7 +101,7 @@ describe('Integrazione del sistema di esportazione', () => {
       removeUndefined: true,
       maxDepth: 3,
       maxStringLength: 20,
-      maxArrayLength: 3
+      maxArrayLength: 3,
     });
 
     // Verifiche
@@ -108,22 +110,22 @@ describe('Integrazione del sistema di esportazione', () => {
     expect(sanitizedComplexData).not.toHaveProperty('description'); // Rimosso perché null
     expect(sanitizedComplexData).not.toHaveProperty('config'); // Rimosso perché undefined
     expect(sanitizedComplexData).not.toHaveProperty('specialFunction'); // Rimosso perché funzione
-    
+
     // Verifica oggetti annidati
     expect(sanitizedComplexData.metadata).toHaveProperty('owner');
     expect(sanitizedComplexData.metadata.owner).toHaveProperty('id', 1);
     expect(sanitizedComplexData.metadata.owner).toHaveProperty('username', 'utente123');
     expect(sanitizedComplexData.metadata.owner.profile.bio).toBe('Una biografia molto...');
-    
+
     // Verifica array troncati
     expect(sanitizedComplexData.metadata.owner.profile.socialLinks).toHaveLength(4); // 3 elementi + messaggio
     expect(sanitizedComplexData.metadata.owner.profile.socialLinks[3]).toContain('elementi omessi');
-    
+
     // Verifica date convertite
     expect(sanitizedComplexData.metadata.created).toBe('2023-05-15T08:30:00.000Z');
     expect(sanitizedComplexData.metadata.updated).toBe('2023-06-20T15:45:00.000Z');
-    
+
     // Verifica rimozione dei null
     expect(sanitizedComplexData.stats).not.toHaveProperty('shares');
   });
-}); 
+});

@@ -21,13 +21,18 @@ import {
 } from './agent-memory-message';
 
 /**
+ * Type for unknown message payload
+ */
+type UnknownPayload = Record<string, unknown>;
+
+/**
  * Type guard generico per verificare se un messaggio è di un tipo specifico
  * @param message Il messaggio da verificare
  * @param type Il tipo di messaggio da verificare
  * @returns True se il messaggio è del tipo specificato
  */
 export function isMessageOfType<T extends AgentMemoryMessageUnion>(
-  message: WebviewMessage<any>,
+  message: WebviewMessage<UnknownPayload>,
   type: AgentMemoryMessageType
 ): message is T {
   return message?.type === type;
@@ -38,7 +43,7 @@ export function isMessageOfType<T extends AgentMemoryMessageUnion>(
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un'unione di messaggi della memoria dell'agente
  */
-export function isAgentMemoryMessage(message: WebviewMessage<any>): message is AgentMemoryMessageUnion {
+export function isAgentMemoryMessage(message: WebviewMessage<UnknownPayload>): message is AgentMemoryMessageUnion {
   return Object.values(AgentMemoryMessageType).includes(message?.type as AgentMemoryMessageType);
 }
 
@@ -48,7 +53,7 @@ export function isAgentMemoryMessage(message: WebviewMessage<any>): message is A
  * @returns True se il messaggio è una richiesta di snapshot della memoria
  */
 export function isRequestMemorySnapshotMessage(
-  message: WebviewMessage<any>
+  message: WebviewMessage<UnknownPayload>
 ): message is RequestMemorySnapshotMessage {
   return isMessageOfType<RequestMemorySnapshotMessage>(
     message,
@@ -62,7 +67,7 @@ export function isRequestMemorySnapshotMessage(
  * @returns True se il messaggio è una risposta con snapshot della memoria
  */
 export function isMemorySnapshotReceivedMessage(
-  message: WebviewMessage<any>
+  message: WebviewMessage<UnknownPayload>
 ): message is MemorySnapshotReceivedMessage {
   return isMessageOfType<MemorySnapshotReceivedMessage>(
     message,
@@ -76,7 +81,7 @@ export function isMemorySnapshotReceivedMessage(
  * @returns True se il messaggio è una richiesta di pulizia della memoria
  */
 export function isClearAgentMemoryMessage(
-  message: WebviewMessage<any>
+  message: WebviewMessage<UnknownPayload>
 ): message is ClearAgentMemoryMessage {
   return isMessageOfType<ClearAgentMemoryMessage>(
     message,
@@ -90,7 +95,7 @@ export function isClearAgentMemoryMessage(
  * @returns True se il messaggio è una conferma di pulizia della memoria
  */
 export function isAgentMemoryClearedMessage(
-  message: WebviewMessage<any>
+  message: WebviewMessage<UnknownPayload>
 ): message is AgentMemoryClearedMessage {
   return isMessageOfType<AgentMemoryClearedMessage>(
     message,
@@ -104,7 +109,7 @@ export function isAgentMemoryClearedMessage(
  * @returns True se il messaggio è una richiesta di salvataggio di un elemento di memoria
  */
 export function isSaveMemoryItemMessage(
-  message: WebviewMessage<any>
+  message: WebviewMessage<UnknownPayload>
 ): message is SaveMemoryItemMessage {
   return isMessageOfType<SaveMemoryItemMessage>(
     message,
@@ -118,7 +123,7 @@ export function isSaveMemoryItemMessage(
  * @returns True se il messaggio è una conferma di salvataggio di un elemento di memoria
  */
 export function isMemoryItemSavedMessage(
-  message: WebviewMessage<any>
+  message: WebviewMessage<UnknownPayload>
 ): message is MemoryItemSavedMessage {
   return isMessageOfType<MemoryItemSavedMessage>(
     message,
@@ -132,7 +137,7 @@ export function isMemoryItemSavedMessage(
  * @returns True se il messaggio è una richiesta di eliminazione di un elemento di memoria
  */
 export function isDeleteMemoryItemMessage(
-  message: WebviewMessage<any>
+  message: WebviewMessage<UnknownPayload>
 ): message is DeleteMemoryItemMessage {
   return isMessageOfType<DeleteMemoryItemMessage>(
     message,
@@ -146,7 +151,7 @@ export function isDeleteMemoryItemMessage(
  * @returns True se il messaggio è una conferma di eliminazione di un elemento di memoria
  */
 export function isMemoryItemDeletedMessage(
-  message: WebviewMessage<any>
+  message: WebviewMessage<UnknownPayload>
 ): message is MemoryItemDeletedMessage {
   return isMessageOfType<MemoryItemDeletedMessage>(
     message,
@@ -161,7 +166,7 @@ export function isMemoryItemDeletedMessage(
  * @param payload Il payload da validare
  * @returns True se il payload è valido
  */
-function validateRequestMemorySnapshotPayload(payload: any): boolean {
+function validateRequestMemorySnapshotPayload(payload: UnknownPayload): boolean {
   return (
     typeof payload === 'object' &&
     payload !== null &&
@@ -175,7 +180,7 @@ function validateRequestMemorySnapshotPayload(payload: any): boolean {
  * @param item L'item da validare
  * @returns True se l'item è valido
  */
-function validateMemoryItem(item: any): item is MemoryItem {
+function validateMemoryItem(item: UnknownPayload): item is MemoryItem {
   return (
     typeof item === 'object' &&
     item !== null &&
@@ -183,7 +188,7 @@ function validateMemoryItem(item: any): item is MemoryItem {
     typeof item.content === 'string' &&
     typeof item.timestamp === 'number' &&
     Array.isArray(item.tags) &&
-    item.tags.every((tag: any) => typeof tag === 'string')
+    item.tags.every((tag: unknown) => typeof tag === 'string')
   );
 }
 
@@ -192,13 +197,13 @@ function validateMemoryItem(item: any): item is MemoryItem {
  * @param payload Il payload da validare
  * @returns True se il payload è valido
  */
-function validateAgentMemory(payload: any): payload is AgentMemory {
+function validateAgentMemory(payload: UnknownPayload): payload is AgentMemory {
   return (
     typeof payload === 'object' &&
     payload !== null &&
     typeof payload.agentId === 'string' &&
     Array.isArray(payload.memories) &&
-    payload.memories.every((memory: any) => validateMemoryItem(memory))
+    payload.memories.every((memory: unknown) => validateMemoryItem(memory as UnknownPayload))
   );
 }
 
@@ -207,7 +212,7 @@ function validateAgentMemory(payload: any): payload is AgentMemory {
  * @param payload Il payload da validare
  * @returns True se il payload è valido
  */
-function validateMemorySnapshotReceivedPayload(payload: any): boolean {
+function validateMemorySnapshotReceivedPayload(payload: UnknownPayload): boolean {
   return validateAgentMemory(payload);
 }
 
@@ -216,7 +221,7 @@ function validateMemorySnapshotReceivedPayload(payload: any): boolean {
  * @param payload Il payload da validare
  * @returns True se il payload è valido
  */
-function validateClearAgentMemoryPayload(payload: any): boolean {
+function validateClearAgentMemoryPayload(payload: UnknownPayload): boolean {
   return (
     typeof payload === 'object' &&
     payload !== null &&
@@ -230,7 +235,7 @@ function validateClearAgentMemoryPayload(payload: any): boolean {
  * @param payload Il payload da validare
  * @returns True se il payload è valido
  */
-function validateAgentMemoryClearedPayload(payload: any): boolean {
+function validateAgentMemoryClearedPayload(payload: UnknownPayload): boolean {
   return (
     typeof payload === 'object' &&
     payload !== null &&
@@ -244,16 +249,14 @@ function validateAgentMemoryClearedPayload(payload: any): boolean {
  * @param payload Il payload da validare
  * @returns True se il payload è valido
  */
-function validateSaveMemoryItemPayload(payload: any): boolean {
+function validateSaveMemoryItemPayload(payload: UnknownPayload): boolean {
   return (
     typeof payload === 'object' &&
     payload !== null &&
     typeof payload.agentId === 'string' &&
     typeof payload.content === 'string' &&
-    (!payload.tags || (
-      Array.isArray(payload.tags) &&
-      payload.tags.every((tag: any) => typeof tag === 'string')
-    ))
+    Array.isArray(payload.tags) &&
+    payload.tags.every((tag: unknown) => typeof tag === 'string')
   );
 }
 
@@ -262,13 +265,8 @@ function validateSaveMemoryItemPayload(payload: any): boolean {
  * @param payload Il payload da validare
  * @returns True se il payload è valido
  */
-function validateMemoryItemSavedPayload(payload: any): boolean {
-  return (
-    typeof payload === 'object' &&
-    payload !== null &&
-    typeof payload.agentId === 'string' &&
-    validateMemoryItem(payload.item)
-  );
+function validateMemoryItemSavedPayload(payload: UnknownPayload): boolean {
+  return validateMemoryItem(payload);
 }
 
 /**
@@ -276,14 +274,12 @@ function validateMemoryItemSavedPayload(payload: any): boolean {
  * @param payload Il payload da validare
  * @returns True se il payload è valido
  */
-function validateDeleteMemoryItemPayload(payload: any): boolean {
+function validateDeleteMemoryItemPayload(payload: UnknownPayload): boolean {
   return (
     typeof payload === 'object' &&
     payload !== null &&
     typeof payload.agentId === 'string' &&
-    typeof payload.itemId === 'string' &&
-    payload.agentId.trim() !== '' &&
-    payload.itemId.trim() !== ''
+    typeof payload.memoryId === 'string'
   );
 }
 
@@ -292,13 +288,11 @@ function validateDeleteMemoryItemPayload(payload: any): boolean {
  * @param payload Il payload da validare
  * @returns True se il payload è valido
  */
-function validateMemoryItemDeletedPayload(payload: any): boolean {
+function validateMemoryItemDeletedPayload(payload: UnknownPayload): boolean {
   return (
     typeof payload === 'object' &&
     payload !== null &&
     typeof payload.agentId === 'string' &&
-    typeof payload.itemId === 'string' &&
-    payload.agentId.trim() !== '' &&
-    payload.itemId.trim() !== ''
+    typeof payload.memoryId === 'string'
   );
 } 

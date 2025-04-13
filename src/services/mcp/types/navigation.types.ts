@@ -59,4 +59,4 @@ export interface NavigationParams {
   includeContent?: boolean;
   includeMetadata?: boolean;
   format?: NavigationFormat;
-} 
+}

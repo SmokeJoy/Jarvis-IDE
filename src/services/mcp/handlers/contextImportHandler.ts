@@ -1,6 +1,6 @@
-import { ContextItem } from '../types/context.js';
-import { getMemoryContexts, saveMemoryContexts } from '../utils/memory.js';
-import { ToolCallResult } from '../types/tool.js';
+import { ContextItem } from '../types/context';
+import { getMemoryContexts, saveMemoryContexts } from '../utils/memory';
+import { ToolCallResult } from '../types/tool';
 import { v4 as uuidv4 } from 'uuid';
 
 interface ImportOptions {
@@ -45,32 +45,31 @@ function parseJsonImport(content: string): ContextItem[] {
     throw new Error('Il contenuto JSON deve essere un array');
   }
 
-  return data.map(item => ({
+  return data.map((item) => ({
     id: item.id || uuidv4(),
     scope: item.scope || 'chat',
     timestamp: item.timestamp || Date.now(),
     tags: item.tags || [],
-    text: item.text
+    text: item.text,
   }));
 }
 
 function parseCsvImport(content: string): ContextItem[] {
   const lines = content.split('\n');
-  const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-  
+  const headers = lines[0].split(',').map((h) => h.trim().toLowerCase());
+
   if (!headers.includes('text')) {
     throw new Error('Il CSV deve contenere una colonna "text"');
   }
 
-  return lines.slice(1).map(line => {
-    const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+  return lines.slice(1).map((line) => {
+    const values = line.split(',').map((v) => v.trim().replace(/^"|"$/g, ''));
     const item: any = {};
-    
+
     headers.forEach((header, i) => {
       if (values[i]) {
-        item[header] = header === 'tags' ? 
-          values[i].split(',').map((t: string) => t.trim()) : 
-          values[i];
+        item[header] =
+          header === 'tags' ? values[i].split(',').map((t: string) => t.trim()) : values[i];
       }
     });
 
@@ -79,13 +78,13 @@ function parseCsvImport(content: string): ContextItem[] {
       scope: item.scope || 'chat',
       timestamp: item.timestamp ? parseInt(item.timestamp) : Date.now(),
       tags: item.tags || [],
-      text: item.text
+      text: item.text,
     };
   });
 }
 
 function parseMarkdownImport(content: string): ContextItem[] {
-  const sections = content.split('---').filter(s => s.trim());
+  const sections = content.split('---').filter((s) => s.trim());
   const items: ContextItem[] = [];
 
   for (const section of sections) {
@@ -102,7 +101,7 @@ function parseMarkdownImport(content: string): ContextItem[] {
         item.timestamp = new Date(timestamp).getTime();
       } else if (line.includes('**Tags**:')) {
         const tags = line.split('**Tags**:')[1].trim();
-        item.tags = tags.split(',').map(t => t.trim().replace(/`/g, ''));
+        item.tags = tags.split(',').map((t) => t.trim().replace(/`/g, ''));
       } else if (line.trim() && !line.startsWith('-')) {
         item.text = line.trim();
       }
@@ -114,7 +113,7 @@ function parseMarkdownImport(content: string): ContextItem[] {
         scope: item.scope || 'chat',
         timestamp: item.timestamp || Date.now(),
         tags: item.tags || [],
-        text: item.text
+        text: item.text,
       });
     }
   }
@@ -122,16 +121,13 @@ function parseMarkdownImport(content: string): ContextItem[] {
   return items;
 }
 
-function normalizeImportedItem(
-  item: ContextItem,
-  options: ImportOptions
-): ContextItem {
+function normalizeImportedItem(item: ContextItem, options: ImportOptions): ContextItem {
   return {
     ...item,
     scope: options.scope || item.scope,
-    tags: options.mergeTags ? 
-      [...new Set([...item.tags])] : // Deduplica tag
-      item.tags
+    tags: options.mergeTags
+      ? [...new Set([...item.tags])] // Deduplica tag
+      : item.tags,
   };
 }
 
@@ -143,16 +139,16 @@ async function insertIntoMemory(
   const result: ImportResult = {
     imported: 0,
     skipped: 0,
-    errors: []
+    errors: [],
   };
 
   for (const item of items) {
     try {
       const normalized = normalizeImportedItem(item, options);
-      
+
       // Verifica duplicati
       const isDuplicate = existingContexts.some(
-        ctx => ctx.id === normalized.id || ctx.text === normalized.text
+        (ctx) => ctx.id === normalized.id || ctx.text === normalized.text
       );
 
       if (isDuplicate) {
@@ -178,21 +174,12 @@ async function insertIntoMemory(
   return result;
 }
 
-export async function contextImportHandler(
-  args: ImportOptions
-): Promise<ToolCallResult> {
+export async function contextImportHandler(args: ImportOptions): Promise<ToolCallResult> {
   try {
-    const {
-      format = 'auto',
-      content,
-      scope,
-      mergeTags = true
-    } = args;
+    const { format = 'auto', content, scope, mergeTags = true } = args;
 
     // Rileva il formato se auto
-    const detectedFormat = format === 'auto' ? 
-      detectImportFormat(content) : 
-      format;
+    const detectedFormat = format === 'auto' ? detectImportFormat(content) : format;
 
     // Parsing in base al formato
     let items: ContextItem[];
@@ -215,20 +202,20 @@ export async function contextImportHandler(
       format: detectedFormat,
       content,
       scope,
-      mergeTags
+      mergeTags,
     });
 
     return {
       success: true,
       output: {
         format: detectedFormat,
-        ...result
-      }
+        ...result,
+      },
     };
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Errore durante l\'importazione'
+      error: error instanceof Error ? error.message : "Errore durante l'importazione",
     };
   }
-} 
+}

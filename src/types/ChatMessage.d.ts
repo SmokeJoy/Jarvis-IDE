@@ -3,26 +3,26 @@
  * compatibile con tutti i provider LLM
  */
 export interface ChatMessage {
-    /**
-     * Il ruolo del messaggio: system, user o assistant
-     */
-    role: 'system' | 'user' | 'assistant';
-    /**
-     * Il contenuto testuale del messaggio
-     */
-    content: string;
-    /**
-     * Nome opzionale per identificare l'autore del messaggio
-     */
-    name?: string;
-    /**
-     * Timestamp del messaggio
-     */
-    timestamp?: number;
-    /**
-     * Flag che indica se il messaggio è in streaming
-     */
-    streaming?: boolean;
+  /**
+   * Il ruolo del messaggio: system, user o assistant
+   */
+  role: 'system' | 'user' | 'assistant';
+  /**
+   * Il contenuto testuale del messaggio
+   */
+  content: string;
+  /**
+   * Nome opzionale per identificare l'autore del messaggio
+   */
+  name?: string;
+  /**
+   * Timestamp del messaggio
+   */
+  timestamp?: number;
+  /**
+   * Flag che indica se il messaggio è in streaming
+   */
+  streaming?: boolean;
 }
 /**
  * Funzione di utilità per convertire messaggi da altri formati a ChatMessage

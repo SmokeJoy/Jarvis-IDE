@@ -1,4 +1,4 @@
-import { McpToolHandler } from "../../../shared/types/mcp.types.js";
+import { McpToolHandler } from '../../../shared/types/mcp.types';
 /**
  * Handler per la richiesta semantica di documentazione
  */

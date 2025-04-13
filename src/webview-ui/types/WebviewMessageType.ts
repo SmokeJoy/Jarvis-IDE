@@ -1,7 +1,7 @@
 /**
  * Tipi di messaggi supportati tra VSCode e Webview
  */
-export type WebviewMessageType = 
+export type WebviewMessageType =
   | 'updateSettings'
   | 'modelSelected'
   | 'apiKeyUpdated'
@@ -76,9 +76,9 @@ export interface InfoMessage extends BaseWebviewMessage {
 /**
  * Unione di tutti i tipi di messaggi
  */
-export type WebviewMessage = 
+export type WebviewMessage =
   | SettingsUpdateMessage
   | ModelSelectedMessage
   | ApiKeyUpdatedMessage
   | ErrorMessage
-  | InfoMessage; 
+  | InfoMessage;

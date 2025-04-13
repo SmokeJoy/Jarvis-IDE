@@ -17,13 +17,28 @@ import {
 } from './suggestions-message';
 
 /**
+ * Type for unknown message payload
+ */
+type UnknownPayload = Record<string, unknown>;
+
+/**
+ * Type for suggestion type
+ */
+type SuggestionType = 'code' | 'refactor' | 'fix' | 'general';
+
+/**
+ * Type for suggestion apply mode
+ */
+type ApplyMode = 'immediate' | 'preview';
+
+/**
  * Type guard generico per verificare se un messaggio è di un tipo specifico
  * @param message Il messaggio da verificare
  * @param type Il tipo di messaggio da controllare
  * @returns True se il messaggio è del tipo specificato
  */
 export function isMessageOfType<T extends SuggestionsMessageUnion>(
-  message: WebviewMessage<any>,
+  message: WebviewMessage<UnknownPayload>,
   type: SuggestionsMessageType
 ): message is T {
   return message?.type === type;
@@ -34,7 +49,7 @@ export function isMessageOfType<T extends SuggestionsMessageUnion>(
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un SuggestionsMessageUnion
  */
-export function isSuggestionsMessage(message: WebviewMessage<any>): message is SuggestionsMessageUnion {
+export function isSuggestionsMessage(message: WebviewMessage<UnknownPayload>): message is SuggestionsMessageUnion {
   return Object.values(SuggestionsMessageType).includes(message?.type as SuggestionsMessageType);
 }
 
@@ -43,7 +58,7 @@ export function isSuggestionsMessage(message: WebviewMessage<any>): message is S
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è una richiesta di suggerimenti
  */
-export function isRequestSuggestionsMessage(message: WebviewMessage<any>): message is RequestSuggestionsMessage {
+export function isRequestSuggestionsMessage(message: WebviewMessage<UnknownPayload>): message is RequestSuggestionsMessage {
   return isMessageOfType<RequestSuggestionsMessage>(
     message, 
     SuggestionsMessageType.REQUEST_SUGGESTIONS
@@ -55,7 +70,7 @@ export function isRequestSuggestionsMessage(message: WebviewMessage<any>): messa
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un aggiornamento di suggerimenti
  */
-export function isSuggestionsUpdatedMessage(message: WebviewMessage<any>): message is SuggestionsUpdatedMessage {
+export function isSuggestionsUpdatedMessage(message: WebviewMessage<UnknownPayload>): message is SuggestionsUpdatedMessage {
   return isMessageOfType<SuggestionsUpdatedMessage>(
     message, 
     SuggestionsMessageType.SUGGESTIONS_UPDATED
@@ -67,7 +82,7 @@ export function isSuggestionsUpdatedMessage(message: WebviewMessage<any>): messa
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un'accettazione di suggerimento
  */
-export function isSuggestionAcceptedMessage(message: WebviewMessage<any>): message is SuggestionAcceptedMessage {
+export function isSuggestionAcceptedMessage(message: WebviewMessage<UnknownPayload>): message is SuggestionAcceptedMessage {
   return isMessageOfType<SuggestionAcceptedMessage>(
     message, 
     SuggestionsMessageType.SUGGESTION_ACCEPTED
@@ -79,7 +94,7 @@ export function isSuggestionAcceptedMessage(message: WebviewMessage<any>): messa
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un rifiuto di suggerimento
  */
-export function isSuggestionRejectedMessage(message: WebviewMessage<any>): message is SuggestionRejectedMessage {
+export function isSuggestionRejectedMessage(message: WebviewMessage<UnknownPayload>): message is SuggestionRejectedMessage {
   return isMessageOfType<SuggestionRejectedMessage>(
     message, 
     SuggestionsMessageType.SUGGESTION_REJECTED
@@ -91,7 +106,7 @@ export function isSuggestionRejectedMessage(message: WebviewMessage<any>): messa
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è una pulizia di suggerimenti
  */
-export function isSuggestionsClearedMessage(message: WebviewMessage<any>): message is SuggestionsClearedMessage {
+export function isSuggestionsClearedMessage(message: WebviewMessage<UnknownPayload>): message is SuggestionsClearedMessage {
   return isMessageOfType<SuggestionsClearedMessage>(
     message, 
     SuggestionsMessageType.SUGGESTIONS_CLEARED
@@ -105,7 +120,7 @@ export function isSuggestionsClearedMessage(message: WebviewMessage<any>): messa
  * @param payload Il payload da validare
  * @returns True se il payload è valido
  */
-function validateRequestSuggestionsPayload(payload: any): boolean {
+function validateRequestSuggestionsPayload(payload: UnknownPayload): boolean {
   // La richiesta può avere payload opzionale o vuoto
   if (!payload) return true;
   
@@ -122,12 +137,12 @@ function validateRequestSuggestionsPayload(payload: any): boolean {
  * @param suggestion Il suggerimento da validare
  * @returns True se il suggerimento è valido
  */
-function validateSuggestion(suggestion: any): suggestion is Suggestion {
+function validateSuggestion(suggestion: UnknownPayload): suggestion is Suggestion {
   return (
     typeof suggestion === 'object' &&
     typeof suggestion.id === 'string' &&
     typeof suggestion.text === 'string' &&
-    ['code', 'refactor', 'fix', 'general'].includes(suggestion.type) &&
+    ['code', 'refactor', 'fix', 'general'].includes(suggestion.type as SuggestionType) &&
     (!suggestion.preview || typeof suggestion.preview === 'string') &&
     (!suggestion.confidence || (
       typeof suggestion.confidence === 'number' &&
@@ -142,11 +157,11 @@ function validateSuggestion(suggestion: any): suggestion is Suggestion {
  * @param payload Il payload da validare
  * @returns True se il payload è valido
  */
-function validateSuggestionsUpdatedPayload(payload: any): boolean {
+function validateSuggestionsUpdatedPayload(payload: UnknownPayload): boolean {
   return (
     typeof payload === 'object' &&
     Array.isArray(payload.suggestions) &&
-    payload.suggestions.every((suggestion: any) => validateSuggestion(suggestion)) &&
+    payload.suggestions.every((suggestion: unknown) => validateSuggestion(suggestion as UnknownPayload)) &&
     (!payload.source || typeof payload.source === 'string')
   );
 }
@@ -156,11 +171,11 @@ function validateSuggestionsUpdatedPayload(payload: any): boolean {
  * @param payload Il payload da validare
  * @returns True se il payload è valido
  */
-function validateSuggestionAcceptedPayload(payload: any): boolean {
+function validateSuggestionAcceptedPayload(payload: UnknownPayload): boolean {
   return (
     typeof payload === 'object' &&
     typeof payload.suggestionId === 'string' &&
-    (!payload.applyMode || ['immediate', 'preview'].includes(payload.applyMode))
+    (!payload.applyMode || ['immediate', 'preview'].includes(payload.applyMode as ApplyMode))
   );
 }
 
@@ -169,7 +184,7 @@ function validateSuggestionAcceptedPayload(payload: any): boolean {
  * @param payload Il payload da validare
  * @returns True se il payload è valido
  */
-function validateSuggestionRejectedPayload(payload: any): boolean {
+function validateSuggestionRejectedPayload(payload: UnknownPayload): boolean {
   return (
     typeof payload === 'object' &&
     typeof payload.suggestionId === 'string' &&

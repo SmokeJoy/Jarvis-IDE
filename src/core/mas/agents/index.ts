@@ -17,25 +17,25 @@ import { coordinatorAgent } from './CoordinatorAgent';
 export const agents = {
   executor: executorAgent,
   analyst: analystAgent,
-  coordinator: coordinatorAgent
+  coordinator: coordinatorAgent,
 };
 
 // Funzione di inizializzazione degli agenti
 export function initializeAgents(): void {
   console.log('[MAS] Initializing agents...');
-  
+
   // L'importazione degli agenti li inizializza automaticamente
   // Possiamo fare qualcosa di aggiuntivo se necessario
-  
+
   console.log('[MAS] Agents initialized successfully');
 }
 
 // Funzione di terminazione degli agenti
 export function terminateAgents(): void {
   console.log('[MAS] Terminating agents...');
-  
+
   // Pulizia delle risorse degli agenti
   // Ad esempio, potremmo voler cancellare i timer di heartbeat
-  
+
   console.log('[MAS] Agents terminated successfully');
-} 
+}

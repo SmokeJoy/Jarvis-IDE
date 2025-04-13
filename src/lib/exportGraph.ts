@@ -21,16 +21,16 @@ export const exportGraphAsPNG = async (element: HTMLElement): Promise<string> =>
     });
     return dataUrl;
   } catch (error) {
-    console.error('Errore durante l\'export del grafo come PNG:', error);
+    console.error("Errore durante l'export del grafo come PNG:", error);
     throw error;
   }
 };
 
-export const exportGraphAsJSON = (data: any): string => {
+export const exportGraphAsJSON = (data: GraphData): string => {
   try {
     return JSON.stringify(data, null, 2);
   } catch (error) {
-    console.error('Errore durante l\'export del grafo come JSON:', error);
+    console.error("Errore durante l'export del grafo come JSON:", error);
     throw error;
   }
 };
@@ -45,4 +45,4 @@ export const downloadFile = (data: string, filename: string, type: string): void
   link.click();
   document.body.removeChild(link);
   window.URL.revokeObjectURL(url);
-}; 
+};

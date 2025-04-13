@@ -1,14 +1,14 @@
 import { jest } from '@jest/globals';
-import { searchDocsHandler } from './searchDocsHandler.js';
-import { SearchDocsArgs } from '../mcp.types.js';
+import { searchDocsHandler } from './searchDocsHandler';
+import { SearchDocsArgs } from '../mcp.types';
 
 // Mock della funzione search
 jest.mock('../../../integrations/documentation/searchAdapter.js', () => ({
-  search: jest.fn()
+  search: jest.fn(),
 }));
 
 // Importa il mock per usarlo nei test
-import { search } from '../../../integrations/documentation/searchAdapter.js';
+import { search } from '../../../integrations/documentation/searchAdapter';
 
 describe('searchDocsHandler', () => {
   // Resetta tutti i mock prima di ogni test
@@ -33,18 +33,18 @@ describe('searchDocsHandler', () => {
     // Arrange
     const args: SearchDocsArgs = { query: 'typescript' };
     const mockResults = [
-      { 
-        title: 'Introduzione a TypeScript', 
-        content: 'TypeScript è un linguaggio di programmazione sviluppato da Microsoft...', 
-        source: 'docs/typescript/intro.md'
+      {
+        title: 'Introduzione a TypeScript',
+        content: 'TypeScript è un linguaggio di programmazione sviluppato da Microsoft...',
+        source: 'docs/typescript/intro.md',
       },
-      { 
-        title: 'Tipi in TypeScript', 
-        content: 'TypeScript aggiunge tipi statici a JavaScript...', 
-        source: 'docs/typescript/types.md'
-      }
+      {
+        title: 'Tipi in TypeScript',
+        content: 'TypeScript aggiunge tipi statici a JavaScript...',
+        source: 'docs/typescript/types.md',
+      },
     ];
-    
+
     (search as jest.Mock).mockResolvedValue(mockResults);
 
     // Act
@@ -58,15 +58,15 @@ describe('searchDocsHandler', () => {
 
   it('dovrebbe rispettare il limite specificato', async () => {
     // Arrange
-    const args: SearchDocsArgs = { 
-      query: 'javascript', 
-      limit: 5 
+    const args: SearchDocsArgs = {
+      query: 'javascript',
+      limit: 5,
     };
     const mockResults = [
       { title: 'Risultato 1', content: 'Contenuto 1', source: 'source1' },
-      { title: 'Risultato 2', content: 'Contenuto 2', source: 'source2' }
+      { title: 'Risultato 2', content: 'Contenuto 2', source: 'source2' },
     ];
-    
+
     (search as jest.Mock).mockResolvedValue(mockResults);
 
     // Act
@@ -81,7 +81,7 @@ describe('searchDocsHandler', () => {
   it('dovrebbe gestire errori durante la ricerca', async () => {
     // Arrange
     const args: SearchDocsArgs = { query: 'errore' };
-    
+
     (search as jest.Mock).mockRejectedValue(new Error('Errore durante la ricerca'));
 
     // Act
@@ -93,4 +93,4 @@ describe('searchDocsHandler', () => {
     expect(result.message).toMatch(/Errore durante la ricerca nella documentazione/i);
     expect(result.message).toMatch(/Errore durante la ricerca/i);
   });
-}); 
+});

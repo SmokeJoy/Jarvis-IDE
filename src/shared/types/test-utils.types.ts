@@ -34,11 +34,23 @@ export interface MockMessageCreator {
     type: T,
     payload: ExtensionMessage<T>['payload']
   ) => ExtensionMessage<T>;
-  
+
   createError: (error: Error) => ExtensionMessage<'error'>;
   createInfoMessage: (message: string, severity?: MessageSeverity) => ExtensionMessage<'info'>;
-  createLogMessage: (level: LogLevel, message: string, context?: Record<string, unknown>) => ExtensionMessage<'log.update'>;
-  createModelUpdate: (modelId: string, modelInfo: ModelInfo, status?: ModelStatus) => ExtensionMessage<'model.update'>;
+  createLogMessage: (
+    level: LogLevel,
+    message: string,
+    context?: Record<string, unknown>
+  ) => ExtensionMessage<'log.update'>;
+  createModelUpdate: (
+    modelId: string,
+    modelInfo: ModelInfo,
+    status?: ModelStatus
+  ) => ExtensionMessage<'model.update'>;
   createSettingsUpdate: (settings: ExtensionSettings) => ExtensionMessage<'settings.update'>;
-  createChatUpdate: (threadId: string, messages: MockedChatMessage[], status?: ChatStatus) => ExtensionMessage<'chat.update'>;
-} 
+  createChatUpdate: (
+    threadId: string,
+    messages: MockedChatMessage[],
+    status?: ChatStatus
+  ) => ExtensionMessage<'chat.update'>;
+}

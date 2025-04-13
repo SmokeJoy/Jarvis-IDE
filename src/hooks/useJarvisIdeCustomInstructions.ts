@@ -1,6 +1,4 @@
-// Dichiarazione per l'API vscode WebView
-declare const vscode: { postMessage: (message: any) => void };
-
+import './vscode-api';
 import { useCallback, useState } from 'react';
 
 export const useJarvisIdeCustomInstructions = () => {
@@ -12,8 +10,8 @@ export const useJarvisIdeCustomInstructions = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          customInstructions: newInstructions
-        }
+          customInstructions: newInstructions,
+        },
       });
 
       setCustomInstructions(newInstructions);
@@ -30,8 +28,8 @@ export const useJarvisIdeCustomInstructions = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          customInstructions: defaultInstructions
-        }
+          customInstructions: defaultInstructions,
+        },
       });
 
       setCustomInstructions(defaultInstructions);
@@ -44,6 +42,6 @@ export const useJarvisIdeCustomInstructions = () => {
   return {
     customInstructions,
     updateCustomInstructions,
-    resetCustomInstructions
+    resetCustomInstructions,
   };
-}; 
+};

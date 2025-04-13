@@ -5,18 +5,23 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { contextNavigateHandler } from '../contextNavigateHandler';
-import { ContextItem, ContextLink, NavigationOptions, NavigationResult } from '../contextNavigateHandler';
+import {
+  ContextItem,
+  ContextLink,
+  NavigationOptions,
+  NavigationResult,
+} from '../contextNavigateHandler';
 import { getMemoryContexts, getContextById } from '../../memory/context';
 import { readFile } from 'fs/promises';
 
 // Mock delle dipendenze
 vi.mock('../../memory/context', () => ({
   getMemoryContexts: vi.fn(),
-  getContextById: vi.fn()
+  getContextById: vi.fn(),
 }));
 
 vi.mock('fs/promises', () => ({
-  readFile: vi.fn()
+  readFile: vi.fn(),
 }));
 
 // Tipizzazione dei mock
@@ -29,18 +34,18 @@ const mockContexts: ContextItem[] = [
   {
     id: 'ctx1',
     text: 'Contesto 1',
-    tags: ['tag1', 'tag2']
+    tags: ['tag1', 'tag2'],
   },
   {
     id: 'ctx2',
     text: 'Contesto 2',
-    tags: ['tag2', 'tag3']
+    tags: ['tag2', 'tag3'],
   },
   {
     id: 'ctx3',
     text: 'Contesto 3',
-    tags: ['tag3', 'tag4']
-  }
+    tags: ['tag3', 'tag4'],
+  },
 ];
 
 const mockLinks: ContextLink[] = [
@@ -54,8 +59,8 @@ const mockLinks: ContextLink[] = [
     metadata: {
       confidence: 0.9,
       source: 'test',
-      timestamp: '2024-01-01'
-    }
+      timestamp: '2024-01-01',
+    },
   },
   {
     id: 'link2',
@@ -67,9 +72,9 @@ const mockLinks: ContextLink[] = [
     metadata: {
       confidence: 0.8,
       source: 'test',
-      timestamp: '2024-01-01'
-    }
-  }
+      timestamp: '2024-01-01',
+    },
+  },
 ];
 
 describe('contextNavigateHandler', () => {
@@ -77,8 +82,8 @@ describe('contextNavigateHandler', () => {
     vi.clearAllMocks();
     mockedGetMemoryContexts.mockResolvedValue(mockContexts);
     mockedReadFile.mockResolvedValue(JSON.stringify(mockLinks));
-    mockedGetContextById.mockImplementation(async (id: string) => 
-      mockContexts.find(ctx => ctx.id === id) || null
+    mockedGetContextById.mockImplementation(
+      async (id: string) => mockContexts.find((ctx) => ctx.id === id) || null
     );
   });
 
@@ -92,7 +97,7 @@ describe('contextNavigateHandler', () => {
     it('dovrebbe fallire con modalità non supportata', async () => {
       const result = await contextNavigateHandler({
         startId: 'ctx1',
-        mode: 'invalid' as any
+        mode: 'invalid' as any,
       });
       expect(result.success).toBe(false);
       expect(result.error).toContain('Modalità di navigazione non supportata');
@@ -101,7 +106,7 @@ describe('contextNavigateHandler', () => {
     it('dovrebbe fallire con formato non supportato', async () => {
       const result = await contextNavigateHandler({
         startId: 'ctx1',
-        format: 'invalid' as any
+        format: 'invalid' as any,
       });
       expect(result.success).toBe(false);
       expect(result.error).toContain('Formato non supportato');
@@ -111,8 +116,8 @@ describe('contextNavigateHandler', () => {
       const result = await contextNavigateHandler({
         startId: 'ctx1',
         strategy: {
-          minStrength: 2
-        }
+          minStrength: 2,
+        },
       });
       expect(result.success).toBe(false);
       expect(result.error).toContain('minStrength deve essere tra');
@@ -122,8 +127,8 @@ describe('contextNavigateHandler', () => {
       const result = await contextNavigateHandler({
         startId: 'ctx1',
         strategy: {
-          minConfidence: -1
-        }
+          minConfidence: -1,
+        },
       });
       expect(result.success).toBe(false);
       expect(result.error).toContain('minConfidence deve essere tra');
@@ -137,7 +142,7 @@ describe('contextNavigateHandler', () => {
         targetId: 'ctx3',
         mode: 'shortest',
         includeContent: true,
-        includeMetadata: true
+        includeMetadata: true,
       });
 
       expect(result.success).toBe(true);
@@ -152,7 +157,7 @@ describe('contextNavigateHandler', () => {
       const result = await contextNavigateHandler({
         startId: 'invalid',
         targetId: 'ctx3',
-        mode: 'shortest'
+        mode: 'shortest',
       });
 
       expect(result.success).toBe(false);
@@ -163,7 +168,7 @@ describe('contextNavigateHandler', () => {
       const result = await contextNavigateHandler({
         startId: 'ctx1',
         targetId: 'invalid',
-        mode: 'shortest'
+        mode: 'shortest',
       });
 
       expect(result.success).toBe(false);
@@ -177,7 +182,7 @@ describe('contextNavigateHandler', () => {
       const result = await contextNavigateHandler({
         startId: 'ctx1',
         targetId: 'ctx3',
-        mode: 'shortest'
+        mode: 'shortest',
       });
 
       expect(result.success).toBe(false);
@@ -192,7 +197,7 @@ describe('contextNavigateHandler', () => {
       const result = await contextNavigateHandler({
         startId: 'ctx1',
         targetId: 'ctx3',
-        mode: 'shortest'
+        mode: 'shortest',
       });
 
       expect(result.success).toBe(false);
@@ -205,11 +210,11 @@ describe('contextNavigateHandler', () => {
       const result = await contextNavigateHandler({
         startId: 'ctx1',
         targetId: 'ctx3',
-        mode: 'shortest'
+        mode: 'shortest',
       });
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('Errore sconosciuto');
     });
   });
-}); 
+});

@@ -1,20 +1,20 @@
-import { ChatCompletionMessageParam } from "../types/provider-types/openai-types.js"
-import { ApiConfiguration } from "./global.js"
-import { 
-  AnthropicContentBlock, 
-  AnthropicTextBlock, 
-  AnthropicImageBlock, 
-  AnthropicToolUseBlock, 
+import { ChatCompletionMessageParam } from '../types/provider-types/openai-types';
+import { ApiConfiguration } from './global';
+import {
+  AnthropicContentBlock,
+  AnthropicTextBlock,
+  AnthropicImageBlock,
+  AnthropicToolUseBlock,
   AnthropicToolResultBlock,
-  AnthropicMessage
-} from "./provider-types/anthropic-types.js"
-import { WebviewMessage } from '../shared/types/webview.types.js'
-import { ConfigModelInfo } from './models.js'
+  AnthropicMessage,
+} from './provider-types/anthropic-types';
+import { WebviewMessage } from '../shared/types/webview.types';
+import { ConfigModelInfo } from './models';
 
-export type ContentBlock = AnthropicContentBlock
-export type TextBlock = AnthropicTextBlock
-export type ImageBlock = AnthropicContentBlock & { type: "image" }
-export type ToolBlock = AnthropicContentBlock & { type: "tool_use" | "tool_result" }
+export type ContentBlock = AnthropicContentBlock;
+export type TextBlock = AnthropicTextBlock;
+export type ImageBlock = AnthropicContentBlock & { type: 'image' };
+export type ToolBlock = AnthropicContentBlock & { type: 'tool_use' | 'tool_result' };
 
 export interface OpenRouterModelInfo {
   id: string;
@@ -34,7 +34,7 @@ export interface ExtendedApiConfig {
   baseUrl?: string;
   temperature?: number;
   maxTokens?: number;
-  
+
   // Proprietà estese
   openRouterApiKey?: string;
   selectedModelId?: string;
@@ -77,7 +77,7 @@ export interface ApiMessage {
 // Consolido i MessageParam in un tipo unione
 export type AnthropicMessageParam = AnthropicMessage;
 export type StandardMessageParam = {
-  role?: "system" | "user" | "assistant" | "function" | "tool";
+  role?: 'system' | 'user' | 'assistant' | 'function' | 'tool';
   content?: string;
   name?: string;
   function_call?: {
@@ -86,16 +86,21 @@ export type StandardMessageParam = {
   };
 };
 
-export type ContentBlockParam = ContentBlock
-export type TextBlockParam = TextBlock
-export type ImageBlockParam = AnthropicImageBlock
-export type ToolResultBlockParam = AnthropicToolResultBlock
-export type Messages = AnthropicMessage[]
+export type ContentBlockParam = ContentBlock;
+export type TextBlockParam = TextBlock;
+export type ImageBlockParam = AnthropicImageBlock;
+export type ToolResultBlockParam = AnthropicToolResultBlock;
+export type Messages = AnthropicMessage[];
+
+/**
+ * Tipo generico per il payload delle estensioni
+ */
+export type ExtensionPayload = Record<string, unknown>;
 
 // Interfaccia base per i messaggi dell'estensione
 export interface BasicExtensionMessage {
   type: string;
-  payload?: any;
+  payload?: ExtensionPayload;
   messageIds?: string[];
   taskId?: string;
 }
@@ -140,6 +145,11 @@ export interface ExtensionContext {
   globalState: ExtensionState;
 }
 
+/**
+ * Metadati aggiuntivi per un messaggio
+ */
+export type MessageMetadata = Record<string, unknown>;
+
 export interface Message {
   id?: string;
   role?: string;
@@ -147,7 +157,7 @@ export interface Message {
   content?: string;
   streamingFinished?: boolean;
   error?: string;
-  meta?: any;
+  meta?: MessageMetadata;
 }
 
 export interface AgentTask {
@@ -159,33 +169,33 @@ export interface AgentTask {
 }
 
 export enum WebviewCommand {
-  SEND_MESSAGE = "sendMessage",
-  SEND_UPDATED_MESSAGE = "sendUpdatedMessage",
-  SET_TASK = "setTask",
-  STOP_TASK = "stopTask",
-  ABORT_TASK = "abortTask",
-  FORCE_REFRESH = "forceRefresh",
-  CLEAR_CHAT = "clearChat",
-  UPDATE_SETTINGS = "updateSettings",
-  EDIT_SYSTEM_PROMPT = "editSystemPrompt",
-  SAVE_SYSTEM_PROMPT = "saveSystemPrompt",
-  BROWSER_NAVIGATE = "browserNavigate",
-  BROWSER_ACTION = "browserAction",
-  SEND_BROWSER_URL = "sendBrowserUrl",
-  MCP_COMMAND = "mcpCommand",
-  OPEN_TASK_HISTORY = "openTaskHistory",
-  LOAD_TASK = "loadTask",
-  EXPORT_CURRENT_TASK = "exportCurrentTask",
-  UPLOAD_IMAGE = "uploadImage",
-  REMOVE_IMAGE = "removeImage",
-  TOGGLE_THINKING_MODE = "toggleThinkingMode",
-  APPROVE_PLAN = "approvePlan",
-  REJECT_PLAN = "rejectPlan",
-  SET_THINKING_BUDGET = "setThinkingBudget",
-  ADD_CUSTOM_MODEL = "addCustomModel",
-  LOGIN = "login",
-  LOGOUT = "logout",
-  TOGGLE_ACCOUNT_ENABLED = "toggleAccountEnabled"
+  SEND_MESSAGE = 'sendMessage',
+  SEND_UPDATED_MESSAGE = 'sendUpdatedMessage',
+  SET_TASK = 'setTask',
+  STOP_TASK = 'stopTask',
+  ABORT_TASK = 'abortTask',
+  FORCE_REFRESH = 'forceRefresh',
+  CLEAR_CHAT = 'clearChat',
+  UPDATE_SETTINGS = 'updateSettings',
+  EDIT_SYSTEM_PROMPT = 'editSystemPrompt',
+  SAVE_SYSTEM_PROMPT = 'saveSystemPrompt',
+  BROWSER_NAVIGATE = 'browserNavigate',
+  BROWSER_ACTION = 'browserAction',
+  SEND_BROWSER_URL = 'sendBrowserUrl',
+  MCP_COMMAND = 'mcpCommand',
+  OPEN_TASK_HISTORY = 'openTaskHistory',
+  LOAD_TASK = 'loadTask',
+  EXPORT_CURRENT_TASK = 'exportCurrentTask',
+  UPLOAD_IMAGE = 'uploadImage',
+  REMOVE_IMAGE = 'removeImage',
+  TOGGLE_THINKING_MODE = 'toggleThinkingMode',
+  APPROVE_PLAN = 'approvePlan',
+  REJECT_PLAN = 'rejectPlan',
+  SET_THINKING_BUDGET = 'setThinkingBudget',
+  ADD_CUSTOM_MODEL = 'addCustomModel',
+  LOGIN = 'login',
+  LOGOUT = 'logout',
+  TOGGLE_ACCOUNT_ENABLED = 'toggleAccountEnabled',
 }
 
 export interface MessageHistory {
@@ -207,11 +217,41 @@ export interface WebviewState {
   planActSeparateModelsSetting?: boolean;
 }
 
-export type { WebviewMessage }
+export type { WebviewMessage };
 
 // Interfaccia dettagliata per i messaggi dell'estensione
 export interface DetailedExtensionMessage {
-  type: "error" | "message" | "state" | "action" | "response" | "mcpMarketplaceCatalog" | "requestVsCodeLmModels" | "authCallback" | "invoke" | "log.export" | "log.openFolder" | "selectedImages" | "isStreaming" | "mcpServers" | "taskHistory" | "autoApprovalSettings" | "browserSettings" | "chatSettings" | "userInfo" | "settings" | "beginThinking" | "endThinking" | "setThinkingBudget" | "thinkingModeEnabled" | "planData" | "planRequest" | "isAwaitingPlanResponse" | "taskAssistantMessage" | "versionNumber" | "vscode";
+  type:
+    | 'error'
+    | 'message'
+    | 'state'
+    | 'action'
+    | 'response'
+    | 'mcpMarketplaceCatalog'
+    | 'requestVsCodeLmModels'
+    | 'authCallback'
+    | 'invoke'
+    | 'log.export'
+    | 'log.openFolder'
+    | 'selectedImages'
+    | 'isStreaming'
+    | 'mcpServers'
+    | 'taskHistory'
+    | 'autoApprovalSettings'
+    | 'browserSettings'
+    | 'chatSettings'
+    | 'userInfo'
+    | 'settings'
+    | 'beginThinking'
+    | 'endThinking'
+    | 'setThinkingBudget'
+    | 'thinkingModeEnabled'
+    | 'planData'
+    | 'planRequest'
+    | 'isAwaitingPlanResponse'
+    | 'taskAssistantMessage'
+    | 'versionNumber'
+    | 'vscode';
   payload?: {
     text?: string;
     role?: string;
@@ -225,6 +265,6 @@ export interface DetailedExtensionMessage {
   taskId?: string;
 }
 
-export type Message_role = "system" | "user" | "assistant" | "function" | "tool";
+export type Message_role = 'system' | 'user' | 'assistant' | 'function' | 'tool';
 
-export type TelemetrySetting = 'enabled' | 'disabled'; 
+export type TelemetrySetting = 'enabled' | 'disabled';

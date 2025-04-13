@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
-import { AIProvider, AIModel } from '../types/provider.types.js';
-import { WebviewMessage } from '../types/webview.js';
+import { AIProvider, AIModel } from '../types/provider.types';
+import { WebviewMessage } from '../types/webview';
 
 declare const vscode: {
   postMessage: (message: WebviewMessage) => void;
@@ -9,36 +9,42 @@ declare const vscode: {
 export const useJarvisIdeModel = (provider: AIProvider) => {
   const [selectedModel, setSelectedModel] = useState<AIModel>(provider.models[0]);
 
-  const updateModel = useCallback(async (modelId: string) => {
-    try {
-      const model = provider.models.find(m => m.id === modelId);
-      if (!model) {
-        throw new Error(`Model ${modelId} not found`);
-      }
-
-      // Invia l'aggiornamento del modello al provider
-      await vscode.postMessage({
-        type: 'settings',
-        payload: {
-          selectedModel: modelId
+  const updateModel = useCallback(
+    async (modelId: string) => {
+      try {
+        const model = provider.models.find((m) => m.id === modelId);
+        if (!model) {
+          throw new Error(`Model ${modelId} not found`);
         }
-      });
 
-      setSelectedModel(model);
-    } catch (error) {
-      console.error('Error updating model:', error);
-      throw error;
-    }
-  }, [provider.models]);
+        // Invia l'aggiornamento del modello al provider
+        await vscode.postMessage({
+          type: 'settings',
+          payload: {
+            selectedModel: modelId,
+          },
+        });
 
-  const getModelInfo = useCallback((modelId: string) => {
-    return provider.models.find(m => m.id === modelId);
-  }, [provider.models]);
+        setSelectedModel(model);
+      } catch (error) {
+        console.error('Error updating model:', error);
+        throw error;
+      }
+    },
+    [provider.models]
+  );
+
+  const getModelInfo = useCallback(
+    (modelId: string) => {
+      return provider.models.find((m) => m.id === modelId);
+    },
+    [provider.models]
+  );
 
   return {
     selectedModel,
     updateModel,
     getModelInfo,
-    availableModels: provider.models
+    availableModels: provider.models,
   };
 };

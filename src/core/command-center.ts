@@ -2,7 +2,7 @@
  * @file command-center.ts
  * @description Centro di comando per il sistema Multi-Agent (MAS) di Jarvis IDE
  * Gestisce il flusso di comunicazione tra agenti, interfacce utente e sistema
- * 
+ *
  * @author AI1 | Jarvis MAS v1.0.0 Init
  */
 
@@ -53,24 +53,24 @@ export class CommandCenter {
   private eventEmitter: EventEmitter;
   private heartbeatInterval: NodeJS.Timeout | null;
   private heartbeatFrequency: number; // in millisecondi
-  
+
   private constructor() {
     this.agents = new Map<string, Agent>();
     this.commands = [];
     this.eventEmitter = new EventEmitter();
     this.heartbeatInterval = null;
     this.heartbeatFrequency = 30000; // 30 secondi
-    
+
     this.initializeHeartbeat();
   }
-  
+
   public static getInstance(): CommandCenter {
     if (!CommandCenter.instance) {
       CommandCenter.instance = new CommandCenter();
     }
     return CommandCenter.instance;
   }
-  
+
   /**
    * Registra un nuovo agente nel sistema
    */
@@ -81,14 +81,14 @@ export class CommandCenter {
       id,
       lastHeartbeat: Date.now(),
     };
-    
+
     this.agents.set(id, newAgent);
     this.eventEmitter.emit('agent:registered', newAgent);
-    
+
     console.log(`[CommandCenter] Agente registrato: ${agent.name} (${id})`);
     return id;
   }
-  
+
   /**
    * Invia un comando nel sistema
    */
@@ -99,22 +99,22 @@ export class CommandCenter {
       id,
       timestamp: Date.now(),
     };
-    
+
     this.commands.push(newCommand);
     this.eventEmitter.emit('command:sent', newCommand);
-    
+
     // Elabora il comando
     this.processCommand(newCommand);
-    
+
     return id;
   }
-  
+
   /**
    * Elabora un comando ricevuto
    */
   private processCommand(command: Command): void {
     console.log(`[CommandCenter] Elaborazione comando: ${command.id} (${command.type})`);
-    
+
     // Logica di routing del comando
     if (command.target) {
       const targetAgent = this.agents.get(command.target);
@@ -128,7 +128,7 @@ export class CommandCenter {
       this.eventEmitter.emit(`command:${command.type}`, command);
     }
   }
-  
+
   /**
    * Inizializza il sistema di heartbeat per monitorare gli agenti
    */
@@ -136,42 +136,47 @@ export class CommandCenter {
     if (this.heartbeatInterval) {
       clearInterval(this.heartbeatInterval);
     }
-    
+
     this.heartbeatInterval = setInterval(() => {
       this.checkAgentsHealth();
     }, this.heartbeatFrequency);
-    
-    console.log(`[CommandCenter] Sistema heartbeat attivato. Frequenza: ${this.heartbeatFrequency}ms`);
+
+    console.log(
+      `[CommandCenter] Sistema heartbeat attivato. Frequenza: ${this.heartbeatFrequency}ms`
+    );
   }
-  
+
   /**
    * Controlla lo stato di salute degli agenti tramite heartbeat
    */
   private checkAgentsHealth(): void {
     const now = Date.now();
     const timeoutThreshold = 3 * this.heartbeatFrequency; // 3 volte la frequenza di heartbeat
-    
+
     console.log(`[CommandCenter] Controllo salute degli agenti in corso...`);
-    
+
     this.agents.forEach((agent, id) => {
       if (now - agent.lastHeartbeat > timeoutThreshold) {
         // L'agente non risponde
         if (agent.status !== AgentStatus.OFFLINE) {
-          console.warn(`[CommandCenter] L'agente ${agent.name} (${id}) non risponde. Impostato come OFFLINE.`);
+          console.warn(
+            `[CommandCenter] L'agente ${agent.name} (${id}) non risponde. Impostato come OFFLINE.`
+          );
           agent.status = AgentStatus.OFFLINE;
           this.eventEmitter.emit('agent:offline', agent);
         }
       }
     });
-    
+
     // Emetti un evento heartbeat
     this.eventEmitter.emit('system:heartbeat', {
       timestamp: now,
       agentsCount: this.agents.size,
-      activeAgents: [...this.agents.values()].filter(a => a.status !== AgentStatus.OFFLINE).length
+      activeAgents: [...this.agents.values()].filter((a) => a.status !== AgentStatus.OFFLINE)
+        .length,
     });
   }
-  
+
   /**
    * Aggiorna l'heartbeat di un agente
    */
@@ -183,7 +188,7 @@ export class CommandCenter {
     }
     return false;
   }
-  
+
   /**
    * Aggiorna lo stato di un agente
    */
@@ -193,28 +198,28 @@ export class CommandCenter {
       const previousStatus = agent.status;
       agent.status = status;
       agent.lastHeartbeat = Date.now();
-      
+
       // Emetti un evento di cambio stato
       if (previousStatus !== status) {
         this.eventEmitter.emit('agent:status-changed', {
           agentId,
           previousStatus,
-          newStatus: status
+          newStatus: status,
         });
       }
-      
+
       return true;
     }
     return false;
   }
-  
+
   /**
    * Sottoscrizione a eventi
    */
   public on(event: string, listener: (...args: any[]) => void): void {
     this.eventEmitter.on(event, listener);
   }
-  
+
   /**
    * Rimuove un agente dal sistema
    */
@@ -225,19 +230,20 @@ export class CommandCenter {
     }
     return result;
   }
-  
+
   /**
    * Ottiene lo stato attuale del sistema
    */
   public getSystemStatus(): any {
     return {
       agentsCount: this.agents.size,
-      activeAgents: [...this.agents.values()].filter(a => a.status !== AgentStatus.OFFLINE).length,
+      activeAgents: [...this.agents.values()].filter((a) => a.status !== AgentStatus.OFFLINE)
+        .length,
       commandsProcessed: this.commands.length,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
 }
 
 // Esporta l'istanza singleton del CommandCenter
-export const commandCenter = CommandCenter.getInstance(); 
+export const commandCenter = CommandCenter.getInstance();

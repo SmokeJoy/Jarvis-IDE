@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
-import styled from "styled-components";
+import styled from 'styled-components';
 import * as vscode from 'vscode-webview';
-import { BaseMessage, MessageRole } from "../shared/types/message.js";
-import { ApiConfiguration } from "../shared/types/global.js";
-import { McpView } from "./McpView.js";
+import { BaseMessage, MessageRole } from '../shared/types/message';
+import { ApiConfiguration } from '../shared/types/global';
+import { McpView } from './McpView';
+import { createSafeMessage } from "../shared/types/message";
 
 const Container = styled.div`
   display: flex;
@@ -42,13 +43,13 @@ const MessageItem = styled.div<{ role: MessageRole }>`
   padding: 12px;
   border-radius: 8px;
   background: ${(props) =>
-    props.role === "user"
-      ? "var(--vscode-input-background)"
-      : props.role === "assistant"
-      ? "var(--vscode-editor-selectionBackground)"
-      : props.role === "system"
-      ? "var(--vscode-editorInfo-background)"
-      : "var(--vscode-editorWarning-background)"};
+    props.role === 'user'
+      ? 'var(--vscode-input-background)'
+      : props.role === 'assistant'
+        ? 'var(--vscode-editor-selectionBackground)'
+        : props.role === 'system'
+          ? 'var(--vscode-editorInfo-background)'
+          : 'var(--vscode-editorWarning-background)'};
   color: var(--vscode-editor-foreground);
 `;
 
@@ -116,7 +117,7 @@ type WebviewMessage = ResponseMessage | ChunkMessage | ErrorMessage | McpConnect
 
 export function Webview({ config }: WebviewProps) {
   const [messages, setMessages] = useState<BaseMessage[]>([]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [mcpConnected, setMcpConnected] = useState(false);
 
@@ -124,73 +125,66 @@ export function Webview({ config }: WebviewProps) {
     const handleMessage = (event: MessageEvent) => {
       const message = event.data as WebviewMessage;
       switch (message.type) {
-        case "response":
+        case 'response':
           setMessages((prev) => [...prev, message.response]);
           setIsLoading(false);
           break;
-        case "chunk":
+        case 'chunk':
           setMessages((prev) => {
             const lastMessage = prev[prev.length - 1];
-            if (lastMessage && lastMessage.role === "assistant") {
+            if (lastMessage && lastMessage.role === 'assistant') {
               return [
                 ...prev.slice(0, -1),
                 {
                   ...lastMessage,
-                  content: typeof lastMessage.content === "string"
-                    ? lastMessage.content + message.chunk
-                    : [...lastMessage.content, { type: "text", text: message.chunk }],
+                  content:
+                    typeof lastMessage.content === 'string'
+                      ? lastMessage.content + message.chunk
+                      : [...lastMessage.content, { type: 'text', text: message.chunk }],
                 },
               ];
             }
             return [
               ...prev,
-              {
-                role: "assistant",
-                content: message.chunk,
-                timestamp: Date.now(),
-              },
+              createSafeMessage({role: 'assistant', content: message.chunk, timestamp: Date.now()}),
             ];
           });
           break;
-        case "error":
+        case 'error':
           console.error(message.error);
           setIsLoading(false);
           break;
-        case "mcpConnected":
+        case 'mcpConnected':
           setMcpConnected(true);
           break;
-        case "mcpDisconnected":
+        case 'mcpDisconnected':
           setMcpConnected(false);
           break;
       }
     };
 
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
   }, []);
 
   const handleSubmit = () => {
     if (!input.trim() || isLoading) return;
 
-    const userMessage: BaseMessage = {
-      role: "user",
-      content: input,
-      timestamp: Date.now(),
-    };
+    const userMessage: BaseMessage = createSafeMessage({role: 'user', content: input, timestamp: Date.now()});
 
     setMessages((prev) => [...prev, userMessage]);
-    setInput("");
+    setInput('');
     setIsLoading(true);
 
     const vscode = acquireVsCodeApi();
     vscode.postMessage({
-      type: "chat",
+      type: 'chat',
       messages: [...messages, userMessage],
     });
   };
 
   const handleKeyPress = (event: React.KeyboardEvent) => {
-    if (event.key === "Enter" && !event.shiftKey) {
+    if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       handleSubmit();
     }
@@ -205,10 +199,10 @@ export function Webview({ config }: WebviewProps) {
         <MessageList>
           {messages.map((message, index) => (
             <MessageItem key={index} role={message.role}>
-              {typeof message.content === "string" 
-                ? message.content 
+              {typeof message.content === 'string'
+                ? message.content
                 : message.content.map((part, i) => (
-                    <span key={i}>{part.type === "text" ? part.text : "[Image]"}</span>
+                    <span key={i}>{part.type === 'text' ? part.text : '[Image]'}</span>
                   ))}
             </MessageItem>
           ))}
@@ -223,10 +217,10 @@ export function Webview({ config }: WebviewProps) {
           disabled={isLoading}
         />
         <Button onClick={handleSubmit} disabled={!input.trim() || isLoading}>
-          {isLoading ? "Sending..." : "Send"}
+          {isLoading ? 'Sending...' : 'Send'}
         </Button>
       </Footer>
       {mcpConnected && <McpView code="" />}
     </Container>
   );
-} 
+}

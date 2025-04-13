@@ -8,7 +8,9 @@
  * @param fn Funzione da misurare
  * @returns Oggetto con il risultato della funzione e la durata di esecuzione in ms
  */
-export function measureExecutionTime<T>(fn: () => Promise<T>): Promise<{ result: T; duration: number }> {
+export function measureExecutionTime<T>(
+  fn: () => Promise<T>
+): Promise<{ result: T; duration: number }> {
   const start = performance.now();
   return fn().then((result) => ({
     result,
@@ -32,4 +34,4 @@ export function getMemoryUsage(): number {
  */
 export function getMemoryGrowthPercentage(before: number, after: number): number {
   return ((after - before) / before) * 100;
-} 
+}

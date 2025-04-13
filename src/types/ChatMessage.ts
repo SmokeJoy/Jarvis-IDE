@@ -5,11 +5,11 @@
  * @deprecated Usare l'importazione da "../shared/types/message.types.js" invece
  */
 
-import { 
-  ChatMessage as ChatMessageType, 
-  normalizeChatMessages as normalizeMessages, 
-  toChatMessage 
-} from '../shared/types/message.types.js';
+import {
+  ChatMessage as ChatMessageType,
+  normalizeChatMessages as normalizeMessages,
+  toChatMessage,
+} from '../shared/types/message.types';
 
 // Esporta per retrocompatibilità
 export type ChatMessage = ChatMessageType;

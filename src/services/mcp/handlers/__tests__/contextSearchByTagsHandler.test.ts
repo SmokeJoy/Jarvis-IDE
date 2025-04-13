@@ -12,12 +12,12 @@ import { normalizeTag } from '../contextTagHandler';
 
 // Mock delle utility di memoria
 vi.mock('../contextInjectHandler', () => ({
-  getAllMemory: vi.fn()
+  getAllMemory: vi.fn(),
 }));
 
 // Mock della normalizzazione dei tag
 vi.mock('../contextTagHandler', () => ({
-  normalizeTag: vi.fn((tag: string) => tag.toLowerCase().trim())
+  normalizeTag: vi.fn((tag: string) => tag.toLowerCase().trim()),
 }));
 
 describe('contextSearchByTagsHandler', () => {
@@ -28,15 +28,15 @@ describe('contextSearchByTagsHandler', () => {
         scope: 'chat',
         text: 'Test chat 1',
         timestamp: Date.now(),
-        tags: ['test', 'chat', 'important']
+        tags: ['test', 'chat', 'important'],
       },
       {
         id: 'chat-2',
         scope: 'chat',
         text: 'Test chat 2',
         timestamp: Date.now(),
-        tags: ['test', 'chat']
-      }
+        tags: ['test', 'chat'],
+      },
     ],
     project: [
       {
@@ -44,9 +44,9 @@ describe('contextSearchByTagsHandler', () => {
         scope: 'project',
         text: 'Test project 1',
         timestamp: Date.now(),
-        tags: ['test', 'project', 'important']
-      }
-    ]
+        tags: ['test', 'project', 'important'],
+      },
+    ],
   };
 
   beforeEach(() => {
@@ -70,7 +70,7 @@ describe('contextSearchByTagsHandler', () => {
 
     it('dovrebbe rifiutare tags non validi', async () => {
       const args: ContextSearchByTagsArgs = {
-        tags: ['   ', '!!!', '']
+        tags: ['   ', '!!!', ''],
       };
 
       const result = await contextSearchByTagsHandler(args);
@@ -81,7 +81,7 @@ describe('contextSearchByTagsHandler', () => {
     it('dovrebbe rifiutare scope non validi', async () => {
       const args: ContextSearchByTagsArgs = {
         tags: ['test'],
-        scope: 'invalid' as any
+        scope: 'invalid' as any,
       };
 
       const result = await contextSearchByTagsHandler(args);
@@ -93,7 +93,7 @@ describe('contextSearchByTagsHandler', () => {
   describe('Ricerca tag', () => {
     it('dovrebbe trovare contesti con tag esatti', async () => {
       const args: ContextSearchByTagsArgs = {
-        tags: ['test', 'chat']
+        tags: ['test', 'chat'],
       };
 
       const result = await contextSearchByTagsHandler(args);
@@ -107,7 +107,7 @@ describe('contextSearchByTagsHandler', () => {
     it('dovrebbe filtrare per scope specifico', async () => {
       const args: ContextSearchByTagsArgs = {
         tags: ['test'],
-        scope: 'project'
+        scope: 'project',
       };
 
       const result = await contextSearchByTagsHandler(args);
@@ -120,7 +120,7 @@ describe('contextSearchByTagsHandler', () => {
     it('dovrebbe limitare il numero di risultati', async () => {
       const args: ContextSearchByTagsArgs = {
         tags: ['test'],
-        limit: 1
+        limit: 1,
       };
 
       const result = await contextSearchByTagsHandler(args);
@@ -132,7 +132,7 @@ describe('contextSearchByTagsHandler', () => {
 
     it('dovrebbe ordinare per rilevanza', async () => {
       const args: ContextSearchByTagsArgs = {
-        tags: ['important']
+        tags: ['important'],
       };
 
       const result = await contextSearchByTagsHandler(args);
@@ -146,19 +146,19 @@ describe('contextSearchByTagsHandler', () => {
     it('dovrebbe trovare corrispondenze simili con soglia bassa', async () => {
       const args: ContextSearchByTagsArgs = {
         tags: ['impotant'], // Typo intenzionale
-        similarityThreshold: 0.5
+        similarityThreshold: 0.5,
       };
 
       const result = await contextSearchByTagsHandler(args);
       expect(result.success).toBe(true);
       const output = JSON.parse(result.output!);
-      expect(output.items.some(item => item.tags.includes('important'))).toBe(true);
+      expect(output.items.some((item) => item.tags.includes('important'))).toBe(true);
     });
 
     it('non dovrebbe trovare corrispondenze con soglia alta', async () => {
       const args: ContextSearchByTagsArgs = {
         tags: ['impotant'], // Typo intenzionale
-        similarityThreshold: 0.9
+        similarityThreshold: 0.9,
       };
 
       const result = await contextSearchByTagsHandler(args);
@@ -175,7 +175,7 @@ describe('contextSearchByTagsHandler', () => {
       });
 
       const args: ContextSearchByTagsArgs = {
-        tags: ['test']
+        tags: ['test'],
       };
 
       const result = await contextSearchByTagsHandler(args);
@@ -187,7 +187,7 @@ describe('contextSearchByTagsHandler', () => {
       (memoryUtils.getAllMemory as any).mockReturnValue({});
 
       const args: ContextSearchByTagsArgs = {
-        tags: ['test']
+        tags: ['test'],
       };
 
       const result = await contextSearchByTagsHandler(args);
@@ -196,4 +196,4 @@ describe('contextSearchByTagsHandler', () => {
       expect(output.items).toHaveLength(0);
     });
   });
-}); 
+});

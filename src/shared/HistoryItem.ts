@@ -1,20 +1,20 @@
-import { ChatMessage } from "./types/message.js"
-import { ApiConfiguration } from "./types/api.types.js"
-import { AutoApprovalSettings, BrowserSettings, ChatSettings } from "./types/user-settings.types.js"
-import { ChatCompletionContentPartText, ChatCompletionContentPartImage } from "./types/api.types.js"
+import { ChatMessage } from './types/message';
+import { ApiConfiguration } from './types/api.types';
+import { AutoApprovalSettings, BrowserSettings, ChatSettings } from './types/user-settings.types';
+import { ChatCompletionContentPartText, ChatCompletionContentPartImage } from './types/api.types';
 
 // Definisco l'interfaccia con i tipi corretti importati dal file centralizzato
 export interface HistoryItem {
-	id: string
-	task: string
-	timestamp: number
-	apiConfiguration: ApiConfiguration
-	autoApprovalSettings: AutoApprovalSettings
-	browserSettings: BrowserSettings
-	chatSettings: ChatSettings
-	customInstructions?: string
-	tokensIn?: number
-	tokensOut?: number
-	role?: "user" | "assistant"
-	content?: (ChatCompletionContentPartText | ChatCompletionContentPartImage)[]
+  id: string;
+  task: string;
+  timestamp: number;
+  apiConfiguration: ApiConfiguration;
+  autoApprovalSettings: AutoApprovalSettings;
+  browserSettings: BrowserSettings;
+  chatSettings: ChatSettings;
+  customInstructions?: string;
+  tokensIn?: number;
+  tokensOut?: number;
+  role?: 'user' | 'assistant';
+  content?: (ChatCompletionContentPartText | ChatCompletionContentPartImage)[];
 }

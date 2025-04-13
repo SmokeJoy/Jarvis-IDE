@@ -7,58 +7,83 @@ interface DebuggerState {
   history: MitigatorOverlayProps[];
 }
 
+// Interfacce per i tipi di eventi
+interface StrategyChangeEvent {
+  reason: string;
+  strategyName: string;
+  selectedProvider: string;
+  candidates?: string[];
+  conditions?: Array<{ name: string; isActive: boolean }>;
+}
+
+interface ProviderFailureEvent {
+  providerId: string;
+  reason: string;
+  strategyName: string;
+  newProvider: string;
+  candidates?: string[];
+  conditions?: Array<{ name: string; isActive: boolean }>;
+}
+
+interface ProviderSuccessEvent {
+  providerId: string;
+  strategyName: string;
+  candidates?: string[];
+  conditions?: Array<{ name: string; isActive: boolean }>;
+}
+
 export function useDebuggerOverlay(eventBus: LLMEventBus): DebuggerState {
   const [state, setState] = useState<DebuggerState>({
     current: null,
-    history: []
+    history: [],
   });
 
   useEffect(() => {
-    const handleStrategyChange = (event: any) => {
+    const handleStrategyChange = (event: StrategyChangeEvent) => {
       const newState: MitigatorOverlayProps = {
         timestamp: Date.now(),
         fallbackReason: event.reason || 'Strategy changed',
         strategyName: event.strategyName,
         selectedProvider: event.selectedProvider,
         providerCandidates: event.candidates || [],
-        activeConditions: event.conditions || []
+        activeConditions: event.conditions || [],
       };
 
-      setState(prev => ({
+      setState((prev) => ({
         current: newState,
-        history: [...prev.history, newState]
+        history: [...prev.history, newState],
       }));
     };
 
-    const handleProviderFailure = (event: any) => {
+    const handleProviderFailure = (event: ProviderFailureEvent) => {
       const newState: MitigatorOverlayProps = {
         timestamp: Date.now(),
         fallbackReason: `Provider ${event.providerId} failed: ${event.reason}`,
         strategyName: event.strategyName,
         selectedProvider: event.newProvider,
         providerCandidates: event.candidates || [],
-        activeConditions: event.conditions || []
+        activeConditions: event.conditions || [],
       };
 
-      setState(prev => ({
+      setState((prev) => ({
         current: newState,
-        history: [...prev.history, newState]
+        history: [...prev.history, newState],
       }));
     };
 
-    const handleProviderSuccess = (event: any) => {
+    const handleProviderSuccess = (event: ProviderSuccessEvent) => {
       const newState: MitigatorOverlayProps = {
         timestamp: Date.now(),
         fallbackReason: 'Provider restored',
         strategyName: event.strategyName,
         selectedProvider: event.providerId,
         providerCandidates: event.candidates || [],
-        activeConditions: event.conditions || []
+        activeConditions: event.conditions || [],
       };
 
-      setState(prev => ({
+      setState((prev) => ({
         current: newState,
-        history: [...prev.history, newState]
+        history: [...prev.history, newState],
       }));
     };
 
@@ -74,4 +99,4 @@ export function useDebuggerOverlay(eventBus: LLMEventBus): DebuggerState {
   }, [eventBus]);
 
   return state;
-} 
+}

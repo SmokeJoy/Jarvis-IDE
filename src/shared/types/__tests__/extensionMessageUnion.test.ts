@@ -1,8 +1,8 @@
 import { describe, test, expect } from 'vitest';
-import { 
-  isExtensionMessage, 
-  ExtensionMessage, 
-  ExtensionMessageType 
+import {
+  isExtensionMessage,
+  ExtensionMessage,
+  ExtensionMessageType,
 } from '../extensionMessageUnion';
 import { mockModelInfo } from '@/core/webview/__tests__/testUtils';
 
@@ -12,17 +12,18 @@ describe('extensionMessageUnion', () => {
     const createValidMessage = <T extends ExtensionMessageType>(
       type: T,
       payload: any
-    ): ExtensionMessage => ({
-      type,
-      timestamp: Date.now(),
-      payload
-    }) as ExtensionMessage;
+    ): ExtensionMessage =>
+      ({
+        type,
+        timestamp: Date.now(),
+        payload,
+      }) as ExtensionMessage;
 
     test('restituisce true per un messaggio log.update valido', () => {
       const message = createValidMessage('log.update', {
         level: 'info',
         message: 'Test log message',
-        context: { test: true }
+        context: { test: true },
       });
       expect(isExtensionMessage(message, 'log.update')).toBe(true);
     });
@@ -31,7 +32,7 @@ describe('extensionMessageUnion', () => {
       const message = createValidMessage('error', {
         code: 'TEST_ERROR',
         message: 'Test error message',
-        details: { stack: 'Error stack' }
+        details: { stack: 'Error stack' },
       });
       expect(isExtensionMessage(message, 'error')).toBe(true);
     });
@@ -39,7 +40,7 @@ describe('extensionMessageUnion', () => {
     test('restituisce true per un messaggio info valido', () => {
       const message = createValidMessage('info', {
         message: 'Test info message',
-        severity: 'warning'
+        severity: 'warning',
       });
       expect(isExtensionMessage(message, 'info')).toBe(true);
     });
@@ -48,7 +49,7 @@ describe('extensionMessageUnion', () => {
       const message = createValidMessage('model.update', {
         modelId: 'test-model',
         modelInfo: mockModelInfo,
-        status: 'ready'
+        status: 'ready',
       });
       expect(isExtensionMessage(message, 'model.update')).toBe(true);
     });
@@ -56,7 +57,7 @@ describe('extensionMessageUnion', () => {
     test('restituisce false per un tipo di messaggio non corrispondente', () => {
       const message = createValidMessage('error', {
         code: 'TEST_ERROR',
-        message: 'Test error message'
+        message: 'Test error message',
       });
       // Verifichiamo che un messaggio di error non passi come log.update
       expect(isExtensionMessage(message, 'log.update')).toBe(false);
@@ -77,7 +78,7 @@ describe('extensionMessageUnion', () => {
     test('restituisce false per oggetti senza type', () => {
       const invalidMessage = {
         timestamp: Date.now(),
-        payload: { message: 'Test' }
+        payload: { message: 'Test' },
       };
       expect(isExtensionMessage(invalidMessage, 'error')).toBe(false);
     });
@@ -86,7 +87,7 @@ describe('extensionMessageUnion', () => {
       const invalidMessage = {
         type: 123, // type non stringa
         timestamp: Date.now(),
-        payload: { message: 'Test' }
+        payload: { message: 'Test' },
       };
       expect(isExtensionMessage(invalidMessage, 'error')).toBe(false);
     });
@@ -94,7 +95,7 @@ describe('extensionMessageUnion', () => {
     test('restituisce false per oggetti senza payload', () => {
       const invalidMessage = {
         type: 'error',
-        timestamp: Date.now()
+        timestamp: Date.now(),
         // payload mancante
       };
       expect(isExtensionMessage(invalidMessage, 'error')).toBe(false);
@@ -103,7 +104,7 @@ describe('extensionMessageUnion', () => {
     test('restituisce false per oggetti senza timestamp', () => {
       const invalidMessage = {
         type: 'error',
-        payload: { message: 'Test' }
+        payload: { message: 'Test' },
         // timestamp mancante
       };
       expect(isExtensionMessage(invalidMessage, 'error')).toBe(false);
@@ -113,9 +114,9 @@ describe('extensionMessageUnion', () => {
       const invalidMessage = {
         type: 'error',
         timestamp: 'not-a-number',
-        payload: { message: 'Test' }
+        payload: { message: 'Test' },
       };
       expect(isExtensionMessage(invalidMessage, 'error')).toBe(false);
     });
   });
-}); 
+});

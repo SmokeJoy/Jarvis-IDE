@@ -1,11 +1,11 @@
 // Importazioni necessarie
-import * as vscode from "vscode";
-import { ChatSettings, AutoApprovalSettings, BrowserSettings } from "./user-settings.types.js";
-import { ApiConfiguration, OpenAiCompatibleModelInfo, LLMProviderId } from "./api.types.js";
-import { AgentStatus, PriorityLevel, TaskQueueState } from "./mas.types.js";
-import { ChatContent } from "../ChatContent.js";
-import { WebviewMessage } from "./webview.types.js";
-import { Platform } from "../ExtensionMessage.js";
+import * as vscode from 'vscode';
+import { ChatSettings, AutoApprovalSettings, BrowserSettings } from './user-settings.types';
+import { ApiConfiguration, OpenAiCompatibleModelInfo, LLMProviderId } from './api.types';
+import { AgentStatus, PriorityLevel, TaskQueueState } from './mas.types';
+import { ChatContent } from '../ChatContent';
+import { WebviewMessage } from './webview.types';
+import { Platform } from '../ExtensionMessage';
 
 /**
  * Definizione esplicita dell'interfaccia ExtensionState
@@ -45,14 +45,14 @@ export interface ExtensionState {
 export interface IJarvisProvider {
   // Proprietà essenziali
   context: vscode.ExtensionContext;
-  
+
   // Metodi per comunicazione WebView
   postMessageToWebview(message: WebviewMessage<any>): Promise<void>;
-  
+
   // Gestione stato
   getStateToPostToWebview(): Promise<ExtensionState>;
   postStateToWebview(): Promise<void>;
-  
+
   // Gestione file
   readFile(filePath: string): Promise<string>;
   editFile(filePath: string, newContent: string): Promise<void>;
@@ -60,14 +60,14 @@ export interface IJarvisProvider {
   deleteFile(filePath: string): Promise<void>;
   listFiles(dirPath?: string): Promise<string[]>;
   listFilesRecursive(dirPath?: string): Promise<string[]>;
-  
+
   // Gestione API e configurazione
   getAvailableModels(): Promise<ConfigModelInfo[]>;
   switchToProvider(provider: string, modelId?: string): void;
-  
+
   // Gestione history
   updateTaskHistory(item: HistoryItem): Promise<HistoryItem[]>;
-  
+
   // Metodi del ciclo di vita
   dispose(): Promise<void>;
 }
@@ -76,10 +76,10 @@ export interface IJarvisProvider {
  * Stati possibili dell'agente
  */
 export enum AgentMode {
-  INACTIVE = "inactive",
-  ACTIVE = "active",
-  BUSY = "busy",
-  ERROR = "error"
+  INACTIVE = 'inactive',
+  ACTIVE = 'active',
+  BUSY = 'busy',
+  ERROR = 'error',
 }
 
 /**
@@ -134,7 +134,12 @@ export interface JarvisSettings {
 export interface SupervisorAgent {
   getAllAgentsStatus(): AgentStatus[];
   getAgentStatus(agentId: string): AgentStatus | undefined;
-  queueInstruction(agentId: string, instruction: string, style?: string, priority?: PriorityLevel): unknown;
+  queueInstruction(
+    agentId: string,
+    instruction: string,
+    style?: string,
+    priority?: PriorityLevel
+  ): unknown;
   sendMessage(message: unknown): void;
   on(event: string, listener: (data: unknown) => void): void;
 }
@@ -183,4 +188,4 @@ export type GlobalStateKey = string;
 /**
  * Tipo per le chiavi segrete
  */
-export type SecretKey = string; 
+export type SecretKey = string;

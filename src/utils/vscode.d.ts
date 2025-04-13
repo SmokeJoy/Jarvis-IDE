@@ -1,7 +1,7 @@
 declare const acquireVsCodeApi: () => {
-    postMessage: (message: any) => void;
-    getState: () => any;
-    setState: (state: any) => void;
+  postMessage: (message: any) => void;
+  getState: () => any;
+  setState: (state: any) => void;
 };
 declare let vscode: ReturnType<typeof acquireVsCodeApi>;
 export declare const postMessage: (type: string, value: any) => void;

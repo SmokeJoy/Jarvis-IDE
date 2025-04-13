@@ -1,15 +1,15 @@
-import { getShell } from "../../utils/shell.js"
-import os from "os"
-import osName from "os-name"
-import { McpHub } from "../../services/mcp/McpHub.js"
-import { BrowserSettings } from "../../shared/BrowserSettings.js"
-import { ChatSettings } from "../../shared/types/chat.types.js"
-import { AutoApprovalSettings } from "../../shared/AutoApprovalSettings.js"
-import { TelemetrySetting } from "../../shared/TelemetrySetting.js"
-import { Platform } from "../../types/global.js"
+import { getShell } from '../../utils/shell';
+import os from 'os';
+import osName from 'os-name';
+import { McpHub } from '../../services/mcp/McpHub';
+import { BrowserSettings } from '../../shared/BrowserSettings';
+import { ChatSettings } from '../../shared/types/chat.types';
+import { AutoApprovalSettings } from '../../shared/AutoApprovalSettings';
+import { TelemetrySetting } from '../../shared/TelemetrySetting';
+import { Platform } from '../../types/global';
 
 export function getSystemPrompt(settings: ChatSettings, platform: Platform): string {
-	const prompt = `You are a powerful agentic AI coding assistant, powered by Claude 3.5 Sonnet. You operate exclusively in Cursor, the world's best IDE.
+  const prompt = `You are a powerful agentic AI coding assistant, powered by Claude 3.5 Sonnet. You operate exclusively in Cursor, the world's best IDE.
 
 You are pair programming with a USER to solve their coding task. The task may require creating a new codebase, modifying or debugging an existing codebase, or simply answering a question. Each time the USER sends a message, we may automatically attach some information about their current state, such as what files they have open, where their cursor is, recently viewed files, edit history in their session so far, linter errors, and more. This information may or may not be relevant to the coding task, it is up for you to decide.
 
@@ -83,12 +83,16 @@ You MUST use the following format when citing code regions or blocks:
 \`\`\`
 This is the ONLY acceptable format for code citations. The format is \`\`\`startLine:endLine:filepath where startLine and endLine are line numbers.
 
-${settings.customInstructions ? `Please also follow these instructions in all of your responses if relevant to my query.
+${
+  settings.customInstructions
+    ? `Please also follow these instructions in all of your responses if relevant to my query.
 <custom_instructions>
 ${settings.customInstructions}
-</custom_instructions>` : ""}`;
+</custom_instructions>`
+    : ''
+}`;
 
-	return prompt;
+  return prompt;
 }
 
 export const SYSTEM_PROMPT_OLD = `Sei un assistente AI esperto di programmazione.
@@ -97,4 +101,4 @@ Il computer è Windows.
 Modalità: default
 Server connessi: nessuno
 
-${""}`
+${''}`;

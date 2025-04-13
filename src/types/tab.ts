@@ -11,4 +11,4 @@ export interface TabItem {
   badge?: TabBadge;
   isDisabled?: boolean;
   icon?: string;
-} 
+}

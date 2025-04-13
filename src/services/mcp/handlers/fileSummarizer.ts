@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { HandlerFunction } from '../types.js';
+import { HandlerFunction } from '../types';
 import { readFile } from 'fs/promises';
 import { extname } from 'path';
 
@@ -31,12 +31,16 @@ function getMimeType(extension: string): string {
     '.md': 'text/markdown',
     '.html': 'text/html',
     '.css': 'text/css',
-    '.xml': 'application/xml'
+    '.xml': 'application/xml',
   };
   return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
 }
 
-async function summarizeFile(filePath: string, includeMetadata: boolean = true, maxPreviewLength: number = 1000): Promise<FileSummary> {
+async function summarizeFile(
+  filePath: string,
+  includeMetadata: boolean = true,
+  maxPreviewLength: number = 1000
+): Promise<FileSummary> {
   try {
     const stats = await vscode.workspace.fs.stat(vscode.Uri.file(filePath));
     const extension = extname(filePath);
@@ -46,14 +50,14 @@ async function summarizeFile(filePath: string, includeMetadata: boolean = true, 
       path: filePath,
       name,
       extension,
-      size: stats.size
+      size: stats.size,
     };
 
     if (includeMetadata) {
       summary.metadata = {
         lastModified: new Date(stats.mtime),
         createdAt: new Date(stats.ctime),
-        mimeType: getMimeType(extension)
+        mimeType: getMimeType(extension),
       };
     }
 
@@ -75,12 +79,12 @@ export const fileSummarizer: HandlerFunction = async (args: FileSummarizerArgs) 
     const summary = await summarizeFile(filePath, includeMetadata, maxPreviewLength);
     return {
       success: true,
-      data: summary
+      data: summary,
     };
   } catch (error) {
     return {
       success: false,
-      error: `Failed to summarize file: ${error.message}`
+      error: `Failed to summarize file: ${error.message}`,
     };
   }
 };

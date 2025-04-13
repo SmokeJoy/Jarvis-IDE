@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
-import { logger } from '../utils/logger.js';
-import { JarvisProvider } from '../core/webview/JarvisProvider.js';
-import { JarvisAgent } from '../agent/JarvisAgent.js';
-import { Logger } from '../utils/Logger.js';
-import { createMasSystem, SupervisorAgent } from '../core/mas.js';
+import { logger } from '../utils/logger';
+import { JarvisProvider } from '../core/webview/JarvisProvider';
+import { JarvisAgent } from '../agent/JarvisAgent';
+import { Logger } from '../utils/Logger';
+import { createMasSystem, SupervisorAgent } from '../core/mas';
 import { v4 as uuidv4 } from 'uuid';
 
 // Logger per i comandi degli agenti
@@ -19,24 +19,24 @@ function initializeMasSystem(): SupervisorAgent {
   if (!masSystem) {
     agentLogger.info('Inizializzazione del sistema MAS');
     masSystem = createMasSystem();
-    
+
     // Configura gli ascoltatori di eventi
     masSystem.on('instruction-queued', (data) => {
       agentLogger.info(`Istruzione in coda per ${data.agentId}: ${data.instruction}`);
       vscode.window.setStatusBarMessage(`Istruzione inviata a ${data.agentId}`, 3000);
     });
-    
+
     masSystem.on('instruction-completed', (data) => {
       agentLogger.info(`Istruzione completata da ${data.agentId}`);
       vscode.window.setStatusBarMessage(`Operazione completata da ${data.agentId}`, 3000);
     });
-    
+
     masSystem.on('instruction-failed', (data) => {
       agentLogger.error(`Errore nell'esecuzione dell'istruzione per ${data.agentId}`, data.error);
       vscode.window.showErrorMessage(`Errore durante l'esecuzione: ${data.error.message}`);
     });
   }
-  
+
   return masSystem;
 }
 
@@ -49,10 +49,10 @@ export function registerAgentCommands(
   context: vscode.ExtensionContext,
   provider?: JarvisProvider
 ): vscode.Disposable[] {
-  agentLogger.info('Registrazione comandi dell\'agente Jarvis');
-  
+  agentLogger.info("Registrazione comandi dell'agente Jarvis");
+
   const disposables: vscode.Disposable[] = [];
-  
+
   // Comando per eseguire l'agente autonomo
   const runAgentCommand = vscode.commands.registerCommand('jarvis.runAgent', async () => {
     try {
@@ -65,7 +65,7 @@ export function registerAgentCommands(
       vscode.window.showErrorMessage(`Errore: ${error}`);
     }
   });
-  
+
   // Comando per analizzare il file corrente
   const analyzeFileCommand = vscode.commands.registerCommand('jarvis.analyzeFile', async () => {
     try {
@@ -91,35 +91,34 @@ export function registerAgentCommands(
       vscode.window.showErrorMessage(`Errore: ${error}`);
     }
   });
-  
+
   // Comando per inviare un'istruzione al CoderAgent
   const sendCoderInstructionCommand = vscode.commands.registerCommand(
-    'jarvis-ide.sendCoderInstruction', 
+    'jarvis-ide.sendCoderInstruction',
     async () => {
       try {
         const masSystem = initializeMasSystem();
-        
+
         // Richiedi l'istruzione all'utente
         const instruction = await vscode.window.showInputBox({
-          prompt: 'Inserisci l\'istruzione per il CoderAgent',
-          placeHolder: 'Es. Crea una classe per...'
+          prompt: "Inserisci l'istruzione per il CoderAgent",
+          placeHolder: 'Es. Crea una classe per...',
         });
-        
+
         if (!instruction) {
           return; // Operazione annullata
         }
-        
+
         // Invia l'istruzione
         await masSystem.queueInstruction('coder-agent', instruction);
         agentLogger.info(`Istruzione inviata al CoderAgent: ${instruction}`);
-        
       } catch (error) {
-        agentLogger.error('Errore nell\'invio dell\'istruzione', error as Error);
+        agentLogger.error("Errore nell'invio dell'istruzione", error as Error);
         vscode.window.showErrorMessage(`Errore: ${(error as Error).message}`);
       }
     }
   );
-  
+
   // Comando per mostrare lo stato degli agenti
   const showAgentStatusCommand = vscode.commands.registerCommand(
     'jarvis-ide.showAgentStatus',
@@ -127,26 +126,25 @@ export function registerAgentCommands(
       try {
         const masSystem = initializeMasSystem();
         const statuses = masSystem.getAllAgentsStatus();
-        
+
         // Formatta e mostra lo stato
-        const statusMessages = statuses.map(status => {
+        const statusMessages = statuses.map((status) => {
           return `${status.name} (${status.id}): ${status.isActive ? 'attivo' : 'inattivo'}, modalità: ${status.mode}${status.currentTask ? `, task corrente: ${status.currentTask}` : ''}`;
         });
-        
+
         vscode.window.showInformationMessage('Stato del sistema MAS', {
           modal: true,
-          detail: statusMessages.join('\n')
+          detail: statusMessages.join('\n'),
         });
-        
+
         agentLogger.info('Stato del sistema MAS visualizzato');
-        
       } catch (error) {
         agentLogger.error('Errore nella visualizzazione dello stato', error as Error);
         vscode.window.showErrorMessage(`Errore: ${(error as Error).message}`);
       }
     }
   );
-  
+
   // Comando per attivare/disattivare il CoderAgent
   const toggleCoderAgentCommand = vscode.commands.registerCommand(
     'jarvis-ide.toggleCoderAgent',
@@ -154,15 +152,16 @@ export function registerAgentCommands(
       try {
         const masSystem = initializeMasSystem();
         const status = masSystem.getAgentStatus('coder-agent');
-        
+
         if (status.isActive) {
           // Ottieni lo stato corrente
           const confirmDisable = await vscode.window.showWarningMessage(
             'Disattivare il CoderAgent?',
             { modal: true },
-            'Sì', 'No'
+            'Sì',
+            'No'
           );
-          
+
           if (confirmDisable === 'Sì') {
             // Invia un messaggio per disattivare l'agente
             masSystem.sendMessage({
@@ -171,9 +170,9 @@ export function registerAgentCommands(
               to: 'coder-agent',
               type: 'notification',
               timestamp: new Date(),
-              payload: 'deactivate'
+              payload: 'deactivate',
             });
-            
+
             vscode.window.setStatusBarMessage('CoderAgent disattivato', 3000);
             agentLogger.info('CoderAgent disattivato');
           }
@@ -185,21 +184,26 @@ export function registerAgentCommands(
             to: 'coder-agent',
             type: 'notification',
             timestamp: new Date(),
-            payload: 'activate'
+            payload: 'activate',
           });
-          
+
           vscode.window.setStatusBarMessage('CoderAgent attivato', 3000);
           agentLogger.info('CoderAgent attivato');
         }
-        
       } catch (error) {
         agentLogger.error('Errore nel toggle del CoderAgent', error as Error);
         vscode.window.showErrorMessage(`Errore: ${(error as Error).message}`);
       }
     }
   );
-  
-  disposables.push(runAgentCommand, analyzeFileCommand, sendCoderInstructionCommand, showAgentStatusCommand, toggleCoderAgentCommand);
+
+  disposables.push(
+    runAgentCommand,
+    analyzeFileCommand,
+    sendCoderInstructionCommand,
+    showAgentStatusCommand,
+    toggleCoderAgentCommand
+  );
   return disposables;
 }
 
@@ -207,8 +211,9 @@ export function registerAgentCommands(
  * Genera un UUID v4
  */
 function uuidv4(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0,
+      v = c == 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
-} 
+}

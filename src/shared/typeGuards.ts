@@ -2,8 +2,8 @@
  * Utilità per la validazione e il casting di tipi sicuro
  */
 
-import { WebviewMessage } from './WebviewMessage.js';
-import { ExtensionMessage } from './ExtensionMessage.js';
+import { WebviewMessage } from './WebviewMessage';
+import { ExtensionMessage } from './ExtensionMessage';
 
 /**
  * Verifica se un oggetto è un messaggio WebView valido
@@ -14,21 +14,29 @@ export function isWebviewMessage(obj: unknown): obj is WebviewMessage {
   if (!obj || typeof obj !== 'object') {
     return false;
   }
-  
+
   const candidate = obj as Record<string, unknown>;
   // Verifica che ci sia un campo 'type' di tipo stringa
   if (typeof candidate.type !== 'string') {
     return false;
   }
-  
+
   // Elenco di tutti i tipi validi di messaggi WebView
   const validTypes: string[] = [
-    'getSettings', 'saveSettings', 'chatRequest', 
-    'cancelRequest', 'clearChat', 'resetApiKey',
-    'exportChat', 'executeCommand', 'selectFiles',
-    'loadContext', 'modelSwitch', 'progressUpdate'
+    'getSettings',
+    'saveSettings',
+    'chatRequest',
+    'cancelRequest',
+    'clearChat',
+    'resetApiKey',
+    'exportChat',
+    'executeCommand',
+    'selectFiles',
+    'loadContext',
+    'modelSwitch',
+    'progressUpdate',
   ];
-  
+
   return validTypes.includes(candidate.type);
 }
 
@@ -41,21 +49,29 @@ export function isExtensionMessage(obj: unknown): obj is ExtensionMessage {
   if (!obj || typeof obj !== 'object') {
     return false;
   }
-  
+
   const candidate = obj as Record<string, unknown>;
   // Verifica che ci sia un campo 'type' di tipo stringa
   if (typeof candidate.type !== 'string') {
     return false;
   }
-  
+
   // Elenco di tutti i tipi validi di messaggi di estensione
   const validTypes: string[] = [
-    'response', 'requestProgress', 'settings', 
-    'error', 'telemetry', 'modelList',
-    'contextFiles', 'chatHistory', 'apiKeyReset',
-    'exportResult', 'commandResult', 'notification'
+    'response',
+    'requestProgress',
+    'settings',
+    'error',
+    'telemetry',
+    'modelList',
+    'contextFiles',
+    'chatHistory',
+    'apiKeyReset',
+    'exportResult',
+    'commandResult',
+    'notification',
   ];
-  
+
   return validTypes.includes(candidate.type);
 }
 
@@ -81,7 +97,7 @@ export function safeCastAs<T>(obj: unknown): T {
  * @returns Una funzione che valida input e ritorna il tipo o lancia errore
  */
 export function strictGuard<T>(
-  unionGuard: (input: any) => boolean, 
+  unionGuard: (input: any) => boolean,
   name: string
 ): (input: unknown) => T {
   return (input: unknown): T => {
@@ -101,4 +117,4 @@ export const requireWebviewMessage = strictGuard<WebviewMessage>(
 export const requireExtensionMessage = strictGuard<ExtensionMessage>(
   isExtensionMessage,
   'ExtensionMessage'
-); 
+);

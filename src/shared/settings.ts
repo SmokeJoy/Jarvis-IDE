@@ -1,10 +1,10 @@
-import { ApiConfiguration } from "./types/api.types.js"
-import { TelemetrySetting } from './types.js';
+import { ApiConfiguration } from './types/api.types';
+import { TelemetrySetting } from './types';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { LLMProviderId } from '../types/global.js';
-import { Settings, AvailableModel } from './types/settings.types.js';
+import { LLMProviderId } from '../types/global';
+import { Settings, AvailableModel } from './types/settings.types';
 
 export class SettingsManager {
   private static instance: SettingsManager;
@@ -31,11 +31,7 @@ export class SettingsManager {
         fs.mkdirSync(configDir, { recursive: true });
       }
 
-      await fs.promises.writeFile(
-        this.settingsPath,
-        JSON.stringify(settings, null, 2),
-        'utf-8'
-      );
+      await fs.promises.writeFile(this.settingsPath, JSON.stringify(settings, null, 2), 'utf-8');
     } catch (error) {
       console.error('Error saving settings:', error);
       throw error;
@@ -72,10 +68,20 @@ export class SettingsManager {
       provider: 'openai',
       model: '',
       availableModels: [
-        { label: "DeepSeek Coder (Local)", value: "deepseek-coder", provider: "local", coder: true },
-        { label: "OpenRouter Mistral", value: "openrouter-mistral", provider: "openrouter", coder: false },
-        { label: "Gemini 1.5", value: "gemini", provider: "google", coder: false }
-      ]
+        {
+          label: 'DeepSeek Coder (Local)',
+          value: 'deepseek-coder',
+          provider: 'local',
+          coder: true,
+        },
+        {
+          label: 'OpenRouter Mistral',
+          value: 'openrouter-mistral',
+          provider: 'openrouter',
+          coder: false,
+        },
+        { label: 'Gemini 1.5', value: 'gemini', provider: 'google', coder: false },
+      ],
     };
 
     await this.saveSettings(defaultSettings);
@@ -84,7 +90,7 @@ export class SettingsManager {
 
   public async addModel(model: AvailableModel): Promise<void> {
     try {
-      const settings = await this.loadSettings() || await this.resetSettings();
+      const settings = (await this.loadSettings()) || (await this.resetSettings());
       const updatedModels = [...(settings.availableModels || []), model];
       settings.availableModels = updatedModels;
       await this.saveSettings(settings);
@@ -101,11 +107,7 @@ export class SettingsManager {
         throw new Error('Nessuna impostazione trovata da esportare');
       }
 
-      await fs.promises.writeFile(
-        targetPath,
-        JSON.stringify(settings, null, 2),
-        'utf-8'
-      );
+      await fs.promises.writeFile(targetPath, JSON.stringify(settings, null, 2), 'utf-8');
     } catch (error) {
       console.error('Error exporting settings:', error);
       throw error;
@@ -140,7 +142,10 @@ export class SettingsManager {
       if (settings && settings.systemPromptPath) {
         // Se è un percorso relativo, lo rende assoluto
         if (!path.isAbsolute(settings.systemPromptPath)) {
-          return path.join(vscode.workspace.workspaceFolders?.[0].uri.fsPath || '', settings.systemPromptPath);
+          return path.join(
+            vscode.workspace.workspaceFolders?.[0].uri.fsPath || '',
+            settings.systemPromptPath
+          );
         }
         return settings.systemPromptPath;
       }
@@ -153,7 +158,7 @@ export class SettingsManager {
 
   public async setSystemPromptPath(customPath: string): Promise<void> {
     try {
-      const settings = await this.loadSettings() || await this.resetSettings();
+      const settings = (await this.loadSettings()) || (await this.resetSettings());
       settings.systemPromptPath = customPath;
       await this.saveSettings(settings);
     } catch (error) {
@@ -165,7 +170,7 @@ export class SettingsManager {
   public async openSystemPromptFile(): Promise<void> {
     try {
       const systemPromptPath = await this.getSystemPromptPath();
-      
+
       // Verifica se il file esiste, altrimenti lo crea con contenuto vuoto
       if (!fs.existsSync(systemPromptPath)) {
         const dirPath = path.dirname(systemPromptPath);
@@ -174,7 +179,7 @@ export class SettingsManager {
         }
         await fs.promises.writeFile(systemPromptPath, '', 'utf-8');
       }
-      
+
       // Apre il file in VS Code
       const document = await vscode.workspace.openTextDocument(systemPromptPath);
       await vscode.window.showTextDocument(document);
@@ -183,7 +188,7 @@ export class SettingsManager {
       vscode.window.showErrorMessage(`Errore nell'apertura del file: ${error}`);
     }
   }
-  
+
   public async getSystemPrompt(): Promise<string> {
     try {
       const systemPromptPath = await this.getSystemPromptPath();
@@ -213,7 +218,7 @@ export class SettingsManager {
 
   public async updateSetting<K extends keyof Settings>(key: K, value: Settings[K]): Promise<void> {
     try {
-      const settings = await this.loadSettings() || await this.resetSettings();
+      const settings = (await this.loadSettings()) || (await this.resetSettings());
       settings[key] = value;
       await this.saveSettings(settings);
     } catch (error) {
@@ -248,4 +253,4 @@ export class SettingsManager {
       typeof settings.model === 'string'
     );
   }
-} 
+}

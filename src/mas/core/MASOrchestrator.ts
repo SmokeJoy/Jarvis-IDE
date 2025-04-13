@@ -50,14 +50,14 @@ export class MASOrchestrator {
     this.maxConcurrentAgents = options.maxConcurrentAgents || 1;
     this.startingAgent = options.startingAgent || 'planner';
     this.parallelExecution = options.parallelExecution || false;
-    
+
     // Inizializza i provider e il gestore di fallback
     this.initializeProviders(options.providers);
     this.fallbackManager = new LLMFallbackManager({
       providers: this.providers,
       preferredProvider: options.preferredProvider,
       rememberSuccessful: true,
-      maxRetries: 1
+      maxRetries: 1,
     });
   }
 
@@ -69,10 +69,7 @@ export class MASOrchestrator {
   /**
    * Esegue una strategia di agente utilizzando il provider LLM appropriato
    */
-  async executeAgentStrategy(
-    message: WebviewMessageUnion,
-    schemaMap: ZodSchemaMap
-  ): Promise<any> {
+  async executeAgentStrategy(message: WebviewMessageUnion, schemaMap: ZodSchemaMap): Promise<any> {
     try {
       // Validazione del messaggio
       if (!message.type || !schemaMap[message.type]) {
@@ -86,16 +83,16 @@ export class MASOrchestrator {
         return result;
       });
     } catch (error) {
-      console.error('Errore durante l\'esecuzione della strategia:', (error as Error).message);
-      
+      console.error("Errore durante l'esecuzione della strategia:", (error as Error).message);
+
       // Registra l'interazione fallita nella memoria
       await this.memoryManager.append(`agent-interactions-${message.agentId}`, {
         agentId: message.agentId,
         input: message.payload,
         error: error,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
-      
+
       throw error;
     }
   }
@@ -107,31 +104,31 @@ export class MASOrchestrator {
    */
   public async run(options: RunOptions): Promise<any> {
     const { query, conversationId, maxTurns = 10, fallbackAgent } = options;
-    
+
     // Inizializza il contesto
     let context = {
       query,
       history: [],
       memory: {},
-      performance: {}
+      performance: {},
     };
-    
+
     // Salva query e contesto iniziale in memoria
     await this.memoryManager.set(conversationId, {
       query,
-      ...context
+      ...context,
     });
-    
+
     // Recupera l'agente iniziale
     let currentAgent = await this.agentManager.getAgent(this.startingAgent);
     if (!currentAgent) {
       throw new Error(`Agente iniziale "${this.startingAgent}" non trovato`);
     }
-    
+
     // Esegui la catena di agenti
     let turns = 0;
     const visited = new Set<string>();
-    
+
     while (currentAgent && turns < maxTurns) {
       try {
         // Aggiorna il contesto con la memoria condivisa
@@ -139,19 +136,19 @@ export class MASOrchestrator {
         if (storedMemory) {
           context.memory = {
             ...context.memory,
-            ...storedMemory
+            ...storedMemory,
           };
         }
-        
+
         // Esegue l'agente
         const result = await currentAgent.execute(context);
-        
+
         // Aggiorna il contesto con il risultato
         context = result.context;
-        
+
         // Aggiorna la memoria
         await this.memoryManager.set(conversationId, context);
-        
+
         // Controlla se dobbiamo proseguire con un altro agente
         if (result.nextAgent) {
           // Controlla se stiamo entrando in un ciclo
@@ -159,14 +156,14 @@ export class MASOrchestrator {
             // Rileva ciclo
             await this.memoryManager.set(conversationId, {
               ...context,
-              cycleDetected: true
+              cycleDetected: true,
             });
             break;
           }
-          
+
           // Marca l'agente corrente come visitato
           visited.add(currentAgent.role);
-          
+
           // Passa all'agente successivo
           currentAgent = await this.agentManager.getAgent(result.nextAgent);
           if (!currentAgent) {
@@ -176,22 +173,22 @@ export class MASOrchestrator {
           // Fine della catena
           break;
         }
-        
+
         turns++;
       } catch (error) {
         // Gestisci l'errore
         console.error(`Errore nell'esecuzione dell'agente "${currentAgent.role}": ${error}`);
-        
+
         // Registra l'errore in memoria
         await this.memoryManager.set(conversationId, {
           ...context,
           error: {
             agent: currentAgent.role,
             message: (error as Error).message,
-            stack: (error as Error).stack
-          }
+            stack: (error as Error).stack,
+          },
         });
-        
+
         // Se c'è un agente di fallback, passa a quello
         if (fallbackAgent) {
           currentAgent = await this.agentManager.getAgent(fallbackAgent);
@@ -204,7 +201,7 @@ export class MASOrchestrator {
         }
       }
     }
-    
+
     // Ritorna il contesto finale
     return context;
   }
@@ -219,71 +216,71 @@ export class MASOrchestrator {
     if (!this.parallelExecution) {
       throw new Error('Esecuzione parallela non abilitata');
     }
-    
+
     // Limita il numero di task concorrenti
     const results: Record<string, any> = {};
     const batches: ParallelTask[][] = [];
-    
+
     // Suddividi i task in batch in base a maxConcurrentAgents
     for (let i = 0; i < tasks.length; i += this.maxConcurrentAgents) {
       batches.push(tasks.slice(i, i + this.maxConcurrentAgents));
     }
-    
+
     // Esegui i batch in sequenza
     for (const batch of batches) {
       // Esegui i task nel batch in parallelo
-      const batchPromises = batch.map(async task => {
+      const batchPromises = batch.map(async (task) => {
         try {
           // Ottieni l'agente
           const agent = await this.agentManager.getAgent(task.agentRole);
           if (!agent) {
             throw new Error(`Agente "${task.agentRole}" non trovato`);
           }
-          
+
           // Esegui l'agente
           const result = await agent.execute({
             query: task.input.query,
             history: [],
-            memory: {}
+            memory: {},
           });
-          
+
           // Salva il risultato in memoria
           await this.memoryManager.set(task.taskId, result.context);
-          
+
           // Restituisci il risultato
           return {
             taskId: task.taskId,
-            result: result.context
+            result: result.context,
           };
         } catch (error) {
           // Gestisci l'errore
           console.error(`Errore nell'esecuzione del task "${task.taskId}": ${error}`);
-          
+
           // Salva l'errore in memoria
           await this.memoryManager.set(task.taskId, {
             error: {
               message: (error as Error).message,
-              stack: (error as Error).stack
-            }
+              stack: (error as Error).stack,
+            },
           });
-          
+
           // Restituisci l'errore
           return {
             taskId: task.taskId,
-            error
+            error,
           };
         }
       });
-      
+
       // Attendi il completamento di tutti i task nel batch
       const batchResults = await Promise.all(batchPromises);
-      
+
       // Aggiorna i risultati
       for (const { taskId, result, error } of batchResults) {
         results[taskId] = error || result;
       }
     }
-    
+
     return results;
   }
 }

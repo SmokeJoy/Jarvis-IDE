@@ -1,37 +1,36 @@
-import { z } from 'zod';
+import { WebviewMessage } from '../../shared/types/webview.types';
 
 export enum FirebaseAuthMessageType {
-  SIGN_IN_WITH_TOKEN = 'FIREBASE_AUTH/SIGN_IN_WITH_TOKEN',
-  LOGOUT = 'FIREBASE_AUTH/LOGOUT',
-  AUTH_STATE_CHANGED = 'FIREBASE_AUTH/AUTH_STATE_CHANGED'
+  AUTH_STATE_CHANGED = 'authStateChanged',
+  SIGN_IN_WITH_TOKEN = 'signInWithToken',
+  LOGOUT = 'logout',
 }
 
-export const SignInWithTokenPayload = z.object({
-  token: z.string().min(1)
-});
+export interface AuthStateChangedPayload {
+  userId?: string;
+  email?: string;
+  token?: string;
+}
 
-export const AuthStateChangedPayload = z.object({
-  userId: z.string().optional(),
-  email: z.string().email().optional(),
-  token: z.string().optional()
-}).nullable();
+export interface SignInWithTokenPayload {
+  token: string;
+}
 
-export const FirebaseAuthMessageSchema = z.discriminatedUnion('type', [
-  z.object({
-    type: z.literal(FirebaseAuthMessageType.SIGN_IN_WITH_TOKEN),
-    timestamp: z.number(),
-    payload: SignInWithTokenPayload
-  }),
-  z.object({
-    type: z.literal(FirebaseAuthMessageType.LOGOUT),
-    timestamp: z.number(),
-    payload: z.null()
-  }),
-  z.object({
-    type: z.literal(FirebaseAuthMessageType.AUTH_STATE_CHANGED),
-    timestamp: z.number(),
-    payload: AuthStateChangedPayload
-  })
-]);
+export interface AuthStateChangedMessage
+  extends WebviewMessage<FirebaseAuthMessageType.AUTH_STATE_CHANGED> {
+  type: FirebaseAuthMessageType.AUTH_STATE_CHANGED;
+  payload: AuthStateChangedPayload | null;
+}
 
-export type FirebaseAuthMessageUnion = z.infer<typeof FirebaseAuthMessageSchema>;
+export interface SignInWithTokenMessage
+  extends WebviewMessage<FirebaseAuthMessageType.SIGN_IN_WITH_TOKEN> {
+  type: FirebaseAuthMessageType.SIGN_IN_WITH_TOKEN;
+  payload: SignInWithTokenPayload;
+}
+
+export interface LogoutMessage extends WebviewMessage<FirebaseAuthMessageType.LOGOUT> {
+  type: FirebaseAuthMessageType.LOGOUT;
+  payload: null;
+}
+
+export type FirebaseAuthMessage = AuthStateChangedMessage | SignInWithTokenMessage | LogoutMessage;

@@ -11,11 +11,11 @@ export enum MasMessageType {
   // Richieste al backend
   GET_AGENTS_STATUS = 'getAgentsStatus',
   TOGGLE_AGENT_ACTIVE = 'toggleAgentActive',
-  
+
   // Nuovo tipo per M9-S4
   AGENT_TOGGLE_ENABLE = 'agentToggleEnable',
-  
+
   // Risposte dal backend
   AGENTS_STATUS_UPDATE = 'agentsStatusUpdate',
-  AGENT_STATE_UPDATED = 'agentStateUpdated'
-} 
+  AGENT_STATE_UPDATED = 'agentStateUpdated',
+}

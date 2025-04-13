@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 
-import { 
+import {
   WebviewMessage,
   WebviewMessageType,
   SendPromptMessage,
@@ -13,8 +13,8 @@ import {
   ResponseMessage,
   StateMessage,
   InstructionMessage,
-  InstructionCompletedMessage
-} from './webview.types.js';
+  InstructionCompletedMessage,
+} from './webview.types';
 
 import { ZodSchemaMap } from '../../utils/validation';
 
@@ -23,14 +23,19 @@ import { ZodSchemaMap } from '../../utils/validation';
  * Questo tipo permette al compilatore TypeScript di distinguere
  * automaticamente il tipo specifico basandosi sul campo 'type'.
  */
-export type WebviewMessageUnion =
+export type WebviewMessageUnion = (
   | SendPromptMessage
   | ActionMessage
   | ErrorMessage
   | ResponseMessage
   | StateMessage
   | InstructionMessage
-  | InstructionCompletedMessage;
+  | InstructionCompletedMessage
+) & {
+  agentId: string;
+  payload: unknown;
+  type: string;
+};
 
 /**
  * Type guard per verificare se un messaggio è un SendPromptMessage
@@ -47,7 +52,7 @@ export function isSendPromptMessage(message: WebviewMessage<any>): message is Se
  * @returns True se il messaggio è un ActionMessage
  */
 export function isActionMessage(message: WebviewMessage<any>): message is ActionMessage {
-  return message?.type === "action";
+  return message?.type === 'action';
 }
 
 /**
@@ -56,7 +61,7 @@ export function isActionMessage(message: WebviewMessage<any>): message is Action
  * @returns True se il messaggio è un ErrorMessage
  */
 export function isErrorMessage(message: WebviewMessage<any>): message is ErrorMessage {
-  return message?.type === "error";
+  return message?.type === 'error';
 }
 
 /**
@@ -65,7 +70,7 @@ export function isErrorMessage(message: WebviewMessage<any>): message is ErrorMe
  * @returns True se il messaggio è un ResponseMessage
  */
 export function isResponseMessage(message: WebviewMessage<any>): message is ResponseMessage {
-  return message?.type === "response";
+  return message?.type === 'response';
 }
 
 /**
@@ -74,7 +79,7 @@ export function isResponseMessage(message: WebviewMessage<any>): message is Resp
  * @returns True se il messaggio è un StateMessage
  */
 export function isStateMessage(message: WebviewMessage<any>): message is StateMessage {
-  return message?.type === "state";
+  return message?.type === 'state';
 }
 
 /**
@@ -83,9 +88,11 @@ export function isStateMessage(message: WebviewMessage<any>): message is StateMe
  * @returns True se il messaggio è un InstructionMessage
  */
 export function isInstructionMessage(message: WebviewMessage<any>): message is InstructionMessage {
-  return message?.type === WebviewMessageType.INSTRUCTION_RECEIVED || 
-         message?.type === WebviewMessageType.INSTRUCTION_COMPLETED || 
-         message?.type === WebviewMessageType.INSTRUCTION_FAILED;
+  return (
+    message?.type === WebviewMessageType.INSTRUCTION_RECEIVED ||
+    message?.type === WebviewMessageType.INSTRUCTION_COMPLETED ||
+    message?.type === WebviewMessageType.INSTRUCTION_FAILED
+  );
 }
 
 /**
@@ -93,8 +100,10 @@ export function isInstructionMessage(message: WebviewMessage<any>): message is I
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un InstructionCompletedMessage
  */
-export function isInstructionCompletedMessage(message: WebviewMessage<any>): message is InstructionCompletedMessage {
-  return message?.type === "instructionCompleted";
+export function isInstructionCompletedMessage(
+  message: WebviewMessage<any>
+): message is InstructionCompletedMessage {
+  return message?.type === 'instructionCompleted';
 }
 
 /**
@@ -116,17 +125,11 @@ export function safeCastAs<T>(value: unknown, validator?: (val: any) => boolean)
  */
 export const validators = {
   isSendPrompt: (d: any): d is SendPromptMessage => d?.type === WebviewMessageType.SEND_PROMPT,
-  isAction: (d: any): d is ActionMessage => d?.type === "action",
-  isError: (d: any): d is ErrorMessage => d?.type === "error",
-  isResponse: (d: any): d is ResponseMessage => d?.type === "response",
-  isState: (d: any): d is StateMessage => d?.type === "state"
+  isAction: (d: any): d is ActionMessage => d?.type === 'action',
+  isError: (d: any): d is ErrorMessage => d?.type === 'error',
+  isResponse: (d: any): d is ResponseMessage => d?.type === 'response',
+  isState: (d: any): d is StateMessage => d?.type === 'state',
 };
-
-export interface WebviewMessageUnion {
-  agentId: string;
-  payload: unknown;
-  type: string;
-}
 
 /**
  * Verifica se un messaggio è un messaggio valido per la webview
@@ -138,25 +141,104 @@ export function isWebviewMessage(message: unknown, schema: ZodSchemaMap): boolea
   if (!message || typeof message !== 'object') {
     return false;
   }
-  
+
   const msg = message as Record<string, unknown>;
-  
+
   if (!msg.type || typeof msg.type !== 'string') {
     return false;
   }
-  
+
   if (!msg.agentId || typeof msg.agentId !== 'string') {
     return false;
   }
-  
+
   if (!msg.payload) {
     return false;
   }
-  
+
   const schemaForType = schema[msg.type as string];
   if (!schemaForType) {
     return false;
   }
-  
+
   return true;
-} 
+}
+
+export interface WebviewReadyMessage {
+  type: WebviewMessageType.READY;
+  timestamp?: number;
+  payload?: Record<string, unknown>;
+}
+
+export interface WebviewErrorMessage {
+  type: WebviewMessageType.ERROR;
+  timestamp?: number;
+  payload?: {
+    error: string;
+  };
+}
+
+export interface WebviewLogMessage {
+  type: WebviewMessageType.LOG_EXPORT;
+  timestamp?: number;
+  payload?: {
+    message: string;
+  };
+}
+
+export interface WebviewStateUpdateMessage {
+  type: WebviewMessageType.STATE_UPDATE;
+  timestamp?: number;
+  payload?: {
+    state: Record<string, unknown>;
+  };
+}
+
+export interface WebviewCommandMessage {
+  type: WebviewMessageType.COMMAND;
+  timestamp?: number;
+  payload?: {
+    command: string;
+    args?: any[];
+  };
+}
+
+export interface WebviewResponseMessage {
+  type: WebviewMessageType.RESPONSE;
+  timestamp?: number;
+  payload?: {
+    requestId: string;
+    data?: any;
+    error?: string;
+  };
+}
+
+export type WebviewMessage =
+  | WebviewReadyMessage
+  | WebviewErrorMessage
+  | WebviewLogMessage
+  | WebviewStateUpdateMessage
+  | WebviewCommandMessage
+  | WebviewResponseMessage;
+
+// Type guards
+export const isWebviewReadyMessage = (message: WebviewMessage): message is WebviewReadyMessage =>
+  message.type === WebviewMessageType.READY;
+
+export const isWebviewErrorMessage = (message: WebviewMessage): message is WebviewErrorMessage =>
+  message.type === WebviewMessageType.ERROR;
+
+export const isWebviewLogMessage = (message: WebviewMessage): message is WebviewLogMessage =>
+  message.type === WebviewMessageType.LOG_EXPORT;
+
+export const isWebviewStateUpdateMessage = (
+  message: WebviewMessage
+): message is WebviewStateUpdateMessage => message.type === WebviewMessageType.STATE_UPDATE;
+
+export const isWebviewCommandMessage = (
+  message: WebviewMessage
+): message is WebviewCommandMessage => message.type === WebviewMessageType.COMMAND;
+
+export const isWebviewResponseMessage = (
+  message: WebviewMessage
+): message is WebviewResponseMessage => message.type === WebviewMessageType.RESPONSE;

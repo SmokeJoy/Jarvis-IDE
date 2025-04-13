@@ -1,12 +1,12 @@
-import { findSemanticPath } from './semantic.js';
-import { findExploratoryPath } from './exploratory.js';
-import { NavigationOptions } from '../types.js';
-import { ContextLink } from '../../../../memory/context_links.js';
+import { findSemanticPath } from './semantic';
+import { findExploratoryPath } from './exploratory';
+import { NavigationOptions } from '../types';
+import { ContextLink } from '../../../../memory/context_links';
 
 interface HybridNavigationOptions extends NavigationOptions {
-  semanticThreshold: number;  // Soglia per passare da exploratory a semantic
+  semanticThreshold: number; // Soglia per passare da exploratory a semantic
   maxExploratorySteps: number; // Passi massimi in modalità exploratory
-  minSemanticScore: number;   // Punteggio minimo per considerare un percorso semanticamente valido
+  minSemanticScore: number; // Punteggio minimo per considerare un percorso semanticamente valido
 }
 
 export async function findHybridPath(
@@ -29,7 +29,7 @@ export async function findHybridPath(
     if (semanticResult.success && semanticResult.path) {
       // Calcola il punteggio semantico medio del percorso
       const avgScore = calculateAverageSemanticScore(semanticResult.path.edges, options);
-      
+
       if (avgScore >= options.minSemanticScore) {
         return semanticResult; // Percorso semanticamente valido trovato
       }
@@ -43,7 +43,7 @@ export async function findHybridPath(
     startId,
     {
       ...options,
-      maxSteps: options.maxExploratorySteps
+      maxSteps: options.maxExploratorySteps,
     },
     includeContent,
     includeMetadata,
@@ -55,7 +55,7 @@ export async function findHybridPath(
   }
 
   // 3. Filtra i percorsi esplorativi per punteggio semantico
-  const filteredEdges = exploratoryResult.path.edges.filter(edge => {
+  const filteredEdges = exploratoryResult.path.edges.filter((edge) => {
     const score = calculateEdgeSemanticScore(edge, options);
     return score >= options.semanticThreshold;
   });
@@ -65,14 +65,14 @@ export async function findHybridPath(
     success: true,
     path: {
       nodes: exploratoryResult.path.nodes,
-      edges: filteredEdges
-    }
+      edges: filteredEdges,
+    },
   };
 }
 
 function calculateAverageSemanticScore(edges: any[], options: HybridNavigationOptions): number {
   if (edges.length === 0) return 0;
-  
+
   const totalScore = edges.reduce((sum, edge) => {
     return sum + calculateEdgeSemanticScore(edge, options);
   }, 0);
@@ -82,7 +82,7 @@ function calculateAverageSemanticScore(edges: any[], options: HybridNavigationOp
 
 function calculateEdgeSemanticScore(edge: ContextLink, options: HybridNavigationOptions): number {
   let score = (edge.strength || 0) * (edge.metadata?.confidence || 0);
-  
+
   // Applica moltiplicatori per relazioni preferite
   if (options.preferredRelations?.includes(edge.relation)) {
     score *= 1.5;
@@ -96,4 +96,4 @@ function calculateEdgeSemanticScore(edge: ContextLink, options: HybridNavigation
   }
 
   return score;
-} 
+}

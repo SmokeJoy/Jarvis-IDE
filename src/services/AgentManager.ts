@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { sendPrompt } from './LMStudioService.js';
-import { runPython } from './pythonBridge.js';
+import { sendPrompt } from './LMStudioService';
+import { runPython } from './pythonBridge';
 
 // Interfaccia per definire la struttura di un agente
 export interface Agent {
@@ -45,13 +45,8 @@ export class AgentManager {
       name: 'Developer Agent',
       description: 'Genera codice C# e risponde ai prompt di sviluppo',
       role: 'developer',
-      capabilities: [
-        'generazione codice C#',
-        'debugging',
-        'refactoring',
-        'ottimizzazione'
-      ],
-      memoryContext: 'developer_context.json'
+      capabilities: ['generazione codice C#', 'debugging', 'refactoring', 'ottimizzazione'],
+      memoryContext: 'developer_context.json',
     });
 
     // Compiler Agent - Gestisce la compilazione
@@ -64,9 +59,9 @@ export class AgentManager {
         'compilazione progetto',
         'verifica errori',
         'analisi dipendenze',
-        'ottimizzazione build'
+        'ottimizzazione build',
       ],
-      memoryContext: 'compiler_context.json'
+      memoryContext: 'compiler_context.json',
     });
 
     // Memory Agent - Gestisce il contesto e la memoria
@@ -79,9 +74,9 @@ export class AgentManager {
         'ricerca documentazione',
         'gestione contesto',
         'analisi progetti passati',
-        'suggerimenti contestuali'
+        'suggerimenti contestuali',
       ],
-      memoryContext: 'memory_context.json'
+      memoryContext: 'memory_context.json',
     });
 
     // Doc Agent - Gestisce la documentazione
@@ -94,9 +89,9 @@ export class AgentManager {
         'analisi file .cs',
         'generazione documentazione',
         'commenti automatici',
-        'manuali utente'
+        'manuali utente',
       ],
-      memoryContext: 'doc_context.json'
+      memoryContext: 'doc_context.json',
     });
   }
 
@@ -130,7 +125,7 @@ export class AgentManager {
       return {
         success: false,
         content: '',
-        error: 'Nessun agente attivo selezionato'
+        error: 'Nessun agente attivo selezionato',
       };
     }
 
@@ -147,14 +142,14 @@ export class AgentManager {
         metadata: {
           type: agent.role,
           timestamp: Date.now(),
-          agentId: agent.id
-        }
+          agentId: agent.id,
+        },
       };
     } catch (error) {
       return {
         success: false,
         content: '',
-        error: `Errore nell'elaborazione del prompt: ${error instanceof Error ? error.message : String(error)}`
+        error: `Errore nell'elaborazione del prompt: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
   }
@@ -194,8 +189,10 @@ export class AgentManager {
   private async processDeveloperPrompt(prompt: string, context: any): Promise<string> {
     try {
       // Carica la configurazione
-      const config = JSON.parse(fs.readFileSync(path.join(__dirname, '../../config/config.json'), 'utf-8'));
-      
+      const config = JSON.parse(
+        fs.readFileSync(path.join(__dirname, '../../config/config.json'), 'utf-8')
+      );
+
       // Verifica la lunghezza del prompt
       if (prompt.length > 12000) {
         return `⚠️ **Warning: Prompt troppo lungo**\n\nIl prompt supera il limite di 12000 caratteri. Per favore, riduci la lunghezza del prompt per evitare problemi di token.`;
@@ -286,4 +283,4 @@ export class AgentManager {
     // Implementazione per l'agente documentazione
     return `[Doc Agent] Elaborazione del prompt: ${prompt}`;
   }
-} 
+}

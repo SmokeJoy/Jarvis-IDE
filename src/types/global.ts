@@ -9,38 +9,35 @@ export type {
   OpenAiCompatibleModelInfo,
   LLMProviderId,
   ModelInfo,
-  TelemetrySetting
-} from '../shared/types/api.types.js';
+  TelemetrySetting,
+} from '../shared/types/api.types';
 
 // Esporta i tipi specifici da llm.types.js
 export type {
   ChatCompletionContentPartText,
-  ChatCompletionContentPartImage
-} from '../shared/types/llm.types.js';
+  ChatCompletionContentPartImage,
+} from '../shared/types/llm.types';
 
 // Esporta i tipi dalle impostazioni della chat
-export type { ChatSettings } from '../shared/types/user-settings.types.js';
+export type { ChatSettings } from '../shared/types/user-settings.types';
 
 // Esporta i tipi dalle impostazioni del browser
-export type { BrowserSettings } from '../shared/types/user-settings.types.js';
+export type { BrowserSettings } from '../shared/types/user-settings.types';
 
 // Esporta i tipi dalle impostazioni di approvazione automatica
-export type { AutoApprovalSettings } from '../shared/types/user-settings.types.js';
+export type { AutoApprovalSettings } from '../shared/types/user-settings.types';
 
 // Re-esporta i tipi dal WebviewMessage centralizzato
-export type {
-  WebviewMessage,
-  WebviewMessageBase
-} from '../shared/types/webview.types.js';
+export type { WebviewMessage, WebviewMessageBase } from '../shared/types/webview.types';
 
 /**
  * Enum per i livelli di log
  */
 export enum LogLevel {
-  DEBUG = "DEBUG",
-  INFO = "INFO",
-  WARN = "WARN",
-  ERROR = "ERROR"
+  DEBUG = 'DEBUG',
+  INFO = 'INFO',
+  WARN = 'WARN',
+  ERROR = 'ERROR',
 }
 
 // Definizioni di tipi comuni utilizzati nell'applicazione
@@ -83,7 +80,12 @@ export interface GlobalConfig {
   timeout: number;
 }
 
-export interface ApiResponse<T = any> {
+/**
+ * Tipo per rappresentare oggetti di dati generici ma type-safe
+ */
+export type DataObject = Record<string, unknown>;
+
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -106,13 +108,13 @@ export interface LogEntry {
   timestamp: string;
   level: 'debug' | 'info' | 'warn' | 'error';
   message: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 export interface ErrorResponse {
   code: string;
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 export interface ValidationResult {

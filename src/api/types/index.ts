@@ -1,7 +1,7 @@
-import { OpenRouterModelInfo } from '../../types/extension.js';
-import { ApiStream } from '../../types/global.js';
-import { HistoryItem } from '../../shared/HistoryItem.js';
-import { ApiProvider } from '../../agent/api/ApiProvider.js';
+import { OpenRouterModelInfo } from '../../types/extension';
+import { ApiStream } from '../../types/global';
+import { HistoryItem } from '../../shared/HistoryItem';
+import { ApiProvider } from '../../agent/api/ApiProvider';
 
 export interface ApiHandler {
   createMessage(
@@ -9,7 +9,7 @@ export interface ApiHandler {
     messages: HistoryItem[],
     options?: { signal?: AbortSignal }
   ): Promise<AsyncGenerator<ApiStream>>;
-  
+
   getModel(): OpenRouterModelInfo;
 }
 
@@ -22,4 +22,4 @@ export interface ApiHandler {
 //   temperature?: number;
 //   maxTokens?: number;
 //   organization?: string;
-// } 
+// }

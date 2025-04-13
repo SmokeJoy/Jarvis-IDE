@@ -1,7 +1,7 @@
 export enum ModelSelectorMessageType {
   REQUEST_MODELS = 'requestModels',
   MODEL_SELECTED = 'modelSelected',
-  MODEL_LIST_UPDATED = 'modelListUpdated'
+  MODEL_LIST_UPDATED = 'modelListUpdated',
 }
 
 export interface RequestModelsMessage {
@@ -23,7 +23,7 @@ export interface ModelListUpdatedMessage {
   }>;
 }
 
-export type ModelSelectorMessageUnion = 
+export type ModelSelectorMessageUnion =
   | RequestModelsMessage
   | ModelSelectedMessage
   | ModelListUpdatedMessage;

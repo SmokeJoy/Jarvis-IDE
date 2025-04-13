@@ -1,3 +1,5 @@
+![SafeMessage Status](reports/badges/safe-message-status.svg)
+
 # Jarvis IDE
 
 ![Test CI](https://github.com/jarvis-ide/jarvis-ide/actions/workflows/test.yml/badge.svg)
@@ -127,3 +129,45 @@ npx vsce package
 ## Licenza
 
 MIT
+
+# Strumenti di Refactoring per la Sicurezza dei Messaggi
+
+Il progetto include un set completo di strumenti per garantire la sicurezza tipizzata dei messaggi di chat. Questi strumenti aiutano a:
+
+- ✅ Convertire oggetti message raw in chiamate `createSafeMessage`
+- ✅ Correggere chiamate nidificate a `createSafeMessage`
+- ✅ Aggiungere gli import mancanti per `createSafeMessage`
+- ✅ Verificare la correttezza di tutte le chiamate
+
+## Script Disponibili
+
+```bash
+# Verifica lo stato attuale della sicurezza dei messaggi
+pnpm refactor:check-safety
+
+# Correggi le chiamate nidificate a createSafeMessage
+pnpm ts-node scripts/refactor/fix-nested-safe-message.ts
+
+# Aggiungi gli import mancanti per createSafeMessage
+pnpm ts-node scripts/refactor/add-missing-imports.ts
+
+# Esegui tutte le correzioni in sequenza (fix + check)
+pnpm refactor:fix-all
+
+# Genera il badge di stato per il README
+pnpm refactor:badge
+```
+
+## Report di Sicurezza
+
+I report di sicurezza vengono generati automaticamente nella cartella `reports/`:
+- Report JSON completo con dettagli di tutti i problemi
+- Report CSV per facile importazione in fogli di calcolo
+
+## Integrazione CI
+
+Il progetto include un workflow GitHub Actions che verifica automaticamente la sicurezza dei messaggi:
+- Esegue i controlli di sicurezza ad ogni push/PR
+- Genera e aggiorna il badge di stato
+- Carica il report come artefatto
+- Fa fallire il workflow se sono presenti problemi di sicurezza

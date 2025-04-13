@@ -27,9 +27,7 @@ export class VisixPanel {
       {
         enableScripts: true,
         retainContextWhenHidden: true,
-        localResourceRoots: [
-          vscode.Uri.joinPath(this.context.extensionUri, 'dist')
-        ]
+        localResourceRoots: [vscode.Uri.joinPath(this.context.extensionUri, 'dist')],
       }
     );
 
@@ -38,7 +36,7 @@ export class VisixPanel {
     this.panel.onDidDispose(
       () => {
         this.panel = undefined;
-        this.disposables.forEach(d => d.dispose());
+        this.disposables.forEach((d) => d.dispose());
       },
       null,
       this.disposables
@@ -92,6 +90,6 @@ export class VisixPanel {
 
   public dispose() {
     this.panel?.dispose();
-    this.disposables.forEach(d => d.dispose());
+    this.disposables.forEach((d) => d.dispose());
   }
-} 
+}

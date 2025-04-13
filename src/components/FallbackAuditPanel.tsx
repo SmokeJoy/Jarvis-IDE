@@ -33,18 +33,12 @@ export const FallbackAuditPanel: React.FC<FallbackAuditPanelProps> = ({
   eventBus,
   strategy,
   providers,
-  className = ''
+  className = '',
 }) => {
   const [selectedTab, setSelectedTab] = useState<'events' | 'snapshots' | 'analytics'>('events');
   const [exportFormat, setExportFormat] = useState<'json' | 'csv'>('json');
 
-  const {
-    events,
-    snapshots,
-    exportEvents,
-    exportSnapshots,
-    clearSnapshots
-  } = useFallbackAudit({
+  const { events, snapshots, exportEvents, exportSnapshots, clearSnapshots } = useFallbackAudit({
     eventBus,
     strategy,
     providers,
@@ -53,27 +47,28 @@ export const FallbackAuditPanel: React.FC<FallbackAuditPanelProps> = ({
     },
     onSnapshot: (snapshot) => {
       console.log('Audit Snapshot:', snapshot);
-    }
+    },
   });
 
   // Converte snapshots in audit-like per i grafici
-  const auditData = snapshots.map(snapshot => ({
+  const auditData = snapshots.map((snapshot) => ({
     timestamp: snapshot.timestamp,
     provider: snapshot.provider,
     success: true, // fallback placeholder, se non disponibile
     latency: snapshot.stats.get(snapshot.provider)?.avgResponseTime || 0,
     cost: 0, // da aggiungere in futuro
     strategy: snapshot.strategy,
-    condition: '' // opzionale
+    condition: '', // opzionale
   }));
 
   const handleExport = () => {
-    const content = selectedTab === 'events' 
-      ? exportEvents(exportFormat)
-      : selectedTab === 'snapshots'
-        ? exportSnapshots(exportFormat)
-        : '';
-    
+    const content =
+      selectedTab === 'events'
+        ? exportEvents(exportFormat)
+        : selectedTab === 'snapshots'
+          ? exportSnapshots(exportFormat)
+          : '';
+
     const filename = `fallback-${selectedTab}-${new Date().toISOString()}.${exportFormat}`;
     downloadFile(content, filename);
   };
@@ -95,8 +90,8 @@ export const FallbackAuditPanel: React.FC<FallbackAuditPanelProps> = ({
         <button
           onClick={() => setSelectedTab('events')}
           className={`px-4 py-2 rounded-lg transition-colors ${
-            selectedTab === 'events' 
-              ? 'bg-blue-600 text-white' 
+            selectedTab === 'events'
+              ? 'bg-blue-600 text-white'
               : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
           }`}
         >
@@ -105,8 +100,8 @@ export const FallbackAuditPanel: React.FC<FallbackAuditPanelProps> = ({
         <button
           onClick={() => setSelectedTab('snapshots')}
           className={`px-4 py-2 rounded-lg transition-colors ${
-            selectedTab === 'snapshots' 
-              ? 'bg-blue-600 text-white' 
+            selectedTab === 'snapshots'
+              ? 'bg-blue-600 text-white'
               : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
           }`}
         >
@@ -115,8 +110,8 @@ export const FallbackAuditPanel: React.FC<FallbackAuditPanelProps> = ({
         <button
           onClick={() => setSelectedTab('analytics')}
           className={`px-4 py-2 rounded-lg transition-colors ${
-            selectedTab === 'analytics' 
-              ? 'bg-blue-600 text-white' 
+            selectedTab === 'analytics'
+              ? 'bg-blue-600 text-white'
               : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
           }`}
         >
@@ -128,10 +123,7 @@ export const FallbackAuditPanel: React.FC<FallbackAuditPanelProps> = ({
         {selectedTab === 'events' ? (
           <div className="space-y-2">
             {events.map((event, index) => (
-              <div
-                key={index}
-                className="bg-gray-800 p-3 rounded"
-              >
+              <div key={index} className="bg-gray-800 p-3 rounded">
                 <div className="flex justify-between text-sm text-gray-400">
                   <span>{event.type}</span>
                   <span>{formatTimestamp(event.timestamp)}</span>
@@ -151,10 +143,7 @@ export const FallbackAuditPanel: React.FC<FallbackAuditPanelProps> = ({
         ) : selectedTab === 'snapshots' ? (
           <div className="space-y-2">
             {snapshots.map((snapshot, index) => (
-              <div
-                key={index}
-                className="bg-gray-800 p-3 rounded"
-              >
+              <div key={index} className="bg-gray-800 p-3 rounded">
                 <div className="flex justify-between text-sm text-gray-400">
                   <span>Snapshot</span>
                   <span>{formatTimestamp(snapshot.timestamp)}</span>
@@ -227,4 +216,4 @@ export const FallbackAuditPanel: React.FC<FallbackAuditPanelProps> = ({
       </div>
     </div>
   );
-}; 
+};

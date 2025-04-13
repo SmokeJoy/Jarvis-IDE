@@ -13,8 +13,8 @@
  */
 export interface Base64ImageSource {
   type: 'base64';
-  media_type: string;  // ad es. "image/jpeg", "image/png"
-  data: string;        // dati codificati in base64
+  media_type: string; // ad es. "image/jpeg", "image/png"
+  data: string; // dati codificati in base64
 }
 
 /**
@@ -22,15 +22,15 @@ export interface Base64ImageSource {
  */
 export interface URLImageSource {
   type: 'url';
-  url: string;         // URL dell'immagine
+  url: string; // URL dell'immagine
   media_type?: string; // opzionale per URL
-  data?: string | object;       // opzionale per URL, può essere stringa o oggetto
+  data?: string | object; // opzionale per URL, può essere stringa o oggetto
 }
 
 /**
  * Tipo unione per le diverse sorgenti di immagini
  */
-export type ImageSource = Base64ImageSource | URLImageSource; 
+export type ImageSource = Base64ImageSource | URLImageSource;
 
 // Importazione per riferimento
-// import { ImageBlock, isImageBlock } from '../../types/chat.types.js'; 
+// import { ImageBlock, isImageBlock } from '../../types/chat.types';

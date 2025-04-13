@@ -8,4 +8,4 @@ export interface ConfigModelInfo {
   provider: string;
   capabilities: string[];
   isDefault?: boolean;
-} 
+}

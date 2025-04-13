@@ -12,7 +12,7 @@ const initialMockAudits: FallbackAudit[] = [
     latency: 450,
     cost: 0.02,
     strategy: 'adaptive',
-    condition: 'latency'
+    condition: 'latency',
   },
   {
     timestamp: Date.now() - 25000,
@@ -21,7 +21,7 @@ const initialMockAudits: FallbackAudit[] = [
     latency: 380,
     cost: 0.015,
     strategy: 'adaptive',
-    condition: 'cost'
+    condition: 'cost',
   },
   {
     timestamp: Date.now() - 20000,
@@ -30,7 +30,7 @@ const initialMockAudits: FallbackAudit[] = [
     latency: 520,
     cost: 0.01,
     strategy: 'adaptive',
-    condition: 'latency'
+    condition: 'latency',
   },
   {
     timestamp: Date.now() - 15000,
@@ -39,7 +39,7 @@ const initialMockAudits: FallbackAudit[] = [
     latency: 420,
     cost: 0.02,
     strategy: 'adaptive',
-    condition: 'latency'
+    condition: 'latency',
   },
   {
     timestamp: Date.now() - 10000,
@@ -48,7 +48,7 @@ const initialMockAudits: FallbackAudit[] = [
     latency: 400,
     cost: 0.015,
     strategy: 'adaptive',
-    condition: 'cost'
+    condition: 'cost',
   },
   {
     timestamp: Date.now() - 5000,
@@ -57,8 +57,8 @@ const initialMockAudits: FallbackAudit[] = [
     latency: 480,
     cost: 0.01,
     strategy: 'adaptive',
-    condition: 'latency'
-  }
+    condition: 'latency',
+  },
 ];
 
 const meta: Meta<typeof FallbackChartPanel> = {
@@ -88,7 +88,7 @@ const generateMockAudit = (): FallbackAudit => {
     latency,
     cost,
     strategy: 'adaptive',
-    condition: Math.random() > 0.5 ? 'latency' : 'cost'
+    condition: Math.random() > 0.5 ? 'latency' : 'cost',
   };
 };
 
@@ -98,7 +98,7 @@ const TemplateWithUpdates = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setAudits(prev => {
+      setAudits((prev) => {
         const newAudit = generateMockAudit();
         return [...prev, newAudit].slice(-20); // Mantieni solo gli ultimi 20 audit
       });
@@ -133,13 +133,13 @@ export const WithLiveUpdates: Story = {
 export const WithManyDataPoints: Story = {
   args: {
     audits: Array.from({ length: 50 }, (_, i) => ({
-      timestamp: Date.now() - (i * 10000),
+      timestamp: Date.now() - i * 10000,
       provider: ['openai', 'anthropic', 'mistral'][i % 3],
       success: Math.random() > 0.2,
       latency: Math.floor(300 + Math.random() * 300),
       cost: 0.01 + Math.random() * 0.02,
       strategy: 'adaptive',
-      condition: Math.random() > 0.5 ? 'latency' : 'cost'
+      condition: Math.random() > 0.5 ? 'latency' : 'cost',
     })),
   },
   render: (args) => (
@@ -147,4 +147,4 @@ export const WithManyDataPoints: Story = {
       <FallbackChartPanel {...args} />
     </div>
   ),
-}; 
+};

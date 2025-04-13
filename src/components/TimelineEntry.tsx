@@ -13,7 +13,7 @@ interface TimelineEntryProps {
 export const TimelineEntry: React.FC<TimelineEntryProps> = ({ entry, isSelected, onSelect }) => {
   const { isActive, confidence } = useAutoMitigation();
   const { isBlocked, getBlockReason } = useProviderBlacklist();
-  
+
   const hasAutoMitigation = entry.type === 'provider_change' && isActive;
   const isProviderBlocked = entry.type === 'provider_change' && isBlocked(entry.selectedProvider);
   const blockReason = isProviderBlocked ? getBlockReason(entry.selectedProvider) : null;
@@ -41,13 +41,13 @@ export const TimelineEntry: React.FC<TimelineEntryProps> = ({ entry, isSelected,
               🚫 Bloccato
             </span>
           </Tooltip.Trigger>
-          <Tooltip.Content 
+          <Tooltip.Content
             className="bg-gray-900 text-white p-2 rounded shadow-lg max-w-xs"
             side="top"
           >
             <div className="text-sm font-medium">Provider Bloccato</div>
             <div className="text-xs text-gray-300 mt-1">
-              {blockReason || "Provider bloccato tramite auto-mitigation"}
+              {blockReason || 'Provider bloccato tramite auto-mitigation'}
             </div>
             <div className="text-xs text-gray-400 mt-1">
               Ultimo aggiornamento: {new Date().toLocaleTimeString()}
@@ -95,13 +95,9 @@ export const TimelineEntry: React.FC<TimelineEntryProps> = ({ entry, isSelected,
         <div className="flex items-center space-x-2">
           <span className="text-sm font-medium">{entry.timestamp.toLocaleTimeString()}</span>
         </div>
-        <div className="flex flex-col items-end gap-1">
-          {getBadges()}
-        </div>
+        <div className="flex flex-col items-end gap-1">{getBadges()}</div>
       </div>
-      <div className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-        {entry.details}
-      </div>
+      <div className="mt-1 text-sm text-gray-600 dark:text-gray-300">{entry.details}</div>
     </motion.div>
   );
-}; 
+};

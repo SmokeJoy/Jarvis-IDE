@@ -1,14 +1,14 @@
-import { findHybridPath } from './hybrid.js';
-import { getContextById } from '../../../../memory/context.js';
-import { getContextLinks } from '../../../../memory/context_links.js';
+import { findHybridPath } from './hybrid';
+import { getContextById } from '../../../../memory/context';
+import { getContextLinks } from '../../../../memory/context_links';
 
 // Mock delle dipendenze
 jest.mock('../../../../memory/context', () => ({
-  getContextById: jest.fn()
+  getContextById: jest.fn(),
 }));
 
 jest.mock('../../../../memory/context_links', () => ({
-  getContextLinks: jest.fn()
+  getContextLinks: jest.fn(),
 }));
 
 describe('findHybridPath', () => {
@@ -16,7 +16,7 @@ describe('findHybridPath', () => {
     'ctx-1': { id: 'ctx-1', text: 'Contesto 1', tags: ['architettura'] },
     'ctx-2': { id: 'ctx-2', text: 'Contesto 2', tags: ['performance'] },
     'ctx-3': { id: 'ctx-3', text: 'Contesto 3', tags: ['deprecato'] },
-    'ctx-4': { id: 'ctx-4', text: 'Contesto 4', tags: ['architettura', 'performance'] }
+    'ctx-4': { id: 'ctx-4', text: 'Contesto 4', tags: ['architettura', 'performance'] },
   };
 
   const mockLinks = [
@@ -26,7 +26,7 @@ describe('findHybridPath', () => {
       targetId: 'ctx-2',
       relation: 'supports',
       strength: 0.8,
-      metadata: { confidence: 0.9, source: 'user' }
+      metadata: { confidence: 0.9, source: 'user' },
     },
     {
       id: 'link-2',
@@ -34,7 +34,7 @@ describe('findHybridPath', () => {
       targetId: 'ctx-3',
       relation: 'explains',
       strength: 0.6,
-      metadata: { confidence: 0.7, source: 'tool' }
+      metadata: { confidence: 0.7, source: 'tool' },
     },
     {
       id: 'link-3',
@@ -42,8 +42,8 @@ describe('findHybridPath', () => {
       targetId: 'ctx-4',
       relation: 'extends',
       strength: 0.9,
-      metadata: { confidence: 0.8, source: 'user' }
-    }
+      metadata: { confidence: 0.8, source: 'user' },
+    },
   ];
 
   beforeEach(() => {
@@ -57,7 +57,7 @@ describe('findHybridPath', () => {
       semanticThreshold: 0.5,
       maxExploratorySteps: 2,
       minSemanticScore: 0.6,
-      preferredRelations: ['supports', 'extends']
+      preferredRelations: ['supports', 'extends'],
     });
 
     expect(result.success).toBe(true);
@@ -69,7 +69,7 @@ describe('findHybridPath', () => {
       semanticThreshold: 0.5,
       maxExploratorySteps: 2,
       minSemanticScore: 0.9, // Punteggio molto alto per forzare exploratory
-      preferredRelations: ['supports']
+      preferredRelations: ['supports'],
     });
 
     expect(result.success).toBe(true);
@@ -81,12 +81,12 @@ describe('findHybridPath', () => {
       semanticThreshold: 0.7,
       maxExploratorySteps: 2,
       minSemanticScore: 0.9,
-      preferredRelations: ['supports']
+      preferredRelations: ['supports'],
     });
 
     expect(result.success).toBe(true);
     // Verifica che i link filtrati abbiano punteggio >= 0.7
-    result.path?.edges.forEach(edge => {
+    result.path?.edges.forEach((edge) => {
       const score = (edge.strength || 0) * (edge.confidence || 0);
       expect(score).toBeGreaterThanOrEqual(0.7);
     });
@@ -97,37 +97,41 @@ describe('findHybridPath', () => {
       semanticThreshold: 0.5,
       maxExploratorySteps: 2,
       minSemanticScore: 0.6,
-      preferredRelations: ['supports']
+      preferredRelations: ['supports'],
     });
 
     expect(result.success).toBe(true);
     // Verifica che i link da fonti umane abbiano priorità
-    const userLinks = result.path?.edges.filter(edge => 
-      edge.metadata?.source === 'user'
-    );
+    const userLinks = result.path?.edges.filter((edge) => edge.metadata?.source === 'user');
     expect(userLinks?.length).toBeGreaterThan(0);
   });
 
   it('dovrebbe gestire correttamente i contesti inesistenti', async () => {
-    await expect(findHybridPath('ctx-999', 'ctx-4', {
-      semanticThreshold: 0.5,
-      maxExploratorySteps: 2,
-      minSemanticScore: 0.6
-    }))
-      .rejects
-      .toThrow('Contesto con ID ctx-999 non trovato');
+    await expect(
+      findHybridPath('ctx-999', 'ctx-4', {
+        semanticThreshold: 0.5,
+        maxExploratorySteps: 2,
+        minSemanticScore: 0.6,
+      })
+    ).rejects.toThrow('Contesto con ID ctx-999 non trovato');
   });
 
   it('dovrebbe includere content e metadata quando richiesto', async () => {
-    const result = await findHybridPath('ctx-1', 'ctx-4', {
-      semanticThreshold: 0.5,
-      maxExploratorySteps: 2,
-      minSemanticScore: 0.6
-    }, true, true);
+    const result = await findHybridPath(
+      'ctx-1',
+      'ctx-4',
+      {
+        semanticThreshold: 0.5,
+        maxExploratorySteps: 2,
+        minSemanticScore: 0.6,
+      },
+      true,
+      true
+    );
 
     expect(result.success).toBe(true);
     expect(result.path?.nodes[0]).toHaveProperty('text');
     expect(result.path?.edges[0]).toHaveProperty('strength');
     expect(result.path?.edges[0]).toHaveProperty('confidence');
   });
-}); 
+});

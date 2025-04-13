@@ -11,7 +11,7 @@ export enum ContentType {
   Text = 'text',
   Image = 'image',
   ToolUse = 'tool_use',
-  ToolResult = 'tool_result'
+  ToolResult = 'tool_result',
 }
 
 /**
@@ -125,7 +125,7 @@ export function normalizeContent(content: string | ContentBlock[]): ContentBlock
 export function contentBlocksToString(blocks: ContentBlock[]): string {
   return blocks
     .filter(isTextBlock)
-    .map(block => block.text)
+    .map((block) => block.text)
     .join('\n');
 }
 
@@ -135,10 +135,11 @@ export function contentBlocksToString(blocks: ContentBlock[]): string {
 export function normalizeMessage(message: ChatMessage): ChatMessage {
   return {
     ...message,
-    content: typeof message.content === 'string' 
-      ? [{ type: ContentType.Text, text: message.content }] 
-      : message.content,
-    timestamp: message.timestamp || new Date().toISOString()
+    content:
+      typeof message.content === 'string'
+        ? [{ type: ContentType.Text, text: message.content }]
+        : message.content,
+    timestamp: message.timestamp || new Date().toISOString(),
   };
 }
 
@@ -155,30 +156,30 @@ export function normalizeChatMessages(messages: ChatMessage[]): ChatMessage[] {
  * @returns Testo estratto
  */
 export function extractTextFromMessage(message: ChatMessage): string {
-  if (typeof message.content === "string") {
+  if (typeof message.content === 'string') {
     return message.content;
   } else if (Array.isArray(message.content)) {
     return message.content
       .filter(isTextBlock)
-      .map(block => block.text)
-      .join("\n");
+      .map((block) => block.text)
+      .join('\n');
   }
-  return "";
+  return '';
 }
 
 /**
  * Crea un nuovo oggetto ChatMessage con i parametri specificati.
- * 
+ *
  * @param role Ruolo del messaggio
  * @param content Contenuto del messaggio
  * @param options Opzioni aggiuntive (nome, timestamp, providerFields)
  * @returns Nuovo oggetto ChatMessage
  */
 export function createChatMessage(
-  role: ChatMessage["role"],
+  role: ChatMessage['role'],
   content: string | ContentBlock[],
-  options?: { 
-    name?: string; 
+  options?: {
+    name?: string;
     timestamp?: string;
     providerFields?: Record<string, any>;
   }
@@ -188,6 +189,6 @@ export function createChatMessage(
     content,
     name: options?.name,
     timestamp: options?.timestamp || new Date().toISOString(),
-    providerFields: options?.providerFields
+    providerFields: options?.providerFields,
   };
-} 
+}

@@ -1,30 +1,62 @@
-import type { FallbackStrategy } from '../../../src/mas/core/fallback/strategies/FallbackStrategy';
+import { FallbackStrategy } from '../../../src/mas/core/fallback/strategies/FallbackStrategy';
+import { LLMProviderHandler } from '../../../src/types/llm-provider.types';
 
 export const createMockStrategy = (): FallbackStrategy => {
-  let activeStrategy = 'latency-based';
-  let activeProvider = 'openai';
-  const stats = new Map();
+  let activeStrategy = 'default';
 
   return {
+    name: 'mock-strategy',
+    description: 'A mock strategy for testing',
+    isEnabled: true,
+    providers: new Map<string, LLMProviderHandler>(),
+    stats: new Map(),
+    conditions: [],
+    history: [],
+
+    initialize: async () => {
+      // No-op
+    },
+
+    dispose: () => {
+      // No-op
+    },
+
+    selectProvider: async () => {
+      return null;
+    },
+
+    updateStats: () => {
+      // No-op
+    },
+
+    reset: () => {
+      // No-op
+    },
+
     getActive: () => activeStrategy,
-    setActive: (strategy: string) => {
+
+    setActive: async (strategy: string) => {
       activeStrategy = strategy;
     },
-    getCurrentProvider: () => activeProvider,
-    setCurrentProvider: (provider: string) => {
-      activeProvider = provider;
+
+    validate: () => true,
+
+    getConditions: () => [],
+
+    getHistory: () => [],
+
+    getStats: () => new Map(),
+
+    getProviders: () => new Map(),
+
+    isEnabled: true,
+
+    enable: async () => {
+      // No-op
     },
-    getStats: () => stats,
-    updateStats: (provider: string, data: any) => {
-      stats.set(provider, {
-        ...stats.get(provider),
-        ...data
-      });
-    },
-    reset: () => {
-      activeStrategy = 'latency-based';
-      activeProvider = 'openai';
-      stats.clear();
+
+    disable: async () => {
+      // No-op
     }
   };
 }; 

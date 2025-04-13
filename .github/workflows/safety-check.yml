@@ -1,0 +1,129 @@
+name: Message Safety Check
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  safety-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run safety check
+        id: safety_check
+        run: |
+          pnpm refactor:check-safety
+          echo "::set-output name=has_issues::$(test -f reports/safety-report-*.json && grep -q '"issues": \[\]' reports/safety-report-*.json && echo "false" || echo "true")"
+
+      - name: Generate badge
+        if: success()
+        run: pnpm refactor:badge
+
+      - name: Upload safety report
+        uses: actions/upload-artifact@v3
+        with:
+          name: safety-report
+          path: reports/
+          retention-days: 7
+      
+      - name: Check for issues
+        if: steps.safety_check.outputs.has_issues == 'true'
+        run: |
+          echo "::error::Problemi di sicurezza nei messaggi rilevati!"
+          echo "Esegui 'pnpm refactor:fix-all' per correggere automaticamente gli errori più comuni."
+          exit 1 
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  safety-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run safety check
+        id: safety_check
+        run: |
+          pnpm refactor:check-safety
+          echo "::set-output name=has_issues::$(test -f reports/safety-report-*.json && grep -q '"issues": \[\]' reports/safety-report-*.json && echo "false" || echo "true")"
+
+      - name: Generate badge
+        if: success()
+        run: pnpm refactor:badge
+
+      - name: Upload safety report
+        uses: actions/upload-artifact@v3
+        with:
+          name: safety-report
+          path: reports/
+          retention-days: 7
+      
+      - name: Check for issues
+        if: steps.safety_check.outputs.has_issues == 'true'
+        run: |
+          echo "::error::Problemi di sicurezza nei messaggi rilevati!"
+          echo "Esegui 'pnpm refactor:fix-all' per correggere automaticamente gli errori più comuni."
+          exit 1 

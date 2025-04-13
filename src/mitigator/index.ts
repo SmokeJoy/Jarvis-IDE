@@ -1,7 +1,11 @@
 // src/mitigator/index.ts
 
 // Tipi
-export type { MitigationType, MitigationStats, MitigatorOverlayProps } from '../components/MitigatorOverlay';
+export type {
+  MitigationType,
+  MitigationStats,
+  MitigatorOverlayProps,
+} from '../components/MitigatorOverlay';
 
 // Componenti
 export { MitigatorOverlay } from '../components/MitigatorOverlay';
@@ -20,4 +24,4 @@ export { useProviderBlacklist } from '../hooks/useProviderBlacklist';
 
 // Utilità
 export { calculateConfidence } from '../utils/confidence';
-export { determineNextProvider } from '../utils/provider-selection'; 
+export { determineNextProvider } from '../utils/provider-selection';

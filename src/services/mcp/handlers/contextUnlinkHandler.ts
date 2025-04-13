@@ -1,7 +1,7 @@
-import { ContextItem, getMemoryContexts } from "../../memory/context.js";
-import { readFile, writeFile } from "fs/promises";
-import path from "path";
-import { v4 as uuid } from "uuid";
+import { ContextItem, getMemoryContexts } from '../../memory/context';
+import { readFile, writeFile } from 'fs/promises';
+import path from 'path';
+import { v4 as uuid } from 'uuid';
 
 interface ContextLink {
   id: string;
@@ -26,8 +26,8 @@ interface UnlinkOptions {
 
 async function getContextLinks(): Promise<ContextLink[]> {
   try {
-    const linksPath = path.join(__dirname, "../../data/context_links.json");
-    const data = await readFile(linksPath, "utf-8");
+    const linksPath = path.join(__dirname, '../../data/context_links.json');
+    const data = await readFile(linksPath, 'utf-8');
     return JSON.parse(data);
   } catch (error) {
     return [];
@@ -35,7 +35,7 @@ async function getContextLinks(): Promise<ContextLink[]> {
 }
 
 async function saveContextLinks(links: ContextLink[]): Promise<void> {
-  const linksPath = path.join(__dirname, "../../data/context_links.json");
+  const linksPath = path.join(__dirname, '../../data/context_links.json');
   await writeFile(linksPath, JSON.stringify(links, null, 2));
 }
 
@@ -83,4 +83,4 @@ export async function contextUnlinkHandler(
       error: `Errore durante la rimozione delle relazioni: ${error.message}`,
     };
   }
-} 
+}

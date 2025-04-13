@@ -32,7 +32,7 @@ export class InMemoryAgentHistory {
    * @returns Interazioni dell'agente
    */
   public async getAgentInteractions(agentId: string): Promise<AgentInteraction[]> {
-    return this.history.filter(i => i.agentId === agentId);
+    return this.history.filter((i) => i.agentId === agentId);
   }
 
   /**

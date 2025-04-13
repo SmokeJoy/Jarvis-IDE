@@ -1,15 +1,15 @@
-import React from "react";
-import { describe, expect, test, beforeEach, afterEach, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
-import { ApiConfiguration } from "../types/global.js";
+import React from 'react';
+import { describe, expect, test, beforeEach, afterEach, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { ApiConfiguration } from '../types/global';
 
-describe("Webview Entry Point", () => {
+describe('Webview Entry Point', () => {
   let config: ApiConfiguration;
 
   beforeEach(() => {
     config = {
-      provider: "openai",
-      apiKey: "test-key",
+      provider: 'openai',
+      apiKey: 'test-key',
     };
 
     window.initialConfig = config;
@@ -18,11 +18,11 @@ describe("Webview Entry Point", () => {
 
   afterEach(() => {
     delete window.initialConfig;
-    document.body.innerHTML = "";
+    document.body.innerHTML = '';
   });
 
-  test("renders Webview with initial config", async () => {
-    await import("./index");
-    expect(screen.getByText("Jarvis IDE")).toBeInTheDocument();
+  test('renders Webview with initial config', async () => {
+    await import('./index');
+    expect(screen.getByText('Jarvis IDE')).toBeInTheDocument();
   });
-}); 
+});

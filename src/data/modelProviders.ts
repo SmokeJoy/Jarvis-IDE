@@ -1,18 +1,18 @@
-import { OpenAiCompatibleModelInfo } from "../shared/types/api.types.js"
-import { OPENROUTER_MODELS } from "./openrouterModels.js"
+import { OpenAiCompatibleModelInfo } from '../shared/types/api.types';
+import { OPENROUTER_MODELS } from './openrouterModels';
 
-import { LLMProviderId } from "../shared/types/llm.types.js"
+import { LLMProviderId } from '../shared/types/llm.types';
 
 /**
  * Tipo che rappresenta i provider di modelli supportati
  * @deprecated Utilizzare LLMProviderId da llm.types.ts
  */
-export type ModelProvider = LLMProviderId
+export type ModelProvider = LLMProviderId;
 
 export interface ModelProviderInfo {
-  name: string
-  description: string
-  models: OpenAiCompatibleModelInfo[]
+  name: string;
+  description: string;
+  models: OpenAiCompatibleModelInfo[];
 }
 
 export const MODEL_PROVIDERS: Record<string, string> = {
@@ -24,10 +24,10 @@ export const MODEL_PROVIDERS: Record<string, string> = {
   'openai:gpt-3.5-turbo': 'OpenAI',
   'google:gemini-pro': 'Google',
   'mistral:mistral-medium': 'Mistral',
-  'deepseek:deepseek-coder': 'DeepSeek'
-}
+  'deepseek:deepseek-coder': 'DeepSeek',
+};
 
 export function getProviderFromModelId(id: string): string {
-  const [provider] = id.split(':')
-  return MODEL_PROVIDERS[id] || provider || 'Unknown'
+  const [provider] = id.split(':');
+  return MODEL_PROVIDERS[id] || provider || 'Unknown';
 }

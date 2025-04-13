@@ -7,11 +7,11 @@ import {
   providerCostAbove,
   providerFailedRecently,
   allConditions,
-  notCondition
+  notCondition,
 } from '../strategies/adaptive-conditions';
 import { LLMProviderHandler } from '../../../providers/provider-registry-stub';
 import { ProviderStats } from '../LLMFallbackManager';
-import { LLMEventBus } from '../LLMEventBus';
+import { LLMEventBus } from '@/mas/types/llm-events';
 
 describe('AdaptiveFallbackStrategy E2E', () => {
   let providers: LLMProviderHandler[];
@@ -25,32 +25,41 @@ describe('AdaptiveFallbackStrategy E2E', () => {
     providers = [
       { id: 'openai', name: 'OpenAI' },
       { id: 'anthropic', name: 'Anthropic' },
-      { id: 'mistral', name: 'Mistral' }
+      { id: 'mistral', name: 'Mistral' },
     ] as LLMProviderHandler[];
 
     // Inizializza le statistiche
     stats = new Map([
-      ['openai', {
-        successCount: 10,
-        failureCount: 2,
-        avgResponseTime: 500,
-        lastFailureTimestamp: 0,
-        costPerToken: 0.1
-      }],
-      ['anthropic', {
-        successCount: 8,
-        failureCount: 1,
-        avgResponseTime: 400,
-        lastFailureTimestamp: 0,
-        costPerToken: 0.08
-      }],
-      ['mistral', {
-        successCount: 12,
-        failureCount: 0,
-        avgResponseTime: 300,
-        lastFailureTimestamp: 0,
-        costPerToken: 0.05
-      }]
+      [
+        'openai',
+        {
+          successCount: 10,
+          failureCount: 2,
+          avgResponseTime: 500,
+          lastFailureTimestamp: 0,
+          costPerToken: 0.1,
+        },
+      ],
+      [
+        'anthropic',
+        {
+          successCount: 8,
+          failureCount: 1,
+          avgResponseTime: 400,
+          lastFailureTimestamp: 0,
+          costPerToken: 0.08,
+        },
+      ],
+      [
+        'mistral',
+        {
+          successCount: 12,
+          failureCount: 0,
+          avgResponseTime: 300,
+          lastFailureTimestamp: 0,
+          costPerToken: 0.05,
+        },
+      ],
     ]);
 
     // Inizializza l'event bus e il listener per gli eventi di cambio strategia
@@ -61,26 +70,30 @@ describe('AdaptiveFallbackStrategy E2E', () => {
     });
 
     // Configura la strategia adattiva con l'event bus
-    strategy = new AdaptiveFallbackStrategy([
-      {
-        name: 'low-cost',
-        strategy: new PreferredFallbackStrategy('mistral'),
-        condition: allConditions([
-          notCondition(providerCostAbove('mistral', 0.1)),
-          notCondition(providerFailedRecently('mistral'))
-        ])
-      },
-      {
-        name: 'high-cost-fallback',
-        strategy: new RoundRobinFallbackStrategy(),
-        condition: providerCostAbove('mistral', 0.1)
-      },
-      {
-        name: 'reliability-fallback',
-        strategy: new ReliabilityFallbackStrategy(5),
-        condition: providerFailedRecently('mistral')
-      }
-    ], true, eventBus);
+    strategy = new AdaptiveFallbackStrategy(
+      [
+        {
+          name: 'low-cost',
+          strategy: new PreferredFallbackStrategy('mistral'),
+          condition: allConditions([
+            notCondition(providerCostAbove('mistral', 0.1)),
+            notCondition(providerFailedRecently('mistral')),
+          ]),
+        },
+        {
+          name: 'high-cost-fallback',
+          strategy: new RoundRobinFallbackStrategy(),
+          condition: providerCostAbove('mistral', 0.1),
+        },
+        {
+          name: 'reliability-fallback',
+          strategy: new ReliabilityFallbackStrategy(5),
+          condition: providerFailedRecently('mistral'),
+        },
+      ],
+      true,
+      eventBus
+    );
   });
 
   it('should select Mistral as preferred provider when conditions are met', () => {
@@ -93,7 +106,7 @@ describe('AdaptiveFallbackStrategy E2E', () => {
     const mistralStats = stats.get('mistral')!;
     stats.set('mistral', {
       ...mistralStats,
-      costPerToken: 0.15
+      costPerToken: 0.15,
     });
 
     const selectedProvider = strategy.selectProvider(providers, stats);
@@ -105,7 +118,7 @@ describe('AdaptiveFallbackStrategy E2E', () => {
     const mistralStats = stats.get('mistral')!;
     stats.set('mistral', {
       ...mistralStats,
-      lastFailureTimestamp: Date.now() - 1000 // Fallimento 1 secondo fa
+      lastFailureTimestamp: Date.now() - 1000, // Fallimento 1 secondo fa
     });
 
     const selectedProvider = strategy.selectProvider(providers, stats);
@@ -116,27 +129,27 @@ describe('AdaptiveFallbackStrategy E2E', () => {
   it('should maintain provider order consistency', () => {
     // Verifica ordine iniziale con Mistral come preferito
     const initialOrder = strategy.getProvidersInOrder(providers, stats);
-    expect(initialOrder.map(p => p.id)).toEqual(['mistral', 'anthropic', 'openai']);
+    expect(initialOrder.map((p) => p.id)).toEqual(['mistral', 'anthropic', 'openai']);
 
     // Simula un fallimento di Mistral
     const mistralStats = stats.get('mistral')!;
     stats.set('mistral', {
       ...mistralStats,
-      lastFailureTimestamp: Date.now() - 1000
+      lastFailureTimestamp: Date.now() - 1000,
     });
 
     // Verifica che l'ordine cambi quando si attiva la strategia di affidabilità
     const newOrder = strategy.getProvidersInOrder(providers, stats);
-    expect(newOrder.map(p => p.id)).toEqual(['anthropic', 'openai', 'mistral']);
+    expect(newOrder.map((p) => p.id)).toEqual(['anthropic', 'openai', 'mistral']);
   });
 
   it('should handle provider failures correctly', () => {
     const failedProviders = new Set(['mistral']);
-    
+
     // Verifica che i provider falliti vengano messi in fondo all'ordine
     const orderedProviders = strategy.getProvidersInOrder(providers, stats, failedProviders);
-    expect(orderedProviders.map(p => p.id)).toEqual(['anthropic', 'openai', 'mistral']);
-    
+    expect(orderedProviders.map((p) => p.id)).toEqual(['anthropic', 'openai', 'mistral']);
+
     // Verifica che il provider selezionato sia il primo non fallito
     const selectedProvider = strategy.selectProvider(providers, stats, failedProviders);
     expect(selectedProvider?.id).toBe('anthropic');
@@ -147,15 +160,15 @@ describe('AdaptiveFallbackStrategy E2E', () => {
       notifySuccess: vi.fn(),
       notifyFailure: vi.fn(),
       selectProvider: vi.fn(),
-      getProvidersInOrder: vi.fn()
+      getProvidersInOrder: vi.fn(),
     };
 
     const testStrategy = new AdaptiveFallbackStrategy([
       {
         name: 'test',
         strategy: mockStrategy,
-        condition: () => true
-      }
+        condition: () => true,
+      },
     ]);
 
     testStrategy.notifySuccess('test-provider');
@@ -167,27 +180,30 @@ describe('AdaptiveFallbackStrategy E2E', () => {
 
   it('should update stats when notified of success/failure', () => {
     const initialStats = new Map([
-      ['test-provider', {
-        successCount: 10,
-        failureCount: 2,
-        avgResponseTime: 100,
-        lastFailureTimestamp: 0
-      }]
+      [
+        'test-provider',
+        {
+          successCount: 10,
+          failureCount: 2,
+          avgResponseTime: 100,
+          lastFailureTimestamp: 0,
+        },
+      ],
     ]);
 
     const mockStrategy = {
       notifySuccess: vi.fn(),
       notifyFailure: vi.fn(),
       selectProvider: vi.fn(),
-      getProvidersInOrder: vi.fn()
+      getProvidersInOrder: vi.fn(),
     };
 
     const testStrategy = new AdaptiveFallbackStrategy([
       {
         name: 'test',
         strategy: mockStrategy,
-        condition: () => true
-      }
+        condition: () => true,
+      },
     ]);
 
     // Notifica successo
@@ -209,7 +225,7 @@ describe('AdaptiveFallbackStrategy E2E', () => {
       const mistralStats = stats.get('mistral')!;
       stats.set('mistral', {
         ...mistralStats,
-        costPerToken: 0.15
+        costPerToken: 0.15,
       });
 
       strategy.selectProvider(providers, stats);
@@ -220,23 +236,23 @@ describe('AdaptiveFallbackStrategy E2E', () => {
         toStrategy: 'high-cost-fallback',
         reason: 'Condition satisfied',
         timestamp: expect.any(Number),
-        stats: expect.any(Map)
+        stats: expect.any(Map),
       });
 
       // Verifica che le statistiche nell'evento siano una copia
       expect(strategyChangeEvents[0].stats).not.toBe(stats);
       expect(strategyChangeEvents[0].stats.get('mistral')).toMatchObject({
-        costPerToken: 0.15
+        costPerToken: 0.15,
       });
     });
 
     it('should emit event when switching to reliability due to failure', () => {
       const mistralStats = stats.get('mistral')!;
       const failureTime = Date.now() - 1000;
-      
+
       stats.set('mistral', {
         ...mistralStats,
-        lastFailureTimestamp: failureTime
+        lastFailureTimestamp: failureTime,
       });
 
       strategy.selectProvider(providers, stats);
@@ -247,11 +263,11 @@ describe('AdaptiveFallbackStrategy E2E', () => {
         toStrategy: 'reliability-fallback',
         reason: 'Condition satisfied',
         timestamp: expect.any(Number),
-        stats: expect.any(Map)
+        stats: expect.any(Map),
       });
 
       expect(strategyChangeEvents[0].stats.get('mistral')).toMatchObject({
-        lastFailureTimestamp: failureTime
+        lastFailureTimestamp: failureTime,
       });
     });
 
@@ -261,7 +277,7 @@ describe('AdaptiveFallbackStrategy E2E', () => {
       stats.set('mistral', {
         ...mistralStats,
         costPerToken: 0.15,
-        lastFailureTimestamp: Date.now() - 1000
+        lastFailureTimestamp: Date.now() - 1000,
       });
 
       strategy.selectProvider(providers, stats);
@@ -269,8 +285,8 @@ describe('AdaptiveFallbackStrategy E2E', () => {
       expect(strategyChangeEvents).toHaveLength(1);
       expect(strategyChangeEvents[0]).toMatchObject({
         toStrategy: 'default',
-        reason: 'No conditions satisfied'
+        reason: 'No conditions satisfied',
       });
     });
   });
-}); 
+});

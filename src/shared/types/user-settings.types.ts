@@ -19,20 +19,20 @@ export interface ChatSettings {
   enableStreaming?: boolean;
   contextWindow?: number;
   model?: string;
-  
+
   // Parametri di esecuzione
   workingDirectory?: string;
   shell?: string;
   customInstructions?: string;
   mode?: string;
   planActSeparateModels?: boolean;
-  
+
   // Impostazioni di visualizzazione UI
   displayMode?: 'standard' | 'minimal' | 'full';
   font?: string;
   fontSize: number;
   theme: 'light' | 'dark' | 'system';
-  
+
   // Funzionalità chat
   autosave?: boolean;
   autosaveInterval?: number;
@@ -61,14 +61,14 @@ export interface BrowserSettings {
   browserContextEnabled?: boolean;
   headless?: boolean;
   timeout: number;
-  
+
   // Comportamento browser
   useSandbox?: boolean;
   allowJavaScript?: boolean;
   allowCookies?: boolean;
   allowLocalStorage?: boolean;
   debugMode: boolean;
-  
+
   // Acquisizione contenuto
   includeFullPageText?: boolean;
   includeActiveTabOnly?: boolean;
@@ -77,16 +77,16 @@ export interface BrowserSettings {
   useMhtml?: boolean;
   maxUrls?: number;
   maxNavigationDepth?: number;
-  
+
   // Configurazioni browser
   userAgent?: string;
   customUserAgent?: string;
   customChromeExecutablePath?: string;
-  
+
   // Navigazione
   url?: string;
   startUrl?: string;
-  
+
   // Visualizzazione
   viewport?: {
     width: number;
@@ -142,19 +142,19 @@ export function normalizeChatSettings(settings?: Partial<ChatSettings>): ChatSet
     stopSequences: [],
     enableStreaming: true,
     contextWindow: 4000,
-    
+
     // Parametri di esecuzione
     workingDirectory: '',
     shell: '',
     customInstructions: '',
     planActSeparateModels: false,
-    
+
     // Impostazioni di visualizzazione UI
     displayMode: 'standard',
     font: 'system-ui',
     fontSize: 14,
     theme: 'system',
-    
+
     // Funzionalità chat
     autosave: true,
     autosaveInterval: 5,
@@ -171,7 +171,7 @@ export function normalizeChatSettings(settings?: Partial<ChatSettings>): ChatSet
     enableAutoScroll: true,
     displayTimestamps: true,
     useMarkdown: true,
-    
+
     ...settings,
   };
 }
@@ -188,14 +188,14 @@ export function normalizeBrowserSettings(settings?: Partial<BrowserSettings>): B
     browserContextEnabled: true,
     headless: true,
     timeout: 30000,
-    
+
     // Comportamento browser
     useSandbox: true,
     allowJavaScript: true,
     allowCookies: true,
     allowLocalStorage: true,
     debugMode: false,
-    
+
     // Acquisizione contenuto
     includeFullPageText: true,
     includeActiveTabOnly: false,
@@ -204,10 +204,10 @@ export function normalizeBrowserSettings(settings?: Partial<BrowserSettings>): B
     useMhtml: false,
     maxUrls: 5,
     maxNavigationDepth: 2,
-    
+
     // Navigazione
     startUrl: '',
-    
+
     // Visualizzazione
     viewport: {
       width: 900,
@@ -221,7 +221,7 @@ export function normalizeBrowserSettings(settings?: Partial<BrowserSettings>): B
       quality: 90,
       fullPage: true,
     },
-    
+
     ...settings,
   };
 }
@@ -231,7 +231,9 @@ export function normalizeBrowserSettings(settings?: Partial<BrowserSettings>): B
  * @param settings Impostazioni di approvazione automatica parziali
  * @returns Impostazioni di approvazione automatica complete con valori predefiniti
  */
-export function normalizeAutoApprovalSettings(settings?: Partial<AutoApprovalSettings>): AutoApprovalSettings {
+export function normalizeAutoApprovalSettings(
+  settings?: Partial<AutoApprovalSettings>
+): AutoApprovalSettings {
   return {
     enabled: false,
     actions: {
@@ -251,4 +253,4 @@ export function normalizeAutoApprovalSettings(settings?: Partial<AutoApprovalSet
     allowTerminalCommands: false,
     ...settings,
   };
-} 
+}

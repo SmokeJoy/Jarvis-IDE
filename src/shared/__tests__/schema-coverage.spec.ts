@@ -4,16 +4,16 @@ import * as path from 'path';
 import * as glob from 'glob';
 
 // Import validators and types
-import { 
-  isValidChatMessage, 
+import {
+  isValidChatMessage,
   isValidChatMessageArray,
-  isValidChatSettings, 
+  isValidChatSettings,
   isValidApiConfiguration,
   validateChatMessageOrThrow,
   validateChatMessageArrayOrThrow,
   validateChatSettingsOrThrow,
-  validateApiConfigurationOrThrow
-} from '../validators.js';
+  validateApiConfigurationOrThrow,
+} from '../validators';
 
 // Mock del logger per evitare di dipendere da VSCode
 vi.mock('../../utils/logger', () => ({
@@ -22,7 +22,7 @@ vi.mock('../../utils/logger', () => ({
     warn: vi.fn(),
     info: vi.fn(),
     debug: vi.fn(),
-  }
+  },
 }));
 
 // Path to the examples directory
@@ -71,15 +71,16 @@ const testCases: TestCase[] = [
 
 // Function to get example files matching a glob pattern
 function getExampleFiles(glob: string): string[] {
-  const files = fs.readdirSync(examplesDir)
-    .filter(file => {
+  const files = fs
+    .readdirSync(examplesDir)
+    .filter((file) => {
       // Simple glob matching (supports only * wildcard)
       const pattern = glob.replace('*', '.*');
       const regex = new RegExp(`^${pattern}$`, 'i');
       return regex.test(file);
     })
-    .map(file => path.join(examplesDir, file));
-  
+    .map((file) => path.join(examplesDir, file));
+
   return files;
 }
 
@@ -88,26 +89,26 @@ describe('Schema and Validator alignment', () => {
   testCases.forEach(({ schemaType, validator, strictValidator, exampleGlob }) => {
     describe(`${schemaType} validation`, () => {
       const exampleFiles = getExampleFiles(exampleGlob);
-      
+
       if (exampleFiles.length === 0) {
         it.todo(`No example files found for ${schemaType} (${exampleGlob})`);
         return;
       }
-      
-      exampleFiles.forEach(filePath => {
+
+      exampleFiles.forEach((filePath) => {
         const fileName = path.basename(filePath);
-        
+
         it(`validates example file ${fileName}`, () => {
           const data = readJsonFile(filePath);
           expect(validator(data)).toBe(true);
         });
-        
+
         it(`strict validates example file ${fileName} without throwing`, () => {
           const data = readJsonFile(filePath);
           expect(() => strictValidator(data)).not.toThrow();
         });
       });
-      
+
       it(`has consistent schema for ${schemaType}`, () => {
         // Ensure the schema exists and is properly loaded
         expect(validator).toBeDefined();
@@ -117,4 +118,4 @@ describe('Schema and Validator alignment', () => {
       });
     });
   });
-}); 
+});

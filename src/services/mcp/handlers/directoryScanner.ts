@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { HandlerFunction } from '../types.js';
+import { HandlerFunction } from '../types';
 import { readdir } from 'fs/promises';
 import { join } from 'path';
-import { DirectoryScanArgs } from '../mcp.types.js';
+import { DirectoryScanArgs } from '../mcp.types';
 
 interface DirectoryScanResult {
   path: string;
@@ -10,20 +10,24 @@ interface DirectoryScanResult {
   children?: DirectoryScanResult[];
 }
 
-async function scanDirectory(path: string, maxDepth: number = 3, exclude: string[] = []): Promise<DirectoryScanResult[]> {
+async function scanDirectory(
+  path: string,
+  maxDepth: number = 3,
+  exclude: string[] = []
+): Promise<DirectoryScanResult[]> {
   try {
     const entries = await readdir(path, { withFileTypes: true });
     const results: DirectoryScanResult[] = [];
 
     for (const entry of entries) {
-      if (exclude.some(pattern => entry.name.match(pattern))) {
+      if (exclude.some((pattern) => entry.name.match(pattern))) {
         continue;
       }
 
       const entryPath = join(path, entry.name);
       const result: DirectoryScanResult = {
         path: entryPath,
-        type: entry.isDirectory() ? 'directory' : 'file'
+        type: entry.isDirectory() ? 'directory' : 'file',
       };
 
       if (entry.isDirectory() && maxDepth > 0) {
@@ -42,21 +46,21 @@ async function scanDirectory(path: string, maxDepth: number = 3, exclude: string
 
 export const directoryScanner: HandlerFunction = async (args: DirectoryScanArgs) => {
   const { path, maxDepth = 3, exclude = ['.git', 'node_modules'] } = args;
-  const recursive = args.recursive !== undefined ? args.recursive : (maxDepth !== 0);
+  const recursive = args.recursive !== undefined ? args.recursive : maxDepth !== 0;
 
   try {
     // Se recursive è false, usa maxDepth = 0, altrimenti usa il valore specificato
     const effectiveMaxDepth = recursive ? maxDepth : 0;
-    
+
     const results = await scanDirectory(path, effectiveMaxDepth, exclude);
     return {
       success: true,
-      data: results
+      data: results,
     };
   } catch (error) {
     return {
       success: false,
-      error: `Failed to scan directory: ${error.message}`
+      error: `Failed to scan directory: ${error.message}`,
     };
   }
 };

@@ -18,7 +18,7 @@ export function getVsCodeApi() {
   if (typeof window.vscode !== 'undefined') {
     return window.vscode;
   }
-  
+
   // Fallback per ambiente di sviluppo o test
   return {
     postMessage: (message: any) => {
@@ -27,7 +27,7 @@ export function getVsCodeApi() {
     getState: () => ({}),
     setState: (state: any) => {
       console.log('VS Code API mock: setState', state);
-    }
+    },
   };
 }
 
@@ -51,4 +51,4 @@ export function isDarkTheme(): boolean {
 export function getResourceUrl(relativePath: string): string {
   const baseUrl = getResourceBaseUrl();
   return `${baseUrl}/${relativePath}`;
-} 
+}

@@ -5,11 +5,8 @@
  * - Eliminazione impliciti
  */
 
-import { ContextLink } from '../types.js';
-import {
-  NavigationOptions,
-  NavigationResult
-} from '../types/navigation.types';
+import { ContextLink } from '../types';
+import { NavigationOptions, NavigationResult } from '../types/navigation.types';
 
 export interface NodeResult {
   id: string;
@@ -26,10 +23,7 @@ export interface EdgeResult {
   confidence?: number;
 }
 
-export function calculateSemanticScore(
-  link: ContextLink,
-  options: NavigationOptions
-): number {
+export function calculateSemanticScore(link: ContextLink, options: NavigationOptions): number {
   let score = 1.0;
 
   // Moltiplicatori per relazioni preferite
@@ -49,7 +43,11 @@ export function calculateSemanticScore(
   if (options.minStrength && link.strength && link.strength < options.minStrength) {
     score = 0;
   }
-  if (options.minConfidence && link.metadata?.confidence && link.metadata.confidence < options.minConfidence) {
+  if (
+    options.minConfidence &&
+    link.metadata?.confidence &&
+    link.metadata.confidence < options.minConfidence
+  ) {
     score = 0;
   }
 
@@ -62,33 +60,30 @@ export function buildNodeResult(
   includeMetadata: boolean
 ): NodeResult {
   const node: NodeResult = { id: context.id };
-  
+
   if (includeContent) {
     node.text = context.text;
   }
   if (includeMetadata) {
     node.tags = context.tags;
   }
-  
+
   return node;
 }
 
-export function buildEdgeResult(
-  link: ContextLink,
-  includeMetadata: boolean
-): EdgeResult {
+export function buildEdgeResult(link: ContextLink, includeMetadata: boolean): EdgeResult {
   const edge: EdgeResult = {
     id: link.id,
     sourceId: link.sourceId,
     targetId: link.targetId,
-    relation: link.relation
+    relation: link.relation,
   };
-  
+
   if (includeMetadata) {
     edge.strength = link.strength;
     edge.confidence = link.metadata?.confidence;
   }
-  
+
   return edge;
 }
 
@@ -96,14 +91,18 @@ export function filterLinksByOptions(
   links: ContextLink[],
   options: NavigationOptions
 ): ContextLink[] {
-  return links.filter(link => {
+  return links.filter((link) => {
     // Filtri su strength e confidence
     if (options.minStrength && link.strength && link.strength < options.minStrength) {
       return false;
     }
-    if (options.minConfidence && link.metadata?.confidence && link.metadata.confidence < options.minConfidence) {
+    if (
+      options.minConfidence &&
+      link.metadata?.confidence &&
+      link.metadata.confidence < options.minConfidence
+    ) {
       return false;
     }
     return true;
   });
-} 
+}

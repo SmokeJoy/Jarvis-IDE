@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { LLMProviderHandler } from '../providers/provider-registry-stub';
-import { LLMEventBus } from '../mas/core/fallback/LLMEventBus';
+import { LLMEventBus, LLMEventType, LLMEventPayload, AdaptiveStrategyChangePayload } from '../mas/types/llm-events';
 import { ProviderStats } from '../mas/core/fallback/LLMFallbackManager';
 import { FallbackStrategy } from '../mas/core/fallback/strategies/FallbackStrategy';
 
@@ -10,7 +10,7 @@ interface FallbackTelemetryState {
   recentEvents: Array<{
     type: string;
     timestamp: number;
-    payload: any;
+    payload: LLMEventPayload;
   }>;
   activeConditions: Array<{
     name: string;
@@ -32,53 +32,59 @@ export function useFallbackTelemetry({
   strategy,
   providers,
   maxEvents = 50,
-  debug = false
+  debug = false,
 }: UseFallbackTelemetryOptions) {
   const [state, setState] = useState<FallbackTelemetryState>({
     activeStrategy: strategy.getCurrentStrategyName?.(providers) || 'unknown',
     currentProvider: null,
     recentEvents: [],
     activeConditions: [],
-    providerStats: new Map()
+    providerStats: new Map(),
   });
 
   // Gestisce gli eventi di cambio strategia
-  const handleStrategyChange = useCallback((payload: any) => {
-    setState(prev => ({
-      ...prev,
-      activeStrategy: payload.toStrategy,
-      recentEvents: [
-        {
-          type: 'strategy:adaptive:change',
-          timestamp: Date.now(),
-          payload
-        },
-        ...prev.recentEvents.slice(0, maxEvents - 1)
-      ]
-    }));
-  }, [maxEvents]);
+  const handleStrategyChange = useCallback(
+    (payload: AdaptiveStrategyChangePayload) => {
+      setState((prev) => ({
+        ...prev,
+        activeStrategy: payload.toStrategy,
+        recentEvents: [
+          {
+            type: 'strategy:adaptive:change',
+            timestamp: Date.now(),
+            payload,
+          },
+          ...prev.recentEvents.slice(0, maxEvents - 1),
+        ],
+      }));
+    },
+    [maxEvents]
+  );
 
   // Gestisce gli eventi di successo/failure dei provider
-  const handleProviderEvent = useCallback((type: string, payload: any) => {
-    setState(prev => ({
-      ...prev,
-      recentEvents: [
-        {
-          type,
-          timestamp: Date.now(),
-          payload
-        },
-        ...prev.recentEvents.slice(0, maxEvents - 1)
-      ]
-    }));
-  }, [maxEvents]);
+  const handleProviderEvent = useCallback(
+    (type: string, payload: LLMEventPayload) => {
+      setState((prev) => ({
+        ...prev,
+        recentEvents: [
+          {
+            type,
+            timestamp: Date.now(),
+            payload,
+          },
+          ...prev.recentEvents.slice(0, maxEvents - 1),
+        ],
+      }));
+    },
+    [maxEvents]
+  );
 
   // Aggiorna lo stato del provider corrente
   const updateCurrentProvider = useCallback(() => {
     const currentProvider = strategy.selectProvider(providers, state.providerStats);
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      currentProvider
+      currentProvider,
     }));
   }, [strategy, providers, state.providerStats]);
 
@@ -86,18 +92,18 @@ export function useFallbackTelemetry({
   const updateActiveConditions = useCallback(() => {
     if ('getActiveConditions' in strategy) {
       const activeConditions = strategy.getActiveConditions?.(state.providerStats) || [];
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
-        activeConditions
+        activeConditions,
       }));
     }
   }, [strategy, state.providerStats]);
 
   // Setup degli event listeners
   useEffect(() => {
-    const strategyChangeListener = (payload: any) => handleStrategyChange(payload);
-    const successListener = (payload: any) => handleProviderEvent('provider:success', payload);
-    const failureListener = (payload: any) => handleProviderEvent('provider:failure', payload);
+    const strategyChangeListener = (payload: AdaptiveStrategyChangePayload) => handleStrategyChange(payload);
+    const successListener = (payload: LLMEventPayload) => handleProviderEvent('provider:success', payload);
+    const failureListener = (payload: LLMEventPayload) => handleProviderEvent('provider:failure', payload);
 
     eventBus.on('strategy:adaptive:change', strategyChangeListener);
     eventBus.on('provider:success', successListener);
@@ -115,7 +121,13 @@ export function useFallbackTelemetry({
       eventBus.off('provider:failure', failureListener);
       clearInterval(interval);
     };
-  }, [eventBus, handleStrategyChange, handleProviderEvent, updateCurrentProvider, updateActiveConditions]);
+  }, [
+    eventBus,
+    handleStrategyChange,
+    handleProviderEvent,
+    updateCurrentProvider,
+    updateActiveConditions,
+  ]);
 
   // Debug logging
   useEffect(() => {
@@ -127,6 +139,6 @@ export function useFallbackTelemetry({
   return {
     ...state,
     updateCurrentProvider,
-    updateActiveConditions
+    updateActiveConditions,
   };
-} 
+}

@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { WebviewMessage } from '../types/webview.js';
+import { WebviewMessage } from '../types/webview';
 
 declare const vscode: {
   postMessage: (message: WebviewMessage) => void;
@@ -14,8 +14,8 @@ export const useJarvisIdeSystemPrompt = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          systemPrompt: newPrompt
-        }
+          systemPrompt: newPrompt,
+        },
       });
 
       setSystemPrompt(newPrompt);
@@ -32,8 +32,8 @@ export const useJarvisIdeSystemPrompt = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          systemPrompt: defaultPrompt
-        }
+          systemPrompt: defaultPrompt,
+        },
       });
 
       setSystemPrompt(defaultPrompt);
@@ -46,6 +46,6 @@ export const useJarvisIdeSystemPrompt = () => {
   return {
     systemPrompt,
     updateSystemPrompt,
-    resetSystemPrompt
+    resetSystemPrompt,
   };
 };

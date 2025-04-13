@@ -64,7 +64,7 @@ export class MasDispatcher {
 
     // Recupera lo stato dell'agente dalla memoria
     const savedState = await this.memoryManager.getAgentState(agentId);
-    
+
     // Se c'è uno stato salvato, aggiorna l'enabled state
     if (savedState && savedState.enabled !== undefined) {
       agent.setEnabled(savedState.enabled);
@@ -80,9 +80,9 @@ export class MasDispatcher {
       case MasMessageType.AGENT_TOGGLE_ENABLE:
         await this.handleAgentToggleEnable(message);
         break;
-      
+
       // Altri tipi di messaggi...
-      
+
       default:
         console.warn(`MasDispatcher: tipo di messaggio sconosciuto: ${message.type}`);
         break;
@@ -96,14 +96,14 @@ export class MasDispatcher {
   private async handleAgentToggleEnable(message: MasMessage): Promise<void> {
     const { agentId, enabled } = message;
     if (!agentId || enabled === undefined) return;
-    
+
     const agent = this.agents[agentId];
     if (!agent) return;
-    
+
     // Aggiorna lo stato dell'agente
     agent.setEnabled(enabled);
-    
+
     // Salva lo stato in memoria per persistenza
     await this.memoryManager.saveAgentState(agentId, { enabled });
   }
-} 
+}

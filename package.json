@@ -3,7 +3,7 @@
   "displayName": "Jarvis IDE MAS",
   "description": "Assistente AI per sviluppatori con supporto import/export sessioni",
   "version": "1.0.0-mas",
-  "type": "module",
+  "type": "commonjs",
   "publisher": "jarvis-ide",
   "private": true,
   "license": "MIT",
@@ -45,12 +45,13 @@
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "ts-node --esm node_modules/mocha/bin/mocha.js src/**/*.test.ts",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "test": "vitest",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "coverage": "vitest run --coverage",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest watch",
     "test:providers": "tsx scripts/test-providers.ts",
     "test:providers:openai": "tsx scripts/test-providers.ts openai",
     "test:providers:groq": "tsx scripts/test-providers.ts groq",
@@ -63,7 +64,7 @@
     "mcp-server:debug": "node --trace-warnings --experimental-specifier-resolution=node --loader ts-node/esm src/services/mcp/run-server.ts",
     "test:mcp": "vitest --config=vitest.config.cjs src/services/mcp/__tests__/mcp-server.test.js --detectOpenHandles",
     "test:mcp:coverage": "vitest --config=vitest.config.cjs src/services/mcp/__tests__/mcp-server.test.js --coverage --detectOpenHandles",
-    "fix-imports": "node scripts/fix-imports.js",
+    "fix-imports": "ts-node scripts/fix-js-imports.ts",
     "fix-imports:dry": "node scripts/fix-imports.js --dry-run",
     "fix-imports:ts": "node --loader ts-node/esm src/scripts/fix-imports.ts",
     "fix-double-js": "node scripts/fix-double-js.js",
@@ -72,11 +73,38 @@
     "test:payload": "ts-node scripts/test-payloads.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "fix:imports": "ts-node scripts/codemods/fix-import-type.ts",
+    "fix:imports": "ts-node -P tsconfig.node.json scripts/fix-imports.ts",
     "test:codemods": "vitest run",
     "test:codemods:watch": "vitest watch",
     "changelog:imports": "ts-node scripts/codemods/generate-import-fix-changelog.ts",
-    "fix:imports:ast": "ts-node scripts/codemods/fix-import-type-ast.ts"
+    "fix:imports:ast": "ts-node scripts/codemods/fix-import-type-ast.ts",
+    "verify:imports": "node scripts/verify-imports.js",
+    "verify:all": "pnpm verify:imports && pnpm lint && pnpm tsc --noEmit && pnpm vitest run",
+    "type:analyze": "ts-node scripts/type-analyzer.ts",
+    "type:migrate": "ts-node -P tsconfig.node.json scripts/type-migrate.ts",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "lint:all": "pnpm lint && pnpm format",
+    "fix": "pnpm lint && pnpm format && pnpm type:analyze && pnpm refactor:report",
+    "refactor:compile": "tsc -p tsconfig.scripts.json",
+    "refactor:fix-nested": "pnpm refactor:compile && node dist-scripts/fixes/fix-nested-safe-message.js",
+    "refactor:add-imports": "pnpm refactor:compile && node dist-scripts/fixes/add-missing-imports.js",
+    "refactor:chat": "pnpm refactor:compile && node dist-scripts/fixes/transform-chat-message.js",
+    "refactor:check-safety": "pnpm refactor:compile && node dist-scripts/checks/verify-all-safety.js",
+    "refactor:fix-all": "pnpm refactor:fix-nested && pnpm refactor:add-imports && pnpm refactor:check-safety",
+    "refactor:badge": "pnpm refactor:compile && node dist-scripts/dashboard/badge-generator.js",
+    "refactor:report": "pnpm refactor:compile && node dist-scripts/dashboard/generate-report.js",
+    "refactor:verify": "pnpm refactor:compile && node dist-scripts/checks/verify-safe-messages.js",
+    "refactor:all": "pnpm refactor:verify && pnpm refactor:fix-nested && pnpm refactor:add-imports && pnpm tsc --noEmit && pnpm refactor:report",
+    "dashboard": "ts-node --esm tools/run-dashboard.ts",
+    "dashboard:trend": "ts-node --esm tools/jarvis-refactor.ts --generate-trend",
+    "dashboard:detailed": "ts-node --esm tools/jarvis-refactor.ts --detailed-report",
+    "dashboard:fix": "ts-node --esm tools/jarvis-refactor.ts --auto-fix",
+    "dashboard:priority": "ts-node --esm tools/jarvis-refactor.ts --priority-report",
+    "refactor:js-imports": "ts-node --esm -P tsconfig.node.json tools/jarvis-refactor.ts --find-js-imports",
+    "refactor:rename-js": "ts-node --esm -P tsconfig.node.json tools/jarvis-refactor.ts --rename-js-to-ts",
+    "refactor:map": "ts-node --esm -P tsconfig.node.json tools/jarvis-refactor.ts --generate-map",
+    "type:audit": "pnpm type:analyze && pnpm refactor:report && pnpm refactor:js-imports",
+    "dashboard:dev": "vite --config refactor-dashboard/vite.config.ts refactor-dashboard"
   },
   "contributes": {
     "viewsContainers": {
@@ -90,6 +118,11 @@
           "id": "jarvis-ide",
           "title": "Jarvis IDE",
           "icon": "resources/icon.svg"
+        },
+        {
+          "id": "jarvis-refactor",
+          "title": "Jarvis Refactor",
+          "icon": "assets/icons/refactor.svg"
         }
       ]
     },
@@ -106,6 +139,14 @@
           "type": "webview",
           "id": "jarvis.settingsView",
           "name": "Impostazioni"
+        }
+      ],
+      "jarvis-refactor": [
+        {
+          "type": "webview",
+          "id": "jarvis.refactorOverlay",
+          "name": "Refactor Tracker",
+          "visibility": "visible"
         }
       ]
     },
@@ -237,6 +278,21 @@
       {
         "command": "jarvis.previewSession",
         "title": "Jarvis: Anteprima Sessione"
+      },
+      {
+        "command": "jarvis.openRefactorDashboard",
+        "title": "Jarvis: Apri Dashboard Refactoring",
+        "category": "Jarvis Refactor"
+      },
+      {
+        "command": "jarvis.refreshRefactorData",
+        "title": "Jarvis: Aggiorna Dati Refactoring",
+        "category": "Jarvis Refactor"
+      },
+      {
+        "command": "jarvis.showCriticalFiles",
+        "title": "Jarvis: Mostra File Critici",
+        "category": "Jarvis Refactor"
       }
     ],
     "configuration": {
@@ -266,6 +322,21 @@
           "type": "string",
           "default": "",
           "description": "Prompt di contesto personalizzato da utilizzare nelle conversazioni"
+        },
+        "jarvis-ide.refactor.autoScanOnOpen": {
+          "type": "boolean",
+          "default": true,
+          "description": "Esegui automaticamente una scansione del codice all'apertura dell'editor"
+        },
+        "jarvis-ide.refactor.showDecorations": {
+          "type": "boolean",
+          "default": true,
+          "description": "Mostra decorazioni nell'editor per 'any' e import .js"
+        },
+        "jarvis-ide.refactor.refreshInterval": {
+          "type": "number",
+          "default": 300,
+          "description": "Intervallo in secondi per l'aggiornamento automatico dei dati di refactoring"
         }
       }
     }
@@ -312,15 +383,22 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",
+    "@babel/parser": "^7.27.0",
     "@babel/preset-env": "^7.26.9",
     "@babel/preset-typescript": "^7.27.0",
+    "@babel/traverse": "^7.23.2",
+    "@babel/types": "^7.27.0",
+    "@eslint/js": "^9.0.0",
     "@playwright/test": "^1.51.1",
     "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^14.2.1",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/user-event": "^14.0.0",
     "@types/cheerio": "^0.22.35",
     "@types/jest": "^29.5.14",
+    "@types/json2csv": "^5.0.7",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^20.11.24",
+    "@types/node": "^20.17.30",
+    "@types/puppeteer": "^7.0.4",
     "@types/puppeteer-core": "^5.4.0",
     "@types/react": "^18.3.20",
     "@types/react-dom": "^18.3.6",
@@ -329,32 +407,43 @@
     "@types/styled-components": "^5.1.34",
     "@types/supertest": "^6.0.3",
     "@types/turndown": "^5.0.5",
-    "@types/vscode": "^1.85.0",
+    "@types/vscode": "^1.99.1",
     "@types/vscode-webview": "^1.57.5",
     "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "@typescript-eslint/typescript-estree": "^8.29.1",
     "@vitejs/plugin-react": "^4.2.1",
-    "@vitest/coverage-v8": "^1.2.2",
+    "@vitest/coverage-v8": "^1.0.0",
     "@vscode/test-electron": "^2.4.1",
     "@vscode/webview-ui-toolkit": "^1.4.0",
     "babel-jest": "^29.7.0",
-    "eslint": "^8.56.0",
+    "chalk": "^5.4.1",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.37.5",
+    "fast-glob": "^3.3.3",
     "glob": "^10.3.10",
+    "globals": "^16.0.0",
     "isbinaryfile": "^5.0.4",
-    "jsdom": "^24.0.0",
+    "jsdom": "^22.0.0",
+    "json2csv": "6.0.0-alpha.2",
     "mammoth": "^1.9.0",
     "mocha": "^10.3.0",
     "open-graph-scraper": "^6.9.0",
     "os-name": "^6.0.0",
+    "prettier": "^3.5.3",
+    "puppeteer": "^24.6.1",
     "puppeteer-core": "^24.6.0",
     "simple-git": "^3.27.0",
     "supertest": "^7.1.0",
     "ts-jest": "^29.3.1",
     "ts-loader": "^9.5.1",
+    "ts-morph": "^25.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
-    "vite": "^5.1.1",
+    "typescript-eslint": "^7.0.0",
+    "vite": "^5.4.18",
     "vitest": "^1.6.1",
     "vscode": "^1.1.37",
     "web-tree-sitter": "^0.25.3",

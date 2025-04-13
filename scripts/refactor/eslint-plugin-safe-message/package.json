@@ -1,0 +1,18 @@
+{
+  "name": "eslint-plugin-safe-message",
+  "version": "1.0.0",
+  "description": "Plugin ESLint per verificare l'uso corretto di createSafeMessage",
+  "main": "index.js",
+  "author": "ChatMessages Refactoring Team",
+  "license": "MIT",
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "eslint-plugin",
+    "typescript",
+    "type-safety"
+  ],
+  "peerDependencies": {
+    "eslint": ">=6.0.0"
+  }
+} 

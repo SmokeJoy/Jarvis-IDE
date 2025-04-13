@@ -20,7 +20,7 @@ export const TimelineFilterBar: React.FC<TimelineFilterBarProps> = ({
   availableStrategies,
   onEventTypeChange,
   onProviderChange,
-  onStrategyChange
+  onStrategyChange,
 }) => {
   return (
     <div className="bg-gray-800 p-2 rounded-lg mb-2">
@@ -47,8 +47,10 @@ export const TimelineFilterBar: React.FC<TimelineFilterBarProps> = ({
             className="w-full bg-gray-700 text-white rounded px-2 py-1 text-sm"
           >
             <option value="all">All Providers</option>
-            {availableProviders.map(p => (
-              <option key={p} value={p}>{p}</option>
+            {availableProviders.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
             ))}
           </select>
         </div>
@@ -61,12 +63,14 @@ export const TimelineFilterBar: React.FC<TimelineFilterBarProps> = ({
             className="w-full bg-gray-700 text-white rounded px-2 py-1 text-sm"
           >
             <option value="all">All Strategies</option>
-            {availableStrategies.map(s => (
-              <option key={s} value={s}>{s}</option>
+            {availableStrategies.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
             ))}
           </select>
         </div>
       </div>
     </div>
   );
-}; 
+};

@@ -1,6 +1,6 @@
-import { 
-  isModelInfoBase, 
-  isModelInfoStandard, 
+import {
+  isModelInfoBase,
+  isModelInfoStandard,
   isModelInfo,
   isOpenAiCompatibleModelInfo,
   isAnthropicModelInfo,
@@ -10,7 +10,7 @@ import {
   validateModelInfoArray,
   ModelInfoBase,
   ModelInfo,
-  ProviderId
+  ProviderId,
 } from '../modelValidator';
 
 // Mock del logger
@@ -46,7 +46,7 @@ describe('modelValidator', () => {
       id: 'model-id',
       name: 'Test Model',
       provider: 'openai',
-      contextLength: 8192
+      contextLength: 8192,
     };
 
     it('dovrebbe validare un ModelInfoBase corretto', () => {
@@ -65,7 +65,9 @@ describe('modelValidator', () => {
     });
 
     it('dovrebbe rifiutare oggetti con proprietà mancanti', () => {
-      expect(isModelInfoBase({ name: 'test', provider: 'openai', contextLength: 4000 })).toBe(false);
+      expect(isModelInfoBase({ name: 'test', provider: 'openai', contextLength: 4000 })).toBe(
+        false
+      );
       expect(isModelInfoBase({ id: 'test', provider: 'openai', contextLength: 4000 })).toBe(false);
       expect(isModelInfoBase({ id: 'test', name: 'test', contextLength: 4000 })).toBe(false);
       expect(isModelInfoBase({ id: 'test', name: 'test', provider: 'openai' })).toBe(false);
@@ -101,7 +103,7 @@ describe('modelValidator', () => {
       contextLength: 8192,
       maxTokens: 4000,
       description: 'Test description',
-      supported: true
+      supported: true,
     };
 
     it('dovrebbe validare un ModelInfoStandard corretto', () => {
@@ -109,27 +111,35 @@ describe('modelValidator', () => {
     });
 
     it('dovrebbe validare un ModelInfoStandard con proprietà opzionali mancanti', () => {
-      expect(isModelInfoStandard({
-        id: 'model-id',
-        name: 'Test Model',
-        provider: 'openai',
-        contextLength: 8192
-      })).toBe(true);
+      expect(
+        isModelInfoStandard({
+          id: 'model-id',
+          name: 'Test Model',
+          provider: 'openai',
+          contextLength: 8192,
+        })
+      ).toBe(true);
 
-      expect(isModelInfoStandard({
-        ...validModel,
-        maxTokens: undefined
-      })).toBe(true);
+      expect(
+        isModelInfoStandard({
+          ...validModel,
+          maxTokens: undefined,
+        })
+      ).toBe(true);
 
-      expect(isModelInfoStandard({
-        ...validModel,
-        description: undefined
-      })).toBe(true);
+      expect(
+        isModelInfoStandard({
+          ...validModel,
+          description: undefined,
+        })
+      ).toBe(true);
 
-      expect(isModelInfoStandard({
-        ...validModel,
-        supported: undefined
-      })).toBe(true);
+      expect(
+        isModelInfoStandard({
+          ...validModel,
+          supported: undefined,
+        })
+      ).toBe(true);
     });
 
     it('dovrebbe rifiutare oggetti con proprietà di tipo errato', () => {
@@ -154,14 +164,14 @@ describe('modelValidator', () => {
       pricing: {
         prompt: 0.001,
         completion: 0.002,
-        unit: 'token'
+        unit: 'token',
       },
       supporting: {
         images: true,
         json: true,
         functions: false,
-        vision: true
-      }
+        vision: true,
+      },
     };
 
     it('dovrebbe validare un ModelInfo corretto', () => {
@@ -169,51 +179,67 @@ describe('modelValidator', () => {
     });
 
     it('dovrebbe validare un ModelInfo con proprietà opzionali mancanti', () => {
-      expect(isModelInfo({
-        id: 'model-id',
-        name: 'Test Model',
-        provider: 'openai',
-        contextLength: 8192
-      })).toBe(true);
+      expect(
+        isModelInfo({
+          id: 'model-id',
+          name: 'Test Model',
+          provider: 'openai',
+          contextLength: 8192,
+        })
+      ).toBe(true);
 
-      expect(isModelInfo({
-        ...validModel,
-        pricing: undefined
-      })).toBe(true);
+      expect(
+        isModelInfo({
+          ...validModel,
+          pricing: undefined,
+        })
+      ).toBe(true);
 
-      expect(isModelInfo({
-        ...validModel,
-        supporting: undefined
-      })).toBe(true);
+      expect(
+        isModelInfo({
+          ...validModel,
+          supporting: undefined,
+        })
+      ).toBe(true);
     });
 
     it('dovrebbe validare un ModelInfo con pricing parziale', () => {
-      expect(isModelInfo({
-        ...validModel,
-        pricing: { prompt: 0.001 }
-      })).toBe(true);
+      expect(
+        isModelInfo({
+          ...validModel,
+          pricing: { prompt: 0.001 },
+        })
+      ).toBe(true);
 
-      expect(isModelInfo({
-        ...validModel,
-        pricing: { completion: 0.002 }
-      })).toBe(true);
+      expect(
+        isModelInfo({
+          ...validModel,
+          pricing: { completion: 0.002 },
+        })
+      ).toBe(true);
 
-      expect(isModelInfo({
-        ...validModel,
-        pricing: { unit: 'token' }
-      })).toBe(true);
+      expect(
+        isModelInfo({
+          ...validModel,
+          pricing: { unit: 'token' },
+        })
+      ).toBe(true);
     });
 
     it('dovrebbe validare un ModelInfo con supporting parziale', () => {
-      expect(isModelInfo({
-        ...validModel,
-        supporting: { images: true }
-      })).toBe(true);
+      expect(
+        isModelInfo({
+          ...validModel,
+          supporting: { images: true },
+        })
+      ).toBe(true);
 
-      expect(isModelInfo({
-        ...validModel,
-        supporting: { json: true }
-      })).toBe(true);
+      expect(
+        isModelInfo({
+          ...validModel,
+          supporting: { json: true },
+        })
+      ).toBe(true);
     });
 
     it('dovrebbe rifiutare oggetti con pricing di tipo errato', () => {
@@ -239,7 +265,7 @@ describe('modelValidator', () => {
       provider: 'anthropic' as ProviderId,
       contextLength: 200000,
       version: '2023-06-01',
-      supportsJsonMode: true
+      supportsJsonMode: true,
     };
 
     it('dovrebbe validare un modello Anthropic valido', () => {
@@ -260,20 +286,20 @@ describe('modelValidator', () => {
       provider: 'openrouter' as ProviderId,
       contextLength: 200000,
       originalProvider: 'anthropic',
-      performanceScore: 9.5
+      performanceScore: 9.5,
     };
-    
+
     it('dovrebbe validare un modello OpenRouter valido', () => {
       expect(isOpenRouterModelInfo(validModel)).toBe(true);
     });
-    
+
     it('dovrebbe rifiutare un modello con provider diverso', () => {
       const invalidModel = {
         id: 'gpt-4',
         name: 'GPT-4',
         provider: 'openai',
         contextLength: 8000,
-        originalProvider: 'openai'
+        originalProvider: 'openai',
       };
       expect(isOpenRouterModelInfo(invalidModel)).toBe(false);
     });
@@ -287,7 +313,7 @@ describe('modelValidator', () => {
         provider: 'azureopenai',
         contextLength: 8000,
         deploymentId: 'gpt-4-deployment',
-        apiVersion: '2023-05-15'
+        apiVersion: '2023-05-15',
       };
       expect(isAzureOpenAIModelInfo(validModel)).toBe(true);
     });
@@ -298,7 +324,7 @@ describe('modelValidator', () => {
         name: 'GPT-4 su Azure',
         provider: 'azureopenai',
         contextLength: 8000,
-        apiVersion: '2023-05-15'
+        apiVersion: '2023-05-15',
       };
       expect(isAzureOpenAIModelInfo(invalidModel)).toBe(false);
     });
@@ -327,20 +353,20 @@ describe('modelValidator', () => {
           id: 'model-1',
           name: 'Valid Model 1',
           provider: 'openai',
-          contextLength: 4000
+          contextLength: 4000,
         },
         {
           id: 'model-2',
           name: 'Invalid Model',
-          provider: 'openai'
+          provider: 'openai',
           // contextLength mancante
         },
         {
           id: 'model-3',
           name: 'Valid Model 2',
           provider: 'anthropic',
-          contextLength: 8000
-        }
+          contextLength: 8000,
+        },
       ];
 
       const result = validateModelInfoArray(models, 'testProvider');
@@ -359,4 +385,4 @@ describe('modelValidator', () => {
       expect(validateModelInfoArray('not an array', 'testProvider')).toEqual([]);
     });
   });
-}); 
+});

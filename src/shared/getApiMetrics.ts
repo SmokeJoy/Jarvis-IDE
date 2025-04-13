@@ -1,12 +1,12 @@
-import { JarvisMessage } from "./ExtensionMessage.js"
+import { JarvisMessage } from './ExtensionMessage';
 
 /**
  * Rappresenta le metriche di utilizzo dell'API
  */
 export interface ApiMetrics {
-	totalCost: number
-	totalTokensIn: number
-	totalTokensOut: number
+  totalCost: number;
+  totalTokensIn: number;
+  totalTokensOut: number;
 }
 
 /**
@@ -18,32 +18,36 @@ export interface ApiMetrics {
  * @returns An ApiMetrics object with totals.
  */
 export function getApiMetrics(messages: JarvisMessage[]): ApiMetrics {
-	const result: ApiMetrics = {
-		totalTokensIn: 0,
-		totalTokensOut: 0,
-		totalCost: 0,
-	}
+  const result: ApiMetrics = {
+    totalTokensIn: 0,
+    totalTokensOut: 0,
+    totalCost: 0,
+  };
 
-	messages.forEach((message) => {
-		if (message.type === "say" && (message.say === "api_req_started" || message.say === "deleted_api_reqs") && message.text) {
-			try {
-				const parsedData = JSON.parse(message.text)
-				const { tokensIn, tokensOut, cost } = parsedData
+  messages.forEach((message) => {
+    if (
+      message.type === 'say' &&
+      (message.say === 'api_req_started' || message.say === 'deleted_api_reqs') &&
+      message.text
+    ) {
+      try {
+        const parsedData = JSON.parse(message.text);
+        const { tokensIn, tokensOut, cost } = parsedData;
 
-				if (typeof tokensIn === "number") {
-					result.totalTokensIn += tokensIn
-				}
-				if (typeof tokensOut === "number") {
-					result.totalTokensOut += tokensOut
-				}
-				if (typeof cost === "number") {
-					result.totalCost += cost
-				}
-			} catch (error) {
-				console.error("Error parsing JSON:", error)
-			}
-		}
-	})
+        if (typeof tokensIn === 'number') {
+          result.totalTokensIn += tokensIn;
+        }
+        if (typeof tokensOut === 'number') {
+          result.totalTokensOut += tokensOut;
+        }
+        if (typeof cost === 'number') {
+          result.totalCost += cost;
+        }
+      } catch (error) {
+        console.error('Error parsing JSON:', error);
+      }
+    }
+  });
 
-	return result
+  return result;
 }

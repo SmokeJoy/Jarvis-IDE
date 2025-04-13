@@ -1,6 +1,6 @@
 import { useContext } from 'react';
-import { ExtensionStateContextType } from '../context/types.js';
-import { ExtensionStateContext } from '../context/ExtensionStateContext.js';
+import { ExtensionStateContextType } from '../context/types';
+import { ExtensionStateContext } from '../context/ExtensionStateContext';
 
 export const useJarvisIdeContext = (): ExtensionStateContextType => {
   const context = useContext(ExtensionStateContext);

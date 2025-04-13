@@ -20,7 +20,7 @@ export const failureRateAbove = (threshold: number): AdaptiveCondition => {
     for (const providerStats of stats.values()) {
       const total = providerStats.successCount + providerStats.failureCount;
       if (total === 0) continue;
-      
+
       const failureRate = (providerStats.failureCount / total) * 100;
       if (failureRate > threshold) return true;
     }
@@ -51,16 +51,16 @@ export const avgLatencyAbove = (threshold: number): AdaptiveCondition => {
   return (stats: Map<string, ProviderStats>) => {
     let totalLatency = 0;
     let count = 0;
-    
+
     for (const providerStats of stats.values()) {
       if (providerStats.avgResponseTime > 0) {
         totalLatency += providerStats.avgResponseTime;
         count++;
       }
     }
-    
+
     if (count === 0) return false;
-    return (totalLatency / count) > threshold;
+    return totalLatency / count > threshold;
   };
 };
 
@@ -84,14 +84,19 @@ export const providerLatencyAbove = (providerId: string, threshold: number): Ada
  * @param timeWindowMs Finestra temporale in millisecondi (default: 5 minuti)
  * @returns Funzione condizione che restituisce true se il provider ha fallito nell'intervallo di tempo
  */
-export const providerFailedRecently = (providerId: string, timeWindowMs: number = 5 * 60 * 1000): AdaptiveCondition => {
+export const providerFailedRecently = (
+  providerId: string,
+  timeWindowMs: number = 5 * 60 * 1000
+): AdaptiveCondition => {
   return (stats: Map<string, ProviderStats>) => {
     const providerStats = stats.get(providerId);
     if (!providerStats) return false;
-    
+
     const now = Date.now();
-    return providerStats.lastFailureTimestamp > 0 &&
-           now - providerStats.lastFailureTimestamp < timeWindowMs;
+    return (
+      providerStats.lastFailureTimestamp > 0 &&
+      now - providerStats.lastFailureTimestamp < timeWindowMs
+    );
   };
 };
 
@@ -108,7 +113,7 @@ export const duringTimeWindow = (startHour: number, endHour: number): AdaptiveCo
 
   return () => {
     const currentHour = new Date().getHours();
-    
+
     if (startHour <= endHour) {
       // Intervallo normale (es. 9-17)
       return currentHour >= startHour && currentHour < endHour;
@@ -128,9 +133,9 @@ export const allConditions = (conditions: AdaptiveCondition[]): AdaptiveConditio
   if (!conditions || conditions.length === 0) {
     throw new Error('allConditions richiede almeno una condizione');
   }
-  
+
   return (stats: Map<string, ProviderStats>) => {
-    return conditions.every(condition => condition(stats));
+    return conditions.every((condition) => condition(stats));
   };
 };
 
@@ -143,9 +148,9 @@ export const anyCondition = (conditions: AdaptiveCondition[]): AdaptiveCondition
   if (!conditions || conditions.length === 0) {
     throw new Error('anyCondition richiede almeno una condizione');
   }
-  
+
   return (stats: Map<string, ProviderStats>) => {
-    return conditions.some(condition => condition(stats));
+    return conditions.some((condition) => condition(stats));
   };
 };
 
@@ -158,7 +163,7 @@ export const notCondition = (condition: AdaptiveCondition): AdaptiveCondition =>
   if (!condition) {
     throw new Error('notCondition richiede una condizione da negare');
   }
-  
+
   return (stats: Map<string, ProviderStats>) => {
     return !condition(stats);
   };
@@ -174,7 +179,7 @@ export const providerCostAbove = (providerId: string, costPerToken: number): Ada
   return (stats: Map<string, ProviderStats>) => {
     const providerStats = stats.get(providerId);
     if (!providerStats || !providerStats.costPerToken) return false;
-    
+
     return providerStats.costPerToken >= costPerToken;
   };
-}; 
+};

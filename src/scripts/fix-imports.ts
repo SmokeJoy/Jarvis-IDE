@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
  * Script TypeScript per correggere automaticamente gli errori di import in progetti ESM
- * 
+ *
  * Risolve:
  * - TS2835: Relative import paths need explicit file extensions in EcmaScript imports
  * - TS1484: 'X' is a type and must be imported using a type-only import
  * - TS2307: Import paths with duplicate `.js` extensions
- * 
+ *
  * Uso:
  * ```
  * pnpm fix-imports           # Esecuzione standard
@@ -80,16 +80,20 @@ export function parseArguments(args: string[]): ProgramOptions {
  * @param allowedExtensions Array di estensioni consentite
  * @returns True se il file dovrebbe essere processato
  */
-function shouldProcessFile(filePath: string, allowedExtensions: string[], excludedDirs: string[]): boolean {
+function shouldProcessFile(
+  filePath: string,
+  allowedExtensions: string[],
+  excludedDirs: string[]
+): boolean {
   const extension = path.extname(filePath);
-  
+
   // Controlla se il file ha un'estensione supportata
   if (!allowedExtensions.includes(extension)) {
     return false;
   }
-  
+
   // Controlla se il file è in una directory esclusa
-  return !excludedDirs.some(dir => filePath.includes(`${dir}${path.sep}`));
+  return !excludedDirs.some((dir) => filePath.includes(`${dir}${path.sep}`));
 }
 
 /**
@@ -105,15 +109,15 @@ export async function getFilesToProcess(
   excludedDirs: string[] = DEFAULT_EXCLUDED_DIRS
 ): Promise<string[]> {
   const result: string[] = [];
-  
+
   for (const itemPath of paths) {
     try {
       // Verifica se il percorso esiste
       await fs.access(itemPath);
-      
+
       // Controlla se è un file o una directory
       const stats = await fs.stat(itemPath);
-      
+
       if (stats.isDirectory()) {
         // Se è una directory, esegue una scansione ricorsiva
         const files = await walkDirectory(itemPath, extensions, excludedDirs);
@@ -126,7 +130,7 @@ export async function getFilesToProcess(
       console.error(`Errore nell'elaborazione di ${itemPath}:`, error);
     }
   }
-  
+
   return result;
 }
 
@@ -143,20 +147,20 @@ async function walkDirectory(
   excludedDirs: string[]
 ): Promise<string[]> {
   const result: string[] = [];
-  
+
   try {
     const items = await fs.readdir(dirPath);
-    
+
     for (const item of items) {
       const itemPath = path.join(dirPath, item);
-      
+
       // Salta le directory escluse
       if (excludedDirs.includes(item)) {
         continue;
       }
-      
+
       const stats = await fs.stat(itemPath);
-      
+
       if (stats.isDirectory()) {
         // Scansione ricorsiva sottodirectory
         const subDirFiles = await walkDirectory(itemPath, extensions, excludedDirs);
@@ -169,7 +173,7 @@ async function walkDirectory(
   } catch (error) {
     console.error(`Errore nella lettura della directory ${dirPath}:`, error);
   }
-  
+
   return result;
 }
 
@@ -186,8 +190,8 @@ const DOUBLE_JS_REGEX = /from\s+['"]([^'"]*?)\.js\.js['"]/g;
  * @returns Risultato dell'elaborazione
  */
 export async function processFile(
-  filePath: string, 
-  checkOnly: boolean, 
+  filePath: string,
+  checkOnly: boolean,
   verbose: boolean
 ): Promise<FileResult> {
   try {
@@ -196,18 +200,20 @@ export async function processFile(
     let importFixCount = 0;
     let typeImportFixCount = 0;
     let doubleJsFixCount = 0;
-    
+
     // Corregge gli import con doppio .js
     newContent = newContent.replace(DOUBLE_JS_REGEX, (match, importPath) => {
       doubleJsFixCount++;
       return match.replace(`${importPath}.js`, `${importPath}.js`);
     });
-    
+
     // Corregge gli import senza estensione .js
     newContent = newContent.replace(IMPORT_REGEX, (match, importPath) => {
       // Aggiungi .js solo se è un import relativo e non ha già un'estensione
-      if ((importPath.startsWith('./') || importPath.startsWith('../')) && 
-          !importPath.match(/\.(js|jsx|ts|tsx|json|css|scss|less|svg|png|jpg|jpeg|gif)$/)) {
+      if (
+        (importPath.startsWith('./') || importPath.startsWith('../')) &&
+        !importPath.match(/\.(js|jsx|ts|tsx|json|css|scss|less|svg|png|jpg|jpeg|gif)$/)
+      ) {
         importFixCount++;
         return match.replace(importPath, `${importPath}.js`);
       }
@@ -216,18 +222,25 @@ export async function processFile(
 
     // Migliora imports di tipi
     const typeIndicators = [
-      'Type', 'Interface', 'Enum', 'Props', 'State', 'Config', 'Options', 
-      'Settings', 'Args', 'Params', 'Result'
+      'Type',
+      'Interface',
+      'Enum',
+      'Props',
+      'State',
+      'Config',
+      'Options',
+      'Settings',
+      'Args',
+      'Params',
+      'Result',
     ];
-    
+
     // Controlla se il contenuto dell'import contiene indicatori di tipi
     function shouldBeTypeImport(importContent: string): boolean {
-      const items = importContent.split(',').map(i => i.trim());
-      return items.some(item => 
-        typeIndicators.some(indicator => item.includes(indicator))
-      );
+      const items = importContent.split(',').map((i) => i.trim());
+      return items.some((item) => typeIndicators.some((indicator) => item.includes(indicator)));
     }
-    
+
     // Trasforma gli import normali in import type quando appropriato
     newContent = newContent.replace(TYPE_IMPORT_REGEX, (match, importContent) => {
       if (shouldBeTypeImport(importContent)) {
@@ -236,38 +249,40 @@ export async function processFile(
       }
       return match;
     });
-    
+
     // Verifica se ci sono state modifiche
     const hasChanges = content !== newContent;
-    
+
     // Mostra dettagli in modalità verbose
     if (verbose && hasChanges) {
-      console.log(`[${filePath}] ${importFixCount} import fixes, ${typeImportFixCount} type import fixes, ${doubleJsFixCount} double .js fixes`);
+      console.log(
+        `[${filePath}] ${importFixCount} import fixes, ${typeImportFixCount} type import fixes, ${doubleJsFixCount} double .js fixes`
+      );
     }
-    
+
     // Scrivi le modifiche se necessario e non in modalità check
     if (hasChanges && !checkOnly) {
       await fs.writeFile(filePath, newContent, 'utf8');
     }
-    
-    return { 
+
+    return {
       path: filePath,
       modified: hasChanges,
       importFixCount,
       typeImportFixCount,
-      doubleJsFixCount
+      doubleJsFixCount,
     };
   } catch (error) {
     if (verbose) {
       console.error(`Errore nell'elaborazione di ${filePath}:`, error);
     }
-    return { 
+    return {
       path: filePath,
       modified: false,
       importFixCount: 0,
       typeImportFixCount: 0,
       doubleJsFixCount: 0,
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     };
   }
 }
@@ -301,46 +316,52 @@ async function main(): Promise<void> {
   // Analizza gli argomenti da linea di comando
   const args = process.argv.slice(2);
   const options = parseArguments(args);
-  
+
   // Mostra aiuto se richiesto
   if (options.help) {
     showHelp();
     return;
   }
-  
+
   console.log(`📂 Correzione import TypeScript`);
   if (options.check) {
-    console.log('🔍 Modalità CHECK: le modifiche verranno solo verificate, nessun file sarà modificato');
+    console.log(
+      '🔍 Modalità CHECK: le modifiche verranno solo verificate, nessun file sarà modificato'
+    );
   }
-  
+
   // Ottieni i file da processare
   let filesToProcess: string[] = [];
-  
+
   if (options.paths.length === 1 && options.paths[0] === '.') {
     // Se non sono stati specificati percorsi, processa l'intera directory src
     filesToProcess = await getFilesToProcess(['src'], DEFAULT_EXTENSIONS, DEFAULT_EXCLUDED_DIRS);
   } else {
     // Altrimenti processa solo i percorsi specificati
-    filesToProcess = await getFilesToProcess(options.paths, DEFAULT_EXTENSIONS, DEFAULT_EXCLUDED_DIRS);
+    filesToProcess = await getFilesToProcess(
+      options.paths,
+      DEFAULT_EXTENSIONS,
+      DEFAULT_EXCLUDED_DIRS
+    );
   }
-  
+
   console.log(`🔍 Trovati ${filesToProcess.length} file da processare`);
-  
+
   // Statistiche
   let filesModified = 0;
   let totalImportFixes = 0;
   let totalTypeImportFixes = 0;
   let totalDoubleJsFixes = 0;
   let errors = 0;
-  
+
   // Processa ogni file
   for (const file of filesToProcess) {
     const result = await processFile(file, options.check, options.verbose);
-    
+
     if (result.error) {
       errors++;
     }
-    
+
     if (result.modified) {
       filesModified++;
       totalImportFixes += result.importFixCount;
@@ -348,7 +369,7 @@ async function main(): Promise<void> {
       totalDoubleJsFixes += result.doubleJsFixCount;
     }
   }
-  
+
   // Mostra riepilogo
   console.log('\n✅ Elaborazione completata');
   console.log(`📊 Statistiche:
@@ -363,8 +384,8 @@ async function main(): Promise<void> {
 
 // Esegui la funzione principale se questo script è stato eseguito direttamente
 if (require.main === module) {
-  main().catch(error => {
-    console.error('Errore durante l\'esecuzione dello script:', error);
+  main().catch((error) => {
+    console.error("Errore durante l'esecuzione dello script:", error);
     process.exit(1);
   });
-} 
+}

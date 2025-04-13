@@ -24,7 +24,7 @@ export const usePredictiveWarnings = (auditData: AuditEntry[]): WarningEntry[] =
     const providerData = new Map<string, AuditEntry[]>();
 
     // Raggruppa gli eventi per provider
-    auditData.forEach(entry => {
+    auditData.forEach((entry) => {
       if (!providerData.has(entry.selectedProvider)) {
         providerData.set(entry.selectedProvider, []);
       }
@@ -34,23 +34,24 @@ export const usePredictiveWarnings = (auditData: AuditEntry[]): WarningEntry[] =
     // Analizza ogni provider
     providerData.forEach((entries, provider) => {
       const recentEntries = entries.slice(-WINDOW_SIZE);
-      
+
       // Controlla latency spike
-      const latencySpikes = recentEntries.filter(e => e.latency > LATENCY_THRESHOLD);
+      const latencySpikes = recentEntries.filter((e) => e.latency > LATENCY_THRESHOLD);
       if (latencySpikes.length >= 3) {
-        const avgLatency = latencySpikes.reduce((sum, e) => sum + e.latency, 0) / latencySpikes.length;
+        const avgLatency =
+          latencySpikes.reduce((sum, e) => sum + e.latency, 0) / latencySpikes.length;
         warnings.push({
           provider,
           signal: 'latency',
           value: avgLatency,
           threshold: LATENCY_THRESHOLD,
           level: avgLatency > 1000 ? 'critical' : 'high',
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       }
 
       // Controlla success rate
-      const successCount = recentEntries.filter(e => e.success).length;
+      const successCount = recentEntries.filter((e) => e.success).length;
       const successRate = successCount / recentEntries.length;
       if (successRate < SUCCESS_RATE_THRESHOLD) {
         warnings.push({
@@ -59,7 +60,7 @@ export const usePredictiveWarnings = (auditData: AuditEntry[]): WarningEntry[] =
           value: successRate,
           threshold: SUCCESS_RATE_THRESHOLD,
           level: successRate < 0.5 ? 'critical' : 'moderate',
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       }
 
@@ -79,11 +80,11 @@ export const usePredictiveWarnings = (auditData: AuditEntry[]): WarningEntry[] =
           value: currentStreak,
           threshold: FAILURE_STREAK_THRESHOLD,
           level: currentStreak >= 5 ? 'critical' : 'high',
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       }
     });
 
     return warnings;
   }, [auditData]);
-}; 
+};

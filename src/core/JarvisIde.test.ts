@@ -1,5 +1,5 @@
-import { JarvisIde } from './JarvisIde.js';
-import { ApiConfiguration } from '../types/provider.types.js';
+import { JarvisIde } from './JarvisIde';
+import { ApiConfiguration } from '../types/provider.types';
 
 describe('JarvisIde', () => {
   let jarvisIde: JarvisIde;
@@ -11,7 +11,7 @@ describe('JarvisIde', () => {
     maxTokens: 1000,
     contextWindow: 4096,
     pricePer1kTokens: 0.002,
-    capabilities: ['chat', 'code', 'search']
+    capabilities: ['chat', 'code', 'search'],
   };
 
   beforeEach(() => {
@@ -38,7 +38,7 @@ describe('JarvisIde', () => {
         content: 'Test response',
         tokensIn: 10,
         tokensOut: 20,
-        cost: 0.02
+        cost: 0.02,
       };
 
       jest.spyOn(jarvisIde, 'sendRequest').mockResolvedValue(mockResponse);
@@ -60,7 +60,7 @@ describe('JarvisIde', () => {
         content: 'function test() { return true; }',
         tokensIn: 15,
         tokensOut: 30,
-        cost: 0.03
+        cost: 0.03,
       };
 
       jest.spyOn(jarvisIde, 'sendRequest').mockResolvedValue(mockResponse);
@@ -82,7 +82,7 @@ describe('JarvisIde', () => {
         content: 'Search results',
         tokensIn: 5,
         tokensOut: 10,
-        cost: 0.01
+        cost: 0.01,
       };
 
       jest.spyOn(jarvisIde, 'sendRequest').mockResolvedValue(mockResponse);
@@ -97,4 +97,4 @@ describe('JarvisIde', () => {
       await expect(jarvisIde.search('Test query')).rejects.toThrow('API Error');
     });
   });
-}); 
+});

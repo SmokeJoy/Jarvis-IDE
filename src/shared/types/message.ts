@@ -1,26 +1,33 @@
-import { ChatCompletionMessageParam } from "../../types/provider-types/openai-types.js"
+/**
+ * @file message.ts
+ * @description Esportazione centralizzata dei tipi per i messaggi di chat
+ */
 
-export type MessageRole = "user" | "assistant" | "system" | "tool"
+export * from './message.types';
+export * from './message-adapter';
 
+// Tipo per i ruoli dei messaggi
+export type MessageRole = 'user' | 'assistant' | 'system' | 'function' | 'tool';
+
+// Tipo di base per i messaggi di chat condivisi
 export interface BaseMessage {
-    role: MessageRole;
-    content: string | Array<{
-        type: "text" | "image";
-        text?: string;
-        url?: string;
-    }>;
-    timestamp: number;
-    streaming?: boolean;
+  role: MessageRole;
+  content: string;
+}
+
+export interface ChatCompletionMessageParam {
+  role: string;
+  content: string;
 }
 
 export interface ChatMessage extends ChatCompletionMessageParam {
-    timestamp: number;
-    streaming?: boolean;
+  timestamp: number;
+  streaming?: boolean;
 }
 
 export interface WebviewMessage {
-    type: string;
-    payload?: unknown;
+  type: string;
+  payload?: unknown;
 }
 
 /**
@@ -61,4 +68,4 @@ export type MessageParam = ChatCompletionMessageParam;
 /**
  * Array di messaggi di chat
  */
-export type Messages = ChatCompletionMessageParam[]; 
+export type Messages = ChatCompletionMessageParam[];

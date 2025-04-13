@@ -1,6 +1,6 @@
-import { getVSCodeApi } from './vscode.js'
+import { getVSCodeApi } from './vscode';
 
 export function postMessage(message: unknown): void {
-  const vscode = getVSCodeApi()
-  vscode.postMessage(message)
-} 
+  const vscode = getVSCodeApi();
+  vscode.postMessage(message);
+}

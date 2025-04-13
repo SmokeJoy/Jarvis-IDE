@@ -1,6 +1,4 @@
-// Dichiarazione per l'API vscode WebView
-declare const vscode: { postMessage: (message: any) => void };
-
+import './vscode-api';
 import { useCallback, useState } from 'react';
 
 export const useJarvisIdeMaxTokens = () => {
@@ -12,8 +10,8 @@ export const useJarvisIdeMaxTokens = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          maxTokens: newMaxTokens
-        }
+          maxTokens: newMaxTokens,
+        },
       });
 
       setMaxTokens(newMaxTokens);
@@ -30,8 +28,8 @@ export const useJarvisIdeMaxTokens = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          maxTokens: defaultMaxTokens
-        }
+          maxTokens: defaultMaxTokens,
+        },
       });
 
       setMaxTokens(defaultMaxTokens);
@@ -44,6 +42,6 @@ export const useJarvisIdeMaxTokens = () => {
   return {
     maxTokens,
     updateMaxTokens,
-    resetMaxTokens
+    resetMaxTokens,
   };
-}; 
+};

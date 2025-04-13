@@ -6,7 +6,7 @@ export const replaySnapshot = async (entry: AuditEntry) => {
     console.log(`[Replay] Inizio replay snapshot ${entry.timestamp}`, {
       strategy: entry.strategyName,
       provider: entry.selectedProvider,
-      reason: entry.fallbackReason
+      reason: entry.fallbackReason,
     });
 
     // Simula il fallback del provider originale
@@ -15,7 +15,7 @@ export const replaySnapshot = async (entry: AuditEntry) => {
         providerId: entry.selectedProvider,
         reason: entry.fallbackReason,
         timestamp: Date.now(),
-        __replayed: true
+        __replayed: true,
       });
     }
 
@@ -25,16 +25,16 @@ export const replaySnapshot = async (entry: AuditEntry) => {
         strategyName: entry.strategyName,
         reason: 'Replay snapshot',
         timestamp: Date.now(),
-        __replayed: true
+        __replayed: true,
       });
     }
 
     // Simula la selezione del nuovo provider
     await eventBus.emit('provider:success', {
       providerId: entry.selectedProvider,
-      score: entry.providerCandidates.find(p => p.id === entry.selectedProvider)?.score,
+      score: entry.providerCandidates.find((p) => p.id === entry.selectedProvider)?.score,
       timestamp: Date.now(),
-      __replayed: true
+      __replayed: true,
     });
 
     console.log(`[Replay] Snapshot ${entry.timestamp} completato con successo`);
@@ -43,4 +43,4 @@ export const replaySnapshot = async (entry: AuditEntry) => {
     console.error(`[Replay] Errore durante il replay dello snapshot ${entry.timestamp}:`, error);
     return false;
   }
-}; 
+};

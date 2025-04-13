@@ -3,7 +3,7 @@ import { ModelSelectorMessageUnion } from '../../../webview/messages/model-selec
 import {
   isModelListUpdatedMessage,
   isModelSelectedMessage,
-  isRequestModelsMessage
+  isRequestModelsMessage,
 } from '../../../webview/messages/model-selector-message-guards';
 
 export const ModelSelector = () => {
@@ -12,7 +12,7 @@ export const ModelSelector = () => {
   const handleModelSelect = (modelId: string) => {
     postMessage({
       type: 'modelSelected',
-      payload: { modelId }
+      payload: { modelId },
     });
   };
 
@@ -27,9 +27,5 @@ export const ModelSelector = () => {
     },
   });
 
-  return (
-    <div className="model-selector-container">
-      {/* UI per selezione modello */}
-    </div>
-  );
+  return <div className="model-selector-container">{/* UI per selezione modello */}</div>;
 };

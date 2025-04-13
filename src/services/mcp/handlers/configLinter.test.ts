@@ -1,16 +1,16 @@
 import { jest } from '@jest/globals';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { configLinter } from './configLinter.js';
+import { configLinter } from './configLinter';
 
 // Mock del modulo fs/promises
 jest.mock('fs/promises', () => ({
-  readFile: jest.fn()
+  readFile: jest.fn(),
 }));
 
 // Mock del modulo path
 jest.mock('path', () => ({
-  extname: jest.fn()
+  extname: jest.fn(),
 }));
 
 describe('configLinter', () => {
@@ -21,19 +21,19 @@ describe('configLinter', () => {
 
   it('dovrebbe validare correttamente un file JSON valido', async () => {
     // Arrange
-    const args = { 
+    const args = {
       configPath: '/path/to/config.json',
-      configType: 'json' as const
+      configType: 'json' as const,
     };
-    
-    const validJson = JSON.stringify({ 
+
+    const validJson = JSON.stringify({
       version: '1.0.0',
       name: 'test-config',
       dependencies: {
-        test: '1.0.0'
-      }
+        test: '1.0.0',
+      },
     });
-    
+
     (fs.readFile as jest.Mock).mockResolvedValue(validJson);
     (path.extname as jest.Mock).mockReturnValue('.json');
 
@@ -49,16 +49,16 @@ describe('configLinter', () => {
 
   it('dovrebbe rilevare mancanza di version in JSON', async () => {
     // Arrange
-    const args = { 
+    const args = {
       configPath: '/path/to/config.json',
-      configType: 'json' as const
+      configType: 'json' as const,
     };
-    
+
     const jsonWithoutVersion = JSON.stringify({
       name: 'test-config',
-      dependencies: {}
+      dependencies: {},
     });
-    
+
     (fs.readFile as jest.Mock).mockResolvedValue(jsonWithoutVersion);
     (path.extname as jest.Mock).mockReturnValue('.json');
 
@@ -74,17 +74,17 @@ describe('configLinter', () => {
 
   it('dovrebbe rilevare valori vuoti in JSON', async () => {
     // Arrange
-    const args = { 
+    const args = {
       configPath: '/path/to/config.json',
-      configType: 'json' as const
+      configType: 'json' as const,
     };
-    
+
     const jsonWithEmptyValues = JSON.stringify({
       version: '1.0.0',
       name: '',
-      description: null
+      description: null,
     });
-    
+
     (fs.readFile as jest.Mock).mockResolvedValue(jsonWithEmptyValues);
     (path.extname as jest.Mock).mockReturnValue('.json');
 
@@ -93,19 +93,19 @@ describe('configLinter', () => {
 
     // Assert
     expect(result.success).toBe(true);
-    expect(result.data?.warnings.some(w => w.code === 'EMPTY_VALUE')).toBe(true);
-    expect(result.data?.warnings.some(w => w.code === 'NULL_VALUE')).toBe(true);
+    expect(result.data?.warnings.some((w) => w.code === 'EMPTY_VALUE')).toBe(true);
+    expect(result.data?.warnings.some((w) => w.code === 'NULL_VALUE')).toBe(true);
   });
 
   it('dovrebbe rilevare JSON non valido', async () => {
     // Arrange
-    const args = { 
+    const args = {
       configPath: '/path/to/config.json',
-      configType: 'json' as const
+      configType: 'json' as const,
     };
-    
+
     const invalidJson = '{name:"test",version:1.0.0}'; // JSON non valido (mancano le virgolette)
-    
+
     (fs.readFile as jest.Mock).mockResolvedValue(invalidJson);
     (path.extname as jest.Mock).mockReturnValue('.json');
 
@@ -121,18 +121,18 @@ describe('configLinter', () => {
 
   it('dovrebbe validare correttamente un file .env', async () => {
     // Arrange
-    const args = { 
+    const args = {
       configPath: '/path/to/.env',
-      configType: 'env' as const
+      configType: 'env' as const,
     };
-    
+
     const validEnv = `
       # Variabili di ambiente
       NODE_ENV=development
       PORT=3000
       DEBUG=true
     `;
-    
+
     (fs.readFile as jest.Mock).mockResolvedValue(validEnv);
     (path.extname as jest.Mock).mockReturnValue('.env');
 
@@ -147,11 +147,11 @@ describe('configLinter', () => {
 
   it('dovrebbe rilevare errori in file .env', async () => {
     // Arrange
-    const args = { 
+    const args = {
       configPath: '/path/to/.env',
-      configType: 'env' as const
+      configType: 'env' as const,
     };
-    
+
     const invalidEnv = `
       # Variabili di ambiente
       NODE_ENV=development
@@ -159,7 +159,7 @@ describe('configLinter', () => {
       =valore
       API_KEY=
     `;
-    
+
     (fs.readFile as jest.Mock).mockResolvedValue(invalidEnv);
     (path.extname as jest.Mock).mockReturnValue('.env');
 
@@ -174,17 +174,17 @@ describe('configLinter', () => {
 
   it('dovrebbe suggerire sicurezza per chiavi sensibili', async () => {
     // Arrange
-    const args = { 
+    const args = {
       configPath: '/path/to/.env',
-      configType: 'env' as const
+      configType: 'env' as const,
     };
-    
+
     const envWithSensitiveKeys = `
       API_KEY=abcdef12345
       SECRET_TOKEN=very-secret
       PASSWORD=unsafe-password
     `;
-    
+
     (fs.readFile as jest.Mock).mockResolvedValue(envWithSensitiveKeys);
     (path.extname as jest.Mock).mockReturnValue('.env');
 
@@ -198,11 +198,11 @@ describe('configLinter', () => {
 
   it('dovrebbe rilevare errore se il file non esiste', async () => {
     // Arrange
-    const args = { 
+    const args = {
       configPath: '/path/non-esistente/config.json',
-      configType: 'json' as const
+      configType: 'json' as const,
     };
-    
+
     (fs.readFile as jest.Mock).mockRejectedValue(new Error('File non trovato'));
 
     // Act
@@ -216,11 +216,11 @@ describe('configLinter', () => {
 
   it('dovrebbe rilevare che YAML non è ancora implementato', async () => {
     // Arrange
-    const args = { 
+    const args = {
       configPath: '/path/to/config.yaml',
-      configType: 'yaml' as const
+      configType: 'yaml' as const,
     };
-    
+
     (fs.readFile as jest.Mock).mockResolvedValue('key: value');
     (path.extname as jest.Mock).mockReturnValue('.yaml');
 
@@ -234,13 +234,13 @@ describe('configLinter', () => {
 
   it('dovrebbe auto-rilevare il tipo di configurazione dal file extension', async () => {
     // Arrange
-    const args = { 
+    const args = {
       configPath: '/path/to/config.env',
-      configType: 'auto' as const
+      configType: 'auto' as const,
     };
-    
+
     const validEnv = 'KEY=VALUE';
-    
+
     (fs.readFile as jest.Mock).mockResolvedValue(validEnv);
     (path.extname as jest.Mock).mockReturnValue('.env');
 
@@ -254,11 +254,11 @@ describe('configLinter', () => {
 
   it('dovrebbe supportare retrocompatibilità con filePath', async () => {
     // Arrange
-    const args = { 
+    const args = {
       filePath: '/path/to/config.json', // Vecchio nome parametro
-      configType: 'json' as const
+      configType: 'json' as const,
     };
-    
+
     const validJson = '{"version":"1.0.0"}';
     (fs.readFile as jest.Mock).mockResolvedValue(validJson);
     (path.extname as jest.Mock).mockReturnValue('.json');
@@ -270,4 +270,4 @@ describe('configLinter', () => {
     expect(result.success).toBe(true);
     expect(fs.readFile).toHaveBeenCalledWith('/path/to/config.json', 'utf-8');
   });
-}); 
+});

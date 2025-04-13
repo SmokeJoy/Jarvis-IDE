@@ -1,4 +1,4 @@
-import { JarvisIdeIgnoreController } from './JarvisIdeIgnoreController.js';
+import { JarvisIdeIgnoreController } from './JarvisIdeIgnoreController';
 import { Uri } from 'vscode';
 
 describe('JarvisIdeIgnoreController', () => {
@@ -71,4 +71,4 @@ describe('JarvisIdeIgnoreController', () => {
       expect(controller.writeFile).toHaveBeenCalledWith('test.js');
     });
   });
-}); 
+});

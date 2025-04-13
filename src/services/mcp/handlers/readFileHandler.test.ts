@@ -1,34 +1,38 @@
 import { jest } from '@jest/globals';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { readFileHandler } from './readFileHandler.js';
-import { ReadFileArgs } from '../mcp.types.js';
+import { readFileHandler } from './readFileHandler';
+import { ReadFileArgs } from '../mcp.types';
 
 // Mock del modulo fs/promises
 jest.mock('fs/promises', () => ({
   stat: jest.fn(),
-  readFile: jest.fn()
+  readFile: jest.fn(),
 }));
 
 // Mock del modulo path
 jest.mock('path', () => ({
   normalize: jest.fn((p) => p),
   isAbsolute: jest.fn(),
-  join: jest.fn((base, file) => `${base}/${file}`)
+  join: jest.fn((base, file) => `${base}/${file}`),
 }));
 
 // Mock di VSCode
-jest.mock('vscode', () => ({
-  workspace: {
-    workspaceFolders: [
-      {
-        uri: {
-          fsPath: '/workspace/root'
-        }
-      }
-    ]
-  }
-}), { virtual: true });
+jest.mock(
+  'vscode',
+  () => ({
+    workspace: {
+      workspaceFolders: [
+        {
+          uri: {
+            fsPath: '/workspace/root',
+          },
+        },
+      ],
+    },
+  }),
+  { virtual: true }
+);
 
 describe('readFileHandler', () => {
   // Resetta tutti i mock prima di ogni test
@@ -52,7 +56,7 @@ describe('readFileHandler', () => {
     // Arrange
     const args: ReadFileArgs = { filePath: '/path/to/file.txt' };
     const mockStats = { isFile: jest.fn().mockReturnValue(true) };
-    
+
     (path.isAbsolute as jest.Mock).mockReturnValue(true);
     (fs.stat as jest.Mock).mockResolvedValue(mockStats);
     (fs.readFile as jest.Mock).mockResolvedValue('contenuto file');
@@ -72,7 +76,7 @@ describe('readFileHandler', () => {
     // Arrange
     const args: ReadFileArgs = { filePath: 'path/to/file.txt' };
     const mockStats = { isFile: jest.fn().mockReturnValue(true) };
-    
+
     (path.isAbsolute as jest.Mock).mockReturnValue(false);
     (fs.stat as jest.Mock).mockResolvedValue(mockStats);
     (fs.readFile as jest.Mock).mockResolvedValue('contenuto file');
@@ -91,12 +95,12 @@ describe('readFileHandler', () => {
 
   it('dovrebbe gestire encoding personalizzato', async () => {
     // Arrange
-    const args: ReadFileArgs = { 
+    const args: ReadFileArgs = {
       filePath: '/path/to/file.txt',
-      encoding: 'latin1'
+      encoding: 'latin1',
     };
     const mockStats = { isFile: jest.fn().mockReturnValue(true) };
-    
+
     (path.isAbsolute as jest.Mock).mockReturnValue(true);
     (fs.stat as jest.Mock).mockResolvedValue(mockStats);
     (fs.readFile as jest.Mock).mockResolvedValue('contenuto file');
@@ -114,7 +118,7 @@ describe('readFileHandler', () => {
     // Arrange
     const args: ReadFileArgs = { filePath: '/path/to/directory' };
     const mockStats = { isFile: jest.fn().mockReturnValue(false) };
-    
+
     (path.isAbsolute as jest.Mock).mockReturnValue(true);
     (fs.stat as jest.Mock).mockResolvedValue(mockStats);
 
@@ -131,7 +135,7 @@ describe('readFileHandler', () => {
     // Arrange
     const args: ReadFileArgs = { filePath: '/path/to/file.txt' };
     const mockStats = { isFile: jest.fn().mockReturnValue(true) };
-    
+
     (path.isAbsolute as jest.Mock).mockReturnValue(true);
     (fs.stat as jest.Mock).mockResolvedValue(mockStats);
     (fs.readFile as jest.Mock).mockRejectedValue(new Error('Errore di lettura'));
@@ -148,7 +152,7 @@ describe('readFileHandler', () => {
   it('dovrebbe gestire errori durante la verifica del percorso', async () => {
     // Arrange
     const args: ReadFileArgs = { filePath: '/path/inesistente/file.txt' };
-    
+
     (path.isAbsolute as jest.Mock).mockReturnValue(true);
     (fs.stat as jest.Mock).mockRejectedValue(new Error('File non trovato'));
 
@@ -160,4 +164,4 @@ describe('readFileHandler', () => {
     expect(result.message).toMatch(/Errore durante la lettura del file/i);
     expect(result.message).toMatch(/File non trovato/i);
   });
-}); 
+});

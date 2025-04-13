@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { sanitizeExportObject, extractSanitizeOptions } from '../sanitize.js';
-import { ExportOptions } from '../types.js';
+import { sanitizeExportObject, extractSanitizeOptions } from '../sanitize';
+import { ExportOptions } from '../types';
 
 describe('sanitizeExportObject', () => {
   describe('Gestione valori base', () => {
@@ -42,19 +42,19 @@ describe('sanitizeExportObject', () => {
           id: 123,
           metadata: {
             created: null,
-            updated: undefined
-          }
-        }
+            updated: undefined,
+          },
+        },
       };
-      
+
       const result = sanitizeExportObject(input, { removeNull: true, removeUndefined: true });
-      
+
       expect(result).toEqual({
         name: 'Test',
         details: {
           id: 123,
-          metadata: {}
-        }
+          metadata: {},
+        },
       });
     });
 
@@ -62,27 +62,23 @@ describe('sanitizeExportObject', () => {
       const input = [
         { id: 1, value: 'abc' },
         { id: 2, value: null },
-        { id: 3, value: undefined }
+        { id: 3, value: undefined },
       ];
-      
+
       const result = sanitizeExportObject(input, { removeNull: true, removeUndefined: true });
-      
-      expect(result).toEqual([
-        { id: 1, value: 'abc' },
-        { id: 2 },
-        { id: 3 }
-      ]);
+
+      expect(result).toEqual([{ id: 1, value: 'abc' }, { id: 2 }, { id: 3 }]);
     });
 
     it('dovrebbe filtrare elementi di array se null/undefined', () => {
       const input = [1, null, 3, undefined, 5];
-      
+
       const nullRemoved = sanitizeExportObject(input, { removeNull: true });
       expect(nullRemoved).toEqual([1, 3, undefined, 5]);
-      
+
       const undefinedRemoved = sanitizeExportObject(input, { removeUndefined: true });
       expect(undefinedRemoved).toEqual([1, null, 3, 5]);
-      
+
       const bothRemoved = sanitizeExportObject(input, { removeNull: true, removeUndefined: true });
       expect(bothRemoved).toEqual([1, 3, 5]);
     });
@@ -94,10 +90,10 @@ describe('sanitizeExportObject', () => {
         if (depth <= 0) return 'value';
         return { nested: createNestedObject(depth - 1) };
       };
-      
+
       const deepObject = createNestedObject(30);
       const result = sanitizeExportObject(deepObject, { maxDepth: 5 });
-      
+
       // Verifica che l'oggetto sia stato troncato
       let current = result;
       let depth = 0;
@@ -105,7 +101,7 @@ describe('sanitizeExportObject', () => {
         current = current.nested;
         depth++;
       }
-      
+
       expect(depth).toBe(5);
       expect(current).toBe('[Oggetto troppo profondo]');
     });
@@ -113,7 +109,7 @@ describe('sanitizeExportObject', () => {
     it('dovrebbe troncare stringhe troppo lunghe', () => {
       const longString = 'a'.repeat(2000);
       const result = sanitizeExportObject(longString, { maxStringLength: 100 });
-      
+
       expect(result.length).toBeLessThan(longString.length);
       expect(result).toContain('... [troncato, lunghezza originale: 2000]');
       expect(result).toContain('a'.repeat(100));
@@ -122,7 +118,7 @@ describe('sanitizeExportObject', () => {
     it('dovrebbe troncare array troppo lunghi', () => {
       const longArray = Array(2000).fill('item');
       const result = sanitizeExportObject(longArray, { maxArrayLength: 50 });
-      
+
       expect(result.length).toBe(51); // 50 items + 1 message
       expect(result[50]).toContain('1950 elementi aggiuntivi omessi');
     });
@@ -132,7 +128,7 @@ describe('sanitizeExportObject', () => {
     it('dovrebbe gestire funzioni convertendole in undefined', () => {
       const input = { fn: () => 'test', id: 123 };
       const result = sanitizeExportObject(input);
-      
+
       expect(result).toEqual({ id: 123 });
     });
 
@@ -140,14 +136,14 @@ describe('sanitizeExportObject', () => {
       const sym = Symbol('test');
       const input = { sym, id: 123 };
       const result = sanitizeExportObject(input);
-      
+
       expect(result).toEqual({ id: 123 });
     });
 
     it('dovrebbe gestire oggetti circolari senza entrare in loop infinito', () => {
       const circular: Record<string, any> = { id: 123 };
       circular.self = circular;
-      
+
       const result = sanitizeExportObject(circular);
       expect(result.id).toBe(123);
       expect(typeof result.self).toBe('object');
@@ -167,28 +163,28 @@ describe('extractSanitizeOptions', () => {
       maxDepth: 5,
       maxStringLength: 100,
       maxArrayLength: 50,
-      includeHeaders: true
+      includeHeaders: true,
     };
 
     const result = extractSanitizeOptions(fullOptions);
-    
+
     expect(result).toEqual({
       removeNull: true,
       removeUndefined: true,
       maxDepth: 5,
       maxStringLength: 100,
-      maxArrayLength: 50
+      maxArrayLength: 50,
     });
-    
+
     // Verifica che altre proprietà non siano incluse
     expect(result).not.toHaveProperty('format');
     expect(result).not.toHaveProperty('indent');
     expect(result).not.toHaveProperty('fileName');
     expect(result).not.toHaveProperty('includeHeaders');
   });
-  
+
   it('dovrebbe restituire un oggetto vuoto se non vengono fornite opzioni', () => {
     expect(extractSanitizeOptions()).toEqual({});
     expect(extractSanitizeOptions({})).toEqual({});
   });
-}); 
+});

@@ -1,5 +1,5 @@
-import React from "react";
-import styled from "styled-components";
+import React from 'react';
+import styled from 'styled-components';
 
 const EditorContainer = styled.div`
   display: flex;
@@ -61,10 +61,10 @@ interface PromptEditorProps {
 export const PromptEditor: React.FC<PromptEditorProps> = ({
   value,
   onChange,
-  label = "Prompt di contesto (contextPrompt)",
-  placeholder = "// Inserisci qui le istruzioni di contesto per il modello...",
-  description = "Questo contesto viene inviato al modello come parte della richiesta. Può contenere istruzioni specifiche sul comportamento, formattazione o altre indicazioni.",
-  disabled = false
+  label = 'Prompt di contesto (contextPrompt)',
+  placeholder = '// Inserisci qui le istruzioni di contesto per il modello...',
+  description = 'Questo contesto viene inviato al modello come parte della richiesta. Può contenere istruzioni specifiche sul comportamento, formattazione o altre indicazioni.',
+  disabled = false,
 }) => {
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e.target.value);
@@ -83,4 +83,4 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
       />
     </EditorContainer>
   );
-}; 
+};

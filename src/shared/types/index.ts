@@ -2,4 +2,4 @@
  * Esportazioni principali dai tipi condivisi
  */
 
-export { ChatMessage, BaseMessage, MessageRole, WebviewMessage } from './message.js'; 
+export { ChatMessage, BaseMessage, MessageRole, WebviewMessage } from './message';

@@ -3,7 +3,7 @@
  * @description Tipi e funzioni per le impostazioni di approvazione automatica
  */
 
-import { AutoApprovalSettings as BaseAutoApprovalSettings } from './types/user-settings.types.js';
+import { AutoApprovalSettings as BaseAutoApprovalSettings } from './types/user-settings.types';
 
 /**
  * Estensione dell'interfaccia AutoApprovalSettings per retrocompatibilità
@@ -30,7 +30,9 @@ export interface AutoApprovalSettings extends Omit<BaseAutoApprovalSettings, 'ac
  * @param settings Le impostazioni da normalizzare
  * @returns Le impostazioni normalizzate
  */
-export function normalizeAutoApprovalSettings(settings?: Partial<AutoApprovalSettings>): AutoApprovalSettings {
+export function normalizeAutoApprovalSettings(
+  settings?: Partial<AutoApprovalSettings>
+): AutoApprovalSettings {
   return {
     enabled: settings?.enabled ?? false,
     maxAutoApprovals: settings?.maxAutoApprovals ?? 3,
@@ -42,10 +44,10 @@ export function normalizeAutoApprovalSettings(settings?: Partial<AutoApprovalSet
       editFiles: settings?.actions?.editFiles ?? false,
       executeCommands: settings?.actions?.executeCommands ?? false,
       useBrowser: settings?.actions?.useBrowser ?? false,
-      useMcp: settings?.actions?.useMcp ?? false
+      useMcp: settings?.actions?.useMcp ?? false,
     },
     maxRequests: settings?.maxRequests ?? 5,
     enableNotifications: settings?.enableNotifications ?? true,
-    tools: settings?.tools ?? []
+    tools: settings?.tools ?? [],
   };
 }

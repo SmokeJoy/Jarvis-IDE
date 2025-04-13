@@ -77,12 +77,14 @@ describe('providerRegistry', () => {
 
     // Verifica che i modelli siano stati convertiti correttamente
     expect(result).toHaveLength(1);
-    expect(result[0]).toEqual(expect.objectContaining({
-      id: 'test-model-1',
-      name: 'Test Model 1',
-      contextLength: 4096,
-      provider: 'openrouter',
-    }));
+    expect(result[0]).toEqual(
+      expect.objectContaining({
+        id: 'test-model-1',
+        name: 'Test Model 1',
+        contextLength: 4096,
+        provider: 'openrouter',
+      })
+    );
 
     // Verifica che i modelli siano stati salvati in cache
     expect(cacheModels).toHaveBeenCalledWith('openrouter', expect.any(Array));
@@ -149,7 +151,9 @@ describe('providerRegistry', () => {
   it('dovrebbe usare il fallback per Anthropic in caso di errore', async () => {
     // Configura il mock per lanciare un errore
     const error = new Error('API non disponibile');
-    (jest.requireMock('../providers/anthropicProvider').fetchModelsFromAnthropic as jest.Mock).mockRejectedValueOnce(error);
+    (
+      jest.requireMock('../providers/anthropicProvider').fetchModelsFromAnthropic as jest.Mock
+    ).mockRejectedValueOnce(error);
 
     // Esegui la funzione da testare
     const result = await fetchModels('anthropic');

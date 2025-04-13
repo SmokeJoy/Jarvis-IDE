@@ -1,15 +1,20 @@
-import React from 'react'
-import { VSCodeDropdown, VSCodeOption, VSCodeCheckbox, VSCodeTextArea } from '@vscode/webview-ui-toolkit/react'
+import React from 'react';
+import {
+  VSCodeDropdown,
+  VSCodeOption,
+  VSCodeCheckbox,
+  VSCodeTextArea,
+} from '@vscode/webview-ui-toolkit/react';
 
 interface SettingsPanelProps {
-  selectedModel: string
-  coderMode: boolean
-  useDocuments: boolean
-  contextPrompt: string
-  onModelChange: (model: string) => void
-  onCoderModeChange: (enabled: boolean) => void
-  onUseDocumentsChange: (enabled: boolean) => void
-  onContextPromptChange: (prompt: string) => void
+  selectedModel: string;
+  coderMode: boolean;
+  useDocuments: boolean;
+  contextPrompt: string;
+  onModelChange: (model: string) => void;
+  onCoderModeChange: (enabled: boolean) => void;
+  onUseDocumentsChange: (enabled: boolean) => void;
+  onContextPromptChange: (prompt: string) => void;
 }
 
 export const SettingsPanel: React.FC<SettingsPanelProps> = ({
@@ -20,27 +25,27 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onModelChange,
   onCoderModeChange,
   onUseDocumentsChange,
-  onContextPromptChange
+  onContextPromptChange,
 }) => {
   const handleModelChange = (event: Event) => {
-    const target = event.target as HTMLSelectElement
-    onModelChange(target.value)
-  }
+    const target = event.target as HTMLSelectElement;
+    onModelChange(target.value);
+  };
 
   const handleCoderModeChange = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    onCoderModeChange(target.checked)
-  }
+    const target = event.target as HTMLInputElement;
+    onCoderModeChange(target.checked);
+  };
 
   const handleUseDocumentsChange = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    onUseDocumentsChange(target.checked)
-  }
+    const target = event.target as HTMLInputElement;
+    onUseDocumentsChange(target.checked);
+  };
 
   const handleContextPromptChange = (event: Event) => {
-    const target = event.target as HTMLTextAreaElement
-    onContextPromptChange(target.value)
-  }
+    const target = event.target as HTMLTextAreaElement;
+    onContextPromptChange(target.value);
+  };
 
   return (
     <div>
@@ -58,5 +63,5 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
       <VSCodeTextArea value={contextPrompt} onInput={handleContextPromptChange} />
     </div>
-  )
-} 
+  );
+};

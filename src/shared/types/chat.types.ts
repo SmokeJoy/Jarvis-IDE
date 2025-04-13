@@ -4,34 +4,39 @@
  * @version 1.0.0
  */
 
-import { ChatSettings } from './user-settings.types.js';
-import { 
+import type { ChatSettings } from './user-settings.types';
+import type {
   ChatCompletionContentPart,
   ChatCompletionContentPartText,
-  ChatCompletionContentPartImage
-} from './llm.types.js';
+  ChatCompletionContentPartImage,
+} from './llm.types';
+import type { ChatMessage, ChatRole } from './message.types';
 
-// Importazione della definizione principale di ChatMessage
-import { ChatMessage } from './message.types.js';
-
-export type { ChatSettings, ChatMessage };
-export type { ChatCompletionContentPart, ChatCompletionContentPartText, ChatCompletionContentPartImage };
+// Re-export types
+export type { 
+  ChatSettings, 
+  ChatMessage, 
+  ChatRole,
+  ChatCompletionContentPart,
+  ChatCompletionContentPartText,
+  ChatCompletionContentPartImage,
+};
 
 /**
  * Tipo di contenuto supportato nei messaggi multimodali
  */
-export enum ContentType {
+export const enum ContentType {
   Text = 'text',
   Image = 'image_url',
   ToolUse = 'tool_use',
-  ToolResult = 'tool_result'
+  ToolResult = 'tool_result',
 }
 
 /**
  * Blocco di testo per un messaggio
  */
 export interface TextBlock {
-  type: ContentType.Text;
+  readonly type: ContentType.Text;
   text: string;
 }
 
@@ -39,50 +44,66 @@ export interface TextBlock {
  * Blocco immagine per un messaggio
  */
 export interface ImageBlock {
-  type: ContentType.Image;
+  readonly type: ContentType.Image;
   url?: string;
   base64Data?: string;
   media_type?: string;
 }
 
 /**
+ * Tipo per gli input degli strumenti
+ * @remarks Garantisce che i valori siano di tipo primitivo o null
+ */
+export type ToolInput = {
+  [key: string]: string | number | boolean | null;
+};
+
+/**
+ * Tipo per i risultati degli strumenti
+ * @remarks Garantisce che i valori siano di tipo unknown per type safety
+ */
+export type ToolResult = string | {
+  [key: string]: unknown;
+};
+
+/**
  * Blocco generico per uso di strumenti
  */
 export interface ToolUseBlock {
-  type: ContentType.ToolUse;
-  id: string;
-  name: string;
-  input: Record<string, any>;
+  readonly type: ContentType.ToolUse;
+  readonly id: string;
+  readonly name: string;
+  input: ToolInput;
 }
 
 /**
  * Blocco generico per risultati di strumenti
  */
 export interface ToolResultBlock {
-  type: ContentType.ToolResult;
-  toolUseId: string;
-  content: string | Record<string, any>;
+  readonly type: ContentType.ToolResult;
+  readonly toolUseId: string;
+  content: ToolResult;
 }
 
 /**
  * Tipo unione per tutti i possibili blocchi di contenuto
  */
-export type ContentBlock = 
-  | TextBlock 
-  | ImageBlock 
-  | ToolUseBlock 
-  | ToolResultBlock;
+export type ContentBlock = TextBlock | ImageBlock | ToolUseBlock | ToolResultBlock;
 
 /**
- * Funzione di utility per normalizzare un messaggio
- * @deprecated Utilizzare la funzione equivalente in message.types.js
+ * @deprecated Use the equivalent function in message.types.ts
+ * @todo(TypescriptAI) Replace with a typed version that supports all content types
  */
 export function normalizeMessage(message: ChatMessage): ChatMessage {
+  if (!message.content) {
+    throw new TypeError('Message content cannot be null or undefined');
+  }
+
   return {
     ...message,
-    content: typeof message.content === 'string' 
-      ? [{ type: ContentType.Text, text: message.content }] 
-      : message.content,
-    timestamp: message.timestamp || new Date().toISOString()
+    content: Array.isArray(message.content)
+      ? message.content
+      : [{ type: ContentType.Text, text: String(message.content) }],
+    timestamp: message.timestamp || new Date().toISOString(),
   };
-} 
+}

@@ -35,4 +35,4 @@ export interface ContextValidationResult {
   isValid: boolean;
   errors?: string[];
   warnings?: string[];
-} 
+}

@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import { Task, AgentStatus } from '../../shared/types/mas.types.js';
-import { Logger } from '../../utils/logger.js';
+import { Task, AgentStatus } from '../../shared/types/mas.types';
+import { Logger } from '../../utils/logger';
 
 /**
  * Interfaccia per i dati persistenti del MAS
@@ -33,7 +33,7 @@ export class MasPersistenceService {
     this.logger = new Logger('MasPersistenceService');
     this.storageDir = path.join(os.homedir(), '.jarvis-ide', 'mas');
     this.storageFile = path.join(this.storageDir, 'task-queue.json');
-    
+
     // Assicura che la directory esista
     this.ensureStorageDirectory();
   }
@@ -73,24 +73,24 @@ export class MasPersistenceService {
       const state: MasPersistentState = {
         timestamp: new Date().toISOString(),
         tasks,
-        agents
+        agents,
       };
 
       // Confronta con l'ultimo stato salvato per evitare scritture inutili
       if (this.isStateIdentical(state)) {
-        this.logger.debug('Stato identico all\'ultimo salvato, salvataggio ignorato');
+        this.logger.debug("Stato identico all'ultimo salvato, salvataggio ignorato");
         return true;
       }
 
       const jsonContent = JSON.stringify(state, null, 2);
       fs.writeFileSync(this.storageFile, jsonContent, 'utf8');
-      
+
       const fileSizeKb = Math.round(fs.statSync(this.storageFile).size / 1024);
       this.logger.info(`Stato MAS salvato su disco (${fileSizeKb}KB): ${this.storageFile}`);
-      
+
       // Memorizza l'ultimo stato salvato
       this.lastSavedState = state;
-      
+
       return true;
     } catch (error) {
       this.logger.error(`Errore nel salvataggio dello stato MAS: ${error}`);
@@ -105,11 +105,12 @@ export class MasPersistenceService {
    */
   private isStateIdentical(newState: MasPersistentState): boolean {
     if (!this.lastSavedState) return false;
-    
+
     // Confronto semplificato (ignora il timestamp)
     const tasksEqual = JSON.stringify(newState.tasks) === JSON.stringify(this.lastSavedState.tasks);
-    const agentsEqual = JSON.stringify(newState.agents) === JSON.stringify(this.lastSavedState.agents);
-    
+    const agentsEqual =
+      JSON.stringify(newState.agents) === JSON.stringify(this.lastSavedState.agents);
+
     return tasksEqual && agentsEqual;
   }
 
@@ -126,13 +127,13 @@ export class MasPersistenceService {
 
       const jsonContent = fs.readFileSync(this.storageFile, 'utf8');
       const state = JSON.parse(jsonContent) as MasPersistentState;
-      
+
       const fileSizeKb = Math.round(fs.statSync(this.storageFile).size / 1024);
       this.logger.info(`Stato MAS caricato da disco (${fileSizeKb}KB): ${this.storageFile}`);
-      
+
       // Memorizza l'ultimo stato caricato
       this.lastSavedState = state;
-      
+
       return state;
     } catch (error) {
       this.logger.error(`Errore nel caricamento dello stato MAS: ${error}`);
@@ -147,18 +148,18 @@ export class MasPersistenceService {
    * @param intervalMs Intervallo di salvataggio in millisecondi (default: 60000ms = 1 minuto)
    */
   public startAutoSave(
-    tasks: () => Task[], 
+    tasks: () => Task[],
     agents: () => AgentStatus[],
     intervalMs: number = 60000
   ): void {
     // Ferma eventuali intervalli precedenti
     this.stopAutoSave();
-    
+
     // Crea un nuovo intervallo
     this.autoSaveInterval = setInterval(() => {
       this.saveState(tasks(), agents());
     }, intervalMs);
-    
+
     this.logger.info(`Salvataggio automatico avviato (intervallo: ${intervalMs}ms)`);
   }
 
@@ -181,19 +182,19 @@ export class MasPersistenceService {
       const state: MasPersistentState = {
         timestamp: new Date().toISOString(),
         tasks,
-        agents
+        agents,
       };
 
       const jsonContent = JSON.stringify(state, null, 2);
-      
+
       const uri = await vscode.window.showSaveDialog({
         defaultUri: vscode.Uri.file('mas-state.json'),
         filters: {
-          'JSON': ['json']
+          JSON: ['json'],
         },
-        title: 'Esporta stato MAS'
+        title: 'Esporta stato MAS',
       });
-      
+
       if (uri) {
         fs.writeFileSync(uri.fsPath, jsonContent, 'utf8');
         this.logger.info(`Stato MAS esportato in: ${uri.fsPath}`);
@@ -215,21 +216,23 @@ export class MasPersistenceService {
         canSelectFolders: false,
         canSelectMany: false,
         filters: {
-          'JSON': ['json']
+          JSON: ['json'],
         },
-        title: 'Importa stato MAS'
+        title: 'Importa stato MAS',
       });
-      
+
       if (uris && uris.length > 0) {
         const jsonContent = fs.readFileSync(uris[0].fsPath, 'utf8');
         const state = JSON.parse(jsonContent) as MasPersistentState;
-        
+
         this.logger.info(`Stato MAS importato da: ${uris[0].fsPath}`);
-        vscode.window.showInformationMessage(`Stato MAS importato con successo da: ${uris[0].fsPath}`);
-        
+        vscode.window.showInformationMessage(
+          `Stato MAS importato con successo da: ${uris[0].fsPath}`
+        );
+
         return state;
       }
-      
+
       return null;
     } catch (error) {
       this.logger.error(`Errore nell'importazione dello stato MAS: ${error}`);
@@ -244,4 +247,4 @@ export class MasPersistenceService {
   public hasSavedState(): boolean {
     return fs.existsSync(this.storageFile);
   }
-} 
+}

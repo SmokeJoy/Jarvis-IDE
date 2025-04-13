@@ -15,10 +15,10 @@ export interface AnthropicMessage {
 /**
  * Blocco di contenuto nel formato Anthropic
  */
-export type AnthropicContentBlock = 
-  | AnthropicTextBlock 
-  | AnthropicImageBlock 
-  | AnthropicToolUseBlock 
+export type AnthropicContentBlock =
+  | AnthropicTextBlock
+  | AnthropicImageBlock
+  | AnthropicToolUseBlock
   | AnthropicToolResultBlock;
 
 /**
@@ -89,7 +89,13 @@ export interface AnthropicTool {
  * Chunk di streaming Anthropic
  */
 export interface AnthropicStreamChunk {
-  type: 'message_start' | 'content_block_start' | 'content_block_delta' | 'content_block_stop' | 'message_delta' | 'message_stop';
+  type:
+    | 'message_start'
+    | 'content_block_start'
+    | 'content_block_delta'
+    | 'content_block_stop'
+    | 'message_delta'
+    | 'message_stop';
   message?: Partial<AnthropicMessageResponse>;
   index?: number;
   content_block?: {
@@ -123,4 +129,4 @@ export interface AnthropicMessageResponse {
     input_characters?: number;
     output_characters?: number;
   };
-} 
+}

@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
-import { JarvisSettings } from '../types/settings.types.js';
-import { WebviewMessage } from '../types/webview.js';
+import { JarvisSettings } from '../types/settings.types';
+import { WebviewMessage } from '../types/webview';
 
 declare const vscode: {
   postMessage: (message: WebviewMessage) => void;
@@ -14,12 +14,12 @@ export const useJarvisIdeSettings = (initialSettings: JarvisSettings) => {
       // Invia le impostazioni aggiornate al provider
       await vscode.postMessage({
         type: 'settings',
-        payload: newSettings
+        payload: newSettings,
       });
 
-      setSettings(prev => ({
+      setSettings((prev) => ({
         ...prev,
-        ...newSettings
+        ...newSettings,
       }));
     } catch (error) {
       console.error('Error updating settings:', error);
@@ -32,7 +32,7 @@ export const useJarvisIdeSettings = (initialSettings: JarvisSettings) => {
       // Reimposta le impostazioni ai valori predefiniti
       await vscode.postMessage({
         type: 'settings',
-        payload: initialSettings
+        payload: initialSettings,
       });
 
       setSettings(initialSettings);
@@ -45,6 +45,6 @@ export const useJarvisIdeSettings = (initialSettings: JarvisSettings) => {
   return {
     settings,
     updateSettings,
-    resetSettings
+    resetSettings,
   };
 };

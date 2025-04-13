@@ -3,17 +3,18 @@
  * @description Test unitari per il registry dei provider LLM
  */
 
-import { 
-  LLMProviderRegistry, 
-  registerProvider, 
-  hasProvider, 
-  getProvider, 
+import {
+  LLMProviderRegistry,
+  registerProvider,
+  hasProvider,
+  getProvider,
   getDefaultProvider,
   unregisterProvider,
   LLMProviderHandler,
   LLMRequestOptions,
   LLMResponse,
-  Model
+  Model,
+  LLMProviderId,
 } from '../provider-registry';
 
 // Mock di logger
@@ -22,23 +23,23 @@ jest.mock('../../utils/logger.js', () => ({
     debug: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
-    error: jest.fn()
-  }
+    error: jest.fn(),
+  },
 }));
 
 // Provider di test
 class MockProvider implements LLMProviderHandler {
   name = 'MockProvider';
   models: Model[] = [
-    { id: 'mock-model-1', name: 'Mock Model 1', provider: 'mock' },
-    { id: 'mock-model-2', name: 'Mock Model 2', provider: 'mock' }
+    { id: 'mock-model-1', name: 'Mock Model 1', provider: 'mock' as LLMProviderId },
+    { id: 'mock-model-2', name: 'Mock Model 2', provider: 'mock' as LLMProviderId },
   ];
   isAvailable = true;
 
   async call(options: LLMRequestOptions): Promise<LLMResponse> {
     return {
       text: `Mock response for: ${options.prompt}`,
-      model: options.model || 'mock-model-1'
+      model: options.model || 'mock-model-1',
     };
   }
 
@@ -55,7 +56,7 @@ class MockProvider implements LLMProviderHandler {
 const invalidProvider = {
   name: 'InvalidProvider',
   // Manca il metodo call()
-  getAvailableModels: async () => []
+  getAvailableModels: async () => [],
 };
 
 describe('Provider Registry', () => {
@@ -93,7 +94,7 @@ describe('Provider Registry', () => {
 
       expect(hasProvider('mock1')).toBe(true);
       expect(hasProvider('mock2')).toBe(true);
-      
+
       // Il primo dovrebbe essere quello default
       expect(LLMProviderRegistry.getDefaultProviderId()).toBe('mock1');
     });
@@ -114,7 +115,7 @@ describe('Provider Registry', () => {
     test('Dovrebbe recuperare un provider registrato', () => {
       const mockProvider = new MockProvider();
       registerProvider('mock', mockProvider);
-      
+
       const provider = getProvider('mock');
       expect(provider).toBe(mockProvider);
     });
@@ -128,17 +129,17 @@ describe('Provider Registry', () => {
     test('Dovrebbe recuperare il provider default', () => {
       const mockProvider = new MockProvider();
       registerProvider('mock', mockProvider);
-      
+
       const provider = getDefaultProvider();
       expect(provider).toBe(mockProvider);
     });
 
-    test('Dovrebbe lanciare un errore se non c\'è provider default', () => {
+    test("Dovrebbe lanciare un errore se non c'è provider default", () => {
       // Registra e poi rimuovi per assicurarti che non ci sia default
       const mockProvider = new MockProvider();
       registerProvider('mock', mockProvider);
       unregisterProvider('mock');
-      
+
       expect(() => {
         getDefaultProvider();
       }).toThrow(/Nessun provider LLM predefinito configurato/);
@@ -148,10 +149,10 @@ describe('Provider Registry', () => {
   describe('Verifica provider', () => {
     test('hasProvider dovrebbe verificare se un provider esiste', () => {
       expect(hasProvider('mock')).toBe(false);
-      
+
       const mockProvider = new MockProvider();
       registerProvider('mock', mockProvider);
-      
+
       expect(hasProvider('mock')).toBe(true);
     });
   });
@@ -160,7 +161,7 @@ describe('Provider Registry', () => {
     test('Dovrebbe rimuovere un provider registrato', () => {
       const mockProvider = new MockProvider();
       registerProvider('mock', mockProvider);
-      
+
       expect(unregisterProvider('mock')).toBe(true);
       expect(hasProvider('mock')).toBe(false);
     });
@@ -172,9 +173,9 @@ describe('Provider Registry', () => {
     test('Dovrebbe resettare il provider default quando rimosso', () => {
       const mockProvider = new MockProvider();
       registerProvider('mock', mockProvider);
-      
+
       expect(LLMProviderRegistry.getDefaultProviderId()).toBe('mock');
-      
+
       unregisterProvider('mock');
       expect(LLMProviderRegistry.getDefaultProviderId()).toBeNull();
     });
@@ -188,7 +189,7 @@ describe('Provider Registry', () => {
 
       registerProvider('mock1', mockProvider1);
       registerProvider('mock2', mockProvider2);
-      
+
       const allProviders = LLMProviderRegistry.getAllProviders();
       expect(allProviders.size).toBe(2);
       expect(allProviders.get('mock1')).toBe(mockProvider1);
@@ -201,7 +202,7 @@ describe('Provider Registry', () => {
 
       registerProvider('mock1', mockProvider1);
       registerProvider('mock2', mockProvider2);
-      
+
       const ids = LLMProviderRegistry.getProviderIds();
       expect(ids).toEqual(['mock1', 'mock2']);
     });
@@ -213,7 +214,7 @@ describe('Provider Registry', () => {
 
       registerProvider('mock1', mockProvider1);
       registerProvider('mock2', mockProvider2);
-      
+
       const availableProviders = LLMProviderRegistry.getAvailableProviders();
       expect(availableProviders.size).toBe(1);
       expect(availableProviders.has('mock1')).toBe(true);
@@ -224,7 +225,7 @@ describe('Provider Registry', () => {
       const mockProvider = new MockProvider();
       // @ts-ignore: forza l'assegnazione di una proprietà invalida per il test
       mockProvider.name = '';
-      
+
       expect(() => {
         registerProvider('mock', mockProvider);
       }).toThrow(/proprietà 'name' mancante o vuota/);
@@ -234,7 +235,7 @@ describe('Provider Registry', () => {
       const mockProvider = new MockProvider();
       // @ts-ignore: forza l'assegnazione di una proprietà invalida per il test
       mockProvider.validateRequest = 'not a function';
-      
+
       expect(() => {
         registerProvider('mock', mockProvider);
       }).toThrow(/metodo 'validateRequest' presente ma non è una funzione/);
@@ -245,7 +246,7 @@ describe('Provider Registry', () => {
     test('Dovrebbe chiamare correttamente il metodo call del provider', async () => {
       const mockProvider = new MockProvider();
       registerProvider('mock', mockProvider);
-      
+
       const provider = getProvider('mock');
       const response = await provider.call({ prompt: 'Hello' });
       expect(response.text).toBe('Mock response for: Hello');
@@ -254,10 +255,10 @@ describe('Provider Registry', () => {
     test('Dovrebbe ottenere i modelli disponibili dal provider', async () => {
       const mockProvider = new MockProvider();
       registerProvider('mock', mockProvider);
-      
+
       const provider = getProvider('mock');
       const models = await provider.getAvailableModels();
-      
+
       expect(models).toHaveLength(2);
       expect(models[0].id).toBe('mock-model-1');
       expect(models[1].id).toBe('mock-model-2');
@@ -266,12 +267,12 @@ describe('Provider Registry', () => {
     test('Dovrebbe validare una richiesta usando il metodo validateRequest', () => {
       const mockProvider = new MockProvider();
       registerProvider('mock', mockProvider);
-      
+
       const provider = getProvider('mock');
-      
+
       // Il metodo validateRequest del mock controlla se prompt è truthy
       expect(provider.validateRequest?.({ prompt: 'Hello' })).toBe(true);
       expect(provider.validateRequest?.({ prompt: '' })).toBe(false);
     });
   });
-}); 
+});

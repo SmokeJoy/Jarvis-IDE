@@ -30,11 +30,11 @@ export const useAggregateStats = (auditData: AuditEntry[]): AggregateStats => {
       strategies: {},
       timeRange: {
         start: Infinity,
-        end: -Infinity
-      }
+        end: -Infinity,
+      },
     };
 
-    auditData.forEach(entry => {
+    auditData.forEach((entry) => {
       // Aggiorna il range temporale
       stats.timeRange.start = Math.min(stats.timeRange.start, entry.timestamp);
       stats.timeRange.end = Math.max(stats.timeRange.end, entry.timestamp);
@@ -46,19 +46,20 @@ export const useAggregateStats = (auditData: AuditEntry[]): AggregateStats => {
           totalFallbacks: 0,
           averageSuccessRate: 0,
           averageLatency: 0,
-          totalRequests: 0
+          totalRequests: 0,
         };
       }
 
       const providerStats = stats.providers[providerName];
       providerStats.totalRequests++;
       providerStats.totalFallbacks += entry.fallbackReason ? 1 : 0;
-      providerStats.averageSuccessRate = 
-        (providerStats.averageSuccessRate * (providerStats.totalRequests - 1) + 
-         (entry.success ? 1 : 0)) / providerStats.totalRequests;
-      providerStats.averageLatency = 
-        (providerStats.averageLatency * (providerStats.totalRequests - 1) + 
-         entry.latency) / providerStats.totalRequests;
+      providerStats.averageSuccessRate =
+        (providerStats.averageSuccessRate * (providerStats.totalRequests - 1) +
+          (entry.success ? 1 : 0)) /
+        providerStats.totalRequests;
+      providerStats.averageLatency =
+        (providerStats.averageLatency * (providerStats.totalRequests - 1) + entry.latency) /
+        providerStats.totalRequests;
 
       // Aggiorna le statistiche della strategia
       const strategyName = entry.strategyName;
@@ -66,28 +67,28 @@ export const useAggregateStats = (auditData: AuditEntry[]): AggregateStats => {
         stats.strategies[strategyName] = {
           totalDecisions: 0,
           successRate: 0,
-          mostUsedProvider: ''
+          mostUsedProvider: '',
         };
       }
 
       const strategyStats = stats.strategies[strategyName];
       strategyStats.totalDecisions++;
-      strategyStats.successRate = 
-        (strategyStats.successRate * (strategyStats.totalDecisions - 1) + 
-         (entry.success ? 1 : 0)) / strategyStats.totalDecisions;
+      strategyStats.successRate =
+        (strategyStats.successRate * (strategyStats.totalDecisions - 1) + (entry.success ? 1 : 0)) /
+        strategyStats.totalDecisions;
 
       // Aggiorna il provider più utilizzato per questa strategia
       const providerCounts: Record<string, number> = {};
       auditData
-        .filter(e => e.strategyName === strategyName)
-        .forEach(e => {
+        .filter((e) => e.strategyName === strategyName)
+        .forEach((e) => {
           providerCounts[e.selectedProvider] = (providerCounts[e.selectedProvider] || 0) + 1;
         });
-      
-      strategyStats.mostUsedProvider = Object.entries(providerCounts)
-        .sort(([, a], [, b]) => b - a)[0]?.[0] || '';
+
+      strategyStats.mostUsedProvider =
+        Object.entries(providerCounts).sort(([, a], [, b]) => b - a)[0]?.[0] || '';
     });
 
     return stats;
   }, [auditData]);
-}; 
+};

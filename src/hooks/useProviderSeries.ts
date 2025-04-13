@@ -8,7 +8,7 @@ export const useProviderSeries = (auditData: AuditEntry[]) => {
     const providerData = new Map<string, number[]>();
 
     // Raggruppa gli eventi per provider
-    auditData.forEach(entry => {
+    auditData.forEach((entry) => {
       if (!providerData.has(entry.selectedProvider)) {
         providerData.set(entry.selectedProvider, []);
       }
@@ -20,7 +20,7 @@ export const useProviderSeries = (auditData: AuditEntry[]) => {
     providerData.forEach((successes, provider) => {
       const recentSuccesses = successes.slice(-WINDOW_SIZE);
       const rates: number[] = [];
-      
+
       // Calcola success rate in finestra mobile
       for (let i = 0; i < recentSuccesses.length; i++) {
         const window = recentSuccesses.slice(0, i + 1);
@@ -33,4 +33,4 @@ export const useProviderSeries = (auditData: AuditEntry[]) => {
 
     return series;
   }, [auditData]);
-}; 
+};

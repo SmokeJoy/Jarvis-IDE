@@ -19,7 +19,7 @@ export const DebugOverlay: React.FC<DebugOverlayProps> = ({ eventBus }) => {
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'D') {
-        setIsVisible(prev => !prev);
+        setIsVisible((prev) => !prev);
       }
     };
 
@@ -28,7 +28,7 @@ export const DebugOverlay: React.FC<DebugOverlayProps> = ({ eventBus }) => {
   }, []);
 
   const handleSelectEntry = (entry: any) => {
-    const index = history.findIndex(h => h.timestamp === entry.timestamp);
+    const index = history.findIndex((h) => h.timestamp === entry.timestamp);
     setSelectedEntry(index);
   };
 
@@ -48,21 +48,13 @@ export const DebugOverlay: React.FC<DebugOverlayProps> = ({ eventBus }) => {
                 selectedIndex={selectedEntry}
               />
             )}
-            {current && (
-              <MitigatorOverlay
-                {...current}
-                onClose={() => setIsVisible(false)}
-              />
-            )}
+            {current && <MitigatorOverlay {...current} onClose={() => setIsVisible(false)} />}
             {selectedEntry !== null && history[selectedEntry] && (
-              <SnapshotDetail
-                data={history[selectedEntry]}
-                onClose={handleCloseSnapshot}
-              />
+              <SnapshotDetail data={history[selectedEntry]} onClose={handleCloseSnapshot} />
             )}
           </>
         )}
       </AnimatePresence>
     </>
   );
-}; 
+};

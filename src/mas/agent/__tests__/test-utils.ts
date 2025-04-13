@@ -28,7 +28,7 @@ export interface Agent {
 
 /**
  * Crea un agente mock per i test
- * 
+ *
  * @param id ID dell'agente
  * @param name Nome dell'agente
  * @param mode Modalità dell'agente (default: 'assistant')
@@ -42,7 +42,7 @@ export const createMockAgent = (id: string, name: string, mode = 'assistant'): A
     mode,
     isActive: true,
     enabled: true,
-    warnings: []
+    warnings: [],
   };
 
   // Creiamo i mock delle funzioni
@@ -58,6 +58,6 @@ export const createMockAgent = (id: string, name: string, mode = 'assistant'): A
     deactivate: vi.fn().mockResolvedValue(true),
     getStatus: vi.fn().mockReturnValue(mockStatus),
     setEnabled: mockSetEnabled,
-    handleMessage: vi.fn().mockResolvedValue(true)
+    handleMessage: vi.fn().mockResolvedValue(true),
   };
-}; 
+};

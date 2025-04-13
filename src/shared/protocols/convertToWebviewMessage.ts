@@ -3,8 +3,8 @@
  * @description Funzione di conversione per messaggi di WebView
  */
 
-import { WebviewMessage, OutgoingWebviewMessage, LegacyWebviewMessage } from './webview.protocol.js';
-import { validateWebviewMessage } from './validateWebviewMessage.test.js';
+import { WebviewMessage, OutgoingWebviewMessage, LegacyWebviewMessage } from './webview.protocol';
+import { validateWebviewMessage } from './validateWebviewMessage.test';
 
 // Tipo per i messaggi legacy che potrebbero arrivare dall'estensione
 interface LegacyExtensionMessage {
@@ -50,7 +50,7 @@ export function convertToWebviewMessage(message: unknown): WebviewMessage | null
   // Se esiste un payload, lo copia
   if (legacyMessage.payload !== undefined) {
     newMessage.payload = legacyMessage.payload || {};
-  } 
+  }
   // Se non esiste, crea un oggetto vuoto
   else {
     newMessage.payload = {};
@@ -64,7 +64,7 @@ export function convertToWebviewMessage(message: unknown): WebviewMessage | null
   // Gestione campi speciali
   if (legacyMessage.error) {
     newMessage.error = String(legacyMessage.error);
-    
+
     // Aggiunge anche al payload per compatibilità
     if (newMessage.payload) {
       newMessage.payload.error = legacyMessage.error;
@@ -113,4 +113,4 @@ export function convertToWebviewMessage(message: unknown): WebviewMessage | null
   // Conversione finale al tipo WebviewMessage
   // Utilizziamo una cast diretta per superare le restrizioni del sistema di tipi durante la migrazione
   return newMessage as WebviewMessage;
-} 
+}

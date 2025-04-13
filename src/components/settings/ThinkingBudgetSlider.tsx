@@ -1,6 +1,6 @@
 import React from 'react';
 import { VSCodeSlider } from '@vscode/webview-ui-toolkit/react';
-import { ApiConfiguration } from '../../types/api.types.js';
+import { ApiConfiguration } from '../../types/api.types';
 
 interface ThinkingBudgetSliderProps {
   apiConfiguration: ApiConfiguration;
@@ -13,7 +13,7 @@ export const ThinkingBudgetSlider: React.FC<ThinkingBudgetSliderProps> = ({
 }) => {
   const handleChange = (event: React.FormEvent<HTMLInputElement>) => {
     onApiConfigurationChange({
-      thinkingBudgetMs: parseInt(event.currentTarget.value)
+      thinkingBudgetMs: parseInt(event.currentTarget.value),
     });
   };
 
@@ -27,4 +27,4 @@ export const ThinkingBudgetSlider: React.FC<ThinkingBudgetSliderProps> = ({
       />
     </div>
   );
-}; 
+};

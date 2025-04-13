@@ -52,10 +52,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
       <section>
         <h2>Telemetry</h2>
-        <VSCodeCheckbox
-          checked={telemetrySetting === 'enabled'}
-          onChange={handleTelemetryChange}
-        >
+        <VSCodeCheckbox checked={telemetrySetting === 'enabled'} onChange={handleTelemetryChange}>
           Enable Telemetry
         </VSCodeCheckbox>
       </section>
@@ -70,4 +67,4 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       </section>
     </div>
   );
-}; 
+};

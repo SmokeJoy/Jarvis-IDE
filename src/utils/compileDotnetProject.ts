@@ -1,7 +1,7 @@
 import * as child_process from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
-import { Logger } from './logger.js';
+import { Logger } from './logger';
 
 /**
  * Compila un progetto .NET
@@ -12,14 +12,14 @@ export async function compileDotnetProject(projectPath?: string): Promise<string
   try {
     const targetPath = projectPath || process.cwd();
     Logger.info(`Compilazione del progetto .NET in: ${targetPath}`);
-    
+
     // Verifica se la directory contiene un file .csproj o .sln
     const files = fs.readdirSync(targetPath);
-    const csprojFiles = files.filter(f => f.endsWith('.csproj'));
-    const slnFiles = files.filter(f => f.endsWith('.sln'));
-    
+    const csprojFiles = files.filter((f) => f.endsWith('.csproj'));
+    const slnFiles = files.filter((f) => f.endsWith('.sln'));
+
     let buildTarget: string | undefined;
-    
+
     if (slnFiles.length > 0) {
       const slnFile = slnFiles[0];
       if (slnFile) {
@@ -33,35 +33,35 @@ export async function compileDotnetProject(projectPath?: string): Promise<string
         Logger.info(`Utilizzando file progetto: ${csprojFile}`);
       }
     }
-    
+
     // Comando di compilazione
     const buildCommand = 'dotnet';
     const buildArgs = buildTarget ? ['build', buildTarget] : ['build'];
-    
+
     Logger.info(`Esecuzione comando: ${buildCommand} ${buildArgs.join(' ')}`);
-    
+
     // Esegui il comando di compilazione
     return new Promise((resolve, reject) => {
       const process = child_process.spawn(buildCommand, buildArgs, {
         cwd: targetPath,
-        shell: true
+        shell: true,
       });
-      
+
       let output = '';
       let errorOutput = '';
-      
+
       process.stdout.on('data', (data) => {
         const chunk = data.toString();
         output += chunk;
         Logger.info(`[dotnet build] ${chunk.trim()}`);
       });
-      
+
       process.stderr.on('data', (data) => {
         const chunk = data.toString();
         errorOutput += chunk;
         Logger.error(`[dotnet build] ${chunk.trim()}`);
       });
-      
+
       process.on('close', (code) => {
         if (code !== 0) {
           Logger.error(`Errore di compilazione. Codice: ${code}`);
@@ -71,7 +71,7 @@ export async function compileDotnetProject(projectPath?: string): Promise<string
           resolve(output);
         }
       });
-      
+
       process.on('error', (error) => {
         Logger.error(`Errore nell'avvio del processo di compilazione: ${error}`);
         reject(error);
@@ -81,4 +81,4 @@ export async function compileDotnetProject(projectPath?: string): Promise<string
     Logger.error(`Errore durante la compilazione del progetto: ${error}`);
     throw error;
   }
-} 
+}

@@ -1,5 +1,6 @@
-import { ChatMessage, ContentType, TextContent } from '../../types/chat.types.js';
-import { logger } from '../../utils/logger.js';
+import { ChatMessage, ContentType, TextContent } from '../../types/chat.types';
+import { logger } from '../../utils/logger';
+import { createSafeMessage } from "../../shared/types/message";
 
 interface LLMStudioMessageRole {
   role: string;
@@ -19,13 +20,13 @@ export const LLMStudioTransformer = {
 
     // Aggiungi system prompt se disponibile
     if (systemPrompt) {
-      output.push({ role: 'system', content: systemPrompt });
+      output.push(createSafeMessage({role: 'system', content: systemPrompt}));
     }
 
     // Converti tutti i messaggi nel formato LLM Studio
     for (const msg of messages) {
       if (!msg || !msg.role) continue;
-      
+
       let role = msg.role;
       // Normalizza i ruoli secondo le aspettative di LLM Studio
       if (role === 'assistant' || role === 'user') {
@@ -42,9 +43,9 @@ export const LLMStudioTransformer = {
       let content: string;
       if (Array.isArray(msg.content)) {
         // Filtra solo i contenuti di testo
-        const textParts = msg.content.filter(part => part.type === ContentType.Text);
-        content = textParts.map(part => part.text).join('\n');
-        
+        const textParts = msg.content.filter((part) => part.type === ContentType.Text);
+        content = textParts.map((part) => part.text).join('\n');
+
         // Log avviso se ci sono contenuti non testuali che vengono ignorati
         if (msg.content.length !== textParts.length) {
           logger.warn('[LLMStudioTransformer] Alcuni contenuti non testuali sono stati ignorati');
@@ -77,11 +78,11 @@ export const LLMStudioTransformer = {
 
       // Contenuto testuale
       const content: TextContent[] = [];
-      
+
       if (typeof message.content === 'string') {
         content.push({
           type: ContentType.Text,
-          text: message.content
+          text: message.content,
         });
       }
 
@@ -89,7 +90,7 @@ export const LLMStudioTransformer = {
       if (message.function_call) {
         const functionCallContent = {
           type: ContentType.Text,
-          text: `[FUNCTION_CALL: ${message.function_call.name}(${message.function_call.arguments})]`
+          text: `[FUNCTION_CALL: ${message.function_call.name}(${message.function_call.arguments})]`,
         };
         content.push(functionCallContent as TextContent);
       }
@@ -103,12 +104,15 @@ export const LLMStudioTransformer = {
           model: response.model || 'lmstudio-model',
           stopReason: choice.finish_reason || 'unknown',
           usage: response.usage || {},
-          internalReasoning: '[N/D: LLM Studio non fornisce reasoning]'
-        }
+          internalReasoning: '[N/D: LLM Studio non fornisce reasoning]',
+        },
       };
     } catch (err) {
-      logger.error('[LLMStudioTransformer] Errore nella conversione della risposta', { err, response });
+      logger.error('[LLMStudioTransformer] Errore nella conversione della risposta', {
+        err,
+        response,
+      });
       throw err;
     }
-  }
-}; 
+  },
+};

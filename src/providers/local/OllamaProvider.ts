@@ -3,7 +3,8 @@
  * https://github.com/ollama/ollama
  */
 
-import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js';
+import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider';
+import { createSafeMessage } from "../../shared/types/message";
 
 interface OllamaGenerateRequest {
   model: string;
@@ -115,11 +116,11 @@ export class OllamaProvider extends BaseLLMProvider {
 
     // Applica le opzioni MCP
     const processedMessages = this.applyMCPOptions(messages, options);
-    
+
     try {
       // Formatta i messaggi per Ollama
       const formattedData = this.formatMessages(processedMessages);
-      
+
       // Aggiungi le opzioni specifiche
       if (options) {
         if (formattedData.options) {
@@ -127,10 +128,10 @@ export class OllamaProvider extends BaseLLMProvider {
           formattedData.options.num_predict = options.max_tokens;
           formattedData.options.stop = options.stop;
         }
-        
+
         formattedData.stream = false; // Assicurati che non sia in streaming
       }
-      
+
       // Effettua la chiamata API
       const response = await fetch(`${this.baseUrl}/api/chat`, {
         method: 'POST',
@@ -139,13 +140,13 @@ export class OllamaProvider extends BaseLLMProvider {
         },
         body: JSON.stringify(formattedData),
       });
-      
+
       if (!response.ok) {
         const error = await response.text();
         throw new Error(`Errore Ollama: ${error}`);
       }
-      
-      const data = await response.json() as OllamaResponse;
+
+      const data = (await response.json()) as OllamaResponse;
       return data.response;
     } catch (error) {
       throw new Error(`Errore nella chiamata a Ollama: ${error.message}`);
@@ -162,11 +163,11 @@ export class OllamaProvider extends BaseLLMProvider {
 
     // Applica le opzioni MCP
     const processedMessages = this.applyMCPOptions(messages, options);
-    
+
     try {
       // Formatta i messaggi per Ollama
       const formattedData = this.formatMessages(processedMessages);
-      
+
       // Aggiungi le opzioni specifiche
       if (options) {
         if (formattedData.options) {
@@ -174,10 +175,10 @@ export class OllamaProvider extends BaseLLMProvider {
           formattedData.options.num_predict = options.max_tokens;
           formattedData.options.stop = options.stop;
         }
-        
+
         formattedData.stream = true; // Imposta lo streaming
       }
-      
+
       // Effettua la chiamata API
       const response = await fetch(`${this.baseUrl}/api/chat`, {
         method: 'POST',
@@ -186,35 +187,35 @@ export class OllamaProvider extends BaseLLMProvider {
         },
         body: JSON.stringify(formattedData),
       });
-      
+
       if (!response.ok) {
         const error = await response.text();
         throw new Error(`Errore Ollama: ${error}`);
       }
-      
+
       // Gestisci lo stream di risposta
       const reader = response.body?.getReader();
       if (!reader) {
         throw new Error('Impossibile leggere lo stream di risposta');
       }
-      
-      let decoder = new TextDecoder();
+
+      const decoder = new TextDecoder();
       let buffer = '';
-      
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        
+
         // Aggiungi i nuovi dati al buffer
         buffer += decoder.decode(value, { stream: true });
-        
+
         // Dividi il buffer in linee
         const lines = buffer.split('\n');
         buffer = lines.pop() || ''; // L'ultima linea potrebbe essere incompleta
-        
+
         for (const line of lines) {
           if (line.trim() === '') continue;
-          
+
           try {
             const data = JSON.parse(line) as OllamaResponse;
             yield data.response;
@@ -223,7 +224,7 @@ export class OllamaProvider extends BaseLLMProvider {
           }
         }
       }
-      
+
       // Gestisci eventuali dati residui nel buffer
       if (buffer.trim() !== '') {
         try {
@@ -233,7 +234,6 @@ export class OllamaProvider extends BaseLLMProvider {
           console.warn('Errore nel parsing della risposta Ollama finale:', e);
         }
       }
-      
     } catch (error) {
       throw new Error(`Errore nello stream Ollama: ${error.message}`);
     }
@@ -246,19 +246,19 @@ export class OllamaProvider extends BaseLLMProvider {
     if (!this.isConfigured()) {
       throw new Error('OllamaProvider non configurato correttamente');
     }
-    
+
     try {
       const response = await fetch(`${this.baseUrl}/api/tags`, {
         method: 'GET',
       });
-      
+
       if (!response.ok) {
         const error = await response.text();
         throw new Error(`Errore Ollama: ${error}`);
       }
-      
-      const data = await response.json() as OllamaListModelsResponse;
-      return data.models.map(model => model.name);
+
+      const data = (await response.json()) as OllamaListModelsResponse;
+      return data.models.map((model) => model.name);
     } catch (error) {
       console.error('Errore nel recupero dei modelli Ollama:', error);
       return [];
@@ -270,29 +270,23 @@ export class OllamaProvider extends BaseLLMProvider {
    */
   protected formatMessages(messages: LLMMessage[]): OllamaChatRequest {
     // Estrai il messaggio di sistema se presente
-    const systemMessage = messages.find(m => m.role === 'system');
-    
+    const systemMessage = messages.find((m) => m.role === 'system');
+
     // Prepara la richiesta standard di chat
     const request: OllamaChatRequest = {
       model: 'llama2', // Valore di default, sarà sovrascritto dalle opzioni
       messages: messages
-        .filter(m => m.role !== 'system') // Rimuovi i messaggi di sistema qui
-        .map(m => ({
-          role: m.role,
-          content: m.content
-        })),
+        .filter((m) => m.role !== 'system') // Rimuovi i messaggi di sistema qui
+        .map((m) => (createSafeMessage({role: m.role, content: m.content}))),
       stream: false,
     };
-    
+
     // Se c'è un messaggio di sistema, aggiungilo nel formato appropriato
     // per Ollama, che gestisce il messaggio di sistema separatamente
     if (systemMessage) {
-      request.messages.unshift({
-        role: 'system',
-        content: systemMessage.content
-      });
+      request.messages.unshift(createSafeMessage({role: 'system', content: systemMessage.content}));
     }
-    
+
     return request;
   }
-} 
+}

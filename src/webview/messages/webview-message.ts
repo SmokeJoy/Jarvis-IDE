@@ -1,5 +1,5 @@
 // src/webview/messages/webview-message.ts
-import { BaseMessage } from "../../shared/types/message.js";
+import { BaseMessage } from '../../shared/types/message';
 
 export interface WebviewMessage<T extends string> {
   type: T;
@@ -22,10 +22,10 @@ export interface McpConnectionMessage extends WebviewMessage<'mcpConnected' | 'm
   payload: boolean;
 }
 
-export type WebviewMessageUnion = 
-  | ResponseMessage 
-  | ChunkMessage 
-  | ErrorMessage 
+export type WebviewMessageUnion =
+  | ResponseMessage
+  | ChunkMessage
+  | ErrorMessage
   | McpConnectionMessage;
 
 export function createWebviewMessage<T extends string>(
@@ -33,4 +33,4 @@ export function createWebviewMessage<T extends string>(
   payload: unknown
 ): WebviewMessage<T> {
   return { type, payload };
-} 
+}

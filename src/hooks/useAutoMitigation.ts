@@ -27,7 +27,7 @@ export const useAutoMitigation = () => {
     currentProvider: '',
     nextProvider: null,
     confidence: 0,
-    lastMitigation: null
+    lastMitigation: null,
   });
 
   const { auditData } = useFallbackAudit();
@@ -53,19 +53,20 @@ export const useAutoMitigation = () => {
     // 3. Stato attuale del provider
     const confidence = calculateConfidence(latestWarning, latestAudit);
 
-    if (confidence > 0.8) { // Soglia di confidenza per auto-mitigation
+    if (confidence > 0.8) {
+      // Soglia di confidenza per auto-mitigation
       const nextProvider = determineNextProvider(latestAudit);
-      
+
       // Blocca il provider corrente
       block(latestAudit.currentProvider, 'auto-mitigation', 120);
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         isActive: true,
         currentProvider: latestAudit.currentProvider,
         nextProvider,
         confidence,
-        lastMitigation: new Date()
+        lastMitigation: new Date(),
       }));
 
       // Emetti evento di auto-mitigation
@@ -73,7 +74,7 @@ export const useAutoMitigation = () => {
         from: latestAudit.currentProvider,
         to: nextProvider,
         confidence,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
       eventBus.emit('auto-mitigation:triggered', event);
     }
@@ -86,7 +87,7 @@ export const useAutoMitigation = () => {
 
   return {
     ...state,
-    evaluateMitigation
+    evaluateMitigation,
   };
 };
 
@@ -99,4 +100,4 @@ function calculateConfidence(warning: PredictiveWarning, audit: AuditEntry): num
 function determineNextProvider(audit: AuditEntry): string {
   // Implementa la logica di selezione del prossimo provider
   return 'fallback'; // Placeholder
-} 
+}

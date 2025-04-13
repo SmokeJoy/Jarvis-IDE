@@ -1,33 +1,27 @@
-import React, { useState } from 'react'
-import { TabNavbar } from './TabNavbar.js'
-import { TabId, TabItem } from '../../types/tab.js'
+import React, { useState } from 'react';
+import { TabNavbar } from './TabNavbar';
+import { TabId, TabItem } from '../../types/tab';
 
 const tabs: TabItem[] = [
   {
     id: 'tab1',
     label: 'Tab 1',
-    badge: { count: 1, type: 'info' }
+    badge: { count: 1, type: 'info' },
   },
   {
     id: 'tab2',
     label: 'Tab 2',
-    badge: { count: 2, type: 'warning' }
+    badge: { count: 2, type: 'warning' },
   },
   {
     id: 'tab3',
     label: 'Tab 3',
-    badge: { count: 3, type: 'error' }
-  }
-]
+    badge: { count: 3, type: 'error' },
+  },
+];
 
 export const TabNavbarExample: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabId>('tab1')
+  const [activeTab, setActiveTab] = useState<TabId>('tab1');
 
-  return (
-    <TabNavbar
-      tabs={tabs}
-      activeTab={activeTab}
-      onTabClick={setActiveTab}
-    />
-  )
-} 
+  return <TabNavbar tabs={tabs} activeTab={activeTab} onTabClick={setActiveTab} />;
+};

@@ -4,23 +4,23 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { 
-  isExtensionMessage, 
-  isWebviewMessage, 
+import {
+  isExtensionMessage,
+  isWebviewMessage,
   convertToWebviewMessage,
   WebviewMessageType,
   ExtensionMessage,
-  WebviewMessage
-} from './webview.types.js';
+  WebviewMessage,
+} from './webview.types';
 
 describe('Type guards per messaggi', () => {
   describe('isExtensionMessage', () => {
     it('dovrebbe identificare correttamente un ExtensionMessage valido', () => {
       const message: ExtensionMessage = {
         type: 'test',
-        payload: { foo: 'bar' }
+        payload: { foo: 'bar' },
       };
-      
+
       expect(isExtensionMessage(message)).toBe(true);
     });
 
@@ -38,18 +38,18 @@ describe('Type guards per messaggi', () => {
     it('dovrebbe identificare correttamente un WebviewMessage con type stringa', () => {
       const message: WebviewMessage = {
         type: 'customAction',
-        payload: { data: 'test' }
+        payload: { data: 'test' },
       };
-      
+
       expect(isWebviewMessage(message)).toBe(true);
     });
 
     it('dovrebbe identificare correttamente un WebviewMessage con type enum', () => {
       const message: WebviewMessage = {
         type: WebviewMessageType.ACTION,
-        payload: { data: 'test' }
+        payload: { data: 'test' },
       };
-      
+
       expect(isWebviewMessage(message)).toBe(true);
     });
 
@@ -68,11 +68,11 @@ describe('Type guards per messaggi', () => {
       const input: ExtensionMessage = {
         type: 'test',
         payload: { foo: 'bar' },
-        action: 'chatButtonClicked'
+        action: 'chatButtonClicked',
       };
-      
+
       const result = convertToWebviewMessage(input);
-      
+
       expect(result).not.toBeNull();
       expect(result?.type).toBe('test');
       expect(result?.payload).toEqual({ foo: 'bar' });
@@ -82,11 +82,11 @@ describe('Type guards per messaggi', () => {
     it('dovrebbe gestire il caso di error nel messaggio', () => {
       const input: ExtensionMessage = {
         type: 'error',
-        error: 'Something went wrong'
+        error: 'Something went wrong',
       };
-      
+
       const result = convertToWebviewMessage(input);
-      
+
       expect(result).not.toBeNull();
       expect(result?.type).toBe('error');
       expect(result?.payload).toHaveProperty('error', 'Something went wrong');
@@ -97,12 +97,12 @@ describe('Type guards per messaggi', () => {
         type: 'apiConfig',
         apiConfiguration: {
           provider: 'test-provider',
-          apiKey: 'test-key'
-        }
+          apiKey: 'test-key',
+        },
       };
-      
+
       const result = convertToWebviewMessage(input);
-      
+
       expect(result).not.toBeNull();
       expect(result?.type).toBe('apiConfig');
       expect(result?.apiConfiguration).toHaveProperty('provider', 'test-provider');
@@ -115,13 +115,13 @@ describe('Type guards per messaggi', () => {
         state: {
           apiConfiguration: {
             provider: 'test-provider',
-            apiKey: 'test-key'
-          }
-        }
+            apiKey: 'test-key',
+          },
+        },
       };
-      
+
       const result = convertToWebviewMessage(input);
-      
+
       expect(result).not.toBeNull();
       expect(result?.type).toBe('stateUpdate');
       expect(result?.apiConfiguration).toHaveProperty('provider', 'test-provider');
@@ -135,4 +135,4 @@ describe('Type guards per messaggi', () => {
       expect(convertToWebviewMessage({ payload: {} } as any)).toBeNull();
     });
   });
-}); 
+});

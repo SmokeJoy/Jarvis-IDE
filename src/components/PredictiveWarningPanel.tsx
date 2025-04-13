@@ -57,7 +57,7 @@ export const PredictiveWarningPanel = ({ warnings, auditData }: PredictiveWarnin
       providerId: warning.provider,
       reason: `Predicted failure (${warning.signal})`,
       timestamp: Date.now(),
-      __predicted: true
+      __predicted: true,
     });
   };
 
@@ -86,29 +86,24 @@ export const PredictiveWarningPanel = ({ warnings, auditData }: PredictiveWarnin
             <div
               key={index}
               className={`flex items-center justify-between p-2 rounded ${
-                warning.level === 'critical' ? 'bg-red-900/20' :
-                warning.level === 'high' ? 'bg-orange-900/20' :
-                'bg-yellow-900/20'
+                warning.level === 'critical'
+                  ? 'bg-red-900/20'
+                  : warning.level === 'high'
+                    ? 'bg-orange-900/20'
+                    : 'bg-yellow-900/20'
               }`}
             >
               <div className="flex items-center gap-2">
-                <span className={getLevelColor(warning.level)}>
-                  {getLevelIcon(warning.level)}
-                </span>
+                <span className={getLevelColor(warning.level)}>{getLevelIcon(warning.level)}</span>
                 <span className="text-white">
                   [{warning.provider}] {formatWarningMessage(warning)}
                 </span>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 {series.length > 0 && (
                   <div className="opacity-75">
-                    <SparklineChart
-                      data={series}
-                      color={color}
-                      height={20}
-                      width={60}
-                    />
+                    <SparklineChart data={series} color={color} height={20} width={60} />
                   </div>
                 )}
                 <button
@@ -124,4 +119,4 @@ export const PredictiveWarningPanel = ({ warnings, auditData }: PredictiveWarnin
       </div>
     </motion.div>
   );
-}; 
+};

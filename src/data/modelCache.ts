@@ -4,8 +4,8 @@
  * Fornisce funzionalità di caching per i modelli di diversi provider
  */
 
-import { LLMProviderId, OpenAiCompatibleModelInfo } from "../shared/types/api.types.js";
-import { Logger } from "../shared/logger.js";
+import { LLMProviderId, OpenAiCompatibleModelInfo } from '../shared/types/api.types';
+import { Logger } from '../shared/logger';
 
 /**
  * Cache in-memory per i modelli LLM

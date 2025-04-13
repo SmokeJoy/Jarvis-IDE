@@ -32,6 +32,72 @@ declare global {
 //     'authStateChanged' |
 //     'startChat';
 
+/**
+ * Type for task history item
+ */
+export interface TaskHistoryItem {
+    id: string;
+    task: string;
+    status: 'pending' | 'completed' | 'failed';
+    timestamp: number;
+    result?: string;
+    error?: string;
+}
+
+/**
+ * Type for MCP server configuration
+ */
+export interface McpServer {
+    id: string;
+    name: string;
+    url: string;
+    status: 'active' | 'inactive';
+    lastPing?: number;
+}
+
+/**
+ * Type for MCP marketplace item
+ */
+export interface McpMarketplaceItem {
+    id: string;
+    name: string;
+    description: string;
+    version: string;
+    author: string;
+    downloads: number;
+    rating: number;
+}
+
+/**
+ * Type for auto approval settings
+ */
+export interface AutoApprovalSetting {
+    enabled: boolean;
+    timeout: number;
+    maxRetries: number;
+}
+
+/**
+ * Type for browser settings
+ */
+export interface BrowserSetting {
+    name: string;
+    value: string | number | boolean;
+    type: 'string' | 'number' | 'boolean';
+}
+
+/**
+ * Type for current task item
+ */
+export interface CurrentTaskItem {
+    id: string;
+    task: string;
+    status: 'pending' | 'in_progress' | 'completed' | 'failed';
+    progress: number;
+    result?: string;
+    error?: string;
+}
+
 export interface ExtensionState {
     didHydrateState: boolean
     showWelcome: boolean
@@ -52,17 +118,17 @@ export interface ExtensionState {
     vscMachineId: string
     planActSeparateModelsSetting: boolean
     theme: 'light' | 'dark'
-    taskHistory: any[]
+    taskHistory: TaskHistoryItem[]
     totalTasksSize: number
-    mcpServers: any[]
+    mcpServers: McpServer[]
     mcpMarketplaceEnabled: boolean
-    mcpMarketplaceCatalog: any[]
-    autoApprovalSettings: Record<string, any>
+    mcpMarketplaceCatalog: McpMarketplaceItem[]
+    autoApprovalSettings: Record<string, AutoApprovalSetting>
     uriScheme: string
     jarvisMessages: ChatMessage[]
-    currentTaskItem: any | null
+    currentTaskItem: CurrentTaskItem | null
     checkpointTrackerErrorMessage: string | null
-    browserSettings: Record<string, any>
+    browserSettings: Record<string, BrowserSetting>
     filePaths: string[]
     platform: string
     chatHistory: ChatMessage[]
@@ -80,7 +146,7 @@ export interface ExtensionState {
 
 export interface ExtensionMessage {
     type: string
-    payload?: any
+    payload?: unknown
     action?: string
 }
 

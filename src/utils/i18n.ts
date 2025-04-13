@@ -22,14 +22,14 @@ const translations: Record<SupportedLanguage, Record<TranslationKey, string>> = 
     'convert.success': 'Session format converted successfully',
     'convert.error': 'Error converting session format',
     'preview.title': 'Session Preview',
-    
+
     // Comandi
     'command.import': 'Import Chat Session',
     'command.export': 'Export Chat Session',
     'command.validate': 'Validate Chat Session',
     'command.convert': 'Convert Session Format',
     'command.preview': 'Preview Session',
-    
+
     // Etichette dialog
     'dialog.import.title': 'Import Chat Session',
     'dialog.export.title': 'Export Chat Session',
@@ -38,14 +38,14 @@ const translations: Record<SupportedLanguage, Record<TranslationKey, string>> = 
     'dialog.convert.title': 'Convert Session Format',
     'dialog.convert.to': 'Convert to format',
     'dialog.preview.title': 'Preview Session',
-    
+
     // Formati
     'format.json': 'JavaScript Object Notation',
-    'format.yaml': 'YAML Ain\'t Markup Language',
+    'format.yaml': "YAML Ain't Markup Language",
     'format.markdown': 'Formatted text',
     'format.csv': 'Comma-Separated Values',
     'format.html': 'HyperText Markup Language',
-    
+
     // Errori
     'error.no.session': 'No session to export',
     'error.invalid.format': 'Invalid format',
@@ -54,22 +54,22 @@ const translations: Record<SupportedLanguage, Record<TranslationKey, string>> = 
   it: {
     // Messaggi interfaccia
     'import.success': 'Sessione di chat importata con successo',
-    'import.error': 'Errore durante l\'importazione della sessione',
+    'import.error': "Errore durante l'importazione della sessione",
     'export.success': 'Sessione di chat esportata con successo',
-    'export.error': 'Errore durante l\'esportazione della sessione',
+    'export.error': "Errore durante l'esportazione della sessione",
     'validate.success': 'La sessione è valida',
     'validate.error': 'La sessione non è valida',
     'convert.success': 'Formato della sessione convertito con successo',
     'convert.error': 'Errore durante la conversione del formato',
     'preview.title': 'Anteprima Sessione',
-    
+
     // Comandi
     'command.import': 'Importa Sessione di Chat',
     'command.export': 'Esporta Sessione di Chat',
     'command.validate': 'Valida Sessione di Chat',
     'command.convert': 'Converti Formato Sessione',
     'command.preview': 'Anteprima Sessione',
-    
+
     // Etichette dialog
     'dialog.import.title': 'Importa Sessione di Chat',
     'dialog.export.title': 'Esporta Sessione di Chat',
@@ -78,19 +78,19 @@ const translations: Record<SupportedLanguage, Record<TranslationKey, string>> = 
     'dialog.convert.title': 'Converti Formato Sessione',
     'dialog.convert.to': 'Converti nel formato',
     'dialog.preview.title': 'Anteprima Sessione',
-    
+
     // Formati
     'format.json': 'JavaScript Object Notation',
-    'format.yaml': 'YAML Ain\'t Markup Language',
+    'format.yaml': "YAML Ain't Markup Language",
     'format.markdown': 'Formato di testo formattato',
     'format.csv': 'Valori separati da virgola',
     'format.html': 'Linguaggio di markup per ipertesti',
-    
+
     // Errori
     'error.no.session': 'Nessuna sessione da esportare',
     'error.invalid.format': 'Formato non valido',
     'error.no.messages': 'La sessione non contiene messaggi',
-  }
+  },
 };
 
 /**
@@ -99,12 +99,12 @@ const translations: Record<SupportedLanguage, Record<TranslationKey, string>> = 
  */
 export function getDefaultLanguage(): SupportedLanguage {
   const vscodeLanguage = vscode.env.language?.toLowerCase() || 'en';
-  
+
   // Controlla se la lingua è italiano
   if (vscodeLanguage.startsWith('it')) {
     return 'it';
   }
-  
+
   // Fallback all'inglese
   return 'en';
 }
@@ -118,17 +118,17 @@ export function getDefaultLanguage(): SupportedLanguage {
 export function t(key: TranslationKey, language?: SupportedLanguage): string {
   // Determina la lingua da utilizzare
   const lang = language || getDefaultLanguage();
-  
+
   // Controlla se la traduzione esiste
   if (translations[lang] && translations[lang][key]) {
     return translations[lang][key];
   }
-  
+
   // Fallback all'inglese
   if (translations.en[key]) {
     return translations.en[key];
   }
-  
+
   // Se non è disponibile nessuna traduzione, restituisci la chiave
   console.warn(`Chiave di traduzione non trovata: ${key}`);
   return key;
@@ -140,7 +140,10 @@ export function t(key: TranslationKey, language?: SupportedLanguage): string {
  * @param language Lingua desiderata (opzionale, default: lingua editor)
  * @returns Promise con la risposta dell'utente
  */
-export function showInformationMessage(key: TranslationKey, language?: SupportedLanguage): Thenable<string | undefined> {
+export function showInformationMessage(
+  key: TranslationKey,
+  language?: SupportedLanguage
+): Thenable<string | undefined> {
   return vscode.window.showInformationMessage(t(key, language));
 }
 
@@ -150,7 +153,10 @@ export function showInformationMessage(key: TranslationKey, language?: Supported
  * @param language Lingua desiderata (opzionale, default: lingua editor)
  * @returns Promise con la risposta dell'utente
  */
-export function showErrorMessage(key: TranslationKey, language?: SupportedLanguage): Thenable<string | undefined> {
+export function showErrorMessage(
+  key: TranslationKey,
+  language?: SupportedLanguage
+): Thenable<string | undefined> {
   return vscode.window.showErrorMessage(t(key, language));
 }
 
@@ -160,9 +166,12 @@ export function showErrorMessage(key: TranslationKey, language?: SupportedLangua
  * @param language Lingua desiderata (opzionale, default: lingua editor)
  * @returns Promise con la risposta dell'utente
  */
-export function showWarningMessage(key: TranslationKey, language?: SupportedLanguage): Thenable<string | undefined> {
+export function showWarningMessage(
+  key: TranslationKey,
+  language?: SupportedLanguage
+): Thenable<string | undefined> {
   return vscode.window.showWarningMessage(t(key, language));
 }
 
 // Esporta una funzione helper principale per facilità d'uso
-export default t; 
+export default t;

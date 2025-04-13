@@ -4,13 +4,14 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { exportSession, exportSessionToFile, getFormatExtension, formatExtensions } from '../index.js';
-import { ExportError } from '../types.js';
-import { ExportableSession } from '../types.js';
-import * as serializers from '../serializers.js';
-import * as sanitize from '../sanitize.js';
+import { exportSession, exportSessionToFile, getFormatExtension, formatExtensions } from '../index';
+import { ExportError } from '../types';
+import { ExportableSession } from '../types';
+import * as serializers from '../serializers';
+import * as sanitize from '../sanitize';
 import * as fs from 'fs';
 import * as path from 'path';
+import { mockMessage } from '../../../../test/utils/factories';
 
 // Mock delle dipendenze
 vi.mock('../serializers', () => ({
@@ -19,7 +20,7 @@ vi.mock('../serializers', () => ({
 }));
 
 vi.mock('../sanitize', () => ({
-  sanitizeExportObject: vi.fn(data => data),
+  sanitizeExportObject: vi.fn((data) => data),
   extractSanitizeOptions: vi.fn(),
 }));
 
@@ -48,9 +49,7 @@ vi.mock('util', () => ({
 
 describe('exportSession', () => {
   const mockSession: ExportableSession = {
-    messages: [
-      { role: 'user', content: 'Test message' },
-    ],
+    messages: [mockMessage('user', 'Test message')],
     settings: {
       temperature: 0.7,
       model: 'test-model',
@@ -63,7 +62,7 @@ describe('exportSession', () => {
 
   it('dovrebbe esportare in formato JSON come predefinito', () => {
     const result = exportSession(mockSession);
-    
+
     expect(sanitize.sanitizeExportObject).toHaveBeenCalledWith(mockSession, {});
     expect(serializers.toJSON).toHaveBeenCalled();
     expect(result.format).toBe('JSON');
@@ -73,7 +72,7 @@ describe('exportSession', () => {
 
   it('dovrebbe esportare in formato YAML quando specificato', () => {
     const result = exportSession(mockSession, 'YAML');
-    
+
     expect(sanitize.sanitizeExportObject).toHaveBeenCalledWith(mockSession, {});
     expect(serializers.toYAML).toHaveBeenCalled();
     expect(result.format).toBe('YAML');
@@ -83,7 +82,7 @@ describe('exportSession', () => {
   it('dovrebbe passare le opzioni di pretty printing ai serializer', () => {
     exportSession(mockSession, 'JSON', { pretty: true });
     expect(serializers.toJSON).toHaveBeenCalledWith(expect.anything(), { indent: 2 });
-    
+
     exportSession(mockSession, 'JSON', { pretty: false });
     expect(serializers.toJSON).toHaveBeenCalledWith(expect.anything(), { indent: 0 });
   });
@@ -113,66 +112,58 @@ describe('exportSession', () => {
 
 describe('exportSessionToFile', () => {
   const mockSession: ExportableSession = {
-    messages: [
-      { role: 'user', content: 'Test message' },
-    ],
+    messages: [mockMessage('user', 'Test message')],
   };
-  
+
   const testFilePath = '/path/to/export.json';
-  
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
-  
+
   it('dovrebbe salvare correttamente il file con impostazioni predefinite', async () => {
     // Configure mock
     vi.mocked(fs.existsSync).mockReturnValue(true);
-    
+
     // Execute
     const result = await exportSessionToFile(mockSession, testFilePath);
-    
+
     // Verify
     expect(result).toBe(testFilePath);
-    expect(fs.writeFile).toHaveBeenCalledWith(
-      testFilePath,
-      '{"mocked":"json"}',
-      { encoding: 'utf-8' }
-    );
+    expect(fs.writeFile).toHaveBeenCalledWith(testFilePath, '{"mocked":"json"}', {
+      encoding: 'utf-8',
+    });
   });
-  
+
   it('dovrebbe creare la directory se non esiste', async () => {
     // Configure mock
     vi.mocked(fs.existsSync).mockReturnValue(false);
-    
+
     // Execute
     await exportSessionToFile(mockSession, testFilePath);
-    
+
     // Verify
     expect(fs.mkdir).toHaveBeenCalledWith(path.dirname(testFilePath), { recursive: true });
   });
-  
-  it('dovrebbe utilizzare l\'encoding specificato nelle opzioni', async () => {
+
+  it("dovrebbe utilizzare l'encoding specificato nelle opzioni", async () => {
     // Execute
     await exportSessionToFile(mockSession, testFilePath, 'JSON', { encoding: 'ascii' });
-    
+
     // Verify
-    expect(fs.writeFile).toHaveBeenCalledWith(
-      testFilePath,
-      '{"mocked":"json"}',
-      { encoding: 'ascii' }
-    );
+    expect(fs.writeFile).toHaveBeenCalledWith(testFilePath, '{"mocked":"json"}', {
+      encoding: 'ascii',
+    });
   });
-  
+
   it('dovrebbe propagare gli errori come ExportError', async () => {
     // Configure mock
     vi.mocked(fs.writeFile).mockImplementationOnce(() => {
       throw new Error('Errore di scrittura file');
     });
-    
+
     // Verify
-    await expect(exportSessionToFile(mockSession, testFilePath))
-      .rejects
-      .toThrow(ExportError);
+    await expect(exportSessionToFile(mockSession, testFilePath)).rejects.toThrow(ExportError);
   });
 });
 
@@ -184,12 +175,12 @@ describe('getFormatExtension', () => {
     expect(getFormatExtension('CSV')).toBe('.csv');
     expect(getFormatExtension('HTML')).toBe('.html');
   });
-  
+
   it('dovrebbe avere mappature per tutti i formati supportati', () => {
     const supportedFormats = ['JSON', 'YAML', 'Markdown', 'CSV', 'HTML'];
-    
+
     for (const format of supportedFormats) {
       expect(formatExtensions).toHaveProperty(format);
     }
   });
-}); 
+});

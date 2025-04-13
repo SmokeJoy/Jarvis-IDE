@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { WebviewMessageHandler } from './handlers/WebviewMessageHandler.js';
-import { TaskQueueMessageHandler } from './handlers/TaskQueueMessageHandler.js';
-import { Logger } from '../utils/logger.js';
-import { MasManager } from '../mas/MasManager.js';
+import { WebviewMessageHandler } from './handlers/WebviewMessageHandler';
+import { TaskQueueMessageHandler } from './handlers/TaskQueueMessageHandler';
+import { Logger } from '../utils/logger';
+import { MasManager } from '../mas/MasManager';
 
 /**
  * Gestisce la WebView e i suoi handler di messaggi
@@ -62,8 +62,8 @@ export class WebviewManager {
         enableScripts: true,
         retainContextWhenHidden: true,
         localResourceRoots: [
-          vscode.Uri.file(path.join(this._context.extensionUri.fsPath, 'webview-ui'))
-        ]
+          vscode.Uri.file(path.join(this._context.extensionUri.fsPath, 'webview-ui')),
+        ],
       }
     );
 
@@ -71,7 +71,7 @@ export class WebviewManager {
     this._panel.webview.html = this._getWebviewContent();
 
     // Inizializza gli handler con la webview
-    this._handlers.forEach(handler => {
+    this._handlers.forEach((handler) => {
       handler.initialize(this._panel!.webview);
     });
 
@@ -86,7 +86,7 @@ export class WebviewManager {
     this._panel.onDidDispose(
       () => {
         this._panel = undefined;
-        this._handlers.forEach(handler => handler.dispose());
+        this._handlers.forEach((handler) => handler.dispose());
       },
       null,
       this._context.subscriptions
@@ -107,7 +107,7 @@ export class WebviewManager {
     this._logger.debug(`Ricevuto messaggio di tipo: ${message.type}`);
 
     // Inoltra il messaggio a tutti gli handler registrati
-    this._handlers.forEach(handler => {
+    this._handlers.forEach((handler) => {
       try {
         handler.handleMessage(message);
       } catch (error) {
@@ -190,7 +190,7 @@ export class WebviewManager {
       this._panel = undefined;
     }
 
-    this._handlers.forEach(handler => handler.dispose());
+    this._handlers.forEach((handler) => handler.dispose());
     this._handlers = [];
   }
 }

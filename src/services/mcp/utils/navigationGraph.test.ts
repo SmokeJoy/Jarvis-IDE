@@ -2,9 +2,9 @@ import {
   calculateSemanticScore,
   buildNodeResult,
   buildEdgeResult,
-  filterLinksByOptions
-} from './navigationGraph.js';
-import { ContextLink } from '../types.js';
+  filterLinksByOptions,
+} from './navigationGraph';
+import { ContextLink } from '../types';
 
 describe('navigationGraph utils', () => {
   describe('calculateSemanticScore', () => {
@@ -14,7 +14,7 @@ describe('navigationGraph utils', () => {
       targetId: 'ctx-2',
       relation: 'supports',
       strength: 0.8,
-      metadata: { confidence: 0.9 }
+      metadata: { confidence: 0.9 },
     };
 
     it('dovrebbe calcolare il punteggio base correttamente', () => {
@@ -24,21 +24,21 @@ describe('navigationGraph utils', () => {
 
     it('dovrebbe applicare il moltiplicatore per relazioni preferite', () => {
       const score = calculateSemanticScore(mockLink, {
-        preferredRelations: ['supports']
+        preferredRelations: ['supports'],
       });
       expect(score).toBe(0.8 * 0.9 * 1.5); // base * 1.5
     });
 
     it('dovrebbe azzerare il punteggio se strength < minStrength', () => {
       const score = calculateSemanticScore(mockLink, {
-        minStrength: 0.9
+        minStrength: 0.9,
       });
       expect(score).toBe(0);
     });
 
     it('dovrebbe azzerare il punteggio se confidence < minConfidence', () => {
       const score = calculateSemanticScore(mockLink, {
-        minConfidence: 0.95
+        minConfidence: 0.95,
       });
       expect(score).toBe(0);
     });
@@ -50,12 +50,12 @@ describe('navigationGraph utils', () => {
         targetId: 'ctx-2',
         relation: 'supports',
         strength: 0.4,
-        metadata: { confidence: 0.5 }
+        metadata: { confidence: 0.5 },
       };
 
       const score = calculateSemanticScore(mockLink, {
         minStrength: 0.6,
-        minConfidence: 0.7
+        minConfidence: 0.7,
       });
 
       expect(score).toBe(0);
@@ -69,7 +69,7 @@ describe('navigationGraph utils', () => {
           targetId: 'ctx-2',
           relation: 'supports',
           strength: 0.8,
-          metadata: { confidence: 0.9 }
+          metadata: { confidence: 0.9 },
         },
         {
           id: 'link-2',
@@ -77,7 +77,7 @@ describe('navigationGraph utils', () => {
           targetId: 'ctx-3',
           relation: 'explains',
           strength: 0.6,
-          metadata: { confidence: 0.7 }
+          metadata: { confidence: 0.7 },
         },
         {
           id: 'link-3',
@@ -85,12 +85,12 @@ describe('navigationGraph utils', () => {
           targetId: 'ctx-4',
           relation: 'extends',
           strength: 0.9,
-          metadata: { confidence: 0.8 }
-        }
+          metadata: { confidence: 0.8 },
+        },
       ];
 
-      const sortedLinks = mockLinks.sort((a, b) => 
-        calculateSemanticScore(b, {}) - calculateSemanticScore(a, {})
+      const sortedLinks = mockLinks.sort(
+        (a, b) => calculateSemanticScore(b, {}) - calculateSemanticScore(a, {})
       );
 
       expect(sortedLinks[0].id).toBe('link-3'); // Punteggio più alto
@@ -103,7 +103,7 @@ describe('navigationGraph utils', () => {
     const mockContext = {
       id: 'ctx-1',
       text: 'Test Context',
-      tags: ['test', 'mock']
+      tags: ['test', 'mock'],
     };
 
     it('dovrebbe includere solo id se nessun flag è true', () => {
@@ -115,7 +115,7 @@ describe('navigationGraph utils', () => {
       const result = buildNodeResult(mockContext, true, false);
       expect(result).toEqual({
         id: 'ctx-1',
-        text: 'Test Context'
+        text: 'Test Context',
       });
     });
 
@@ -123,7 +123,7 @@ describe('navigationGraph utils', () => {
       const result = buildNodeResult(mockContext, false, true);
       expect(result).toEqual({
         id: 'ctx-1',
-        tags: ['test', 'mock']
+        tags: ['test', 'mock'],
       });
     });
 
@@ -140,7 +140,7 @@ describe('navigationGraph utils', () => {
       targetId: 'ctx-2',
       relation: 'supports',
       strength: 0.8,
-      metadata: { confidence: 0.9 }
+      metadata: { confidence: 0.9 },
     };
 
     it('dovrebbe includere solo i campi base se includeMetadata è false', () => {
@@ -149,7 +149,7 @@ describe('navigationGraph utils', () => {
         id: 'link-1',
         sourceId: 'ctx-1',
         targetId: 'ctx-2',
-        relation: 'supports'
+        relation: 'supports',
       });
     });
 
@@ -161,7 +161,7 @@ describe('navigationGraph utils', () => {
         targetId: 'ctx-2',
         relation: 'supports',
         strength: 0.8,
-        confidence: 0.9
+        confidence: 0.9,
       });
     });
   });
@@ -174,7 +174,7 @@ describe('navigationGraph utils', () => {
         targetId: 'ctx-2',
         relation: 'supports',
         strength: 0.8,
-        metadata: { confidence: 0.9 }
+        metadata: { confidence: 0.9 },
       },
       {
         id: 'link-2',
@@ -182,8 +182,8 @@ describe('navigationGraph utils', () => {
         targetId: 'ctx-3',
         relation: 'explains',
         strength: 0.6,
-        metadata: { confidence: 0.7 }
-      }
+        metadata: { confidence: 0.7 },
+      },
     ];
 
     it('dovrebbe filtrare per minStrength', () => {
@@ -201,7 +201,7 @@ describe('navigationGraph utils', () => {
     it('dovrebbe filtrare per entrambi i criteri', () => {
       const filtered = filterLinksByOptions(mockLinks, {
         minStrength: 0.7,
-        minConfidence: 0.8
+        minConfidence: 0.8,
       });
       expect(filtered).toHaveLength(1);
       expect(filtered[0].id).toBe('link-1');
@@ -212,4 +212,4 @@ describe('navigationGraph utils', () => {
       expect(filtered).toHaveLength(2);
     });
   });
-}); 
+});

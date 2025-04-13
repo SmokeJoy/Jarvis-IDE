@@ -25,7 +25,7 @@ export function loadMemoryFromDisk(): Memory {
     if (!existsSync(MEMORY_FILE)) {
       const initialMemory: Memory = {
         items: [],
-        lastUpdate: Date.now()
+        lastUpdate: Date.now(),
       };
       writeFileSync(MEMORY_FILE, JSON.stringify(initialMemory, null, 2));
       return initialMemory;
@@ -37,7 +37,7 @@ export function loadMemoryFromDisk(): Memory {
     console.error('Error loading memory from disk:', error);
     return {
       items: [],
-      lastUpdate: Date.now()
+      lastUpdate: Date.now(),
     };
   }
 }
@@ -52,4 +52,4 @@ export function saveMemoryToDisk(memory: Memory): void {
   } catch (error) {
     console.error('Error saving memory to disk:', error);
   }
-} 
+}

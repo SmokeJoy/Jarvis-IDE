@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { WebviewMessage } from '../types/webview.js';
+import { WebviewMessage } from '../types/webview';
 
 declare const vscode: {
   postMessage: (message: WebviewMessage) => void;
@@ -14,8 +14,8 @@ export const useJarvisIdeBaseUrl = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          baseUrl: newBaseUrl
-        }
+          baseUrl: newBaseUrl,
+        },
       });
 
       setBaseUrl(newBaseUrl);
@@ -32,8 +32,8 @@ export const useJarvisIdeBaseUrl = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          baseUrl: defaultBaseUrl
-        }
+          baseUrl: defaultBaseUrl,
+        },
       });
 
       setBaseUrl(defaultBaseUrl);
@@ -46,6 +46,6 @@ export const useJarvisIdeBaseUrl = () => {
   return {
     baseUrl,
     updateBaseUrl,
-    resetBaseUrl
+    resetBaseUrl,
   };
 };

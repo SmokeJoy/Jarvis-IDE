@@ -1,4 +1,4 @@
-import { McpToolHandler } from "../../../shared/types/mcp.types.js";
+import { McpToolHandler } from '../../../shared/types/mcp.types';
 /**
  * Restituisce contesti che contengono specifici tag
  */

@@ -35,8 +35,8 @@ const mockData: MitigatorOverlayProps = {
   type: 'provider_change',
   stats: {
     latency: 1200,
-    successRate: 0.95
-  }
+    successRate: 0.95,
+  },
 };
 
 export const MitigatorOverlay: React.FC<MitigatorOverlayProps> = ({
@@ -46,7 +46,7 @@ export const MitigatorOverlay: React.FC<MitigatorOverlayProps> = ({
   timestamp,
   details,
   type,
-  stats
+  stats,
 }) => {
   const { current, history, addEntry, clearHistory } = useDebuggerOverlay();
   const { filteredHistory, setFilter } = useFilteredHistory(history);
@@ -61,7 +61,7 @@ export const MitigatorOverlay: React.FC<MitigatorOverlayProps> = ({
       timestamp,
       details,
       type,
-      stats
+      stats,
     });
   };
 
@@ -77,9 +77,7 @@ export const MitigatorOverlay: React.FC<MitigatorOverlayProps> = ({
     <div className="fixed bottom-4 right-4 w-96 bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Mitigator AI
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Mitigator AI</h2>
           <div className="flex items-center space-x-2">
             <button
               onClick={handleAddEntry}
@@ -114,18 +112,11 @@ export const MitigatorOverlay: React.FC<MitigatorOverlayProps> = ({
         </div>
 
         <div className="space-y-4">
-          <DebuggerTimeline
-            history={filteredHistory}
-            onSelect={handleSelectEntry}
-          />
+          <DebuggerTimeline history={filteredHistory} onSelect={handleSelectEntry} />
 
-          {selectedEntry && (
-            <SnapshotDetail data={selectedEntry} />
-          )}
+          {selectedEntry && <SnapshotDetail data={selectedEntry} />}
 
-          {current && (
-            <DecisionGraphView entry={current} />
-          )}
+          {current && <DecisionGraphView entry={current} />}
         </div>
       </div>
 
@@ -145,4 +136,4 @@ export const MitigatorOverlay: React.FC<MitigatorOverlayProps> = ({
       <PredictiveWarningPanel />
     </div>
   );
-}; 
+};

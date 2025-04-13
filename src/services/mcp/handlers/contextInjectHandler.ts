@@ -1,14 +1,14 @@
-import * as path from "path";
-import * as fs from "fs/promises";
-import * as vscode from "vscode";
-import { v4 as uuidv4 } from "uuid";
-import { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
+import * as path from 'path';
+import * as fs from 'fs/promises';
+import * as vscode from 'vscode';
+import { v4 as uuidv4 } from 'uuid';
+import { McpToolHandler, McpToolResult } from '../../../shared/types/mcp.types';
 
 // Mock di vscode per ambienti non-VS Code
 const mockVscode = {
   workspace: {
-    workspaceFolders: null
-  }
+    workspaceFolders: null,
+  },
 };
 
 // Usa il vscode reale se disponibile, altrimenti usa il mock
@@ -27,7 +27,7 @@ interface ContextItem {
 const memoryStore: Record<string, ContextItem[]> = {
   chat: [],
   project: [],
-  agent: []
+  agent: [],
 };
 
 /**
@@ -45,17 +45,17 @@ function addToMemory(scope: string, text: string): ContextItem {
     id: generateMemoryId(),
     scope,
     text,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   };
-  
+
   // Assicura che lo scope esista
   if (!memoryStore[scope]) {
     memoryStore[scope] = [];
   }
-  
+
   // Aggiungi alla memoria
   memoryStore[scope].push(newItem);
-  
+
   return newItem;
 }
 
@@ -83,24 +83,24 @@ async function persistMemoryToDisk(): Promise<void> {
     if (vscodeMod.workspace.workspaceFolders && vscodeMod.workspace.workspaceFolders.length > 0) {
       workspacePath = vscodeMod.workspace.workspaceFolders[0].uri.fsPath;
     }
-    
+
     // Directory per la memoria persistente
     const memoryDir = path.join(workspacePath, '.mcp-memory');
-    
+
     // Crea la directory se non esiste
     try {
       await fs.mkdir(memoryDir, { recursive: true });
     } catch (error) {
-      console.warn("Impossibile creare directory di memoria:", error);
+      console.warn('Impossibile creare directory di memoria:', error);
     }
-    
+
     // Salva ogni tipo di memoria in un file separato
     for (const scope in memoryStore) {
       const filePath = path.join(memoryDir, `${scope}-memory.json`);
       await fs.writeFile(filePath, JSON.stringify(memoryStore[scope], null, 2), 'utf-8');
     }
   } catch (error) {
-    console.error("Errore nel salvataggio della memoria su disco:", error);
+    console.error('Errore nel salvataggio della memoria su disco:', error);
   }
 }
 
@@ -114,26 +114,26 @@ export async function loadMemoryFromDisk(): Promise<void> {
     if (vscodeMod.workspace.workspaceFolders && vscodeMod.workspace.workspaceFolders.length > 0) {
       workspacePath = vscodeMod.workspace.workspaceFolders[0].uri.fsPath;
     }
-    
+
     // Directory per la memoria persistente
     const memoryDir = path.join(workspacePath, '.mcp-memory');
-    
+
     // Verifica se la directory esiste
     try {
       await fs.access(memoryDir);
     } catch {
-      console.log("Nessuna memoria persistente trovata.");
+      console.log('Nessuna memoria persistente trovata.');
       return; // Directory non esistente, nessuna memoria da caricare
     }
-    
+
     // Carica ogni tipo di memoria dal relativo file
     for (const scope of ['chat', 'project', 'agent']) {
       const filePath = path.join(memoryDir, `${scope}-memory.json`);
-      
+
       try {
         const fileContent = await fs.readFile(filePath, 'utf-8');
         const items = JSON.parse(fileContent);
-        
+
         if (Array.isArray(items)) {
           memoryStore[scope] = items;
         }
@@ -142,7 +142,7 @@ export async function loadMemoryFromDisk(): Promise<void> {
       }
     }
   } catch (error) {
-    console.error("Errore nel caricamento della memoria dal disco:", error);
+    console.error('Errore nel caricamento della memoria dal disco:', error);
   }
 }
 
@@ -163,31 +163,31 @@ export const contextInjectHandler: McpToolHandler = async (args): Promise<McpToo
   // Estrai i parametri
   const scope = args?.scope || 'chat';
   const text = args?.text;
-  
+
   // Valida i parametri
   if (!text || typeof text !== 'string') {
     return {
       success: false,
       output: null,
-      error: "Il parametro 'text' è obbligatorio e deve essere una stringa"
+      error: "Il parametro 'text' è obbligatorio e deve essere una stringa",
     };
   }
-  
+
   if (!['chat', 'project', 'agent'].includes(scope)) {
     return {
       success: false,
       output: null,
-      error: `Scope '${scope}' non valido. Valori ammessi: chat, project, agent`
+      error: `Scope '${scope}' non valido. Valori ammessi: chat, project, agent`,
     };
   }
-  
+
   try {
     // Aggiungi alla memoria
     const newItem = addToMemory(scope, text);
-    
+
     // Salva su disco per persistenza
     await persistMemoryToDisk();
-    
+
     // Prepara risultato
     const result = {
       success: true,
@@ -196,19 +196,19 @@ export const contextInjectHandler: McpToolHandler = async (args): Promise<McpToo
       timestamp: newItem.timestamp,
       textPreview: createTextPreview(text),
       memorySize: memoryStore[scope].length,
-      summary: `Contesto aggiunto con successo alla memoria '${scope}'`
+      summary: `Contesto aggiunto con successo alla memoria '${scope}'`,
     };
-    
+
     return {
       success: true,
-      output: JSON.stringify(result)
+      output: JSON.stringify(result),
     };
   } catch (error: any) {
     console.error("Errore nell'iniezione del contesto:", error);
     return {
       success: false,
       output: null,
-      error: `Errore nell'iniezione del contesto: ${error.message}`
+      error: `Errore nell'iniezione del contesto: ${error.message}`,
     };
   }
-}; 
+};

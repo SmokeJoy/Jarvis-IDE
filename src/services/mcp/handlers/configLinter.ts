@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { HandlerFunction } from '../types.js';
+import { HandlerFunction } from '../types';
 import { readFile } from 'fs/promises';
 import { extname } from 'path';
-import { LintConfigArgs } from '../mcp.types.js';
+import { LintConfigArgs } from '../mcp.types';
 
 interface ConfigLinterArgs {
   filePath: string;
@@ -51,7 +51,7 @@ async function validateJson(content: string): Promise<LinterResult> {
     isValid: true,
     errors: [],
     warnings: [],
-    suggestions: []
+    suggestions: [],
   };
 
   try {
@@ -61,7 +61,7 @@ async function validateJson(content: string): Promise<LinterResult> {
     if (!parsed.version) {
       result.warnings.push({
         message: 'Campo "version" mancante',
-        code: 'MISSING_VERSION'
+        code: 'MISSING_VERSION',
       });
     }
 
@@ -72,12 +72,12 @@ async function validateJson(content: string): Promise<LinterResult> {
         if (value === null) {
           result.warnings.push({
             message: `Il campo "${currentPath}" è null`,
-            code: 'NULL_VALUE'
+            code: 'NULL_VALUE',
           });
         } else if (value === '') {
           result.warnings.push({
             message: `Il campo "${currentPath}" è vuoto`,
-            code: 'EMPTY_VALUE'
+            code: 'EMPTY_VALUE',
           });
         } else if (typeof value === 'object') {
           checkNullOrEmpty(value, currentPath);
@@ -86,12 +86,11 @@ async function validateJson(content: string): Promise<LinterResult> {
     };
 
     checkNullOrEmpty(parsed);
-
   } catch (error) {
     result.isValid = false;
     result.errors.push({
       message: `Errore di parsing JSON: ${error.message}`,
-      code: 'INVALID_JSON'
+      code: 'INVALID_JSON',
     });
   }
 
@@ -103,7 +102,7 @@ async function validateEnv(content: string): Promise<LinterResult> {
     isValid: true,
     errors: [],
     warnings: [],
-    suggestions: []
+    suggestions: [],
   };
 
   const lines = content.split('\n');
@@ -118,7 +117,7 @@ async function validateEnv(content: string): Promise<LinterResult> {
       result.errors.push({
         message: 'Formato non valido, manca il simbolo "="',
         line: index + 1,
-        code: 'INVALID_FORMAT'
+        code: 'INVALID_FORMAT',
       });
       return;
     }
@@ -131,7 +130,7 @@ async function validateEnv(content: string): Promise<LinterResult> {
       result.errors.push({
         message: 'Chiave mancante',
         line: index + 1,
-        code: 'MISSING_KEY'
+        code: 'MISSING_KEY',
       });
     }
 
@@ -140,14 +139,16 @@ async function validateEnv(content: string): Promise<LinterResult> {
       result.warnings.push({
         message: 'Valore vuoto',
         line: index + 1,
-        code: 'EMPTY_VALUE'
+        code: 'EMPTY_VALUE',
       });
     }
 
     // Suggerimenti per valori sensibili
-    if (key.toLowerCase().includes('key') || 
-        key.toLowerCase().includes('secret') || 
-        key.toLowerCase().includes('password')) {
+    if (
+      key.toLowerCase().includes('key') ||
+      key.toLowerCase().includes('secret') ||
+      key.toLowerCase().includes('password')
+    ) {
       result.suggestions.push(
         `Considera di utilizzare variabili d'ambiente sicure per "${key.trim()}"`
       );
@@ -172,11 +173,13 @@ async function lintConfig(args: LintConfigArgs): Promise<LinterResult> {
         return {
           isValid: true,
           errors: [],
-          warnings: [{
-            message: 'Validazione YAML non ancora implementata',
-            code: 'YAML_NOT_IMPLEMENTED'
-          }],
-          suggestions: []
+          warnings: [
+            {
+              message: 'Validazione YAML non ancora implementata',
+              code: 'YAML_NOT_IMPLEMENTED',
+            },
+          ],
+          suggestions: [],
         };
       default:
         throw new Error(`Tipo di configurazione non supportato: ${configType}`);
@@ -184,12 +187,14 @@ async function lintConfig(args: LintConfigArgs): Promise<LinterResult> {
   } catch (error) {
     return {
       isValid: false,
-      errors: [{
-        message: `Errore durante la lettura del file: ${error.message}`,
-        code: 'FILE_READ_ERROR'
-      }],
+      errors: [
+        {
+          message: `Errore durante la lettura del file: ${error.message}`,
+          code: 'FILE_READ_ERROR',
+        },
+      ],
       warnings: [],
-      suggestions: []
+      suggestions: [],
     };
   }
 }
@@ -206,21 +211,23 @@ export const configLinter: HandlerFunction = async (args: LintConfigArgs) => {
     // In modalità strict, i warning vengono trattati come errori
     if (strict && result.warnings.length > 0) {
       result.isValid = false;
-      result.errors.push(...result.warnings.map(warning => ({
-        ...warning,
-        message: `[STRICT] ${warning.message}`
-      })));
+      result.errors.push(
+        ...result.warnings.map((warning) => ({
+          ...warning,
+          message: `[STRICT] ${warning.message}`,
+        }))
+      );
       result.warnings = [];
     }
 
     return {
       success: true,
-      data: result
+      data: result,
     };
   } catch (error) {
     return {
       success: false,
-      error: `Failed to lint config file: ${error.message}`
+      error: `Failed to lint config file: ${error.message}`,
     };
   }
 };

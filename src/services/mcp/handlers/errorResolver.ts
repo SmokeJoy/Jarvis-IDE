@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { HandlerFunction } from '../types.js';
+import { HandlerFunction } from '../types';
 import { readFile } from 'fs/promises';
 import { extname } from 'path';
 
@@ -35,35 +35,40 @@ const commonErrorPatterns: ErrorPattern[] = [
     pattern: /Cannot find module '([^']+)'/,
     type: 'ModuleNotFound',
     severity: 'error',
-    getSuggestion: (match) => `Installa il modulo mancante con 'npm install ${match[1]}'`
+    getSuggestion: (match) => `Installa il modulo mancante con 'npm install ${match[1]}'`,
   },
   {
     pattern: /Property '([^']+)' does not exist on type/,
     type: 'TypeMismatch',
     severity: 'error',
-    getSuggestion: (match) => `Verifica la definizione del tipo e aggiungi la proprietà '${match[1]}' se necessaria`
+    getSuggestion: (match) =>
+      `Verifica la definizione del tipo e aggiungi la proprietà '${match[1]}' se necessaria`,
   },
   {
     pattern: /Unexpected token '([^']+)'/,
     type: 'SyntaxError',
     severity: 'error',
-    getSuggestion: (match) => `Correggi la sintassi: token inaspettato '${match[1]}'`
-  }
+    getSuggestion: (match) => `Correggi la sintassi: token inaspettato '${match[1]}'`,
+  },
 ];
 
-async function analyzeError(filePath: string, errorMessage?: string, lineNumber?: number): Promise<ErrorAnalysis> {
+async function analyzeError(
+  filePath: string,
+  errorMessage?: string,
+  lineNumber?: number
+): Promise<ErrorAnalysis> {
   try {
     const fileContent = await readFile(filePath, 'utf-8');
     const fileExtension = extname(filePath);
-    
+
     let analysis: ErrorAnalysis = {
       type: 'Unknown',
       message: errorMessage || 'Errore non specificato',
       location: {
         file: filePath,
-        line: lineNumber
+        line: lineNumber,
       },
-      severity: 'error'
+      severity: 'error',
     };
 
     if (errorMessage) {
@@ -74,7 +79,7 @@ async function analyzeError(filePath: string, errorMessage?: string, lineNumber?
             ...analysis,
             type: pattern.type,
             severity: pattern.severity,
-            suggestedFix: pattern.getSuggestion(match)
+            suggestedFix: pattern.getSuggestion(match),
           };
           break;
         }
@@ -103,15 +108,15 @@ export const errorResolver: HandlerFunction = async (args: ErrorResolverArgs) =>
     if (context) {
       analysis.context = context;
     }
-    
+
     return {
       success: true,
-      data: analysis
+      data: analysis,
     };
   } catch (error) {
     return {
       success: false,
-      error: `Failed to resolve error: ${error.message}`
+      error: `Failed to resolve error: ${error.message}`,
     };
   }
 };

@@ -9,18 +9,22 @@ import {
   allConditions,
   anyCondition,
   notCondition,
-  providerCostAbove
+  providerCostAbove,
 } from '../adaptive-conditions';
-import { ProviderStats } from '../../LLMFallbackManager';
+import { ProviderStats } from '@/mas/types/llm-provider.types';
 
 describe('Adaptive Conditions', () => {
   const createMockStats = (overrides: Partial<ProviderStats> = {}): ProviderStats => ({
+    providerId: 'test-provider',
     successCount: 0,
     failureCount: 0,
-    avgResponseTime: 0,
-    lastFailureTimestamp: 0,
+    totalRequests: 0,
+    averageResponseTime: 0,
+    isInCooldown: false,
+    cooldownEndTime: null,
+    lastError: null,
     costPerToken: 0,
-    ...overrides
+    ...overrides,
   });
 
   describe('providerCostAbove', () => {
@@ -32,7 +36,7 @@ describe('Adaptive Conditions', () => {
 
     it('should return false when costPerToken is not available', () => {
       const stats = new Map<string, ProviderStats>([
-        ['provider1', createMockStats({ costPerToken: undefined })]
+        ['provider1', createMockStats({ costPerToken: undefined })],
       ]);
       const condition = providerCostAbove('provider1', 0.1);
       expect(condition(stats)).toBe(false);
@@ -40,7 +44,7 @@ describe('Adaptive Conditions', () => {
 
     it('should return true when cost per token is above threshold', () => {
       const stats = new Map<string, ProviderStats>([
-        ['provider1', createMockStats({ costPerToken: 0.2 })]
+        ['provider1', createMockStats({ costPerToken: 0.2 })],
       ]);
       const condition = providerCostAbove('provider1', 0.1);
       expect(condition(stats)).toBe(true);
@@ -48,7 +52,7 @@ describe('Adaptive Conditions', () => {
 
     it('should return false when cost per token is below threshold', () => {
       const stats = new Map<string, ProviderStats>([
-        ['provider1', createMockStats({ costPerToken: 0.05 })]
+        ['provider1', createMockStats({ costPerToken: 0.05 })],
       ]);
       const condition = providerCostAbove('provider1', 0.1);
       expect(condition(stats)).toBe(false);
@@ -56,7 +60,7 @@ describe('Adaptive Conditions', () => {
 
     it('should return false when cost per token equals threshold', () => {
       const stats = new Map<string, ProviderStats>([
-        ['provider1', createMockStats({ costPerToken: 0.1 })]
+        ['provider1', createMockStats({ costPerToken: 0.1 })],
       ]);
       const condition = providerCostAbove('provider1', 0.1);
       expect(condition(stats)).toBe(true);
@@ -64,4 +68,4 @@ describe('Adaptive Conditions', () => {
   });
 
   // ... existing tests for other conditions ...
-}); 
+});

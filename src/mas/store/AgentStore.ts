@@ -89,4 +89,4 @@ export class AgentStore {
 }
 
 // Esporta un'istanza singleton pronta all'uso
-export const agentStore = AgentStore.getInstance(); 
+export const agentStore = AgentStore.getInstance();

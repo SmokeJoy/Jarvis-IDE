@@ -35,9 +35,9 @@ export function useDecisionGraphData(entry: MitigatorOverlayProps) {
       type: 'strategy',
       data: {
         label: entry.strategyName,
-        status: 'selected'
+        status: 'selected',
       },
-      position: { x: 0, y: 0 }
+      position: { x: 0, y: 0 },
     });
 
     // Nodi provider
@@ -52,9 +52,9 @@ export function useDecisionGraphData(entry: MitigatorOverlayProps) {
           label: provider.id,
           score: provider.score,
           status: isSelected ? 'selected' : isExcluded ? 'excluded' : 'candidate',
-          stats: provider.stats
+          stats: provider.stats,
         },
-        position: { x: 200, y: index * 100 }
+        position: { x: 200, y: index * 100 },
       });
 
       // Edge dalla strategia al provider
@@ -63,7 +63,7 @@ export function useDecisionGraphData(entry: MitigatorOverlayProps) {
         source: 'strategy',
         target: provider.id,
         type: isSelected ? 'selected' : 'default',
-        animated: isSelected
+        animated: isSelected,
       });
 
       // Edge tra provider (se non è l'ultimo)
@@ -72,11 +72,11 @@ export function useDecisionGraphData(entry: MitigatorOverlayProps) {
           id: `${provider.id}-${entry.providerCandidates[index + 1].id}`,
           source: provider.id,
           target: entry.providerCandidates[index + 1].id,
-          type: 'default'
+          type: 'default',
         });
       }
     });
 
     return { nodes, edges };
   }, [entry]);
-} 
+}

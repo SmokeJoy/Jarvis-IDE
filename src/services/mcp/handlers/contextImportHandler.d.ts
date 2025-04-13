@@ -1,9 +1,9 @@
-import { ToolCallResult } from '../types/tool.js';
+import { ToolCallResult } from '../types/tool';
 interface ImportOptions {
-    format: 'auto' | 'json' | 'csv' | 'markdown';
-    content: string;
-    scope?: 'chat' | 'project' | 'agent';
-    mergeTags?: boolean;
+  format: 'auto' | 'json' | 'csv' | 'markdown';
+  content: string;
+  scope?: 'chat' | 'project' | 'agent';
+  mergeTags?: boolean;
 }
 export declare function contextImportHandler(args: ImportOptions): Promise<ToolCallResult>;
 export {};

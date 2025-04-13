@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { getVsCodeApi } from '../vscode.js';
+import { getVsCodeApi } from '../vscode';
 import ReactMarkdown from 'react-markdown';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs.js';
-import { WebviewMessage } from '../../types/webview.types.js';
-import { ExtensionMessage } from '../../shared/ExtensionMessage.js';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { WebviewMessage } from '../../types/webview.types';
+import { ExtensionMessage } from '../../shared/ExtensionMessage';
 
 const vscode = getVsCodeApi();
 
@@ -26,7 +26,7 @@ export const SystemPromptEditor: React.FC = () => {
     };
 
     window.addEventListener('message', messageListener);
-    
+
     return () => {
       window.removeEventListener('message', messageListener);
     };
@@ -35,7 +35,7 @@ export const SystemPromptEditor: React.FC = () => {
   const handleSave = () => {
     vscode.postMessage({
       type: 'saveSystemPrompt',
-      content: promptContent
+      content: promptContent,
     });
     setIsEditing(false);
   };
@@ -61,13 +61,13 @@ export const SystemPromptEditor: React.FC = () => {
         <div className="flex gap-2">
           {isEditing ? (
             <>
-              <button 
+              <button
                 onClick={handleSave}
                 className="bg-green-600 text-white px-2 py-1 rounded text-sm"
               >
                 Salva
               </button>
-              <button 
+              <button
                 onClick={handleCancel}
                 className="bg-gray-600 text-white px-2 py-1 rounded text-sm"
               >
@@ -76,13 +76,13 @@ export const SystemPromptEditor: React.FC = () => {
             </>
           ) : (
             <>
-              <button 
+              <button
                 onClick={handleEdit}
                 className="bg-blue-600 text-white px-2 py-1 rounded text-sm"
               >
                 Modifica
               </button>
-              <button 
+              <button
                 onClick={handleOpenFile}
                 className="bg-gray-600 text-white px-2 py-1 rounded text-sm"
               >
@@ -93,11 +93,7 @@ export const SystemPromptEditor: React.FC = () => {
         </div>
       </div>
 
-      {filePath && (
-        <div className="text-xs text-gray-400 mb-2">
-          {filePath}
-        </div>
-      )}
+      {filePath && <div className="text-xs text-gray-400 mb-2">{filePath}</div>}
 
       {isEditing ? (
         <textarea
@@ -112,11 +108,12 @@ export const SystemPromptEditor: React.FC = () => {
             <TabsTrigger value="source">Sorgente</TabsTrigger>
           </TabsList>
           <TabsContent value="preview" className="h-64 overflow-auto bg-slate-900 p-3 rounded">
-            <ReactMarkdown className="prose prose-invert">
-              {promptContent}
-            </ReactMarkdown>
+            <ReactMarkdown className="prose prose-invert">{promptContent}</ReactMarkdown>
           </TabsContent>
-          <TabsContent value="source" className="h-64 overflow-auto bg-slate-900 p-3 rounded font-mono text-sm whitespace-pre-wrap">
+          <TabsContent
+            value="source"
+            className="h-64 overflow-auto bg-slate-900 p-3 rounded font-mono text-sm whitespace-pre-wrap"
+          >
             {promptContent}
           </TabsContent>
         </Tabs>

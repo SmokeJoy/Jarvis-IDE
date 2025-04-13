@@ -1,16 +1,16 @@
-import * as fs from "fs/promises";
-import * as path from "path";
-import { exec } from "child_process";
-import { promisify } from "util";
-import * as vscode from "vscode";
-import { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import * as vscode from 'vscode';
+import { McpToolHandler, McpToolResult } from '../../../shared/types/mcp.types';
 
 const execAsync = promisify(exec);
 
 const mockVscode = {
   workspace: {
-    workspaceFolders: null
-  }
+    workspaceFolders: null,
+  },
 };
 
 const vscodeMod = typeof vscode !== 'undefined' ? vscode : mockVscode;
@@ -44,7 +44,7 @@ export const testRunHandler: McpToolHandler = async (args): Promise<McpToolResul
       return {
         success: false,
         output: null,
-        error: `Il percorso '${testPath}' non esiste`
+        error: `Il percorso '${testPath}' non esiste`,
       };
     }
 
@@ -62,7 +62,7 @@ export const testRunHandler: McpToolHandler = async (args): Promise<McpToolResul
       return {
         success: false,
         output: null,
-        error: `Framework '${framework}' non supportato`
+        error: `Framework '${framework}' non supportato`,
       };
     }
 
@@ -73,14 +73,14 @@ export const testRunHandler: McpToolHandler = async (args): Promise<McpToolResul
       output: JSON.stringify({
         summary: `Test eseguiti con successo usando ${framework}`,
         stdout,
-        stderr
-      })
+        stderr,
+      }),
     };
   } catch (error: any) {
     return {
       success: false,
       output: null,
-      error: `Errore nell'esecuzione dei test: ${error.message}`
+      error: `Errore nell'esecuzione dei test: ${error.message}`,
     };
   }
-}; 
+};

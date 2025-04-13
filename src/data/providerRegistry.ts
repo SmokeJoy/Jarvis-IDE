@@ -4,11 +4,17 @@
  * Implementa un sistema di lookup dinamico provider → loader
  */
 
-import { OpenAiCompatibleModelInfo, LLMProviderId } from "../shared/types/api.types.js";
-import { fetchModelsFromOpenRouter, getFallbackModels as getOpenRouterFallbackModels } from "./providers/openrouterProvider.js";
-import { fetchModelsFromAnthropic, getFallbackModels as getAnthropicFallbackModels } from "./providers/anthropicProvider.js";
-import { getCachedModels, cacheModels } from "./modelCache.js";
-import { Logger } from "../shared/logger.js";
+import { OpenAiCompatibleModelInfo, LLMProviderId } from '../shared/types/api.types';
+import {
+  fetchModelsFromOpenRouter,
+  getFallbackModels as getOpenRouterFallbackModels,
+} from './providers/openrouterProvider';
+import {
+  fetchModelsFromAnthropic,
+  getFallbackModels as getAnthropicFallbackModels,
+} from './providers/anthropicProvider';
+import { getCachedModels, cacheModels } from './modelCache';
+import { Logger } from '../shared/logger';
 
 /**
  * Tipo per le funzioni di caricamento modelli
@@ -38,87 +44,87 @@ const providerRegistry: Record<LLMProviderId, ProviderInfo> = {
   // Provider OpenRouter
   openrouter: {
     loader: (apiKey?: string) => fetchModelsFromOpenRouter(apiKey),
-    fallback: getOpenRouterFallbackModels
+    fallback: getOpenRouterFallbackModels,
   },
   // Provider Anthropic (implementazione completa)
   anthropic: {
     loader: (apiKey?: string) => fetchModelsFromAnthropic(apiKey),
-    fallback: getAnthropicFallbackModels
+    fallback: getAnthropicFallbackModels,
   },
   // Provider OpenAI (ancora placeholder)
   openai: {
     loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => {
-      Logger.warn("Provider OpenAI non ancora implementato");
+      Logger.warn('Provider OpenAI non ancora implementato');
       return [];
     },
-    fallback: (): OpenAiCompatibleModelInfo[] => []
+    fallback: (): OpenAiCompatibleModelInfo[] => [],
   },
   // Provider di default (implementazione vuota)
   default: {
     loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [],
-    fallback: (): OpenAiCompatibleModelInfo[] => []
+    fallback: (): OpenAiCompatibleModelInfo[] => [],
   },
   // Implementazioni vuote per gli altri provider richiesti dal tipo LLMProviderId
-  azureopenai: { 
-    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
-    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  azureopenai: {
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [],
+    fallback: (): OpenAiCompatibleModelInfo[] => [],
   },
-  vertex: { 
-    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
-    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  vertex: {
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [],
+    fallback: (): OpenAiCompatibleModelInfo[] => [],
   },
-  aws: { 
-    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
-    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  aws: {
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [],
+    fallback: (): OpenAiCompatibleModelInfo[] => [],
   },
-  gemini: { 
-    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
-    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  gemini: {
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [],
+    fallback: (): OpenAiCompatibleModelInfo[] => [],
   },
-  ollama: { 
-    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
-    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  ollama: {
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [],
+    fallback: (): OpenAiCompatibleModelInfo[] => [],
   },
-  lmstudio: { 
-    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
-    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  lmstudio: {
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [],
+    fallback: (): OpenAiCompatibleModelInfo[] => [],
   },
-  deepseek: { 
-    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
-    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  deepseek: {
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [],
+    fallback: (): OpenAiCompatibleModelInfo[] => [],
   },
-  qwen: { 
-    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
-    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  qwen: {
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [],
+    fallback: (): OpenAiCompatibleModelInfo[] => [],
   },
-  mistral: { 
-    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
-    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  mistral: {
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [],
+    fallback: (): OpenAiCompatibleModelInfo[] => [],
   },
-  litellm: { 
-    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
-    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  litellm: {
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [],
+    fallback: (): OpenAiCompatibleModelInfo[] => [],
   },
-  asksage: { 
-    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
-    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  asksage: {
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [],
+    fallback: (): OpenAiCompatibleModelInfo[] => [],
   },
-  sambanova: { 
-    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
-    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  sambanova: {
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [],
+    fallback: (): OpenAiCompatibleModelInfo[] => [],
   },
-  xai: { 
-    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
-    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  xai: {
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [],
+    fallback: (): OpenAiCompatibleModelInfo[] => [],
   },
-  'jarvis-ide': { 
-    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
-    fallback: (): OpenAiCompatibleModelInfo[] => [] 
+  'jarvis-ide': {
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [],
+    fallback: (): OpenAiCompatibleModelInfo[] => [],
   },
-  zero: { 
-    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [], 
-    fallback: (): OpenAiCompatibleModelInfo[] => [] 
-  }
+  zero: {
+    loader: async (apiKey?: string): Promise<OpenAiCompatibleModelInfo[]> => [],
+    fallback: (): OpenAiCompatibleModelInfo[] => [],
+  },
 };
 
 /**
@@ -148,8 +154,8 @@ export function isProviderRegistered(providerId: LLMProviderId): boolean {
  * @returns Promise con array di modelli compatibili con OpenAI
  */
 export async function fetchModels(
-  provider: LLMProviderId, 
-  apiKey?: string, 
+  provider: LLMProviderId,
+  apiKey?: string,
   forceRefresh: boolean = false
 ): Promise<OpenAiCompatibleModelInfo[]> {
   // Se il provider non è registrato, restituisci un array vuoto
@@ -169,11 +175,11 @@ export async function fetchModels(
 
   // Recupera le informazioni del provider dal registry
   const providerInfo = providerRegistry[provider];
-  
+
   try {
     // Carica i modelli usando la funzione di caricamento del provider
     const models = await providerInfo.loader(apiKey);
-    
+
     // Salva i modelli nella cache in memoria
     if (models.length > 0) {
       cacheModels(provider, models);
@@ -182,14 +188,14 @@ export async function fetchModels(
     return models;
   } catch (error: unknown) {
     Logger.error(`Errore nel recupero dei modelli dal provider ${provider}:`, error);
-    
+
     // Recupera i modelli dalla cache se disponibili
     const cachedModels = getCachedModels(provider);
     if (cachedModels && cachedModels.length > 0) {
       Logger.warn(`Fallback ai modelli ${provider} dalla cache`);
       return cachedModels;
     }
-    
+
     // Fallback ai modelli statici del provider
     Logger.warn(`Fallback ai modelli ${provider} statici`);
     return providerInfo.fallback();
@@ -201,8 +207,8 @@ export async function fetchModels(
  * @deprecated Usa fetchModels('openrouter', apiKey, forceRefresh) invece
  */
 export const loadModels = async (
-  apiKey?: string, 
+  apiKey?: string,
   forceRefresh: boolean = false
 ): Promise<OpenAiCompatibleModelInfo[]> => {
   return fetchModels('openrouter', apiKey, forceRefresh);
-}
+};

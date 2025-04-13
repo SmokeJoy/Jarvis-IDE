@@ -73,7 +73,7 @@ export function validateContextMetadata(metadata: ContextMetadata): ContextValid
     if (!Array.isArray(metadata.tags)) {
       errors.push('Tags deve essere un array');
     } else {
-      const invalidTags = metadata.tags.filter(tag => typeof tag !== 'string');
+      const invalidTags = metadata.tags.filter((tag) => typeof tag !== 'string');
       if (invalidTags.length > 0) {
         errors.push('Tutti i tag devono essere stringhe');
       }
@@ -110,7 +110,7 @@ export function validateContextArray(contexts: ContextData[]): ContextValidation
     if (!result.isValid) {
       errors.push(`Contesto non valido all'indice ${index}`);
       if (result.errors) {
-        errors.push(...result.errors.map(err => `  - ${err}`));
+        errors.push(...result.errors.map((err) => `  - ${err}`));
       }
     }
   });
@@ -120,4 +120,4 @@ export function validateContextArray(contexts: ContextData[]): ContextValidation
   }
 
   return { isValid: true };
-} 
+}

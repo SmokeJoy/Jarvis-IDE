@@ -5,12 +5,12 @@
 
 import { stringify } from 'yaml';
 import * as vscode from 'vscode';
-import { ChatMessage } from '../shared/types.js';
-import { ChatSettings } from '../shared/types/settings.types.js';
-import { ApiConfiguration } from '../shared/types/api.types.js';
-import { Logger } from './logger.js';
+import { ChatMessage } from '../shared/types';
+import { ChatSettings } from '../shared/types/settings.types';
+import { ApiConfiguration } from '../shared/types/api.types';
+import { Logger } from './logger';
 
-const logger = Logger.getInstance("Exporters");
+const logger = Logger.getInstance('Exporters');
 
 /**
  * Interfaccia per il payload di esportazione
@@ -35,20 +35,20 @@ export function exportAsPromptYAML(payload: ExportPayload): string {
     const yamlPayload = {
       messages: payload.messages || [],
       settings: payload.settings || {},
-      systemPrompt: payload.systemPrompt || "",
+      systemPrompt: payload.systemPrompt || '',
       metadata: {
         contextFiles: payload.contextFiles || [],
-        modelId: payload.modelId || "",
+        modelId: payload.modelId || '',
         timestamp: payload.timestamp || Date.now(),
-        version: "1.0"
-      }
+        version: '1.0',
+      },
     };
 
     // Converti in YAML con opzioni di formattazione
     return stringify(yamlPayload, {
       indent: 2,
       doubleQuotedStringStyle: 'literal',
-      lineWidth: 0  // Nessun limite alla lunghezza della riga
+      lineWidth: 0, // Nessun limite alla lunghezza della riga
     });
   } catch (error) {
     logger.error(`Errore durante l'esportazione YAML: ${error.message}`, error);
@@ -65,9 +65,9 @@ export async function saveYAMLToFile(content: string): Promise<void> {
   try {
     const uri = await vscode.window.showSaveDialog({
       filters: {
-        'YAML': ['yaml', 'yml']
+        YAML: ['yaml', 'yml'],
       },
-      defaultUri: vscode.Uri.file('prompt_export.yaml')
+      defaultUri: vscode.Uri.file('prompt_export.yaml'),
     });
 
     if (uri) {
@@ -93,4 +93,4 @@ export async function exportAndSavePromptYAML(payload: ExportPayload): Promise<v
     logger.error(`Errore durante l'esportazione e salvataggio YAML: ${error.message}`, error);
     vscode.window.showErrorMessage(`Errore durante l'esportazione: ${error.message}`);
   }
-} 
+}

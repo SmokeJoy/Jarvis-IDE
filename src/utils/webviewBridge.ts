@@ -21,12 +21,12 @@ const vscode = {
     // In ambiente di produzione, questa funzione invia il messaggio alla WebView
     // Nel contesto di test, viene sostituita da un mock
     console.log('Inviando messaggio alla WebView:', message);
-    
+
     // Se la funzione viene eseguita in un browser, simula l'invio di un messaggio
     if (typeof window !== 'undefined') {
       window.postMessage(message, '*');
     }
-  }
+  },
 };
 
 /**
@@ -37,6 +37,6 @@ export function sendToUI(message: WebviewMessage): void {
   try {
     vscode.postMessage(message);
   } catch (error) {
-    console.error('Errore nell\'invio del messaggio alla WebView:', error);
+    console.error("Errore nell'invio del messaggio alla WebView:", error);
   }
-} 
+}

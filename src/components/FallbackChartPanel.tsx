@@ -1,10 +1,17 @@
 import React from 'react';
 import {
-  LineChart, Line,
-  BarChart, Bar,
-  AreaChart, Area,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
 } from 'recharts';
 import { useFallbackChartData } from '../hooks/useFallbackChartData';
 import { FallbackAudit } from '../types/fallback';
@@ -16,7 +23,7 @@ interface FallbackChartPanelProps {
 
 export const FallbackChartPanel: React.FC<FallbackChartPanelProps> = ({
   audits,
-  className = ''
+  className = '',
 }) => {
   const { latency, successRate, cost, usage } = useFallbackChartData(audits);
 
@@ -32,17 +39,17 @@ export const FallbackChartPanel: React.FC<FallbackChartPanelProps> = ({
             <XAxis dataKey="name" stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" />
             <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-            <Tooltip 
-              contentStyle={{ 
+            <Tooltip
+              contentStyle={{
                 backgroundColor: '#1e293b',
                 border: '1px solid #475569',
-                borderRadius: '0.5rem'
+                borderRadius: '0.5rem',
               }}
             />
-            <Line 
-              type="monotone" 
-              dataKey="latency" 
-              stroke="#facc15" 
+            <Line
+              type="monotone"
+              dataKey="latency"
+              stroke="#facc15"
               strokeWidth={2}
               dot={{ fill: '#facc15', strokeWidth: 2 }}
               activeDot={{ r: 6, fill: '#facc15' }}
@@ -59,26 +66,16 @@ export const FallbackChartPanel: React.FC<FallbackChartPanelProps> = ({
             <XAxis dataKey="name" stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" />
             <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-            <Tooltip 
-              contentStyle={{ 
+            <Tooltip
+              contentStyle={{
                 backgroundColor: '#1e293b',
                 border: '1px solid #475569',
-                borderRadius: '0.5rem'
+                borderRadius: '0.5rem',
               }}
             />
             <Legend />
-            <Bar 
-              dataKey="success" 
-              fill="#22c55e" 
-              radius={[4, 4, 0, 0]}
-              name="Successi"
-            />
-            <Bar 
-              dataKey="failure" 
-              fill="#ef4444" 
-              radius={[4, 4, 0, 0]}
-              name="Fallimenti"
-            />
+            <Bar dataKey="success" fill="#22c55e" radius={[4, 4, 0, 0]} name="Successi" />
+            <Bar dataKey="failure" fill="#ef4444" radius={[4, 4, 0, 0]} name="Fallimenti" />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -90,19 +87,19 @@ export const FallbackChartPanel: React.FC<FallbackChartPanelProps> = ({
           <AreaChart data={cost}>
             <XAxis dataKey="name" stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" />
-            <Tooltip 
-              contentStyle={{ 
+            <Tooltip
+              contentStyle={{
                 backgroundColor: '#1e293b',
                 border: '1px solid #475569',
-                borderRadius: '0.5rem'
+                borderRadius: '0.5rem',
               }}
             />
             <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-            <Area 
-              type="monotone" 
-              dataKey="cost" 
-              stroke="#38bdf8" 
-              fill="#0ea5e9" 
+            <Area
+              type="monotone"
+              dataKey="cost"
+              stroke="#38bdf8"
+              fill="#0ea5e9"
               fillOpacity={0.3}
               strokeWidth={2}
             />
@@ -117,22 +114,18 @@ export const FallbackChartPanel: React.FC<FallbackChartPanelProps> = ({
           <BarChart data={usage}>
             <XAxis dataKey="name" stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" />
-            <Tooltip 
-              contentStyle={{ 
+            <Tooltip
+              contentStyle={{
                 backgroundColor: '#1e293b',
                 border: '1px solid #475569',
-                borderRadius: '0.5rem'
+                borderRadius: '0.5rem',
               }}
             />
             <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-            <Bar 
-              dataKey="requests" 
-              fill="#a78bfa" 
-              radius={[4, 4, 0, 0]}
-            />
+            <Bar dataKey="requests" fill="#a78bfa" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
     </div>
   );
-}; 
+};

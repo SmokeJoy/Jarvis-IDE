@@ -4,16 +4,16 @@
  */
 
 import Ajv from 'ajv';
-import { WebviewMessage } from './WebviewMessage.js';
-import { ExtensionMessage } from './ExtensionMessage.js';
-import { ChatMessage } from './types/index.js';
-import { ChatSettings, ApiConfiguration } from '../types/extension.js';
-import { Logger } from './logger.js';
-import { ChatSession } from './types/session.js';
-import { isChatSession } from './types/session.js';
-import { OpenRouterModelInfo } from './types/api.types.js';
+import { WebviewMessage } from './WebviewMessage';
+import { ExtensionMessage } from './ExtensionMessage';
+import { ChatMessage } from './types/index';
+import { ChatSettings, ApiConfiguration } from '../types/extension';
+import { Logger } from './logger';
+import { ChatSession } from './types/session';
+import { isChatSession } from './types/session';
+import { OpenRouterModelInfo } from './types/api.types';
 
-// Usa require per importare gli schemi JSON 
+// Usa require per importare gli schemi JSON
 // (assicurati che i path siano corretti rispetto a dove verranno generati)
 let webviewSchema: any;
 let extensionSchema: any;
@@ -44,7 +44,14 @@ let validateApiConfiguration: ((data: unknown) => boolean) | null = null;
 let validateChatMessageArray: ((data: unknown) => boolean) | null = null;
 let validateChatSession: ((data: unknown) => boolean) | null = null;
 
-if (webviewSchema && extensionSchema && chatMessageSchema && chatSettingsSchema && apiConfigSchema && chatSessionSchema) {
+if (
+  webviewSchema &&
+  extensionSchema &&
+  chatMessageSchema &&
+  chatSettingsSchema &&
+  apiConfigSchema &&
+  chatSessionSchema
+) {
   try {
     ajv = new Ajv({ allErrors: true, removeAdditional: 'failing' });
     validateWebviewMessage = ajv.compile(webviewSchema);
@@ -53,11 +60,11 @@ if (webviewSchema && extensionSchema && chatMessageSchema && chatSettingsSchema 
     validateChatSettings = ajv.compile(chatSettingsSchema);
     validateApiConfiguration = ajv.compile(apiConfigSchema);
     validateChatSession = ajv.compile(chatSessionSchema);
-    
+
     // Crea uno schema custom per array di ChatMessage
     const chatMessageArraySchema = {
       type: 'array',
-      items: chatMessageSchema
+      items: chatMessageSchema,
     };
     validateChatMessageArray = ajv.compile(chatMessageArraySchema);
   } catch (error) {
@@ -75,7 +82,7 @@ export function isValidWebviewMessage(message: unknown): message is WebviewMessa
     // Fallback sui type guards quando la validazione schema non è disponibile
     return require('./typeGuards').isWebviewMessage(message);
   }
-  
+
   return validateWebviewMessage(message);
 }
 
@@ -89,7 +96,7 @@ export function isValidExtensionMessage(message: unknown): message is ExtensionM
     // Fallback sui type guards quando la validazione schema non è disponibile
     return require('./typeGuards').isExtensionMessage(message);
   }
-  
+
   return validateExtensionMessage(message);
 }
 
@@ -102,11 +109,11 @@ export function getWebviewMessageErrors(message: unknown): string[] | null {
   if (!validateWebviewMessage) {
     return null;
   }
-  
+
   validateWebviewMessage(message);
-  return validateWebviewMessage.errors ? 
-    validateWebviewMessage.errors.map((e: Ajv.ErrorObject) => `${e.instancePath} ${e.message}`) : 
-    null;
+  return validateWebviewMessage.errors
+    ? validateWebviewMessage.errors.map((e: Ajv.ErrorObject) => `${e.instancePath} ${e.message}`)
+    : null;
 }
 
 /**
@@ -118,11 +125,11 @@ export function getExtensionMessageErrors(message: unknown): string[] | null {
   if (!validateExtensionMessage) {
     return null;
   }
-  
+
   validateExtensionMessage(message);
-  return validateExtensionMessage.errors ? 
-    validateExtensionMessage.errors.map((e: Ajv.ErrorObject) => `${e.instancePath} ${e.message}`) : 
-    null;
+  return validateExtensionMessage.errors
+    ? validateExtensionMessage.errors.map((e: Ajv.ErrorObject) => `${e.instancePath} ${e.message}`)
+    : null;
 }
 
 /**
@@ -132,11 +139,11 @@ export function getExtensionMessageErrors(message: unknown): string[] | null {
  */
 export function validateWebviewMessageOrThrow(message: unknown): asserts message is WebviewMessage {
   const errors = getWebviewMessageErrors(message);
-  
+
   if (errors && errors.length > 0) {
     throw new Error(`Messaggio WebView non valido: ${errors.join(', ')}`);
   }
-  
+
   // Se non ci sono errori tramite schema ma il tipo di base non è corretto,
   // usa il type guard come fallback
   if (!require('./typeGuards').isWebviewMessage(message)) {
@@ -149,13 +156,15 @@ export function validateWebviewMessageOrThrow(message: unknown): asserts message
  * @param message Messaggio da validare
  * @throws Error se il messaggio non è valido
  */
-export function validateExtensionMessageOrThrow(message: unknown): asserts message is ExtensionMessage {
+export function validateExtensionMessageOrThrow(
+  message: unknown
+): asserts message is ExtensionMessage {
   const errors = getExtensionMessageErrors(message);
-  
+
   if (errors && errors.length > 0) {
     throw new Error(`Messaggio Extension non valido: ${errors.join(', ')}`);
   }
-  
+
   // Se non ci sono errori tramite schema ma il tipo di base non è corretto,
   // usa il type guard come fallback
   if (!require('./typeGuards').isExtensionMessage(message)) {
@@ -175,7 +184,7 @@ export function isValidChatMessage(message: unknown): message is ChatMessage {
     const msg = message as Record<string, unknown>;
     return typeof msg.role === 'string' && typeof msg.content === 'string';
   }
-  
+
   return validateChatMessage(message);
 }
 
@@ -190,7 +199,7 @@ export function isValidChatMessageArray(messages: unknown): messages is ChatMess
     if (!Array.isArray(messages)) return false;
     return messages.every(isValidChatMessage);
   }
-  
+
   return validateChatMessageArray(messages);
 }
 
@@ -206,7 +215,7 @@ export function isValidChatSettings(settings: unknown): settings is ChatSettings
     const s = settings as Record<string, unknown>;
     return typeof s.modelId === 'string'; // verifica campo minimo obbligatorio
   }
-  
+
   return validateChatSettings(settings);
 }
 
@@ -222,7 +231,7 @@ export function isValidApiConfiguration(config: unknown): config is ApiConfigura
     const c = config as Record<string, unknown>;
     return typeof c.apiKey === 'string' && typeof c.baseUrl === 'string';
   }
-  
+
   return validateApiConfiguration(config);
 }
 
@@ -235,11 +244,11 @@ export function getChatMessageErrors(message: unknown): string[] | null {
   if (!validateChatMessage) {
     return null;
   }
-  
+
   validateChatMessage(message);
-  return validateChatMessage.errors ? 
-    validateChatMessage.errors.map((e: Ajv.ErrorObject) => `${e.instancePath} ${e.message}`) : 
-    null;
+  return validateChatMessage.errors
+    ? validateChatMessage.errors.map((e: Ajv.ErrorObject) => `${e.instancePath} ${e.message}`)
+    : null;
 }
 
 /**
@@ -251,11 +260,11 @@ export function getChatMessageArrayErrors(messages: unknown): string[] | null {
   if (!validateChatMessageArray) {
     return null;
   }
-  
+
   validateChatMessageArray(messages);
-  return validateChatMessageArray.errors ? 
-    validateChatMessageArray.errors.map((e: Ajv.ErrorObject) => `${e.instancePath} ${e.message}`) : 
-    null;
+  return validateChatMessageArray.errors
+    ? validateChatMessageArray.errors.map((e: Ajv.ErrorObject) => `${e.instancePath} ${e.message}`)
+    : null;
 }
 
 /**
@@ -267,11 +276,11 @@ export function getChatSettingsErrors(settings: unknown): string[] | null {
   if (!validateChatSettings) {
     return null;
   }
-  
+
   validateChatSettings(settings);
-  return validateChatSettings.errors ? 
-    validateChatSettings.errors.map((e: Ajv.ErrorObject) => `${e.instancePath} ${e.message}`) : 
-    null;
+  return validateChatSettings.errors
+    ? validateChatSettings.errors.map((e: Ajv.ErrorObject) => `${e.instancePath} ${e.message}`)
+    : null;
 }
 
 /**
@@ -283,11 +292,11 @@ export function getApiConfigurationErrors(config: unknown): string[] | null {
   if (!validateApiConfiguration) {
     return null;
   }
-  
+
   validateApiConfiguration(config);
-  return validateApiConfiguration.errors ? 
-    validateApiConfiguration.errors.map((e: Ajv.ErrorObject) => `${e.instancePath} ${e.message}`) : 
-    null;
+  return validateApiConfiguration.errors
+    ? validateApiConfiguration.errors.map((e: Ajv.ErrorObject) => `${e.instancePath} ${e.message}`)
+    : null;
 }
 
 /**
@@ -297,11 +306,11 @@ export function getApiConfigurationErrors(config: unknown): string[] | null {
  */
 export function validateChatMessageOrThrow(message: unknown): asserts message is ChatMessage {
   const errors = getChatMessageErrors(message);
-  
+
   if (errors && errors.length > 0) {
     throw new Error(`ChatMessage non valido: ${errors.join(', ')}`);
   }
-  
+
   // Fallback validazione base
   if (!isValidChatMessage(message)) {
     throw new Error('Oggetto non conforme al tipo ChatMessage');
@@ -313,13 +322,15 @@ export function validateChatMessageOrThrow(message: unknown): asserts message is
  * @param messages Array di messaggi da validare
  * @throws Error se i messaggi non sono validi
  */
-export function validateChatMessageArrayOrThrow(messages: unknown): asserts messages is ChatMessage[] {
+export function validateChatMessageArrayOrThrow(
+  messages: unknown
+): asserts messages is ChatMessage[] {
   const errors = getChatMessageArrayErrors(messages);
-  
+
   if (errors && errors.length > 0) {
     throw new Error(`Array di ChatMessage non valido: ${errors.join(', ')}`);
   }
-  
+
   // Fallback validazione base
   if (!isValidChatMessageArray(messages)) {
     throw new Error('Oggetto non conforme al tipo ChatMessage[]');
@@ -333,11 +344,11 @@ export function validateChatMessageArrayOrThrow(messages: unknown): asserts mess
  */
 export function validateChatSettingsOrThrow(settings: unknown): asserts settings is ChatSettings {
   const errors = getChatSettingsErrors(settings);
-  
+
   if (errors && errors.length > 0) {
     throw new Error(`ChatSettings non valido: ${errors.join(', ')}`);
   }
-  
+
   // Fallback validazione base
   if (!isValidChatSettings(settings)) {
     throw new Error('Oggetto non conforme al tipo ChatSettings');
@@ -349,13 +360,15 @@ export function validateChatSettingsOrThrow(settings: unknown): asserts settings
  * @param config Configurazione da validare
  * @throws Error se la configurazione non è valida
  */
-export function validateApiConfigurationOrThrow(config: unknown): asserts config is ApiConfiguration {
+export function validateApiConfigurationOrThrow(
+  config: unknown
+): asserts config is ApiConfiguration {
   const errors = getApiConfigurationErrors(config);
-  
+
   if (errors && errors.length > 0) {
     throw new Error(`ApiConfiguration non valido: ${errors.join(', ')}`);
   }
-  
+
   // Fallback validazione base
   if (!isValidApiConfiguration(config)) {
     throw new Error('Oggetto non conforme al tipo ApiConfiguration');
@@ -367,12 +380,12 @@ export function validateApiConfigurationOrThrow(config: unknown): asserts config
  */
 export function isValidChatSession(obj: unknown): obj is ChatSession {
   if (!obj || typeof obj !== 'object') return false;
-  
+
   // Usa il validatore AJV se disponibile
   if (validateChatSession) {
     return validateChatSession(obj) === true;
   }
-  
+
   // Fallback: usa la funzione isChatSession dal modulo session.js
   return isChatSession(obj);
 }
@@ -397,7 +410,7 @@ export function isOpenRouterModelInfo(obj: unknown): obj is OpenRouterModelInfo 
  */
 export function getChatSessionErrors(obj: unknown): string[] {
   if (!obj || typeof obj !== 'object') return ['Input non è un oggetto valido'];
-  
+
   // Usa il validatore AJV se disponibile
   if (validateChatSession) {
     validateChatSession(obj);
@@ -408,23 +421,23 @@ export function getChatSessionErrors(obj: unknown): string[] {
     }
     return [];
   }
-  
+
   // Fallback: messaggi di errore basati su controlli manuali
   const errors: string[] = [];
   const session = obj as ChatSession;
-  
+
   if (!session.id || typeof session.id !== 'string') {
     errors.push('id mancante o non valido');
   }
-  
+
   if (!session.title || typeof session.title !== 'string') {
     errors.push('title mancante o non valido');
   }
-  
+
   if (!session.createdAt || typeof session.createdAt !== 'number') {
     errors.push('createdAt mancante o non valido');
   }
-  
+
   if (!Array.isArray(session.messages)) {
     errors.push('messages deve essere un array');
   } else {
@@ -435,13 +448,13 @@ export function getChatSessionErrors(obj: unknown): string[] {
       }
     });
   }
-  
+
   if (!session.settings || typeof session.settings !== 'object') {
     errors.push('settings mancante o non valido');
   } else if (!isValidChatSettings(session.settings)) {
     errors.push('settings non è una configurazione valida');
   }
-  
+
   return errors;
 }
 
@@ -450,11 +463,11 @@ export function getChatSessionErrors(obj: unknown): string[] {
  */
 export function validateChatSessionOrThrow(obj: unknown): ChatSession {
   const errors = getChatSessionErrors(obj);
-  
+
   if (errors.length > 0) {
     throw new Error(`Sessione chat non valida: ${errors.join(', ')}`);
   }
-  
+
   return obj as ChatSession;
 }
 
@@ -463,8 +476,8 @@ export function validateChatSessionOrThrow(obj: unknown): ChatSession {
  */
 export function isValidChatSessionArray(obj: unknown): obj is ChatSession[] {
   if (!Array.isArray(obj)) return false;
-  
-  return obj.every(item => isValidChatSession(item));
+
+  return obj.every((item) => isValidChatSession(item));
 }
 
 /**
@@ -472,16 +485,16 @@ export function isValidChatSessionArray(obj: unknown): obj is ChatSession[] {
  */
 export function getChatSessionArrayErrors(obj: unknown): string[] {
   if (!Array.isArray(obj)) return ['Input non è un array'];
-  
+
   const errors: string[] = [];
-  
+
   obj.forEach((item, index) => {
     const itemErrors = getChatSessionErrors(item);
     if (itemErrors.length > 0) {
       errors.push(`Elemento ${index}: ${itemErrors.join(', ')}`);
     }
   });
-  
+
   return errors;
 }
 
@@ -490,10 +503,10 @@ export function getChatSessionArrayErrors(obj: unknown): string[] {
  */
 export function validateChatSessionArrayOrThrow(obj: unknown): ChatSession[] {
   const errors = getChatSessionArrayErrors(obj);
-  
+
   if (errors.length > 0) {
     throw new Error(`Array di sessioni chat non valido: ${errors.join('; ')}`);
   }
-  
+
   return obj as ChatSession[];
 }

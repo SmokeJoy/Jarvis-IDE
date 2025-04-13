@@ -168,6 +168,11 @@ export interface TaskAbortedEvent {
 }
 
 /**
+ * Tipo per il payload di un messaggio MAS
+ */
+export type MasPayload = Record<string, unknown>;
+
+/**
  * Tipo di messaggio del sistema MAS
  */
 export interface MasMessage {
@@ -176,7 +181,7 @@ export interface MasMessage {
   /** Mittente del messaggio */
   from?: string;
   /** Payload del messaggio */
-  payload: any;
+  payload: MasPayload;
   /** Timestamp di invio */
   timestamp: Date;
 }
@@ -203,4 +208,4 @@ export interface TaskQueueState {
     agentId?: string;
     search?: string;
   };
-} 
+}

@@ -15,17 +15,16 @@ export const VALID_PROVIDERS = [
   'anthropic',
   'openrouter',
   'azureopenai',
-  'local'
+  'local',
 ] as const;
 
-export type ProviderId = typeof VALID_PROVIDERS[number];
+export type ProviderId = (typeof VALID_PROVIDERS)[number];
 
 /**
  * Verifica se il provider ID è valido
  */
 export function isValidProviderId(providerId: any): providerId is ProviderId {
-  return typeof providerId === 'string' && 
-    VALID_PROVIDERS.includes(providerId as ProviderId);
+  return typeof providerId === 'string' && VALID_PROVIDERS.includes(providerId as ProviderId);
 }
 
 /**
@@ -124,21 +123,20 @@ export function isModelInfo(model: any): model is ModelInfo {
     if (typeof model.pricing !== 'object' || model.pricing === null) {
       return false;
     }
-    
+
     const pricing = model.pricing as ModelPricing;
-    
+
     // Verifica che prompt e completion siano numeri (se presenti)
     if (pricing.prompt !== undefined && typeof pricing.prompt !== 'number') {
       return false;
     }
-    
+
     if (pricing.completion !== undefined && typeof pricing.completion !== 'number') {
       return false;
     }
-    
+
     // Verifica che unit sia uno dei valori consentiti (se presente)
-    if (pricing.unit !== undefined && 
-       !['token', 'character', 'message'].includes(pricing.unit)) {
+    if (pricing.unit !== undefined && !['token', 'character', 'message'].includes(pricing.unit)) {
       return false;
     }
   }
@@ -148,22 +146,22 @@ export function isModelInfo(model: any): model is ModelInfo {
     if (typeof model.supporting !== 'object' || model.supporting === null) {
       return false;
     }
-    
+
     const supporting = model.supporting;
-    
+
     // Verifica che tutte le proprietà siano booleani (se presenti)
     if (supporting.images !== undefined && typeof supporting.images !== 'boolean') {
       return false;
     }
-    
+
     if (supporting.json !== undefined && typeof supporting.json !== 'boolean') {
       return false;
     }
-    
+
     if (supporting.functions !== undefined && typeof supporting.functions !== 'boolean') {
       return false;
     }
-    
+
     if (supporting.vision !== undefined && typeof supporting.vision !== 'boolean') {
       return false;
     }
@@ -323,7 +321,7 @@ export function validateModelInfoArray<T extends ModelInfoBase>(
   }
 
   // Filtra solo i modelli validi
-  const validModels = models.filter(model => {
+  const validModels = models.filter((model) => {
     const isValid = isModelInfoBase(model);
     if (!isValid) {
       logger.warn(`${providerName}: Modello non valido scartato: ${JSON.stringify(model)}`);
@@ -331,6 +329,8 @@ export function validateModelInfoArray<T extends ModelInfoBase>(
     return isValid;
   }) as T[];
 
-  logger.info(`${providerName}: Validati ${validModels.length} modelli validi di ${models.length} totali`);
+  logger.info(
+    `${providerName}: Validati ${validModels.length} modelli validi di ${models.length} totali`
+  );
   return validModels;
-} 
+}

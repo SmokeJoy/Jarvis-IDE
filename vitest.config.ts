@@ -3,26 +3,21 @@ import path from 'path';
 
 export default defineConfig({
   test: {
-    include: [
-      'scripts/codemods/__tests__/**/*.test.ts',
-      'src/__tests__/**/*.test.ts',
-      'src/**/__tests__/**/*.test.ts'
-    ],
-    exclude: [
-      'src/__tests__/problematic/**/*.test.ts'
-    ],
-    environment: 'node',
-    globals: true,
+    environment: 'jsdom',
+    include: ['src/**/*.{test,spec}.{js,jsx,ts,tsx}'],
+    setupFiles: ['./src/test/setup.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'json-summary', 'lcov', 'html'],
-      include: ['src/**/*.ts'],
       exclude: [
-        'src/**/*.test.ts',
-        'src/test/**',
-        'src/**/*.d.ts',
-        'src/index.ts',
         'node_modules/**',
+        'dist/**',
+        'coverage/**',
+        '**/*.d.ts',
+        'test/**',
+        '**/*.test.{js,jsx,ts,tsx}',
+        '**/*.spec.{js,jsx,ts,tsx}',
+        '**/*.config.{js,ts}',
         'scripts/codemods/__tests__/**'
       ],
       all: true,
@@ -33,12 +28,15 @@ export default defineConfig({
         statements: 70
       }
     },
-    setupFiles: ['src/test/setup-vitest.ts'],
     testTimeout: 10000,
     hookTimeout: 10000,
     deps: {
       external: ['vscode'],
-      interopDefault: true
+      interopDefault: true,
+      inline: [
+        '@testing-library/react',
+        '@testing-library/jest-dom',
+      ],
     }
   },
   resolve: {

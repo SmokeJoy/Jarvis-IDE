@@ -14,10 +14,10 @@ export default defineConfig({
   esbuildOptions(options) {
     options.define = {
       ...options.define,
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
     };
   },
   env: {
-    NODE_ENV: process.env.NODE_ENV || 'production'
-  }
-}); 
+    NODE_ENV: process.env.NODE_ENV || 'production',
+  },
+});

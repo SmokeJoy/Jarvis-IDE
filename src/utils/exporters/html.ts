@@ -3,11 +3,11 @@
  * @module utils/exporters/html
  */
 
-import { ChatMessage } from '../../shared/types.js';
-import { ChatSettings } from '../../shared/types/settings.types.js';
-import { ExportableSession } from './types.js';
-import { Logger } from '../logger.js';
-import { toMarkdown } from './markdown.js';
+import { ChatMessage } from '../../shared/types';
+import { ChatSettings } from '../../shared/types/settings.types';
+import { ExportableSession } from './types';
+import { Logger } from '../logger';
+import { toMarkdown } from './markdown';
 
 const logger = Logger.getInstance('htmlExporter');
 
@@ -20,19 +20,19 @@ export interface HTMLOptions {
    * @default true
    */
   includeStyles?: boolean;
-  
+
   /**
    * Se convertire il contenuto Markdown in HTML
    * @default true
    */
   convertMarkdown?: boolean;
-  
+
   /**
    * Se includere metadata come title, description, ecc.
    * @default true
    */
   includeMetadata?: boolean;
-  
+
   /**
    * Titolo del documento
    * @default 'Conversazione Esportata'
@@ -196,26 +196,28 @@ const defaultStyles = `
 
 /**
  * Converte un singolo messaggio in HTML
- * 
+ *
  * @param message - Messaggio da convertire
  * @returns Codice HTML per il messaggio
  */
 function messageToHTML(message: ChatMessage): string {
   // Definisci emoji e label per i ruoli
-  const roleEmoji = {
-    'system': '🔧',
-    'user': '👤',
-    'assistant': '🤖',
-    'function': '⚙️'
-  }[message.role] || '❓';
-  
-  const roleLabel = {
-    'system': 'Sistema',
-    'user': 'Utente',
-    'assistant': 'Assistente',
-    'function': 'Funzione'
-  }[message.role] || message.role;
-  
+  const roleEmoji =
+    {
+      system: '🔧',
+      user: '👤',
+      assistant: '🤖',
+      function: '⚙️',
+    }[message.role] || '❓';
+
+  const roleLabel =
+    {
+      system: 'Sistema',
+      user: 'Utente',
+      assistant: 'Assistente',
+      function: 'Funzione',
+    }[message.role] || message.role;
+
   // Sanitizza il contenuto per HTML
   let content = message.content || '';
   content = content
@@ -223,7 +225,7 @@ function messageToHTML(message: ChatMessage): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
-  
+
   // Mantieni la formattazione di base del markdown
   content = content
     // Converti blocchi di codice
@@ -241,7 +243,7 @@ function messageToHTML(message: ChatMessage): string {
     // Aggiungi interruzioni di riga
     .replace(/\n\n/g, '</p><p>')
     .replace(/\n/g, '<br>');
-  
+
   return `
     <div class="message ${message.role}">
       <div class="role">${roleEmoji} ${roleLabel}</div>
@@ -252,7 +254,7 @@ function messageToHTML(message: ChatMessage): string {
 
 /**
  * Converte le impostazioni in HTML
- * 
+ *
  * @param settings - Impostazioni da convertire
  * @returns Codice HTML per le impostazioni
  */
@@ -260,7 +262,7 @@ function settingsToHTML(settings?: ChatSettings): string {
   if (!settings || Object.keys(settings).length === 0) {
     return '';
   }
-  
+
   let html = `
     <h2>⚙️ Impostazioni</h2>
     <table>
@@ -269,15 +271,15 @@ function settingsToHTML(settings?: ChatSettings): string {
         <th>Valore</th>
       </tr>
   `;
-  
+
   for (const [key, value] of Object.entries(settings)) {
     // Formatta il valore in modo leggibile
     let formattedValue = value;
-    
+
     if (typeof value === 'object' && value !== null) {
       formattedValue = JSON.stringify(value);
     }
-    
+
     html += `
       <tr>
         <td>${key}</td>
@@ -285,15 +287,15 @@ function settingsToHTML(settings?: ChatSettings): string {
       </tr>
     `;
   }
-  
+
   html += '</table>';
-  
+
   return html;
 }
 
 /**
  * Converte i file di contesto in HTML
- * 
+ *
  * @param contextFiles - Array di file di contesto
  * @returns Codice HTML per i file di contesto
  */
@@ -301,41 +303,38 @@ function contextFilesToHTML(contextFiles?: string[]): string {
   if (!contextFiles || contextFiles.length === 0) {
     return '';
   }
-  
+
   let html = `
     <h2>📄 File di Contesto</h2>
     <ul class="context-files">
   `;
-  
+
   for (const file of contextFiles) {
     html += `<li><code>${file}</code></li>`;
   }
-  
+
   html += '</ul>';
-  
+
   return html;
 }
 
 /**
  * Converte una sessione in formato HTML
- * 
+ *
  * @param session - Sessione da convertire
  * @param options - Opzioni per la conversione
  * @returns Codice HTML completo
  */
-export function toHTML(
-  session: ExportableSession,
-  options: HTMLOptions = {}
-): string {
+export function toHTML(session: ExportableSession, options: HTMLOptions = {}): string {
   try {
     logger.debug('Inizio esportazione in formato HTML');
-    
+
     // Imposta opzioni predefinite
     const includeStyles = options.includeStyles !== false;
     const convertMarkdown = options.convertMarkdown !== false;
     const includeMetadata = options.includeMetadata !== false;
     const title = options.title || 'Conversazione Esportata';
-    
+
     // Se si vuole convertire da Markdown a HTML, usa toMarkdown prima
     if (convertMarkdown) {
       // Usa Markdown come formato intermedio per una conversione più ricca
@@ -345,14 +344,14 @@ export function toHTML(
       // Questa è una versione semplificata
       return generateHTMLDocument(markdownContent, title, includeStyles, includeMetadata, session);
     }
-    
+
     // Altrimenti procedi con la conversione diretta
     const timestamp = session.timestamp
       ? new Date(session.timestamp).toLocaleString()
       : new Date().toLocaleString();
-    
+
     const modelId = session.modelId || '';
-    
+
     let metadata = '';
     if (includeMetadata) {
       metadata = `
@@ -362,10 +361,10 @@ export function toHTML(
         </div>
       `;
     }
-    
+
     // Intestazione e prompt di sistema
     let head = `<h1>${title}</h1>${metadata}`;
-    
+
     if (session.systemPrompt) {
       head += `
         <h2>📝 Prompt di Sistema</h2>
@@ -374,28 +373,23 @@ export function toHTML(
         </div>
       `;
     }
-    
+
     // Altre sezioni
     const settingsSection = settingsToHTML(session.settings);
     const contextFilesSection = contextFilesToHTML(session.contextFiles);
-    
+
     // Conversazione
     let messagesSection = '';
     if (session.messages && session.messages.length > 0) {
       messagesSection = '<h2>💬 Conversazione</h2>';
-      messagesSection += session.messages
-        .map(message => messageToHTML(message))
-        .join('');
+      messagesSection += session.messages.map((message) => messageToHTML(message)).join('');
     }
-    
+
     // Componi il documento
-    const bodyContent = [
-      head,
-      settingsSection,
-      contextFilesSection,
-      messagesSection
-    ].filter(Boolean).join('');
-    
+    const bodyContent = [head, settingsSection, contextFilesSection, messagesSection]
+      .filter(Boolean)
+      .join('');
+
     // Genera il documento HTML completo
     const htmlDocument = `<!DOCTYPE html>
 <html lang="it">
@@ -409,12 +403,11 @@ export function toHTML(
   ${bodyContent}
 </body>
 </html>`;
-    
+
     logger.debug('Esportazione HTML completata con successo');
     return htmlDocument;
-    
   } catch (error) {
-    logger.error('Errore durante l\'esportazione in formato HTML', { cause: error });
+    logger.error("Errore durante l'esportazione in formato HTML", { cause: error });
     throw new Error(
       `Errore durante l'esportazione in formato HTML: ${error instanceof Error ? error.message : String(error)}`
     );
@@ -423,7 +416,7 @@ export function toHTML(
 
 /**
  * Genera un documento HTML completo
- * 
+ *
  * @param content - Contenuto Markdown da convertire in HTML
  * @param title - Titolo del documento
  * @param includeStyles - Se includere gli stili CSS
@@ -465,7 +458,7 @@ function generateHTMLDocument(
     .replace(/\n\n/g, '</p><p>')
     // Inserisci le liste in elementi ul
     .replace(/<li>.*(?:\n<li>.*)+/g, (match) => `<ul>${match}</ul>`);
-  
+
   return `<!DOCTYPE html>
 <html lang="it">
 <head>
@@ -478,4 +471,4 @@ function generateHTMLDocument(
   ${htmlContent}
 </body>
 </html>`;
-} 
+}

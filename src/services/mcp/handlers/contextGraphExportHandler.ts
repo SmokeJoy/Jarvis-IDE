@@ -3,10 +3,10 @@
  * @description Handler per l'esportazione del grafo del contesto in vari formati
  */
 
-import { ContextItem, getMemoryContexts } from "../../memory/context.js";
-import { readFile } from "fs/promises";
-import path from "path";
-import { getLogger } from "../../../shared/logging.js";
+import { ContextItem, getMemoryContexts } from '../../memory/context';
+import { readFile } from 'fs/promises';
+import path from 'path';
+import { getLogger } from '../../../shared/logging';
 
 const logger = getLogger('contextGraphExportHandler');
 
@@ -41,7 +41,7 @@ export interface ContextLink {
  */
 export interface GraphExportOptions {
   rootId: string;
-  format?: typeof SUPPORTED_FORMATS[number];
+  format?: (typeof SUPPORTED_FORMATS)[number];
   depth?: number;
   direction?: 'incoming' | 'outgoing' | 'both';
   relation?: string;
@@ -68,8 +68,8 @@ export interface GraphExportResult {
  */
 async function getContextLinks(): Promise<ContextLink[]> {
   try {
-    const linksPath = path.join(__dirname, "../../data/context_links.json");
-    const data = await readFile(linksPath, "utf-8");
+    const linksPath = path.join(__dirname, '../../data/context_links.json');
+    const data = await readFile(linksPath, 'utf-8');
     return JSON.parse(data) as ContextLink[];
   } catch (error) {
     logger.error('Errore nel recupero dei link:', error);
@@ -81,18 +81,18 @@ async function getContextLinks(): Promise<ContextLink[]> {
  * Filtra i link in base alle opzioni specificate
  */
 function filterLinks(links: ContextLink[], options: GraphExportOptions): ContextLink[] {
-  return links.filter(link => {
+  return links.filter((link) => {
     // Filtra per direzione
     if (options.direction === 'incoming' && link.targetId !== options.rootId) return false;
     if (options.direction === 'outgoing' && link.sourceId !== options.rootId) return false;
-    
+
     // Filtra per relazione
     if (options.relation && link.relation !== options.relation) return false;
-    
+
     // Filtra per forza e confidenza
     if (options.minStrength && link.strength < options.minStrength) return false;
     if (options.minConfidence && link.metadata.confidence < options.minConfidence) return false;
-    
+
     return true;
   });
 }
@@ -113,13 +113,13 @@ async function exploreGraph(
   const links: ContextLink[] = [];
 
   // Trova tutti i link rilevanti per il nodo corrente
-  const relevantLinks = allLinks.filter(link => 
-    link.sourceId === rootId || link.targetId === rootId
+  const relevantLinks = allLinks.filter(
+    (link) => link.sourceId === rootId || link.targetId === rootId
   );
 
   for (const link of relevantLinks) {
     const otherId = link.sourceId === rootId ? link.targetId : link.sourceId;
-    
+
     if (!visited.has(otherId)) {
       visited.add(otherId);
       nodes.add(otherId);
@@ -134,8 +134,8 @@ async function exploreGraph(
         options
       );
 
-      childNodes.forEach(node => nodes.add(node));
-      childLinks.forEach(link => links.push(link));
+      childNodes.forEach((node) => nodes.add(node));
+      childLinks.forEach((link) => links.push(link));
     }
   }
 
@@ -263,20 +263,20 @@ function generateJsonLdGraph(
   const graph = {
     '@context': {
       '@vocab': 'http://example.org/',
-      'text': 'http://schema.org/text',
-      'tags': 'http://schema.org/keywords',
-      'relation': 'http://schema.org/relation',
-      'strength': 'http://schema.org/weight',
-      'confidence': 'http://schema.org/confidence'
+      text: 'http://schema.org/text',
+      tags: 'http://schema.org/keywords',
+      relation: 'http://schema.org/relation',
+      strength: 'http://schema.org/weight',
+      confidence: 'http://schema.org/confidence',
     },
-    '@graph': [] as any[]
+    '@graph': [] as any[],
   };
 
   // Aggiungi nodi
   for (const node of nodes) {
     const nodeObj: any = {
       '@id': node.id,
-      '@type': 'Context'
+      '@type': 'Context',
     };
     if (options.includeNodeText) {
       nodeObj.text = node.text;
@@ -292,9 +292,9 @@ function generateJsonLdGraph(
     const edgeObj: any = {
       '@id': link.id,
       '@type': 'Relation',
-      'relation': link.relation,
-      'source': link.sourceId,
-      'target': link.targetId
+      relation: link.relation,
+      source: link.sourceId,
+      target: link.targetId,
     };
     if (options.includeEdgeMetadata) {
       edgeObj.strength = link.strength;
@@ -317,28 +317,31 @@ export async function contextGraphExportHandler(
     if (!args.rootId) {
       return {
         success: false,
-        error: 'ID radice mancante'
+        error: 'ID radice mancante',
       };
     }
 
     if (args.format && !SUPPORTED_FORMATS.includes(args.format)) {
       return {
         success: false,
-        error: `Formato non supportato: ${args.format}`
+        error: `Formato non supportato: ${args.format}`,
       };
     }
 
     if (args.minStrength && (args.minStrength < MIN_STRENGTH || args.minStrength > MAX_STRENGTH)) {
       return {
         success: false,
-        error: `minStrength deve essere tra ${MIN_STRENGTH} e ${MAX_STRENGTH}`
+        error: `minStrength deve essere tra ${MIN_STRENGTH} e ${MAX_STRENGTH}`,
       };
     }
 
-    if (args.minConfidence && (args.minConfidence < MIN_CONFIDENCE || args.minConfidence > MAX_CONFIDENCE)) {
+    if (
+      args.minConfidence &&
+      (args.minConfidence < MIN_CONFIDENCE || args.minConfidence > MAX_CONFIDENCE)
+    ) {
       return {
         success: false,
-        error: `minConfidence deve essere tra ${MIN_CONFIDENCE} e ${MAX_CONFIDENCE}`
+        error: `minConfidence deve essere tra ${MIN_CONFIDENCE} e ${MAX_CONFIDENCE}`,
       };
     }
 
@@ -348,7 +351,7 @@ export async function contextGraphExportHandler(
     if (!rootContext) {
       return {
         success: false,
-        error: `Contesto con ID ${args.rootId} non trovato`
+        error: `Contesto con ID ${args.rootId} non trovato`,
       };
     }
 
@@ -361,7 +364,7 @@ export async function contextGraphExportHandler(
     if (args.includeRoot !== false) {
       visited.add(args.rootId);
     }
-    
+
     const { nodes: nodeIds, links } = await exploreGraph(
       args.rootId,
       args.depth || DEFAULT_DEPTH,
@@ -371,14 +374,12 @@ export async function contextGraphExportHandler(
     );
 
     // Recupera i contesti per i nodi trovati
-    const nodes = contexts.filter(ctx => nodeIds.has(ctx.id));
+    const nodes = contexts.filter((ctx) => nodeIds.has(ctx.id));
 
     // Aggiungi contesti isolati se richiesto
     if (args.includeIsolated) {
       const connectedNodeIds = new Set([...nodeIds, args.rootId]);
-      const isolatedNodes = contexts.filter(
-        ctx => !connectedNodeIds.has(ctx.id)
-      );
+      const isolatedNodes = contexts.filter((ctx) => !connectedNodeIds.has(ctx.id));
       nodes.push(...isolatedNodes);
     }
 
@@ -387,35 +388,35 @@ export async function contextGraphExportHandler(
     const format = args.format || DEFAULT_FORMAT;
 
     switch (format) {
-      case "dot":
+      case 'dot':
         output = generateDotGraph(nodes, links, args);
         break;
-      case "mermaid":
+      case 'mermaid':
         output = generateMermaidGraph(nodes, links, args);
         break;
-      case "graphml":
+      case 'graphml':
         output = generateGraphMLGraph(nodes, links, args);
         break;
-      case "json-ld":
+      case 'json-ld':
         output = generateJsonLdGraph(nodes, links, args);
         break;
       default:
         return {
           success: false,
-          error: `Formato non supportato: ${format}`
+          error: `Formato non supportato: ${format}`,
         };
     }
 
     return {
       success: true,
-      output
+      output,
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Errore sconosciuto';
-    logger.error('Errore durante l\'esportazione del grafo:', error);
+    logger.error("Errore durante l'esportazione del grafo:", error);
     return {
       success: false,
-      error: `Errore durante l'esportazione del grafo: ${errorMessage}`
+      error: `Errore durante l'esportazione del grafo: ${errorMessage}`,
     };
   }
-} 
+}

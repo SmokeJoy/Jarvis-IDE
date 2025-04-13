@@ -1,5 +1,5 @@
 import React from 'react';
-import { TabItem, TabId } from '../../types/tab.js';
+import { TabItem, TabId } from '../../types/tab';
 
 interface TabNavbarProps {
   tabs: TabItem[];
@@ -7,27 +7,19 @@ interface TabNavbarProps {
   onTabChange: (tabId: TabId) => void;
 }
 
-export const TabNavbar: React.FC<TabNavbarProps> = ({
-  tabs,
-  activeTabId,
-  onTabChange,
-}) => {
+export const TabNavbar: React.FC<TabNavbarProps> = ({ tabs, activeTabId, onTabChange }) => {
   return (
     <nav className="tab-navbar">
-      {tabs.map(tab => (
+      {tabs.map((tab) => (
         <button
           key={tab.id}
           className={`tab-button ${tab.id === activeTabId ? 'active' : ''}`}
           onClick={() => onTabChange(tab.id)}
         >
           {tab.label}
-          {tab.badge && (
-            <span className={`badge ${tab.badge.type}`}>
-              {tab.badge.count}
-            </span>
-          )}
+          {tab.badge && <span className={`badge ${tab.badge.type}`}>{tab.badge.count}</span>}
         </button>
       ))}
     </nav>
   );
-}; 
+};

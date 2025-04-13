@@ -27,12 +27,12 @@ export const useFallbackChartData = (audits: FallbackAudit[]): ChartData => {
     const providerStats = new Map<string, ProviderStats>();
 
     // Calcola le statistiche per ogni provider
-    audits.forEach(audit => {
+    audits.forEach((audit) => {
       const stats = providerStats.get(audit.provider) || {
         totalRequests: 0,
         successfulRequests: 0,
         totalLatency: 0,
-        totalCost: 0
+        totalCost: 0,
       };
 
       stats.totalRequests++;
@@ -49,29 +49,29 @@ export const useFallbackChartData = (audits: FallbackAudit[]): ChartData => {
     const successRate = Array.from(providerStats.entries()).map(([provider, stats]) => ({
       name: provider,
       success: stats.successfulRequests,
-      failure: stats.totalRequests - stats.successfulRequests
+      failure: stats.totalRequests - stats.successfulRequests,
     }));
 
     const latency = Array.from(providerStats.entries()).map(([provider, stats]) => ({
       name: provider,
-      latency: stats.totalLatency / stats.totalRequests
+      latency: stats.totalLatency / stats.totalRequests,
     }));
 
     const cost = Array.from(providerStats.entries()).map(([provider, stats]) => ({
       name: provider,
-      cost: stats.totalCost
+      cost: stats.totalCost,
     }));
 
     const usage = Array.from(providerStats.entries()).map(([provider, stats]) => ({
       name: provider,
-      requests: stats.totalRequests
+      requests: stats.totalRequests,
     }));
 
     return {
       successRate,
       latency,
       cost,
-      usage
+      usage,
     };
   }, [audits]);
-}; 
+};

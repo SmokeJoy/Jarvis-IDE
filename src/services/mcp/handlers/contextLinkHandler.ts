@@ -1,5 +1,5 @@
-import { ContextItem } from '../types/ContextItem.js';
-import { getMemoryContexts } from '../utils/memoryUtils.js';
+import { ContextItem } from '../types/ContextItem';
+import { getMemoryContexts } from '../utils/memoryUtils';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -55,17 +55,24 @@ async function saveContextLinks(links: ContextLink[]): Promise<void> {
 }
 
 async function createLink(options: LinkOptions): Promise<ContextLink> {
-  const { sourceId, targetId, relation, bidirectional = false, strength = 0.5, metadata = {} } = options;
-  
+  const {
+    sourceId,
+    targetId,
+    relation,
+    bidirectional = false,
+    strength = 0.5,
+    metadata = {},
+  } = options;
+
   // Verifica esistenza dei contesti
   const contexts = await getMemoryContexts();
-  const sourceExists = contexts.some(ctx => ctx.id === sourceId);
-  const targetExists = contexts.some(ctx => ctx.id === targetId);
-  
+  const sourceExists = contexts.some((ctx) => ctx.id === sourceId);
+  const targetExists = contexts.some((ctx) => ctx.id === targetId);
+
   if (!sourceExists || !targetExists) {
     throw new Error(`Contesto non trovato: ${!sourceExists ? sourceId : targetId}`);
   }
-  
+
   // Crea il link
   const link: ContextLink = {
     id: uuidv4(),
@@ -76,60 +83,62 @@ async function createLink(options: LinkOptions): Promise<ContextLink> {
     strength,
     metadata: {
       ...metadata,
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    },
   };
-  
+
   // Salva il link
   const links = await getContextLinks();
   links.push(link);
-  
+
   // Se bidirezionale, crea il link inverso
   if (bidirectional) {
     const inverseLink: ContextLink = {
       ...link,
       id: uuidv4(),
       sourceId: targetId,
-      targetId: sourceId
+      targetId: sourceId,
     };
     links.push(inverseLink);
   }
-  
+
   await saveContextLinks(links);
   return link;
 }
 
-export async function contextLinkHandler(args: any): Promise<{ success: boolean; output?: any; error?: string }> {
+export async function contextLinkHandler(
+  args: any
+): Promise<{ success: boolean; output?: any; error?: string }> {
   try {
     const { sourceId, targetId, relation, bidirectional, strength, metadata } = args;
-    
+
     if (!sourceId || !targetId || !relation) {
       return {
         success: false,
-        error: "Parametri mancanti: sourceId, targetId e relation sono obbligatori"
+        error: 'Parametri mancanti: sourceId, targetId e relation sono obbligatori',
       };
     }
-    
+
     const link = await createLink({
       sourceId,
       targetId,
       relation,
       bidirectional,
       strength,
-      metadata
+      metadata,
     });
-    
+
     return {
       success: true,
       output: {
         link,
-        bidirectional
-      }
+        bidirectional,
+      },
     };
   } catch (error) {
     return {
       success: false,
-      error: `Errore durante la creazione del link: ${error instanceof Error ? error.message : String(error)}`
+      error: `Errore durante la creazione del link: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
-} 
+}

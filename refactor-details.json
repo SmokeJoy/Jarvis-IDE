@@ -1,0 +1,2921 @@
+{
+  "lastUpdated": "2025-04-12T13:42:38.152Z",
+  "totalAnyCount": 173,
+  "totalJsImports": 0,
+  "files": [
+    {
+      "path": "E:\\cline-main\\src\\shared\\validators\\__tests__\\modelValidator.test.ts",
+      "anyCount": 24,
+      "jsImports": 0,
+      "priority": "high",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 38,
+          "column": 36,
+          "text": "as any",
+          "context": "expect(isValidProviderId(123 as any)).toBe(false);"
+        },
+        {
+          "line": 39,
+          "column": 37,
+          "text": "as any",
+          "context": "expect(isValidProviderId(null as any)).toBe(false);"
+        },
+        {
+          "line": 40,
+          "column": 42,
+          "text": "as any",
+          "context": "expect(isValidProviderId(undefined as any)).toBe(false);"
+        },
+        {
+          "line": 77,
+          "column": 57,
+          "text": "as any",
+          "context": "expect(isModelInfoBase({ ...validModel, id: 123 } as any)).toBe(false);"
+        },
+        {
+          "line": 78,
+          "column": 59,
+          "text": "as any",
+          "context": "expect(isModelInfoBase({ ...validModel, name: 123 } as any)).toBe(false);"
+        },
+        {
+          "line": 79,
+          "column": 63,
+          "text": "as any",
+          "context": "expect(isModelInfoBase({ ...validModel, provider: 123 } as any)).toBe(false);"
+        },
+        {
+          "line": 80,
+          "column": 71,
+          "text": "as any",
+          "context": "expect(isModelInfoBase({ ...validModel, contextLength: '4000' } as any)).toBe(false);"
+        },
+        {
+          "line": 84,
+          "column": 69,
+          "text": "as any",
+          "context": "expect(isModelInfoBase({ ...validModel, provider: 'invalid' } as any)).toBe(false);"
+        },
+        {
+          "line": 146,
+          "column": 71,
+          "text": "as any",
+          "context": "expect(isModelInfoStandard({ ...validModel, maxTokens: '4000' } as any)).toBe(false);"
+        },
+        {
+          "line": 147,
+          "column": 70,
+          "text": "as any",
+          "context": "expect(isModelInfoStandard({ ...validModel, description: 123 } as any)).toBe(false);"
+        },
+        {
+          "line": 148,
+          "column": 70,
+          "text": "as any",
+          "context": "expect(isModelInfoStandard({ ...validModel, supported: 'yes' } as any)).toBe(false);"
+        },
+        {
+          "line": 153,
+          "column": 49,
+          "text": "as any",
+          "context": "expect(isModelInfoStandard({ id: 'test' } as any)).toBe(false);"
+        },
+        {
+          "line": 246,
+          "column": 66,
+          "text": "as any",
+          "context": "expect(isModelInfo({ ...validModel, pricing: 'expensive' } as any)).toBe(false);"
+        },
+        {
+          "line": 247,
+          "column": 74,
+          "text": "as any",
+          "context": "expect(isModelInfo({ ...validModel, pricing: { prompt: '0.001' } } as any)).toBe(false);"
+        },
+        {
+          "line": 248,
+          "column": 78,
+          "text": "as any",
+          "context": "expect(isModelInfo({ ...validModel, pricing: { completion: '0.002' } } as any)).toBe(false);"
+        },
+        {
+          "line": 249,
+          "column": 74,
+          "text": "as any",
+          "context": "expect(isModelInfo({ ...validModel, pricing: { unit: 'invalid' } } as any)).toBe(false);"
+        },
+        {
+          "line": 253,
+          "column": 63,
+          "text": "as any",
+          "context": "expect(isModelInfo({ ...validModel, supporting: 'yes' } as any)).toBe(false);"
+        },
+        {
+          "line": 254,
+          "column": 75,
+          "text": "as any",
+          "context": "expect(isModelInfo({ ...validModel, supporting: { images: 'yes' } } as any)).toBe(false);"
+        },
+        {
+          "line": 255,
+          "column": 72,
+          "text": "as any",
+          "context": "expect(isModelInfo({ ...validModel, supporting: { json: 'no' } } as any)).toBe(false);"
+        },
+        {
+          "line": 256,
+          "column": 80,
+          "text": "as any",
+          "context": "expect(isModelInfo({ ...validModel, supporting: { functions: 'maybe' } } as any)).toBe(false);"
+        },
+        {
+          "line": 257,
+          "column": 75,
+          "text": "as any",
+          "context": "expect(isModelInfo({ ...validModel, supporting: { vision: 'yes' } } as any)).toBe(false);"
+        },
+        {
+          "line": 276,
+          "column": 65,
+          "text": "as any",
+          "context": "expect(isAnthropicModelInfo({ ...validModel, version: 3 } as any)).toBe(false);"
+        },
+        {
+          "line": 277,
+          "column": 78,
+          "text": "as any",
+          "context": "expect(isAnthropicModelInfo({ ...validModel, supportsJsonMode: 'yes' } as any)).toBe(false);"
+        },
+        {
+          "line": 278,
+          "column": 75,
+          "text": "as any",
+          "context": "expect(isAnthropicModelInfo({ ...validModel, supportsVision: 'no' } as any)).toBe(false);"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\test\\shell.test.ts",
+      "anyCount": 19,
+      "jsImports": 0,
+      "priority": "high",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 30,
+          "column": 10,
+          "text": "as any",
+          "context": "}) as any;"
+        },
+        {
+          "line": 45,
+          "column": 15,
+          "text": "as any",
+          "context": "(userInfo as any) = () => ({ shell: null });"
+        },
+        {
+          "line": 53,
+          "column": 15,
+          "text": "as any",
+          "context": "(userInfo as any) = originalUserInfo;"
+        },
+        {
+          "line": 112,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 113,
+          "column": 17,
+          "text": "as any",
+          "context": "(userInfo as any) = () => ({ shell: 'C:\\\\Custom\\\\PowerShell.exe' });"
+        },
+        {
+          "line": 119,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 142,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 143,
+          "column": 17,
+          "text": "as any",
+          "context": "(userInfo as any) = () => ({ shell: '/opt/homebrew/bin/zsh' });"
+        },
+        {
+          "line": 149,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 156,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 178,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 179,
+          "column": 17,
+          "text": "as any",
+          "context": "(userInfo as any) = () => ({ shell: '/usr/bin/zsh' });"
+        },
+        {
+          "line": 185,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 192,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 204,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 214,
+          "column": 17,
+          "text": "as any",
+          "context": "(userInfo as any) = () => ({ shell: '/bin/bash' });"
+        },
+        {
+          "line": 221,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 222,
+          "column": 17,
+          "text": "as any",
+          "context": "(userInfo as any) = () => {"
+        },
+        {
+          "line": 235,
+          "column": 17,
+          "text": "as any",
+          "context": "(userInfo as any) = () => {"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\core\\webview\\__tests__\\JarvisProvider.test.ts",
+      "anyCount": 18,
+      "jsImports": 0,
+      "priority": "high",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 71,
+          "column": 7,
+          "text": "as any",
+          "context": "} as any; // Usa 'as any' solo per il mock"
+        },
+        {
+          "line": 71,
+          "column": 23,
+          "text": "as any",
+          "context": "} as any; // Usa 'as any' solo per il mock"
+        },
+        {
+          "line": 108,
+          "column": 48,
+          "text": "as any",
+          "context": "const handleErrorSpy = vi.spyOn(provider as any, 'handleError');"
+        },
+        {
+          "line": 136,
+          "column": 52,
+          "text": "as any",
+          "context": "const handleLogUpdateSpy = vi.spyOn(provider as any, 'handleLogUpdate');"
+        },
+        {
+          "line": 149,
+          "column": 48,
+          "text": "as any",
+          "context": "const handleErrorSpy = vi.spyOn(provider as any, 'handleError');"
+        },
+        {
+          "line": 161,
+          "column": 47,
+          "text": "as any",
+          "context": "const handleInfoSpy = vi.spyOn(provider as any, 'handleInfo');"
+        },
+        {
+          "line": 172,
+          "column": 54,
+          "text": "as any",
+          "context": "const handleModelUpdateSpy = vi.spyOn(provider as any, 'handleModelUpdate');"
+        },
+        {
+          "line": 187,
+          "column": 57,
+          "text": "as any",
+          "context": "const handleSettingsUpdateSpy = vi.spyOn(provider as any, 'handleSettingsUpdate');"
+        },
+        {
+          "line": 198,
+          "column": 53,
+          "text": "as any",
+          "context": "const handleChatUpdateSpy = vi.spyOn(provider as any, 'handleChatUpdate');"
+        },
+        {
+          "line": 220,
+          "column": 17,
+          "text": "as any",
+          "context": "(provider as any).handleLogUpdate(message);"
+        },
+        {
+          "line": 232,
+          "column": 17,
+          "text": "as any",
+          "context": "(provider as any).handleError(message);"
+        },
+        {
+          "line": 244,
+          "column": 17,
+          "text": "as any",
+          "context": "(provider as any).handleInfo(message);"
+        },
+        {
+          "line": 254,
+          "column": 17,
+          "text": "as any",
+          "context": "(provider as any).handleInfo(message);"
+        },
+        {
+          "line": 261,
+          "column": 17,
+          "text": "as any",
+          "context": "(provider as any).handleInfo(message);"
+        },
+        {
+          "line": 272,
+          "column": 17,
+          "text": "as any",
+          "context": "(provider as any).postMessageToWebview(message);"
+        },
+        {
+          "line": 289,
+          "column": 17,
+          "text": "as any",
+          "context": "(provider as any).postMessageToWebview(message);"
+        },
+        {
+          "line": 305,
+          "column": 36,
+          "text": "as any",
+          "context": "provider.webview = undefined as any;"
+        },
+        {
+          "line": 308,
+          "column": 17,
+          "text": "as any",
+          "context": "(provider as any).postMessageToWebview(message);"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\shared\\__tests__\\validators.more.test.ts",
+      "anyCount": 12,
+      "jsImports": 0,
+      "priority": "high",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 48,
+          "column": 76,
+          "text": "as any",
+          "context": "expect(() => validators.validateChatMessageArrayOrThrow(invalidArray as any)).toThrow();"
+        },
+        {
+          "line": 52,
+          "column": 78,
+          "text": "as any",
+          "context": "expect(() => validators.validateChatMessageArrayOrThrow('non un array' as any)).toThrow();"
+        },
+        {
+          "line": 53,
+          "column": 66,
+          "text": "as any",
+          "context": "expect(() => validators.validateChatMessageArrayOrThrow({} as any)).toThrow();"
+        },
+        {
+          "line": 54,
+          "column": 68,
+          "text": "as any",
+          "context": "expect(() => validators.validateChatMessageArrayOrThrow(null as any)).toThrow();"
+        },
+        {
+          "line": 84,
+          "column": 62,
+          "text": "as any",
+          "context": "expect(() => validators.validateChatSettingsOrThrow({} as any)).toThrow();"
+        },
+        {
+          "line": 85,
+          "column": 80,
+          "text": "as any",
+          "context": "expect(() => validators.validateChatSettingsOrThrow({ temperature: 0.7 } as any)).toThrow();"
+        },
+        {
+          "line": 86,
+          "column": 64,
+          "text": "as any",
+          "context": "expect(() => validators.validateChatSettingsOrThrow(null as any)).toThrow();"
+        },
+        {
+          "line": 102,
+          "column": 66,
+          "text": "as any",
+          "context": "expect(() => validators.validateApiConfigurationOrThrow({} as any)).toThrow();"
+        },
+        {
+          "line": 104,
+          "column": 73,
+          "text": "as any",
+          "context": "validators.validateApiConfigurationOrThrow({ apiKey: 'sk-xxx' } as any)"
+        },
+        {
+          "line": 106,
+          "column": 68,
+          "text": "as any",
+          "context": "expect(() => validators.validateApiConfigurationOrThrow(null as any)).toThrow();"
+        },
+        {
+          "line": 111,
+          "column": 73,
+          "text": "as any",
+          "context": "validators.validateApiConfigurationOrThrow({ apiKey: 'sk-xxx' } as any);"
+        },
+        {
+          "line": 157,
+          "column": 64,
+          "text": "as any",
+          "context": "expect(() => validators.isValidChatMessage(nestedMessage as any)).not.toThrow();"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\mas\\core\\__tests__\\MASOrchestrator.test.ts",
+      "anyCount": 12,
+      "jsImports": 0,
+      "priority": "high",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 195,
+          "column": 19,
+          "text": "as any",
+          "context": "(orchestrator as any).providers = providers;"
+        },
+        {
+          "line": 196,
+          "column": 19,
+          "text": "as any",
+          "context": "(orchestrator as any).fallbackHandler = {"
+        },
+        {
+          "line": 206,
+          "column": 27,
+          "text": "as any",
+          "context": "(orchestrator as any).fallbackHandler.lastSuccessfulProvider = provider;"
+        },
+        {
+          "line": 443,
+          "column": 37,
+          "text": "as any",
+          "context": "const providers = (orchestrator as any).providers;"
+        },
+        {
+          "line": 460,
+          "column": 26,
+          "text": "as any",
+          "context": "expect((orchestrator as any).fallbackHandler.lastSuccessfulProvider).toBe(providers[1]);"
+        },
+        {
+          "line": 477,
+          "column": 37,
+          "text": "as any",
+          "context": "const providers = (orchestrator as any).providers;"
+        },
+        {
+          "line": 525,
+          "column": 19,
+          "text": "as any",
+          "context": "(orchestrator as any).providers = providers;"
+        },
+        {
+          "line": 528,
+          "column": 19,
+          "text": "as any",
+          "context": "(orchestrator as any).fallbackHandler = {"
+        },
+        {
+          "line": 532,
+          "column": 27,
+          "text": "as any",
+          "context": "if ((orchestrator as any).fallbackHandler.lastSuccessfulProvider) {"
+        },
+        {
+          "line": 535,
+          "column": 29,
+          "text": "as any",
+          "context": "(orchestrator as any).fallbackHandler.lastSuccessfulProvider"
+        },
+        {
+          "line": 550,
+          "column": 27,
+          "text": "as any",
+          "context": "(orchestrator as any).fallbackHandler.lastSuccessfulProvider = provider;"
+        },
+        {
+          "line": 567,
+          "column": 26,
+          "text": "as any",
+          "context": "expect((orchestrator as any).fallbackHandler.lastSuccessfulProvider).toBe(providers[1]);"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\shared\\types\\convertToWebviewMessage.test.ts",
+      "anyCount": 10,
+      "jsImports": 0,
+      "priority": "medium",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 10,
+          "column": 41,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage(null as any)).toBeNull();"
+        },
+        {
+          "line": 14,
+          "column": 46,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage(undefined as any)).toBeNull();"
+        },
+        {
+          "line": 18,
+          "column": 39,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage({} as any)).toBeNull();"
+        },
+        {
+          "line": 22,
+          "column": 45,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage('string' as any)).toBeNull();"
+        },
+        {
+          "line": 23,
+          "column": 40,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage(123 as any)).toBeNull();"
+        },
+        {
+          "line": 24,
+          "column": 41,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage(true as any)).toBeNull();"
+        },
+        {
+          "line": 28,
+          "column": 50,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage({ type: 123 } as any)).toBeNull();"
+        },
+        {
+          "line": 29,
+          "column": 49,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage({ type: {} } as any)).toBeNull();"
+        },
+        {
+          "line": 30,
+          "column": 51,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage({ type: true } as any)).toBeNull();"
+        },
+        {
+          "line": 106,
+          "column": 21,
+          "text": "as any",
+          "context": "payload: null as any,"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\services\\mcp\\handlers\\__tests__\\contextGraphExportHandler.test.ts",
+      "anyCount": 6,
+      "jsImports": 0,
+      "priority": "medium",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 73,
+          "column": 24,
+          "text": "as any",
+          "context": "(getMemoryContexts as any).mockResolvedValue(mockContexts);"
+        },
+        {
+          "line": 74,
+          "column": 15,
+          "text": "as any",
+          "context": "(readFile as any).mockResolvedValue(JSON.stringify(mockLinks));"
+        },
+        {
+          "line": 79,
+          "column": 57,
+          "text": "as any",
+          "context": "const result = await contextGraphExportHandler({} as any);"
+        },
+        {
+          "line": 87,
+          "column": 27,
+          "text": "as any",
+          "context": "format: 'invalid' as any,"
+        },
+        {
+          "line": 218,
+          "column": 17,
+          "text": "as any",
+          "context": "(readFile as any).mockRejectedValue(new Error('File not found'));"
+        },
+        {
+          "line": 227,
+          "column": 26,
+          "text": "as any",
+          "context": "(getMemoryContexts as any).mockResolvedValue([]);"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\api\\providers\\config\\deepseek-config.test.ts",
+      "anyCount": 4,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 66,
+          "column": 77,
+          "text": "as any",
+          "context": "const config1 = buildDeepSeekConfig('deepseek-chat', { maxTokens: NaN } as any);"
+        },
+        {
+          "line": 69,
+          "column": 80,
+          "text": "as any",
+          "context": "const config2 = buildDeepSeekConfig('deepseek-chat', { maxTokens: '1024' } as any);"
+        },
+        {
+          "line": 84,
+          "column": 7,
+          "text": "as any",
+          "context": "} as any;"
+        },
+        {
+          "line": 96,
+          "column": 7,
+          "text": "as any",
+          "context": "} as any;"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\services\\mcp\\handlers\\__tests__\\contextTagHandler.test.ts",
+      "anyCount": 4,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 31,
+          "column": 31,
+          "text": "as any",
+          "context": "(memoryUtils.getAllMemory as any).mockReturnValue({"
+        },
+        {
+          "line": 34,
+          "column": 34,
+          "text": "as any",
+          "context": "(memoryUtils.findContextById as any).mockReturnValue({"
+        },
+        {
+          "line": 140,
+          "column": 36,
+          "text": "as any",
+          "context": "(memoryUtils.findContextById as any).mockReturnValue(null);"
+        },
+        {
+          "line": 153,
+          "column": 40,
+          "text": "as any",
+          "context": "(memoryUtils.persistMemoryToDisk as any).mockRejectedValue(new Error('Disk error'));"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\services\\mcp\\handlers\\__tests__\\contextSearchByTagsHandler.test.ts",
+      "anyCount": 4,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 55,
+          "column": 31,
+          "text": "as any",
+          "context": "(memoryUtils.getAllMemory as any).mockReturnValue(mockContexts);"
+        },
+        {
+          "line": 84,
+          "column": 26,
+          "text": "as any",
+          "context": "scope: 'invalid' as any,"
+        },
+        {
+          "line": 173,
+          "column": 33,
+          "text": "as any",
+          "context": "(memoryUtils.getAllMemory as any).mockImplementation(() => {"
+        },
+        {
+          "line": 187,
+          "column": 33,
+          "text": "as any",
+          "context": "(memoryUtils.getAllMemory as any).mockReturnValue({});"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\shared\\types\\webview.types.test.ts",
+      "anyCount": 4,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 132,
+          "column": 43,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage(null as any)).toBeNull();"
+        },
+        {
+          "line": 133,
+          "column": 48,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage(undefined as any)).toBeNull();"
+        },
+        {
+          "line": 134,
+          "column": 41,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage({} as any)).toBeNull();"
+        },
+        {
+          "line": 135,
+          "column": 54,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage({ payload: {} } as any)).toBeNull();"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\shared\\validators\\__tests__\\contextValidator.test.ts",
+      "anyCount": 4,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 81,
+          "column": 30,
+          "text": "as any",
+          "context": "type: 'invalid_type' as any,"
+        },
+        {
+          "line": 142,
+          "column": 36,
+          "text": "as any",
+          "context": "expect(isValidContextId(null as any)).toBe(false);"
+        },
+        {
+          "line": 143,
+          "column": 41,
+          "text": "as any",
+          "context": "expect(isValidContextId(undefined as any)).toBe(false);"
+        },
+        {
+          "line": 192,
+          "column": 58,
+          "text": "as any",
+          "context": "const result = validateContextArray('not an array' as any);"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\mas\\core\\fallback\\__tests__\\LLMFallbackManager.test.ts",
+      "anyCount": 4,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 582,
+          "column": 80,
+          "text": "as any",
+          "context": "await fallbackManager.executeWithFallback((provider) => provider.handle({} as any));"
+        },
+        {
+          "line": 595,
+          "column": 80,
+          "text": "as any",
+          "context": "await fallbackManager.executeWithFallback((provider) => provider.handle({} as any));"
+        },
+        {
+          "line": 628,
+          "column": 80,
+          "text": "as any",
+          "context": "await fallbackManager.executeWithFallback((provider) => provider.handle({} as any));"
+        },
+        {
+          "line": 647,
+          "column": 26,
+          "text": "as any",
+          "context": "provider.handle({} as any)"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\extension.test.ts",
+      "anyCount": 4,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 78,
+          "column": 21,
+          "text": "as any",
+          "context": "(JarvisProvider as any).mockImplementation(() => mockProvider);"
+        },
+        {
+          "line": 79,
+          "column": 23,
+          "text": "as any",
+          "context": "(TelemetryService as any).mockImplementation(() => mockTelemetry);"
+        },
+        {
+          "line": 93,
+          "column": 21,
+          "text": "as any",
+          "context": "(JarvisProvider as any).mockImplementation(() => mockProvider);"
+        },
+        {
+          "line": 115,
+          "column": 27,
+          "text": "as any",
+          "context": ".find((sub) => (sub as any).dispose.name === 'onDidChangeConfiguration')"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\api\\transform\\anthropic-format.ts",
+      "anyCount": 3,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 73,
+          "column": 36,
+          "text": "as any",
+          "context": "content = (message.content as any[]).map((part) => {"
+        },
+        {
+          "line": 123,
+          "column": 79,
+          "text": "as any",
+          "context": "logger.warn(`Tipo di contenuto non supportato da Anthropic: ${(part as any).type}`);"
+        },
+        {
+          "line": 201,
+          "column": 33,
+          "text": "as any",
+          "context": "const delta = chunk.delta as any;"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\integrations\\terminal\\TerminalProcess.test.ts",
+      "anyCount": 3,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 349,
+          "column": 32,
+          "text": "as any",
+          "context": "const processAny = process as any;"
+        },
+        {
+          "line": 359,
+          "column": 32,
+          "text": "as any",
+          "context": "const processAny = process as any;"
+        },
+        {
+          "line": 368,
+          "column": 32,
+          "text": "as any",
+          "context": "const processAny = process as any;"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\webview\\handlers\\__tests__\\WebviewMessageHandler.test.ts",
+      "anyCount": 3,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 80,
+          "column": 89,
+          "text": "as any",
+          "context": "vi.mocked(vscode.workspace.onDidChangeConfiguration).mockReturnValue(mockListener as any);"
+        },
+        {
+          "line": 90,
+          "column": 89,
+          "text": "as any",
+          "context": "vi.mocked(vscode.window.onDidChangeActiveColorTheme).mockReturnValue(mockListener as any);"
+        },
+        {
+          "line": 312,
+          "column": 44,
+          "text": "as any",
+          "context": "handler.handleMessage(invalidMessage as any);"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\api\\providers\\qwen.ts",
+      "anyCount": 2,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 250,
+          "column": 35,
+          "text": "as any",
+          "context": "cacheReadTokens: (usage as any).prompt_cache_hit_tokens || 0,"
+        },
+        {
+          "line": 251,
+          "column": 36,
+          "text": "as any",
+          "context": "cacheWriteTokens: (usage as any).prompt_cache_miss_tokens || 0,"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\api\\providers\\deepseek.test.ts",
+      "anyCount": 2,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 64,
+          "column": 5,
+          "text": "as any",
+          "context": "} as any);"
+        },
+        {
+          "line": 147,
+          "column": 24,
+          "text": "as any",
+          "context": "expect((usageChunk as any).totalCost).to.be.greaterThan(0);"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\api\\transform\\r1-format.ts",
+      "anyCount": 2,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 103,
+          "column": 26,
+          "text": "as any",
+          "context": "(lastMessage as any).content = [...lastContent, ...newContent];"
+        },
+        {
+          "line": 106,
+          "column": 34,
+          "text": "as any",
+          "context": "(lastMessage.content as any[]).push(...newContent);"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\integrations\\misc\\export-markdown.ts",
+      "anyCount": 2,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 33,
+          "column": 77,
+          "text": "as any",
+          "context": "? message.content.map((block) => formatContentBlockToMarkdown(block as any)).join('\\n')"
+        },
+        {
+          "line": 85,
+          "column": 21,
+          "text": "as any",
+          "context": "} else if ((block as any).type === 'document') {"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\integrations\\refactor\\RefactorOverlayProvider.ts",
+      "anyCount": 2,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 384,
+          "column": 42,
+          "text": "as any",
+          "context": "// Cerca le occorrenze di \": any\" e \"as any\" nel documento"
+        },
+        {
+          "line": 386,
+          "column": 29,
+          "text": "as any",
+          "context": "const anyRegex = /: any|as any/g;"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\services\\mcp\\handlers\\__tests__\\contextNavigateHandler.test.ts",
+      "anyCount": 2,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 100,
+          "column": 25,
+          "text": "as any",
+          "context": "mode: 'invalid' as any,"
+        },
+        {
+          "line": 109,
+          "column": 27,
+          "text": "as any",
+          "context": "format: 'invalid' as any,"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\utils\\logger.ts",
+      "anyCount": 2,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 73,
+          "column": 7,
+          "text": "as any",
+          "context": "} as any);"
+        },
+        {
+          "line": 152,
+          "column": 35,
+          "text": "as any",
+          "context": "const fileModule = module as any;"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\webview-ui\\providers\\settingsProvider.test.tsx",
+      "anyCount": 2,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 7,
+          "column": 9,
+          "text": "as any",
+          "context": "(global as any).acquireVsCodeApi = () => ({"
+        },
+        {
+          "line": 60,
+          "column": 13,
+          "text": "as any",
+          "context": "(global as any).acquireVsCodeApi = () => ({"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\api\\providers\\bedrock.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 767,
+          "column": 77,
+          "text": "as any",
+          "context": "imageData = new Uint8Array(Buffer.from(item.source.data as any));"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\integrations\\misc\\link-preview.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 28,
+          "column": 42,
+          "text": "as any",
+          "context": "const { result } = await ogs(options as any);"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\integrations\\theme\\getTheme.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 98,
+          "column": 7,
+          "text": "as any",
+          "context": ") as any;"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\services\\mcp\\handlers\\contextGraphExportHandler.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 272,
+          "column": 18,
+          "text": "as any",
+          "context": "'@graph': [] as any[],"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\services\\mcp\\handlers\\configLinter.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 204,
+          "column": 47,
+          "text": "as any",
+          "context": "const configPath = args.configPath || (args as any).filePath;"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\services\\mcp\\handlers\\configLinter.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 267,
+          "column": 44,
+          "text": "as any",
+          "context": "const result = await configLinter(args as any);"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\services\\mcp\\__tests__\\mcpDispatcher.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 43,
+          "column": 57,
+          "text": "as any",
+          "context": "const result = await mcpDispatcher(malformedRequest as any);"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\services\\mcp\\McpHub.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 147,
+          "column": 15,
+          "text": "as any",
+          "context": "(server as any).timeout = timeout; // Using type assertion since timeout is not in McpServer type"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\shared\\__tests__\\modelValidator.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 323,
+          "column": 56,
+          "text": "as any",
+          "context": "const result = validateModelInfoArray(notAnArray as any, 'TestProvider');"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\test\\suite\\fileOperations.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 19,
+          "column": 7,
+          "text": "as any",
+          "context": "} as any;"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\test\\extension.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 123,
+          "column": 7,
+          "text": "as any",
+          "context": "} as any;"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\test\\fileOperations.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 19,
+          "column": 7,
+          "text": "as any",
+          "context": "} as any;"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\utils\\exporters\\csv.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 115,
+          "column": 33,
+          "text": "as any",
+          "context": "let value = message as any;"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\webview\\webview.test.tsx",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 23,
+          "column": 11,
+          "text": "as any",
+          "context": "(global as any).acquireVsCodeApi = vi.fn(() => vscodeApi);"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\webview\\SettingsView.test.tsx",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 7,
+          "column": 9,
+          "text": "as any",
+          "context": "(global as any).acquireVsCodeApi = () => ({"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\data\\__tests__\\modelLoader.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 111,
+          "column": 35,
+          "text": "as any",
+          "context": "contextLength: '100000' as any,"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\providers\\__tests__\\provider-registry.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 83,
+          "column": 53,
+          "text": "as any",
+          "context": "registerProvider('invalid', invalidProvider as any);"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\mas\\core\\fallback\\strategies\\__tests__\\AdaptiveFallbackStrategy.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 65,
+          "column": 7,
+          "text": "as any",
+          "context": "} as any;"
+        }
+      ]
+    },
+    {
+      "path": "E:\\cline-main\\src\\mas\\agent\\__tests__\\mas-dispatcher.toggle.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 26,
+          "column": 71,
+          "text": "as any",
+          "context": "dispatcher = new MasDispatcher({ memoryManager: mockMemoryManager as any });"
+        }
+      ]
+    }
+  ],
+  "filesWithDetails": [
+    {
+      "path": "E:\\cline-main\\src\\shared\\validators\\__tests__\\modelValidator.test.ts",
+      "anyCount": 24,
+      "jsImports": 0,
+      "priority": "high",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 38,
+          "column": 36,
+          "text": "as any",
+          "context": "expect(isValidProviderId(123 as any)).toBe(false);"
+        },
+        {
+          "line": 39,
+          "column": 37,
+          "text": "as any",
+          "context": "expect(isValidProviderId(null as any)).toBe(false);"
+        },
+        {
+          "line": 40,
+          "column": 42,
+          "text": "as any",
+          "context": "expect(isValidProviderId(undefined as any)).toBe(false);"
+        },
+        {
+          "line": 77,
+          "column": 57,
+          "text": "as any",
+          "context": "expect(isModelInfoBase({ ...validModel, id: 123 } as any)).toBe(false);"
+        },
+        {
+          "line": 78,
+          "column": 59,
+          "text": "as any",
+          "context": "expect(isModelInfoBase({ ...validModel, name: 123 } as any)).toBe(false);"
+        },
+        {
+          "line": 79,
+          "column": 63,
+          "text": "as any",
+          "context": "expect(isModelInfoBase({ ...validModel, provider: 123 } as any)).toBe(false);"
+        },
+        {
+          "line": 80,
+          "column": 71,
+          "text": "as any",
+          "context": "expect(isModelInfoBase({ ...validModel, contextLength: '4000' } as any)).toBe(false);"
+        },
+        {
+          "line": 84,
+          "column": 69,
+          "text": "as any",
+          "context": "expect(isModelInfoBase({ ...validModel, provider: 'invalid' } as any)).toBe(false);"
+        },
+        {
+          "line": 146,
+          "column": 71,
+          "text": "as any",
+          "context": "expect(isModelInfoStandard({ ...validModel, maxTokens: '4000' } as any)).toBe(false);"
+        },
+        {
+          "line": 147,
+          "column": 70,
+          "text": "as any",
+          "context": "expect(isModelInfoStandard({ ...validModel, description: 123 } as any)).toBe(false);"
+        },
+        {
+          "line": 148,
+          "column": 70,
+          "text": "as any",
+          "context": "expect(isModelInfoStandard({ ...validModel, supported: 'yes' } as any)).toBe(false);"
+        },
+        {
+          "line": 153,
+          "column": 49,
+          "text": "as any",
+          "context": "expect(isModelInfoStandard({ id: 'test' } as any)).toBe(false);"
+        },
+        {
+          "line": 246,
+          "column": 66,
+          "text": "as any",
+          "context": "expect(isModelInfo({ ...validModel, pricing: 'expensive' } as any)).toBe(false);"
+        },
+        {
+          "line": 247,
+          "column": 74,
+          "text": "as any",
+          "context": "expect(isModelInfo({ ...validModel, pricing: { prompt: '0.001' } } as any)).toBe(false);"
+        },
+        {
+          "line": 248,
+          "column": 78,
+          "text": "as any",
+          "context": "expect(isModelInfo({ ...validModel, pricing: { completion: '0.002' } } as any)).toBe(false);"
+        },
+        {
+          "line": 249,
+          "column": 74,
+          "text": "as any",
+          "context": "expect(isModelInfo({ ...validModel, pricing: { unit: 'invalid' } } as any)).toBe(false);"
+        },
+        {
+          "line": 253,
+          "column": 63,
+          "text": "as any",
+          "context": "expect(isModelInfo({ ...validModel, supporting: 'yes' } as any)).toBe(false);"
+        },
+        {
+          "line": 254,
+          "column": 75,
+          "text": "as any",
+          "context": "expect(isModelInfo({ ...validModel, supporting: { images: 'yes' } } as any)).toBe(false);"
+        },
+        {
+          "line": 255,
+          "column": 72,
+          "text": "as any",
+          "context": "expect(isModelInfo({ ...validModel, supporting: { json: 'no' } } as any)).toBe(false);"
+        },
+        {
+          "line": 256,
+          "column": 80,
+          "text": "as any",
+          "context": "expect(isModelInfo({ ...validModel, supporting: { functions: 'maybe' } } as any)).toBe(false);"
+        },
+        {
+          "line": 257,
+          "column": 75,
+          "text": "as any",
+          "context": "expect(isModelInfo({ ...validModel, supporting: { vision: 'yes' } } as any)).toBe(false);"
+        },
+        {
+          "line": 276,
+          "column": 65,
+          "text": "as any",
+          "context": "expect(isAnthropicModelInfo({ ...validModel, version: 3 } as any)).toBe(false);"
+        },
+        {
+          "line": 277,
+          "column": 78,
+          "text": "as any",
+          "context": "expect(isAnthropicModelInfo({ ...validModel, supportsJsonMode: 'yes' } as any)).toBe(false);"
+        },
+        {
+          "line": 278,
+          "column": 75,
+          "text": "as any",
+          "context": "expect(isAnthropicModelInfo({ ...validModel, supportsVision: 'no' } as any)).toBe(false);"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\test\\shell.test.ts",
+      "anyCount": 19,
+      "jsImports": 0,
+      "priority": "high",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 30,
+          "column": 10,
+          "text": "as any",
+          "context": "}) as any;"
+        },
+        {
+          "line": 45,
+          "column": 15,
+          "text": "as any",
+          "context": "(userInfo as any) = () => ({ shell: null });"
+        },
+        {
+          "line": 53,
+          "column": 15,
+          "text": "as any",
+          "context": "(userInfo as any) = originalUserInfo;"
+        },
+        {
+          "line": 112,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 113,
+          "column": 17,
+          "text": "as any",
+          "context": "(userInfo as any) = () => ({ shell: 'C:\\\\Custom\\\\PowerShell.exe' });"
+        },
+        {
+          "line": 119,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 142,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 143,
+          "column": 17,
+          "text": "as any",
+          "context": "(userInfo as any) = () => ({ shell: '/opt/homebrew/bin/zsh' });"
+        },
+        {
+          "line": 149,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 156,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 178,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 179,
+          "column": 17,
+          "text": "as any",
+          "context": "(userInfo as any) = () => ({ shell: '/usr/bin/zsh' });"
+        },
+        {
+          "line": 185,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 192,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 204,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 214,
+          "column": 17,
+          "text": "as any",
+          "context": "(userInfo as any) = () => ({ shell: '/bin/bash' });"
+        },
+        {
+          "line": 221,
+          "column": 76,
+          "text": "as any",
+          "context": "vscode.workspace.getConfiguration = () => ({ get: () => undefined }) as any;"
+        },
+        {
+          "line": 222,
+          "column": 17,
+          "text": "as any",
+          "context": "(userInfo as any) = () => {"
+        },
+        {
+          "line": 235,
+          "column": 17,
+          "text": "as any",
+          "context": "(userInfo as any) = () => {"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\core\\webview\\__tests__\\JarvisProvider.test.ts",
+      "anyCount": 18,
+      "jsImports": 0,
+      "priority": "high",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 71,
+          "column": 7,
+          "text": "as any",
+          "context": "} as any; // Usa 'as any' solo per il mock"
+        },
+        {
+          "line": 71,
+          "column": 23,
+          "text": "as any",
+          "context": "} as any; // Usa 'as any' solo per il mock"
+        },
+        {
+          "line": 108,
+          "column": 48,
+          "text": "as any",
+          "context": "const handleErrorSpy = vi.spyOn(provider as any, 'handleError');"
+        },
+        {
+          "line": 136,
+          "column": 52,
+          "text": "as any",
+          "context": "const handleLogUpdateSpy = vi.spyOn(provider as any, 'handleLogUpdate');"
+        },
+        {
+          "line": 149,
+          "column": 48,
+          "text": "as any",
+          "context": "const handleErrorSpy = vi.spyOn(provider as any, 'handleError');"
+        },
+        {
+          "line": 161,
+          "column": 47,
+          "text": "as any",
+          "context": "const handleInfoSpy = vi.spyOn(provider as any, 'handleInfo');"
+        },
+        {
+          "line": 172,
+          "column": 54,
+          "text": "as any",
+          "context": "const handleModelUpdateSpy = vi.spyOn(provider as any, 'handleModelUpdate');"
+        },
+        {
+          "line": 187,
+          "column": 57,
+          "text": "as any",
+          "context": "const handleSettingsUpdateSpy = vi.spyOn(provider as any, 'handleSettingsUpdate');"
+        },
+        {
+          "line": 198,
+          "column": 53,
+          "text": "as any",
+          "context": "const handleChatUpdateSpy = vi.spyOn(provider as any, 'handleChatUpdate');"
+        },
+        {
+          "line": 220,
+          "column": 17,
+          "text": "as any",
+          "context": "(provider as any).handleLogUpdate(message);"
+        },
+        {
+          "line": 232,
+          "column": 17,
+          "text": "as any",
+          "context": "(provider as any).handleError(message);"
+        },
+        {
+          "line": 244,
+          "column": 17,
+          "text": "as any",
+          "context": "(provider as any).handleInfo(message);"
+        },
+        {
+          "line": 254,
+          "column": 17,
+          "text": "as any",
+          "context": "(provider as any).handleInfo(message);"
+        },
+        {
+          "line": 261,
+          "column": 17,
+          "text": "as any",
+          "context": "(provider as any).handleInfo(message);"
+        },
+        {
+          "line": 272,
+          "column": 17,
+          "text": "as any",
+          "context": "(provider as any).postMessageToWebview(message);"
+        },
+        {
+          "line": 289,
+          "column": 17,
+          "text": "as any",
+          "context": "(provider as any).postMessageToWebview(message);"
+        },
+        {
+          "line": 305,
+          "column": 36,
+          "text": "as any",
+          "context": "provider.webview = undefined as any;"
+        },
+        {
+          "line": 308,
+          "column": 17,
+          "text": "as any",
+          "context": "(provider as any).postMessageToWebview(message);"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\shared\\__tests__\\validators.more.test.ts",
+      "anyCount": 12,
+      "jsImports": 0,
+      "priority": "high",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 48,
+          "column": 76,
+          "text": "as any",
+          "context": "expect(() => validators.validateChatMessageArrayOrThrow(invalidArray as any)).toThrow();"
+        },
+        {
+          "line": 52,
+          "column": 78,
+          "text": "as any",
+          "context": "expect(() => validators.validateChatMessageArrayOrThrow('non un array' as any)).toThrow();"
+        },
+        {
+          "line": 53,
+          "column": 66,
+          "text": "as any",
+          "context": "expect(() => validators.validateChatMessageArrayOrThrow({} as any)).toThrow();"
+        },
+        {
+          "line": 54,
+          "column": 68,
+          "text": "as any",
+          "context": "expect(() => validators.validateChatMessageArrayOrThrow(null as any)).toThrow();"
+        },
+        {
+          "line": 84,
+          "column": 62,
+          "text": "as any",
+          "context": "expect(() => validators.validateChatSettingsOrThrow({} as any)).toThrow();"
+        },
+        {
+          "line": 85,
+          "column": 80,
+          "text": "as any",
+          "context": "expect(() => validators.validateChatSettingsOrThrow({ temperature: 0.7 } as any)).toThrow();"
+        },
+        {
+          "line": 86,
+          "column": 64,
+          "text": "as any",
+          "context": "expect(() => validators.validateChatSettingsOrThrow(null as any)).toThrow();"
+        },
+        {
+          "line": 102,
+          "column": 66,
+          "text": "as any",
+          "context": "expect(() => validators.validateApiConfigurationOrThrow({} as any)).toThrow();"
+        },
+        {
+          "line": 104,
+          "column": 73,
+          "text": "as any",
+          "context": "validators.validateApiConfigurationOrThrow({ apiKey: 'sk-xxx' } as any)"
+        },
+        {
+          "line": 106,
+          "column": 68,
+          "text": "as any",
+          "context": "expect(() => validators.validateApiConfigurationOrThrow(null as any)).toThrow();"
+        },
+        {
+          "line": 111,
+          "column": 73,
+          "text": "as any",
+          "context": "validators.validateApiConfigurationOrThrow({ apiKey: 'sk-xxx' } as any);"
+        },
+        {
+          "line": 157,
+          "column": 64,
+          "text": "as any",
+          "context": "expect(() => validators.isValidChatMessage(nestedMessage as any)).not.toThrow();"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\mas\\core\\__tests__\\MASOrchestrator.test.ts",
+      "anyCount": 12,
+      "jsImports": 0,
+      "priority": "high",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 195,
+          "column": 19,
+          "text": "as any",
+          "context": "(orchestrator as any).providers = providers;"
+        },
+        {
+          "line": 196,
+          "column": 19,
+          "text": "as any",
+          "context": "(orchestrator as any).fallbackHandler = {"
+        },
+        {
+          "line": 206,
+          "column": 27,
+          "text": "as any",
+          "context": "(orchestrator as any).fallbackHandler.lastSuccessfulProvider = provider;"
+        },
+        {
+          "line": 443,
+          "column": 37,
+          "text": "as any",
+          "context": "const providers = (orchestrator as any).providers;"
+        },
+        {
+          "line": 460,
+          "column": 26,
+          "text": "as any",
+          "context": "expect((orchestrator as any).fallbackHandler.lastSuccessfulProvider).toBe(providers[1]);"
+        },
+        {
+          "line": 477,
+          "column": 37,
+          "text": "as any",
+          "context": "const providers = (orchestrator as any).providers;"
+        },
+        {
+          "line": 525,
+          "column": 19,
+          "text": "as any",
+          "context": "(orchestrator as any).providers = providers;"
+        },
+        {
+          "line": 528,
+          "column": 19,
+          "text": "as any",
+          "context": "(orchestrator as any).fallbackHandler = {"
+        },
+        {
+          "line": 532,
+          "column": 27,
+          "text": "as any",
+          "context": "if ((orchestrator as any).fallbackHandler.lastSuccessfulProvider) {"
+        },
+        {
+          "line": 535,
+          "column": 29,
+          "text": "as any",
+          "context": "(orchestrator as any).fallbackHandler.lastSuccessfulProvider"
+        },
+        {
+          "line": 550,
+          "column": 27,
+          "text": "as any",
+          "context": "(orchestrator as any).fallbackHandler.lastSuccessfulProvider = provider;"
+        },
+        {
+          "line": 567,
+          "column": 26,
+          "text": "as any",
+          "context": "expect((orchestrator as any).fallbackHandler.lastSuccessfulProvider).toBe(providers[1]);"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\shared\\types\\convertToWebviewMessage.test.ts",
+      "anyCount": 10,
+      "jsImports": 0,
+      "priority": "medium",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 10,
+          "column": 41,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage(null as any)).toBeNull();"
+        },
+        {
+          "line": 14,
+          "column": 46,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage(undefined as any)).toBeNull();"
+        },
+        {
+          "line": 18,
+          "column": 39,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage({} as any)).toBeNull();"
+        },
+        {
+          "line": 22,
+          "column": 45,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage('string' as any)).toBeNull();"
+        },
+        {
+          "line": 23,
+          "column": 40,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage(123 as any)).toBeNull();"
+        },
+        {
+          "line": 24,
+          "column": 41,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage(true as any)).toBeNull();"
+        },
+        {
+          "line": 28,
+          "column": 50,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage({ type: 123 } as any)).toBeNull();"
+        },
+        {
+          "line": 29,
+          "column": 49,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage({ type: {} } as any)).toBeNull();"
+        },
+        {
+          "line": 30,
+          "column": 51,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage({ type: true } as any)).toBeNull();"
+        },
+        {
+          "line": 106,
+          "column": 21,
+          "text": "as any",
+          "context": "payload: null as any,"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\services\\mcp\\handlers\\__tests__\\contextGraphExportHandler.test.ts",
+      "anyCount": 6,
+      "jsImports": 0,
+      "priority": "medium",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 73,
+          "column": 24,
+          "text": "as any",
+          "context": "(getMemoryContexts as any).mockResolvedValue(mockContexts);"
+        },
+        {
+          "line": 74,
+          "column": 15,
+          "text": "as any",
+          "context": "(readFile as any).mockResolvedValue(JSON.stringify(mockLinks));"
+        },
+        {
+          "line": 79,
+          "column": 57,
+          "text": "as any",
+          "context": "const result = await contextGraphExportHandler({} as any);"
+        },
+        {
+          "line": 87,
+          "column": 27,
+          "text": "as any",
+          "context": "format: 'invalid' as any,"
+        },
+        {
+          "line": 218,
+          "column": 17,
+          "text": "as any",
+          "context": "(readFile as any).mockRejectedValue(new Error('File not found'));"
+        },
+        {
+          "line": 227,
+          "column": 26,
+          "text": "as any",
+          "context": "(getMemoryContexts as any).mockResolvedValue([]);"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\api\\providers\\config\\deepseek-config.test.ts",
+      "anyCount": 4,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 66,
+          "column": 77,
+          "text": "as any",
+          "context": "const config1 = buildDeepSeekConfig('deepseek-chat', { maxTokens: NaN } as any);"
+        },
+        {
+          "line": 69,
+          "column": 80,
+          "text": "as any",
+          "context": "const config2 = buildDeepSeekConfig('deepseek-chat', { maxTokens: '1024' } as any);"
+        },
+        {
+          "line": 84,
+          "column": 7,
+          "text": "as any",
+          "context": "} as any;"
+        },
+        {
+          "line": 96,
+          "column": 7,
+          "text": "as any",
+          "context": "} as any;"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\services\\mcp\\handlers\\__tests__\\contextTagHandler.test.ts",
+      "anyCount": 4,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 31,
+          "column": 31,
+          "text": "as any",
+          "context": "(memoryUtils.getAllMemory as any).mockReturnValue({"
+        },
+        {
+          "line": 34,
+          "column": 34,
+          "text": "as any",
+          "context": "(memoryUtils.findContextById as any).mockReturnValue({"
+        },
+        {
+          "line": 140,
+          "column": 36,
+          "text": "as any",
+          "context": "(memoryUtils.findContextById as any).mockReturnValue(null);"
+        },
+        {
+          "line": 153,
+          "column": 40,
+          "text": "as any",
+          "context": "(memoryUtils.persistMemoryToDisk as any).mockRejectedValue(new Error('Disk error'));"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\services\\mcp\\handlers\\__tests__\\contextSearchByTagsHandler.test.ts",
+      "anyCount": 4,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 55,
+          "column": 31,
+          "text": "as any",
+          "context": "(memoryUtils.getAllMemory as any).mockReturnValue(mockContexts);"
+        },
+        {
+          "line": 84,
+          "column": 26,
+          "text": "as any",
+          "context": "scope: 'invalid' as any,"
+        },
+        {
+          "line": 173,
+          "column": 33,
+          "text": "as any",
+          "context": "(memoryUtils.getAllMemory as any).mockImplementation(() => {"
+        },
+        {
+          "line": 187,
+          "column": 33,
+          "text": "as any",
+          "context": "(memoryUtils.getAllMemory as any).mockReturnValue({});"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\shared\\types\\webview.types.test.ts",
+      "anyCount": 4,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 132,
+          "column": 43,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage(null as any)).toBeNull();"
+        },
+        {
+          "line": 133,
+          "column": 48,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage(undefined as any)).toBeNull();"
+        },
+        {
+          "line": 134,
+          "column": 41,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage({} as any)).toBeNull();"
+        },
+        {
+          "line": 135,
+          "column": 54,
+          "text": "as any",
+          "context": "expect(convertToWebviewMessage({ payload: {} } as any)).toBeNull();"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\shared\\validators\\__tests__\\contextValidator.test.ts",
+      "anyCount": 4,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 81,
+          "column": 30,
+          "text": "as any",
+          "context": "type: 'invalid_type' as any,"
+        },
+        {
+          "line": 142,
+          "column": 36,
+          "text": "as any",
+          "context": "expect(isValidContextId(null as any)).toBe(false);"
+        },
+        {
+          "line": 143,
+          "column": 41,
+          "text": "as any",
+          "context": "expect(isValidContextId(undefined as any)).toBe(false);"
+        },
+        {
+          "line": 192,
+          "column": 58,
+          "text": "as any",
+          "context": "const result = validateContextArray('not an array' as any);"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\mas\\core\\fallback\\__tests__\\LLMFallbackManager.test.ts",
+      "anyCount": 4,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 582,
+          "column": 80,
+          "text": "as any",
+          "context": "await fallbackManager.executeWithFallback((provider) => provider.handle({} as any));"
+        },
+        {
+          "line": 595,
+          "column": 80,
+          "text": "as any",
+          "context": "await fallbackManager.executeWithFallback((provider) => provider.handle({} as any));"
+        },
+        {
+          "line": 628,
+          "column": 80,
+          "text": "as any",
+          "context": "await fallbackManager.executeWithFallback((provider) => provider.handle({} as any));"
+        },
+        {
+          "line": 647,
+          "column": 26,
+          "text": "as any",
+          "context": "provider.handle({} as any)"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\extension.test.ts",
+      "anyCount": 4,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 78,
+          "column": 21,
+          "text": "as any",
+          "context": "(JarvisProvider as any).mockImplementation(() => mockProvider);"
+        },
+        {
+          "line": 79,
+          "column": 23,
+          "text": "as any",
+          "context": "(TelemetryService as any).mockImplementation(() => mockTelemetry);"
+        },
+        {
+          "line": 93,
+          "column": 21,
+          "text": "as any",
+          "context": "(JarvisProvider as any).mockImplementation(() => mockProvider);"
+        },
+        {
+          "line": 115,
+          "column": 27,
+          "text": "as any",
+          "context": ".find((sub) => (sub as any).dispose.name === 'onDidChangeConfiguration')"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\api\\transform\\anthropic-format.ts",
+      "anyCount": 3,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 73,
+          "column": 36,
+          "text": "as any",
+          "context": "content = (message.content as any[]).map((part) => {"
+        },
+        {
+          "line": 123,
+          "column": 79,
+          "text": "as any",
+          "context": "logger.warn(`Tipo di contenuto non supportato da Anthropic: ${(part as any).type}`);"
+        },
+        {
+          "line": 201,
+          "column": 33,
+          "text": "as any",
+          "context": "const delta = chunk.delta as any;"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\integrations\\terminal\\TerminalProcess.test.ts",
+      "anyCount": 3,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 349,
+          "column": 32,
+          "text": "as any",
+          "context": "const processAny = process as any;"
+        },
+        {
+          "line": 359,
+          "column": 32,
+          "text": "as any",
+          "context": "const processAny = process as any;"
+        },
+        {
+          "line": 368,
+          "column": 32,
+          "text": "as any",
+          "context": "const processAny = process as any;"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\webview\\handlers\\__tests__\\WebviewMessageHandler.test.ts",
+      "anyCount": 3,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 80,
+          "column": 89,
+          "text": "as any",
+          "context": "vi.mocked(vscode.workspace.onDidChangeConfiguration).mockReturnValue(mockListener as any);"
+        },
+        {
+          "line": 90,
+          "column": 89,
+          "text": "as any",
+          "context": "vi.mocked(vscode.window.onDidChangeActiveColorTheme).mockReturnValue(mockListener as any);"
+        },
+        {
+          "line": 312,
+          "column": 44,
+          "text": "as any",
+          "context": "handler.handleMessage(invalidMessage as any);"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\api\\providers\\qwen.ts",
+      "anyCount": 2,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 250,
+          "column": 35,
+          "text": "as any",
+          "context": "cacheReadTokens: (usage as any).prompt_cache_hit_tokens || 0,"
+        },
+        {
+          "line": 251,
+          "column": 36,
+          "text": "as any",
+          "context": "cacheWriteTokens: (usage as any).prompt_cache_miss_tokens || 0,"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\api\\providers\\deepseek.test.ts",
+      "anyCount": 2,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 64,
+          "column": 5,
+          "text": "as any",
+          "context": "} as any);"
+        },
+        {
+          "line": 147,
+          "column": 24,
+          "text": "as any",
+          "context": "expect((usageChunk as any).totalCost).to.be.greaterThan(0);"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\api\\transform\\r1-format.ts",
+      "anyCount": 2,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 103,
+          "column": 26,
+          "text": "as any",
+          "context": "(lastMessage as any).content = [...lastContent, ...newContent];"
+        },
+        {
+          "line": 106,
+          "column": 34,
+          "text": "as any",
+          "context": "(lastMessage.content as any[]).push(...newContent);"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\integrations\\misc\\export-markdown.ts",
+      "anyCount": 2,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 33,
+          "column": 77,
+          "text": "as any",
+          "context": "? message.content.map((block) => formatContentBlockToMarkdown(block as any)).join('\\n')"
+        },
+        {
+          "line": 85,
+          "column": 21,
+          "text": "as any",
+          "context": "} else if ((block as any).type === 'document') {"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\integrations\\refactor\\RefactorOverlayProvider.ts",
+      "anyCount": 2,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 384,
+          "column": 42,
+          "text": "as any",
+          "context": "// Cerca le occorrenze di \": any\" e \"as any\" nel documento"
+        },
+        {
+          "line": 386,
+          "column": 29,
+          "text": "as any",
+          "context": "const anyRegex = /: any|as any/g;"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\services\\mcp\\handlers\\__tests__\\contextNavigateHandler.test.ts",
+      "anyCount": 2,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 100,
+          "column": 25,
+          "text": "as any",
+          "context": "mode: 'invalid' as any,"
+        },
+        {
+          "line": 109,
+          "column": 27,
+          "text": "as any",
+          "context": "format: 'invalid' as any,"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\utils\\logger.ts",
+      "anyCount": 2,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 73,
+          "column": 7,
+          "text": "as any",
+          "context": "} as any);"
+        },
+        {
+          "line": 152,
+          "column": 35,
+          "text": "as any",
+          "context": "const fileModule = module as any;"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\webview-ui\\providers\\settingsProvider.test.tsx",
+      "anyCount": 2,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 7,
+          "column": 9,
+          "text": "as any",
+          "context": "(global as any).acquireVsCodeApi = () => ({"
+        },
+        {
+          "line": 60,
+          "column": 13,
+          "text": "as any",
+          "context": "(global as any).acquireVsCodeApi = () => ({"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\api\\providers\\bedrock.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 767,
+          "column": 77,
+          "text": "as any",
+          "context": "imageData = new Uint8Array(Buffer.from(item.source.data as any));"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\integrations\\misc\\link-preview.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 28,
+          "column": 42,
+          "text": "as any",
+          "context": "const { result } = await ogs(options as any);"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\integrations\\theme\\getTheme.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 98,
+          "column": 7,
+          "text": "as any",
+          "context": ") as any;"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\services\\mcp\\handlers\\contextGraphExportHandler.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 272,
+          "column": 18,
+          "text": "as any",
+          "context": "'@graph': [] as any[],"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\services\\mcp\\handlers\\configLinter.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 204,
+          "column": 47,
+          "text": "as any",
+          "context": "const configPath = args.configPath || (args as any).filePath;"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\services\\mcp\\handlers\\configLinter.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 267,
+          "column": 44,
+          "text": "as any",
+          "context": "const result = await configLinter(args as any);"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\services\\mcp\\__tests__\\mcpDispatcher.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 43,
+          "column": 57,
+          "text": "as any",
+          "context": "const result = await mcpDispatcher(malformedRequest as any);"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\services\\mcp\\McpHub.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 147,
+          "column": 15,
+          "text": "as any",
+          "context": "(server as any).timeout = timeout; // Using type assertion since timeout is not in McpServer type"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\shared\\__tests__\\modelValidator.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 323,
+          "column": 56,
+          "text": "as any",
+          "context": "const result = validateModelInfoArray(notAnArray as any, 'TestProvider');"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\test\\suite\\fileOperations.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 19,
+          "column": 7,
+          "text": "as any",
+          "context": "} as any;"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\test\\extension.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 123,
+          "column": 7,
+          "text": "as any",
+          "context": "} as any;"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\test\\fileOperations.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 19,
+          "column": 7,
+          "text": "as any",
+          "context": "} as any;"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\utils\\exporters\\csv.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 115,
+          "column": 33,
+          "text": "as any",
+          "context": "let value = message as any;"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\webview\\webview.test.tsx",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 23,
+          "column": 11,
+          "text": "as any",
+          "context": "(global as any).acquireVsCodeApi = vi.fn(() => vscodeApi);"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\webview\\SettingsView.test.tsx",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 7,
+          "column": 9,
+          "text": "as any",
+          "context": "(global as any).acquireVsCodeApi = () => ({"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\data\\__tests__\\modelLoader.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 111,
+          "column": 35,
+          "text": "as any",
+          "context": "contextLength: '100000' as any,"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\providers\\__tests__\\provider-registry.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 83,
+          "column": 53,
+          "text": "as any",
+          "context": "registerProvider('invalid', invalidProvider as any);"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\mas\\core\\fallback\\strategies\\__tests__\\AdaptiveFallbackStrategy.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 65,
+          "column": 7,
+          "text": "as any",
+          "context": "} as any;"
+        }
+      ],
+      "jsImportLocations": []
+    },
+    {
+      "path": "E:\\cline-main\\src\\mas\\agent\\__tests__\\mas-dispatcher.toggle.test.ts",
+      "anyCount": 1,
+      "jsImports": 0,
+      "priority": "low",
+      "status": "pending",
+      "anyLocations": [
+        {
+          "line": 26,
+          "column": 71,
+          "text": "as any",
+          "context": "dispatcher = new MasDispatcher({ memoryManager: mockMemoryManager as any });"
+        }
+      ],
+      "jsImportLocations": []
+    }
+  ]
+}

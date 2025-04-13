@@ -1,21 +1,26 @@
-import { McpToolHandler, McpToolResult } from "../../../shared/types/mcp.types.js";
+import { McpToolHandler, McpToolResult } from '../../../shared/types/mcp.types';
 
 /**
  * Lingue supportate e relative configurazioni per il refactoring
  */
 const SUPPORTED_LANGUAGES = [
-  "typescript", "ts", 
-  "javascript", "js", 
-  "python", "py", 
-  "java", 
-  "csharp", "cs", 
-  "c++", "cpp",
-  "go",
-  "rust", 
-  "php",
-  "ruby", 
-  "swift",
-  "kotlin"
+  'typescript',
+  'ts',
+  'javascript',
+  'js',
+  'python',
+  'py',
+  'java',
+  'csharp',
+  'cs',
+  'c++',
+  'cpp',
+  'go',
+  'rust',
+  'php',
+  'ruby',
+  'swift',
+  'kotlin',
 ];
 
 /**
@@ -23,14 +28,14 @@ const SUPPORTED_LANGUAGES = [
  */
 function normalizeLanguage(language: string): string {
   const lang = language.toLowerCase().trim();
-  
+
   // Mappa abbreviazioni e varianti
-  if (lang === "ts") return "typescript";
-  if (lang === "js") return "javascript";
-  if (lang === "py") return "python";
-  if (lang === "cs") return "csharp";
-  if (lang === "cpp" || lang === "c++") return "cpp";
-  
+  if (lang === 'ts') return 'typescript';
+  if (lang === 'js') return 'javascript';
+  if (lang === 'py') return 'python';
+  if (lang === 'cs') return 'csharp';
+  if (lang === 'cpp' || lang === 'c++') return 'cpp';
+
   return lang;
 }
 
@@ -45,24 +50,28 @@ function isLanguageSupported(language: string): boolean {
 /**
  * Genera commenti e stile di codice appropriati in base alla lingua
  */
-function getLanguageCommentStyle(language: string): { line: string, blockStart: string, blockEnd: string } {
+function getLanguageCommentStyle(language: string): {
+  line: string;
+  blockStart: string;
+  blockEnd: string;
+} {
   const normalizedLang = normalizeLanguage(language);
-  
+
   switch (normalizedLang) {
-    case "python":
-      return { line: "#", blockStart: "'''", blockEnd: "'''" };
-    
-    case "html":
-      return { line: "<!-- ", blockStart: "<!-- ", blockEnd: " -->" };
-    
-    case "css":
-    case "less":
-    case "scss":
-      return { line: "/* ", blockStart: "/* ", blockEnd: " */" };
-    
+    case 'python':
+      return { line: '#', blockStart: "'''", blockEnd: "'''" };
+
+    case 'html':
+      return { line: '<!-- ', blockStart: '<!-- ', blockEnd: ' -->' };
+
+    case 'css':
+    case 'less':
+    case 'scss':
+      return { line: '/* ', blockStart: '/* ', blockEnd: ' */' };
+
     default:
       // JavaScript, TypeScript, Java, C#, PHP, ecc.
-      return { line: "//", blockStart: "/*", blockEnd: "*/" };
+      return { line: '//', blockStart: '/*', blockEnd: '*/' };
   }
 }
 
@@ -76,65 +85,65 @@ export const refactorSnippetHandler: McpToolHandler = async (args): Promise<McpT
   const code = args?.code;
   const objective = args?.objective;
   const includeExplanation = args?.explanation !== false; // Default a true
-  
+
   // Verifica parametri obbligatori
-  if (!language || typeof language !== "string") {
-    return { 
-      success: false, 
-      output: null, 
-      error: "Parametro 'language' mancante o non valido" 
+  if (!language || typeof language !== 'string') {
+    return {
+      success: false,
+      output: null,
+      error: "Parametro 'language' mancante o non valido",
     };
   }
-  
-  if (!code || typeof code !== "string") {
-    return { 
-      success: false, 
-      output: null, 
-      error: "Parametro 'code' mancante o non valido" 
+
+  if (!code || typeof code !== 'string') {
+    return {
+      success: false,
+      output: null,
+      error: "Parametro 'code' mancante o non valido",
     };
   }
-  
-  if (!objective || typeof objective !== "string") {
-    return { 
-      success: false, 
-      output: null, 
-      error: "Parametro 'objective' mancante o non valido" 
+
+  if (!objective || typeof objective !== 'string') {
+    return {
+      success: false,
+      output: null,
+      error: "Parametro 'objective' mancante o non valido",
     };
   }
-  
+
   // Verifica che la lingua sia supportata
   if (!isLanguageSupported(language)) {
     return {
       success: false,
       output: null,
-      error: `Linguaggio '${language}' non supportato per il refactoring. Linguaggi supportati: ${SUPPORTED_LANGUAGES.join(', ')}`
+      error: `Linguaggio '${language}' non supportato per il refactoring. Linguaggi supportati: ${SUPPORTED_LANGUAGES.join(', ')}`,
     };
   }
-  
+
   try {
     // Normalizza la lingua per processi successivi
     const normalizedLanguage = normalizeLanguage(language);
-    
+
     // Qui andrebbe eventualmente chiamata una funzione che utilizza un LLM
     // per analizzare e rifattorizzare il codice. In questa implementazione
     // di esempio, simuliamo un refactoring usando un modello predefinito.
-    
+
     // Prepariamo una risposta simulata (in un'implementazione reale,
     // il codice effettivo verrebbe rifattorizzato basandosi sull'obiettivo)
     const commentStyle = getLanguageCommentStyle(normalizedLanguage);
-    
+
     // In una vera implementazione, qui andrebbe inserita la chiamata al modello LLM
     // che prende in input il codice e l'obiettivo, e restituisce il codice rifattorizzato
-    
+
     // Simuliamo un refactoring di esempio
     const refactoredCode = simulateRefactoring(code, objective, normalizedLanguage, commentStyle);
-    
+
     // Prepara la spiegazione se richiesta
-    let explanation = "";
+    let explanation = '';
     if (includeExplanation) {
       explanation = generateExplanation(objective, normalizedLanguage);
     }
-    
+
     return {
       success: true,
       output: {
@@ -142,14 +151,14 @@ export const refactorSnippetHandler: McpToolHandler = async (args): Promise<McpT
         refactored: refactoredCode,
         language: normalizedLanguage,
         objective: objective,
-        explanation: includeExplanation ? explanation : undefined
-      }
+        explanation: includeExplanation ? explanation : undefined,
+      },
     };
   } catch (error: any) {
     return {
       success: false,
       output: null,
-      error: `Errore durante il refactoring: ${error.message}`
+      error: `Errore durante il refactoring: ${error.message}`,
     };
   }
 };
@@ -159,17 +168,17 @@ export const refactorSnippetHandler: McpToolHandler = async (args): Promise<McpT
  * In una vera implementazione, questa verrebbe sostituita da una chiamata a un LLM
  */
 function simulateRefactoring(
-  code: string, 
-  objective: string, 
+  code: string,
+  objective: string,
   language: string,
-  commentStyle: { line: string, blockStart: string, blockEnd: string }
+  commentStyle: { line: string; blockStart: string; blockEnd: string }
 ): string {
   // In questo esempio, aggiungiamo solo commenti e piccoli accorgimenti
   // In una implementazione reale, qui andrebbero inserite tecniche di refactoring
   // basate sull'obiettivo e su un'analisi intelligente
-  
+
   const lines = code.split('\n');
-  
+
   // Aggiungiamo un commento di intestazione che spiega il refactoring
   const header = [
     `${commentStyle.blockStart}`,
@@ -180,21 +189,21 @@ function simulateRefactoring(
     ` * In una vera implementazione, questo codice verrebbe analizzato e migliorato`,
     ` * secondo criteri specifici legati all'obiettivo richiesto.`,
     `${commentStyle.blockEnd}`,
-    ''
+    '',
   ].join('\n');
-  
+
   // Modifichiamo il codice originale (in questo caso, solo simulazioni di base)
   // In un'implementazione reale, qui andrebbe un vero engine di refactoring
-  const modifiedLines = lines.map(line => {
+  const modifiedLines = lines.map((line) => {
     // Sostituiamo var con let/const in JavaScript/TypeScript
-    if (["javascript", "typescript"].includes(language) && line.trim().startsWith('var ')) {
+    if (['javascript', 'typescript'].includes(language) && line.trim().startsWith('var ')) {
       return line.replace('var ', 'const ');
     }
-    
+
     // Altre sostituzioni di esempio...
     return line;
   });
-  
+
   return header + modifiedLines.join('\n');
 }
 
@@ -218,4 +227,4 @@ Nota: in un'implementazione reale, questa spiegazione sarebbe generata analizzan
 le modifiche effettive apportate al codice originale, spiegando nel dettaglio le
 strategie di refactoring applicate in relazione all'obiettivo specificato.
 `;
-} 
+}

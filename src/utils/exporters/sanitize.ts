@@ -3,7 +3,7 @@
  * @module utils/exporters/sanitize
  */
 
-import { SanitizeOptions, ExportOptions } from './types.js';
+import { SanitizeOptions, ExportOptions } from './types';
 
 /**
  * Opzioni per la sanitizzazione degli oggetti
@@ -11,16 +11,16 @@ import { SanitizeOptions, ExportOptions } from './types.js';
 export interface SanitizeOptions {
   /** Se rimuovere i valori null dall'oggetto esportato */
   removeNull?: boolean;
-  
+
   /** Se rimuovere i valori undefined dall'oggetto esportato */
   removeUndefined?: boolean;
-  
+
   /** Profondità massima per la sanitizzazione dell'oggetto */
   maxDepth?: number;
-  
+
   /** Lunghezza massima delle stringhe nell'output semplificato */
   maxStringLength?: number;
-  
+
   /** Lunghezza massima degli array nell'output semplificato */
   maxArrayLength?: number;
 }
@@ -91,16 +91,12 @@ export function sanitizeExportObject(
   if (Array.isArray(obj)) {
     const sanitizedArray = obj
       .slice(0, opts.maxArrayLength)
-      .map((item) => 
-        sanitizeExportObject(item, options, currentDepth + 1)
-      )
+      .map((item) => sanitizeExportObject(item, options, currentDepth + 1))
       .filter((item) => !(item === undefined && opts.removeUndefined));
 
     // Se l'array è stato troncato, aggiungiamo un messaggio
     if (obj.length > opts.maxArrayLength) {
-      sanitizedArray.push(
-        `... (${obj.length - opts.maxArrayLength} elementi omessi)`
-      );
+      sanitizedArray.push(`... (${obj.length - opts.maxArrayLength} elementi omessi)`);
     }
 
     return sanitizedArray;
@@ -108,16 +104,16 @@ export function sanitizeExportObject(
 
   // Gestione degli oggetti generici
   const sanitizedObj: Record<string, any> = {};
-  
+
   try {
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
         const value = sanitizeExportObject(obj[key], options, currentDepth + 1);
-        
+
         // Rimuove null e undefined in base alle opzioni
         if (value === null && opts.removeNull) continue;
         if (value === undefined && opts.removeUndefined) continue;
-        
+
         sanitizedObj[key] = value;
       }
     }
@@ -133,20 +129,20 @@ export function sanitizeExportObject(
  */
 export function extractSanitizeOptions(options?: Partial<ExportOptions>): SanitizeOptions {
   if (!options) return {};
-  
+
   return {
     removeNull: options.removeNull,
     removeUndefined: options.removeUndefined,
     maxDepth: options.maxDepth,
     maxStringLength: options.maxStringLength,
-    maxArrayLength: options.maxArrayLength
+    maxArrayLength: options.maxArrayLength,
   };
 }
 
 /**
  * Semplifica un oggetto complesso per la stampa di log
  * Limita lunghezza stringhe e profondità oggetti
- * 
+ *
  * @param obj - Oggetto da semplificare
  * @returns Oggetto semplificato
  */
@@ -154,6 +150,6 @@ export function simplifyForLogging(obj: any): any {
   return sanitizeExportObject(obj, {
     maxDepth: 3,
     maxStringLength: 100,
-    maxArrayLength: 10
+    maxArrayLength: 10,
   });
-} 
+}

@@ -1,6 +1,7 @@
 import { getApiProvider } from '../../../src/agent/api/getApiProvider';
 import { StreamHandler } from '../../../src/agent/api/ApiProvider';
 import { ChatMessage } from '../../../src/types/ChatMessage';
+import { createSafeMessage } from "@/shared/types/message-adapter";
 
 // Mock della funzione fetch globale
 global.fetch = jest.fn().mockImplementation((url, options) => {
@@ -38,22 +39,15 @@ global.fetch = jest.fn().mockImplementation((url, options) => {
     // Mock di una risposta standard
     return Promise.resolve({
       ok: true,
-      json: () => Promise.resolve({
-        id: 'msg_mock123',
-        content: [
-          {
-            type: 'text',
-            text: 'Sono Claude, un assistente AI sviluppato da Anthropic.'
-          }
-        ],
-        role: 'assistant',
-        model: 'claude-3-opus-20240229',
-        stop_reason: 'end_turn',
-        usage: {
-          input_tokens: 10,
-          output_tokens: 15
-        }
-      })
+      json: () => Promise.resolve(createSafeMessage({role: 'assistant', content: [
+                                                {
+                                                  type: 'text',
+                                                  text: 'Sono Claude, un assistente AI sviluppato da Anthropic.'
+                                                }
+                                              ], id: 'msg_mock123', model: 'claude-3-opus-20240229', stop_reason: 'end_turn', usage: {
+                                                input_tokens: 10,
+                                                output_tokens: 15
+                                              }}))
     });
   }
 });
@@ -64,9 +58,7 @@ describe('AnthropicProvider', () => {
   const mockApiKey = 'sk-test';
   const baseUrl = 'https://api.anthropic.com';
 
-  const messages: ChatMessage[] = [
-    { role: 'user', content: 'Ciao, chi sei?', timestamp: new Date().toISOString() }
-  ];
+  const messages: ChatMessage[] = [createSafeMessage('user', 'Ciao, chi sei?', { timestamp: new Date().toISOString() })];
 
   beforeEach(() => {
     jest.clearAllMocks();

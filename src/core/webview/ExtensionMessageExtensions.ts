@@ -3,9 +3,9 @@
  * @description Estensioni per l'interfaccia ExtensionMessage per supportare i messaggi MAS
  */
 
-import { ExtensionMessage } from '../../shared/ExtensionMessage.js';
-import { AgentStatus } from '../../shared/types/mas.types.js';
-import { TaskQueueState } from '../../shared/types/mas.types.js';
+import { ExtensionMessage } from '../../shared/ExtensionMessage';
+import { AgentStatus } from '../../shared/types/mas.types';
+import { TaskQueueState } from '../../shared/types/mas.types';
 
 declare module '../../shared/ExtensionMessage' {
   interface ExtensionMessage {
@@ -70,9 +70,9 @@ export interface TaskQueueUpdateMessage extends ExtensionMessage {
 /**
  * Tipo unione per tutti i messaggi dell'estensione MAS
  */
-export type MasExtensionMessage = 
+export type MasExtensionMessage =
   | InstructionReceivedMessage
   | InstructionFailedMessage
   | InstructionCompletedMessage
   | AgentsStatusUpdateMessage
-  | TaskQueueUpdateMessage; 
+  | TaskQueueUpdateMessage;

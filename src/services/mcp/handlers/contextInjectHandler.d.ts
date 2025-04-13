@@ -1,10 +1,10 @@
-import { McpToolHandler } from "../../../shared/types/mcp.types.js";
+import { McpToolHandler } from '../../../shared/types/mcp.types';
 interface ContextItem {
-    id: string;
-    scope: string;
-    text: string;
-    timestamp: number;
-    tags?: string[];
+  id: string;
+  scope: string;
+  text: string;
+  timestamp: number;
+  tags?: string[];
 }
 /**
  * Restituisce i contesti memorizzati per uno specifico scope

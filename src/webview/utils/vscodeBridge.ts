@@ -83,4 +83,4 @@ export function registerMessageListener(
 
   window.addEventListener('message', handler);
   return () => window.removeEventListener('message', handler);
-} 
+}

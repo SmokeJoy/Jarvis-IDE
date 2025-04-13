@@ -10,12 +10,12 @@
 /**
  * Modalità operative del sistema MCP
  */
-export type McpMode = "off" | "minimal" | "full";
+export type McpMode = 'off' | 'minimal' | 'full';
 
 /**
  * Tipi di trasporto supportati
  */
-export type McpTransportType = "stdio" | "sse";
+export type McpTransportType = 'stdio' | 'sse';
 
 /**
  * Interfaccia base per i trasporti MCP
@@ -34,7 +34,7 @@ export interface McpTransport {
 export interface McpServer {
   name: string;
   config: string;
-  status: "connecting" | "connected" | "disconnected";
+  status: 'connecting' | 'connected' | 'disconnected';
   disabled: boolean;
   error?: string;
   tools?: McpTool[];
@@ -64,12 +64,15 @@ export interface McpConnection {
 export interface McpTool {
   name: string;
   description: string;
-  parameters: Record<string, {
-    type: string;
-    description?: string;
-    required?: boolean;
-    default?: unknown;
-  }>;
+  parameters: Record<
+    string,
+    {
+      type: string;
+      description?: string;
+      required?: boolean;
+      default?: unknown;
+    }
+  >;
   autoApprove?: boolean;
 }
 
@@ -94,12 +97,15 @@ export interface McpResourceTemplate {
   type: string;
   schema: {
     type: string;
-    properties: Record<string, {
-      type: string;
-      description?: string;
-      required?: boolean;
-      default?: unknown;
-    }>;
+    properties: Record<
+      string,
+      {
+        type: string;
+        description?: string;
+        required?: boolean;
+        default?: unknown;
+      }
+    >;
     required?: string[];
   };
 }
@@ -177,4 +183,4 @@ export interface McpToolResult {
 /**
  * Firma per gli handler di tool MCP
  */
-export type McpToolHandler = (args: Record<string, unknown>) => Promise<McpToolResult>; 
+export type McpToolHandler = (args: Record<string, unknown>) => Promise<McpToolResult>;

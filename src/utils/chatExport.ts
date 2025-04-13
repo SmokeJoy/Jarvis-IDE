@@ -1,11 +1,11 @@
-import { ChatMessage } from '../shared/types.js';
-import { ApiConfiguration } from '../shared/types/api.types.js';
-import { ExtensionMessage } from '../shared/ExtensionMessage.js';
+import { ChatMessage } from '../shared/types';
+import { ApiConfiguration } from '../shared/types/api.types';
+import { ExtensionMessage } from '../shared/ExtensionMessage';
 import * as vscode from 'vscode';
 
 export async function exportChatToMarkdown(messages: ChatMessage[]): Promise<string> {
   let markdown = '# Chat History\n\n';
-  
+
   // Aggiungi metadata
   markdown += '## Metadata\n';
   markdown += `- Data: ${new Date().toLocaleString()}\n`;
@@ -15,18 +15,18 @@ export async function exportChatToMarkdown(messages: ChatMessage[]): Promise<str
   for (const message of messages) {
     const timestamp = new Date(message.timestamp).toLocaleString();
     const role = message.role === 'user' ? '👤 Utente' : '🤖 Assistente';
-    
+
     markdown += `### ${role} (${timestamp})\n\n`;
-    
+
     // Formatta il contenuto
     const content = message.content
       .split('\n')
       .map((line: string) => line.trim())
       .filter((line: string) => line)
       .join('\n\n');
-    
+
     markdown += `${content}\n\n`;
-    
+
     // Aggiungi metadata del messaggio se presenti
     if (message.metadata) {
       markdown += '<details>\n<summary>Metadata</summary>\n\n';
@@ -35,7 +35,7 @@ export async function exportChatToMarkdown(messages: ChatMessage[]): Promise<str
       markdown += '\n```\n\n';
       markdown += '</details>\n\n';
     }
-    
+
     markdown += '---\n\n';
   }
 
@@ -45,9 +45,9 @@ export async function exportChatToMarkdown(messages: ChatMessage[]): Promise<str
 export async function saveMarkdownToFile(content: string): Promise<void> {
   const uri = await vscode.window.showSaveDialog({
     filters: {
-      'Markdown': ['md']
+      Markdown: ['md'],
     },
-    defaultUri: vscode.Uri.file('chat_history.md')
+    defaultUri: vscode.Uri.file('chat_history.md'),
   });
 
   if (uri) {

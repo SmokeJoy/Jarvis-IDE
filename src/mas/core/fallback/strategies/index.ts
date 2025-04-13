@@ -10,4 +10,4 @@ export * from './ReliabilityFallbackStrategy';
 export * from './CompositeFallbackStrategy';
 export * from './AdaptiveFallbackStrategy';
 export * from './adaptive-conditions';
-export * from './FallbackStrategyFactory'; 
+export * from './FallbackStrategyFactory';

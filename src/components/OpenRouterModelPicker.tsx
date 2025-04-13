@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import { OpenRouterModelId } from "../shared/api.js";
-import { OpenAiCompatibleModelInfo } from "../types/global.js";
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { OpenRouterModelId } from '../shared/api';
+import { OpenAiCompatibleModelInfo } from '../types/global';
 
 const Select = styled.select`
   width: 100%;
@@ -60,4 +60,4 @@ export function OpenRouterModelPicker({
       ))}
     </Select>
   );
-} 
+}

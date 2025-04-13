@@ -1,9 +1,9 @@
 /**
  * @file api.types.ts
- * @description File di compatibilità che re-esporta i tipi API dal file src/shared/types/api.types.ts
+ * @description Definizioni per le API
  */
 
-import { ConfigModelInfo } from './models.js';
+import { ConfigModelInfo } from './models';
 
 // Ri-esporta tutti i tipi dal file src/shared/types/api.types.ts
 export type {
@@ -23,8 +23,8 @@ export type {
   ApiConfiguration,
   LLMProvider,
   ChatCompletionContentPartText,
-  ChatCompletionContentPartImage
-} from '../shared/types/api.types.js';
+  ChatCompletionContentPartImage,
+} from '../shared/types/api.types';
 
 export type LLMProvider = 'openai' | 'anthropic' | 'openrouter' | 'together' | 'ollama';
 
@@ -41,4 +41,30 @@ export interface LLMProviderConfig {
   baseUrl?: string;
   defaultModel?: string;
   models: OpenAiCompatibleModelInfo[];
-} 
+}
+
+export interface ApiConfiguration {
+  provider: string;
+  modelId: string;
+  apiKey?: string;
+  baseUrl?: string;
+  temperature?: number;
+  maxTokens?: number;
+  topP?: number;
+  frequencyPenalty?: number;
+  presencePenalty?: number;
+}
+
+export interface ApiResponse<T = any> {
+  data: T;
+  status: number;
+  statusText: string;
+  headers?: Record<string, string>;
+}
+
+export interface ApiError {
+  message: string;
+  code: string;
+  status: number;
+  details?: any;
+}

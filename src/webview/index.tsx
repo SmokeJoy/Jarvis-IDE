@@ -1,9 +1,6 @@
-import React from "react";
-import { createRoot } from "react-dom/client";
-import { Webview } from "./webview.js";
-import { ApiConfiguration } from "../types/global.js";
-import { ChatMessage } from "../shared/types.js";
-import { ExtensionMessage } from "../shared/ExtensionMessage.js";
+import { createRoot } from 'react-dom/client';
+import { Webview } from './webview';
+import { ApiConfiguration } from '../types/global';
 
 declare global {
   interface Window {
@@ -11,5 +8,5 @@ declare global {
   }
 }
 
-const root = createRoot(document.getElementById("root")!);
-root.render(<Webview config={window.initialConfig} />); 
+const root = createRoot(document.getElementById('root')!);
+root.render(<Webview config={window.initialConfig} />);

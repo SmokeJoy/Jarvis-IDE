@@ -1,8 +1,6 @@
-// Dichiarazione per l'API vscode WebView
-declare const vscode: { postMessage: (message: any) => void };
-
+import './vscode-api';
 import { useCallback } from 'react';
-import { TelemetrySetting } from '../types/settings.types.js';
+import { TelemetrySetting } from '../types/settings.types';
 
 export const useJarvisIdeTelemetry = () => {
   const sendTelemetry = useCallback(async (event: string, properties?: Record<string, unknown>) => {
@@ -12,8 +10,8 @@ export const useJarvisIdeTelemetry = () => {
         type: 'telemetry',
         payload: {
           event,
-          properties
-        }
+          properties,
+        },
       });
     } catch (error) {
       console.error('Error sending telemetry:', error);
@@ -26,8 +24,8 @@ export const useJarvisIdeTelemetry = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          telemetry: settings
-        }
+          telemetry: settings,
+        },
       });
     } catch (error) {
       console.error('Error updating telemetry settings:', error);
@@ -37,6 +35,6 @@ export const useJarvisIdeTelemetry = () => {
 
   return {
     sendTelemetry,
-    updateTelemetrySettings
+    updateTelemetrySettings,
   };
-}; 
+};

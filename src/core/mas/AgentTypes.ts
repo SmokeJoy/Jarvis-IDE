@@ -15,7 +15,7 @@ export interface BaseAgent {
   name: string;
   mode: AgentMode;
   isActive: boolean;
-  
+
   activate(): void;
   deactivate(): void;
 }
@@ -51,6 +51,11 @@ export interface CoderInstruction {
 export type MessageType = 'instruction' | 'response' | 'notification' | 'status';
 
 /**
+ * Payload generico per i messaggi tra agenti
+ */
+export type AgentPayload = Record<string, unknown>;
+
+/**
  * Messaggio scambiato tra gli agenti
  */
 export interface AgentMessage {
@@ -59,8 +64,20 @@ export interface AgentMessage {
   to: string;
   type: MessageType;
   timestamp: Date;
-  payload: any;
+  payload: AgentPayload;
   replyTo?: string;
+}
+
+/**
+ * Risultato dell'esecuzione di un'istruzione
+ */
+export interface InstructionResult {
+  success: boolean;
+  message: string;
+  code?: string;
+  warnings?: string[];
+  errors?: string[];
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -68,7 +85,7 @@ export interface AgentMessage {
  */
 export interface CoderAgent extends BaseAgent {
   currentInstruction?: CoderInstruction;
-  executeInstruction(instruction: string): Promise<any>;
+  executeInstruction(instruction: string): Promise<InstructionResult>;
 }
 
 /**
@@ -95,6 +112,11 @@ export interface DocAgent extends BaseAgent {
 }
 
 /**
+ * Tipo per gli eventi del sistema di agenti
+ */
+export type AgentEventListener = (...args: unknown[]) => void;
+
+/**
  * Interfaccia per il SupervisorAgent
  */
 export interface SupervisorAgent extends BaseAgent {
@@ -104,12 +126,12 @@ export interface SupervisorAgent extends BaseAgent {
     multiAgent?: MultiAgent,
     docAgent?: DocAgent
   ): void;
-  
+
   queueInstruction(agentId: string, instruction: string): Promise<void>;
   getAgentStatus(agentId: string): AgentStatus;
   getAllAgentsStatus(): AgentStatus[];
   sendMessage(message: AgentMessage): void;
-  
-  on(event: string, listener: (...args: any[]) => void): void;
-  off(event: string, listener: (...args: any[]) => void): void;
-} 
+
+  on(event: string, listener: AgentEventListener): void;
+  off(event: string, listener: AgentEventListener): void;
+}

@@ -1,6 +1,6 @@
-import { ContextItem, getMemoryContexts } from "../../memory/context.js";
-import { readFile } from "fs/promises";
-import path from "path";
+import { ContextItem, getMemoryContexts } from '../../memory/context';
+import { readFile } from 'fs/promises';
+import path from 'path';
 
 interface ContextLink {
   id: string;
@@ -19,7 +19,7 @@ interface ContextLink {
 interface GraphOptions {
   rootId: string;
   depth?: number;
-  direction?: "incoming" | "outgoing" | "both";
+  direction?: 'incoming' | 'outgoing' | 'both';
   relation?: string;
   minStrength?: number;
   minConfidence?: number;
@@ -34,25 +34,22 @@ interface GraphResult {
 
 async function getContextLinks(): Promise<ContextLink[]> {
   try {
-    const linksPath = path.join(__dirname, "../../data/context_links.json");
-    const data = await readFile(linksPath, "utf-8");
+    const linksPath = path.join(__dirname, '../../data/context_links.json');
+    const data = await readFile(linksPath, 'utf-8');
     return JSON.parse(data);
   } catch (error) {
     return [];
   }
 }
 
-function filterLinks(
-  links: ContextLink[],
-  options: GraphOptions
-): ContextLink[] {
+function filterLinks(links: ContextLink[], options: GraphOptions): ContextLink[] {
   return links.filter((link) => {
     // Filtra per direzione
     const isIncoming = link.targetId === options.rootId;
     const isOutgoing = link.sourceId === options.rootId;
-    if (options.direction === "incoming" && !isIncoming) return false;
-    if (options.direction === "outgoing" && !isOutgoing) return false;
-    if (options.direction === "both" && !isIncoming && !isOutgoing) return false;
+    if (options.direction === 'incoming' && !isIncoming) return false;
+    if (options.direction === 'outgoing' && !isOutgoing) return false;
+    if (options.direction === 'both' && !isIncoming && !isOutgoing) return false;
 
     // Filtra per tipo di relazione
     if (options.relation && link.relation !== options.relation) return false;
@@ -61,10 +58,7 @@ function filterLinks(
     if (options.minStrength && link.strength < options.minStrength) return false;
 
     // Filtra per confidenza minima
-    if (
-      options.minConfidence &&
-      link.metadata.confidence < options.minConfidence
-    ) return false;
+    if (options.minConfidence && link.metadata.confidence < options.minConfidence) return false;
 
     return true;
   });
@@ -83,13 +77,13 @@ async function exploreGraph(
   const links: ContextLink[] = [];
 
   // Trova tutti i link rilevanti per il nodo corrente
-  const relevantLinks = allLinks.filter(link => 
-    link.sourceId === rootId || link.targetId === rootId
+  const relevantLinks = allLinks.filter(
+    (link) => link.sourceId === rootId || link.targetId === rootId
   );
 
   for (const link of relevantLinks) {
     const otherId = link.sourceId === rootId ? link.targetId : link.sourceId;
-    
+
     if (!visited.has(otherId)) {
       visited.add(otherId);
       nodes.add(otherId);
@@ -104,8 +98,8 @@ async function exploreGraph(
         options
       );
 
-      childNodes.forEach(node => nodes.add(node));
-      childLinks.forEach(link => links.push(link));
+      childNodes.forEach((node) => nodes.add(node));
+      childLinks.forEach((link) => links.push(link));
     }
   }
 
@@ -135,7 +129,7 @@ export async function contextGraphHandler(
     if (args.includeRoot !== false) {
       visited.add(args.rootId);
     }
-    
+
     const { nodes: nodeIds, links } = await exploreGraph(
       args.rootId,
       args.depth || 1,
@@ -145,14 +139,12 @@ export async function contextGraphHandler(
     );
 
     // Recupera i contesti per i nodi trovati
-    const nodes = contexts.filter(ctx => nodeIds.has(ctx.id));
+    const nodes = contexts.filter((ctx) => nodeIds.has(ctx.id));
 
     // Aggiungi contesti isolati se richiesto
     if (args.includeIsolated) {
       const connectedNodeIds = new Set([...nodeIds, args.rootId]);
-      const isolatedNodes = contexts.filter(
-        ctx => !connectedNodeIds.has(ctx.id)
-      );
+      const isolatedNodes = contexts.filter((ctx) => !connectedNodeIds.has(ctx.id));
       nodes.push(...isolatedNodes);
     }
 
@@ -169,4 +161,4 @@ export async function contextGraphHandler(
       error: `Errore durante la generazione del grafo: ${error.message}`,
     };
   }
-} 
+}

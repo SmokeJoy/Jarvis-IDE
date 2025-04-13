@@ -1,7 +1,7 @@
 /**
  * @file toolsListServer.ts
  * @description Server Express che espone gli endpoint MCP per tools/list e tools/call
- * 
+ *
  * Questo server fornisce un'implementazione minimale del protocollo MCP per
  * consentire ai client esterni di scoprire e invocare i tool disponibili.
  */
@@ -11,8 +11,8 @@ import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import { McpDispatcher } from './McpDispatcher.js';
-import { McpToolCall } from '../../shared/types/mcp.types.js';
+import { McpDispatcher } from './McpDispatcher';
+import { McpToolCall } from '../../shared/types/mcp.types';
 
 // Definisci __dirname equivalente per ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -30,8 +30,8 @@ function loadToolsSchema() {
     console.error('Errore nel caricamento dello schema dei tool:', error);
     // Fallback con schema minimo
     return {
-      schema_version: "1.0",
-      tools: []
+      schema_version: '1.0',
+      tools: [],
     };
   }
 }
@@ -61,7 +61,10 @@ app.use((_, res, next) => {
  * Restituisce l'elenco di tool disponibili nel formato MCP
  */
 app.get('/tools/list', (_, res) => {
-  console.log('GET /tools/list - Rispondo con lo schema:', JSON.stringify(toolsSchema).substring(0, 100) + '...');
+  console.log(
+    'GET /tools/list - Rispondo con lo schema:',
+    JSON.stringify(toolsSchema).substring(0, 100) + '...'
+  );
   res.json(toolsSchema);
 });
 
@@ -72,64 +75,66 @@ app.get('/tools/list', (_, res) => {
  */
 app.post('/tools/call', async (req, res) => {
   const { tool, args } = req.body;
-  
+
   if (!tool) {
     return res.status(400).json({
       error: 'Parametro "tool" mancante',
-      status: 'error'
+      status: 'error',
     });
   }
-  
+
   console.log(`POST /tools/call - Tool: ${tool}, args:`, args);
-  
+
   try {
     const requestId = uuidv4();
-    
+
     // Funzione di callback che riceve la risposta dal dispatcher
     const responseCallback = (response: any) => {
       console.log(`Risposta dal dispatcher per ${tool}:`, response.type);
-      
+
       if (response.type === 'llm.error') {
         console.log(`Errore nel tool ${tool}:`, response.payload.error);
         return res.status(400).json({
           status: 'error',
           error: response.payload.error,
-          requestId: response.payload.requestId
+          requestId: response.payload.requestId,
         });
       }
-      
+
       return res.json({
         status: 'success',
         result: response.payload.result,
-        requestId: response.payload.requestId
+        requestId: response.payload.requestId,
       });
     };
-    
+
     // Funzione di callback speciale per code.generate che restituisce sempre 200
     const codeGenerateCallback = (response: any) => {
       console.log(`Risposta dal code.generate:`, response.type);
       return res.json({
         status: 'success',
         result: response.payload.result,
-        requestId: response.payload.requestId
+        requestId: response.payload.requestId,
       });
     };
-    
+
     // Crea un dispatcher e invia la richiesta
-    const dispatcher = new McpDispatcher(tool === 'code.generate' ? codeGenerateCallback : responseCallback);
-    
+    const dispatcher = new McpDispatcher(
+      tool === 'code.generate' ? codeGenerateCallback : responseCallback
+    );
+
     const toolCall: McpToolCall = {
       tool,
       args: args || {}, // Assicurati che args sia sempre un oggetto
-      requestId
+      requestId,
     };
-    
+
     await dispatcher.handleToolCall(toolCall);
   } catch (error: any) {
     console.error('Errore durante la chiamata al tool:', error);
     return res.status(500).json({
       status: 'error',
-      error: error.message || 'Errore interno del server'
+      error: error.message || 'Errore interno del server',
     });
   }
 });
@@ -186,16 +191,17 @@ export function startMcpServer(port: number = 3030) {
     console.log(`Server MCP in ascolto su http://localhost:${port}`);
     console.log(`- GET /tools/list`);
     console.log(`- POST /tools/call`);
-    console.log('Tools disponibili:', toolsSchema.tools.map((t: { name: string }) => t.name).join(', '));
+    console.log(
+      'Tools disponibili:',
+      toolsSchema.tools.map((t: { name: string }) => t.name).join(', ')
+    );
   });
-  
+
   return server; // Restituisce il server per permettere l'arresto durante i test
 }
 
 // Se eseguito direttamente (non importato)
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const PORT = process.env['MCP_SERVER_PORT']
-    ? parseInt(process.env['MCP_SERVER_PORT'])
-    : 3030;
+  const PORT = process.env['MCP_SERVER_PORT'] ? parseInt(process.env['MCP_SERVER_PORT']) : 3030;
   startMcpServer(port);
 }

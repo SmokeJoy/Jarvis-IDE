@@ -45,7 +45,7 @@ export const vscode = {
    */
   setState(state: WebviewState) {
     this.webviewApi.setState(state);
-  }
+  },
 };
 
 /**
@@ -55,4 +55,4 @@ declare function acquireVsCodeApi(): {
   postMessage(message: VSCodeMessage): void;
   getState(): WebviewState;
   setState(state: WebviewState): void;
-}; 
+};

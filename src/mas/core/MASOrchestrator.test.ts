@@ -6,16 +6,16 @@ import { ZodSchemaMap } from '../../../utils/validation';
 const mockProvider = {
   handle: vi.fn().mockResolvedValue('success'),
   id: 'openai',
-  isEnabled: true
+  isEnabled: true,
 };
 
 const mockHistoryStore = {
-  recordInteraction: vi.fn().mockResolvedValue(null)
+  recordInteraction: vi.fn().mockResolvedValue(null),
 };
 
 const mockFallbackHandler = {
   registerSuccess: vi.fn(),
-  getNextProvider: vi.fn().mockReturnValue(mockProvider)
+  getNextProvider: vi.fn().mockReturnValue(mockProvider),
 };
 
 describe('MASOrchestrator', () => {
@@ -40,29 +40,31 @@ describe('MASOrchestrator', () => {
     const testMessage = {
       agentId: 'test-agent',
       payload: { prompt: 'test' },
-      type: 'execute-strategy'
-    } as WebviewMessageUnion;
+      type: 'execute-strategy',
+    } as unknown as WebviewMessageUnion;
 
     // @ts-expect-error Mock private method
     vi.spyOn(orchestrator, 'selectProvider').mockReturnValue(mockProvider);
 
     await orchestrator.executeAgentStrategy(testMessage, testSchema);
-    
+
     expect(mockProvider.handle).toHaveBeenCalledWith(testMessage.payload);
     expect(mockHistoryStore.recordInteraction).toHaveBeenCalled();
     expect(mockFallbackHandler.registerSuccess).toHaveBeenCalledWith(mockProvider);
   });
 
-  it('dovrebbe gestire errori durante l\'esecuzione', async () => {
+  it("dovrebbe gestire errori durante l'esecuzione", async () => {
     const errorMessage = 'Provider error';
     mockProvider.handle.mockRejectedValue(new Error(errorMessage));
 
     // @ts-expect-error Mock private method
     vi.spyOn(orchestrator, 'selectProvider').mockReturnValue(mockProvider);
-    
-    await expect(orchestrator.executeAgentStrategy(
-      { type: 'execute-strategy', agentId: 'test', payload: {} },
-      testSchema
-    )).rejects.toThrow(errorMessage);
+
+    await expect(
+      orchestrator.executeAgentStrategy(
+        { type: 'execute-strategy', agentId: 'test', payload: {} },
+        testSchema
+      )
+    ).rejects.toThrow(errorMessage);
   });
 });

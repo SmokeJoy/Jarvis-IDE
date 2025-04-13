@@ -1,10 +1,10 @@
 /**
  * Definizioni comuni per i moduli di esportazione
  */
-import { ChatMessage } from '../../shared/types.js';
-import { ChatSettings } from '../../shared/types/settings.types.js';
-import { ChatSession } from '../../shared/types/session.js';
-import { SanitizeOptions } from './sanitize.js';
+import { ChatMessage } from '../../shared/types';
+import { ChatSettings } from '../../shared/types/settings.types';
+import { ChatSession } from '../../shared/types/session';
+import { SanitizeOptions } from './sanitize';
 
 /**
  * Definizione dei tipi per il sistema di esportazione
@@ -120,7 +120,10 @@ export interface Exporter<T = any> {
  * Errore specifico per le operazioni di esportazione
  */
 export class ExportError extends Error {
-  constructor(message: string, public readonly cause?: unknown) {
+  constructor(
+    message: string,
+    public readonly cause?: unknown
+  ) {
     super(message);
     this.name = 'ExportError';
   }
@@ -132,19 +135,19 @@ export class ExportError extends Error {
 export interface ExportPayload {
   /** Messaggi della chat */
   messages?: ChatMessage[];
-  
+
   /** Impostazioni della chat */
   settings?: ChatSettings;
-  
+
   /** Prompt di sistema */
   systemPrompt?: string;
-  
+
   /** File di contesto */
   contextFiles?: string[];
-  
+
   /** ID del modello */
   modelId?: string;
-  
+
   /** Timestamp */
   timestamp?: number;
 }
@@ -160,10 +163,10 @@ export type ExportableSession = ChatSession | ExportPayload;
 export interface ExportResult {
   /** Contenuto esportato */
   content: string;
-  
+
   /** Formato dell'esportazione */
   format: ExportFormat;
-  
+
   /** Timestamp dell'esportazione */
   timestamp: number;
-} 
+}

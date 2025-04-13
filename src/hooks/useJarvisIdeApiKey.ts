@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { WebviewMessage } from '../types/webview.js';
+import { WebviewMessage } from '../types/webview';
 
 declare const vscode: {
   postMessage: (message: WebviewMessage) => void;
@@ -14,8 +14,8 @@ export const useJarvisIdeApiKey = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          apiKey: newApiKey
-        }
+          apiKey: newApiKey,
+        },
       });
 
       setApiKey(newApiKey);
@@ -32,8 +32,8 @@ export const useJarvisIdeApiKey = () => {
       await vscode.postMessage({
         type: 'settings',
         payload: {
-          apiKey: defaultApiKey
-        }
+          apiKey: defaultApiKey,
+        },
       });
 
       setApiKey(defaultApiKey);
@@ -46,6 +46,6 @@ export const useJarvisIdeApiKey = () => {
   return {
     apiKey,
     updateApiKey,
-    resetApiKey
+    resetApiKey,
   };
 };

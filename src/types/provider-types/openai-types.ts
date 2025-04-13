@@ -18,7 +18,7 @@ export interface OpenAIOptions {
  * Parametri per un messaggio in una richiesta di completamento chat
  */
 export interface ChatCompletionMessageParam {
-  role: "system" | "user" | "assistant" | "function";
+  role: 'system' | 'user' | 'assistant' | 'function';
   content: string | ChatCompletionContentPart[];
   name?: string;
   function_call?: {
@@ -38,7 +38,7 @@ export interface ChatCompletionSystemMessageParam extends ChatCompletionMessageP
  * Parte di testo di un messaggio multimodale
  */
 export interface ChatCompletionContentPartText {
-  type: "text";
+  type: 'text';
   text: string;
 }
 
@@ -46,17 +46,19 @@ export interface ChatCompletionContentPartText {
  * Parte immagine di un messaggio multimodale
  */
 export interface ChatCompletionContentPartImage {
-  type: "image";
+  type: 'image';
   image_url: {
     url: string;
-    detail?: "auto" | "low" | "high";
+    detail?: 'auto' | 'low' | 'high';
   };
 }
 
 /**
  * Tipo unione per le parti di contenuto
  */
-export type ChatCompletionContentPart = ChatCompletionContentPartText | ChatCompletionContentPartImage;
+export type ChatCompletionContentPart =
+  | ChatCompletionContentPartText
+  | ChatCompletionContentPartImage;
 
 /**
  * Opzioni per una richiesta di completamento chat
@@ -129,7 +131,7 @@ export interface ChatCompletion {
  */
 export interface ChatCompletionMessageToolCall {
   id: string;
-  type: "function";
+  type: 'function';
   function: {
     name: string;
     arguments: string;
@@ -141,4 +143,4 @@ export interface ChatCompletionMessageToolCall {
  */
 export interface Stream<T> extends AsyncIterable<T> {
   controller: AbortController;
-} 
+}

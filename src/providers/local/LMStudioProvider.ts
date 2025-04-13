@@ -3,7 +3,8 @@
  * https://lmstudio.ai/
  */
 
-import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider.js';
+import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider';
+import { createSafeMessage } from "../../shared/types/message";
 
 interface LMStudioChatRequest {
   messages: Array<{
@@ -81,11 +82,11 @@ export class LMStudioProvider extends BaseLLMProvider {
 
     // Applica le opzioni MCP
     const processedMessages = this.applyMCPOptions(messages, options);
-    
+
     try {
       // Formatta i messaggi per LM Studio
       const formattedData = this.formatMessages(processedMessages);
-      
+
       // Aggiungi le opzioni specifiche
       if (options) {
         formattedData.temperature = options.temperature;
@@ -96,7 +97,7 @@ export class LMStudioProvider extends BaseLLMProvider {
           formattedData.model = options.model;
         }
       }
-      
+
       // Effettua la chiamata API
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
@@ -105,19 +106,19 @@ export class LMStudioProvider extends BaseLLMProvider {
         },
         body: JSON.stringify(formattedData),
       });
-      
+
       if (!response.ok) {
         const error = await response.text();
         throw new Error(`Errore LM Studio: ${error}`);
       }
-      
-      const data = await response.json() as LMStudioChatResponse;
-      
+
+      const data = (await response.json()) as LMStudioChatResponse;
+
       // Estrai il contenuto della risposta
       if (data.choices && data.choices.length > 0 && data.choices[0].message) {
         return data.choices[0].message.content;
       }
-      
+
       return '';
     } catch (error) {
       throw new Error(`Errore nella chiamata a LM Studio: ${error.message}`);
@@ -134,11 +135,11 @@ export class LMStudioProvider extends BaseLLMProvider {
 
     // Applica le opzioni MCP
     const processedMessages = this.applyMCPOptions(messages, options);
-    
+
     try {
       // Formatta i messaggi per LM Studio
       const formattedData = this.formatMessages(processedMessages);
-      
+
       // Aggiungi le opzioni specifiche
       if (options) {
         formattedData.temperature = options.temperature;
@@ -149,7 +150,7 @@ export class LMStudioProvider extends BaseLLMProvider {
           formattedData.model = options.model;
         }
       }
-      
+
       // Effettua la chiamata API
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
@@ -158,44 +159,49 @@ export class LMStudioProvider extends BaseLLMProvider {
         },
         body: JSON.stringify(formattedData),
       });
-      
+
       if (!response.ok) {
         const error = await response.text();
         throw new Error(`Errore LM Studio: ${error}`);
       }
-      
+
       // Gestisci lo stream di risposta
       const reader = response.body?.getReader();
       if (!reader) {
         throw new Error('Impossibile leggere lo stream di risposta');
       }
-      
-      let decoder = new TextDecoder();
+
+      const decoder = new TextDecoder();
       let buffer = '';
-      
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        
+
         // Aggiungi i nuovi dati al buffer
         buffer += decoder.decode(value, { stream: true });
-        
+
         // Dividi il buffer in linee
         const lines = buffer.split('\n');
         buffer = lines.pop() || ''; // L'ultima linea potrebbe essere incompleta
-        
+
         for (const line of lines) {
           if (line.trim() === '') continue;
-          
+
           // LM Studio invia linee con prefisso "data: "
           const dataLine = line.startsWith('data: ') ? line.slice(6) : line;
-          
+
           // L'ultimo messaggio è spesso "data: [DONE]"
           if (dataLine.trim() === '[DONE]') continue;
-          
+
           try {
             const data = JSON.parse(dataLine) as LMStudioChatResponse;
-            if (data.choices && data.choices.length > 0 && data.choices[0].delta && data.choices[0].delta.content) {
+            if (
+              data.choices &&
+              data.choices.length > 0 &&
+              data.choices[0].delta &&
+              data.choices[0].delta.content
+            ) {
               yield data.choices[0].delta.content;
             }
           } catch (e) {
@@ -203,7 +209,6 @@ export class LMStudioProvider extends BaseLLMProvider {
           }
         }
       }
-      
     } catch (error) {
       throw new Error(`Errore nello stream LM Studio: ${error.message}`);
     }
@@ -216,19 +221,19 @@ export class LMStudioProvider extends BaseLLMProvider {
     if (!this.isConfigured()) {
       throw new Error('LMStudioProvider non configurato correttamente');
     }
-    
+
     try {
       const response = await fetch(`${this.baseUrl}/models`, {
         method: 'GET',
       });
-      
+
       if (!response.ok) {
         const error = await response.text();
         throw new Error(`Errore LM Studio: ${error}`);
       }
-      
-      const data = await response.json() as LMStudioModelsResponse;
-      return data.data.map(model => model.id);
+
+      const data = (await response.json()) as LMStudioModelsResponse;
+      return data.data.map((model) => model.id);
     } catch (error) {
       console.error('Errore nel recupero dei modelli LM Studio:', error);
       return []; // Ritorna una lista vuota in caso di errore
@@ -241,11 +246,8 @@ export class LMStudioProvider extends BaseLLMProvider {
   protected formatMessages(messages: LLMMessage[]): LMStudioChatRequest {
     // LM Studio utilizza lo stesso formato di OpenAI
     return {
-      messages: messages.map(m => ({
-        role: m.role,
-        content: m.content
-      })),
-      stream: false
+      messages: messages.map((m) => (createSafeMessage({role: m.role, content: m.content}))),
+      stream: false,
     };
   }
-} 
+}

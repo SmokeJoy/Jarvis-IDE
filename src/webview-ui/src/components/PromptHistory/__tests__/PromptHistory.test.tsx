@@ -17,27 +17,25 @@ describe('PromptHistory', () => {
       onMessage: (callback: any) => {
         mockOnMessage(callback);
         return () => {};
-      }
+      },
     });
   });
 
   it('dovrebbe richiedere la cronologia al mount', () => {
     render(<PromptHistory />);
     expect(mockPostMessage).toHaveBeenCalledWith({
-      type: PromptHistoryMessageType.REQUEST_HISTORY
+      type: PromptHistoryMessageType.REQUEST_HISTORY,
     });
   });
 
   it('dovrebbe gestire il caricamento della cronologia', async () => {
-    const testHistory = [
-      { id: '1', prompt: 'Test prompt', timestamp: Date.now() }
-    ];
-    
+    const testHistory = [{ id: '1', prompt: 'Test prompt', timestamp: Date.now() }];
+
     render(<PromptHistory />);
-    
+
     mockOnMessage({
       type: PromptHistoryMessageType.HISTORY_LOADED,
-      payload: { history: testHistory }
+      payload: { history: testHistory },
     });
 
     await waitFor(() => {
@@ -47,10 +45,10 @@ describe('PromptHistory', () => {
 
   it('dovrebbe gestire gli errori di caricamento', async () => {
     render(<PromptHistory />);
-    
+
     mockOnMessage({
       type: PromptHistoryMessageType.HISTORY_ERROR,
-      payload: { error: 'Errore di rete', errorCode: 500 }
+      payload: { error: 'Errore di rete', errorCode: 500 },
     });
 
     await waitFor(() => {
@@ -61,9 +59,9 @@ describe('PromptHistory', () => {
   it('dovrebbe validare i messaggi con le guardie type-safe', () => {
     const validMessage = {
       type: PromptHistoryMessageType.HISTORY_LOADED,
-      payload: { history: [] }
+      payload: { history: [] },
     };
-    
+
     expect(isPromptHistoryLoadedMessage(validMessage)).toBe(true);
   });
 });

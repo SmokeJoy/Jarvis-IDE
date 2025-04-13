@@ -3,9 +3,29 @@
  * @description Definisce l'interfaccia base per i transformer che convertono messaggi tra formati
  */
 
-import { ChatMessage, ContentBlock, TextBlock, ImageBlock, ContentType, isTextBlock, isImageBlock } from '../../types/chat.types.js';
-import { OpenAIOptions, ChatCompletionOptions, ChatCompletionMessageParam, ChatCompletionChunk, Stream, ChatCompletion } from '../../types/provider-types/openai-types.js';
-import { AnthropicMessage, AnthropicMessageOptions, AnthropicStreamChunk, AnthropicMessageResponse } from '../../types/provider-types/anthropic-types.js';
+import {
+  ChatMessage,
+  ContentBlock,
+  TextBlock,
+  ImageBlock,
+  ContentType,
+  isTextBlock,
+  isImageBlock,
+} from '../../types/chat.types';
+import {
+  OpenAIOptions,
+  ChatCompletionOptions,
+  ChatCompletionMessageParam,
+  ChatCompletionChunk,
+  Stream,
+  ChatCompletion,
+} from '../../types/provider-types/openai-types';
+import {
+  AnthropicMessage,
+  AnthropicMessageOptions,
+  AnthropicStreamChunk,
+  AnthropicMessageResponse,
+} from '../../types/provider-types/anthropic-types';
 
 /**
  * Interfaccia base per i transformer che convertono messaggi tra il formato standard dell'applicazione
@@ -14,7 +34,7 @@ import { AnthropicMessage, AnthropicMessageOptions, AnthropicStreamChunk, Anthro
 export interface BaseTransformer<TOptions, TMessage, TChunk, TResponse> {
   /**
    * Converte un messaggio dal formato standard dell'applicazione al formato del provider LLM.
-   * 
+   *
    * @param message Messaggio nel formato standard dell'applicazione
    * @returns Messaggio nel formato del provider LLM
    */
@@ -22,7 +42,7 @@ export interface BaseTransformer<TOptions, TMessage, TChunk, TResponse> {
 
   /**
    * Crea l'oggetto opzioni di richiesta per il provider LLM.
-   * 
+   *
    * @param options Opzioni di base per la richiesta
    * @param messages Messaggi già convertiti nel formato del provider
    * @returns Oggetto opzioni completo per la richiesta al provider
@@ -31,7 +51,7 @@ export interface BaseTransformer<TOptions, TMessage, TChunk, TResponse> {
 
   /**
    * Estrae il testo da un chunk di risposta streaming.
-   * 
+   *
    * @param chunk Chunk di risposta dal provider LLM
    * @returns Testo estratto dal chunk
    */
@@ -39,7 +59,7 @@ export interface BaseTransformer<TOptions, TMessage, TChunk, TResponse> {
 
   /**
    * Estrae il testo di ragionamento da un chunk di risposta streaming (se disponibile).
-   * 
+   *
    * @param chunk Chunk di risposta dal provider LLM
    * @returns Testo di ragionamento estratto dal chunk, se presente
    */
@@ -47,7 +67,7 @@ export interface BaseTransformer<TOptions, TMessage, TChunk, TResponse> {
 
   /**
    * Estrae le informazioni di utilizzo token da un chunk di risposta o risposta completa.
-   * 
+   *
    * @param response Risposta o chunk dal provider LLM
    * @returns Informazioni sui token utilizzati
    */
@@ -55,7 +75,7 @@ export interface BaseTransformer<TOptions, TMessage, TChunk, TResponse> {
 
   /**
    * Converte una risposta completa dal provider LLM al formato standard dell'applicazione.
-   * 
+   *
    * @param response Risposta completa dal provider LLM
    * @returns Messaggio nel formato standard dell'applicazione
    */
@@ -109,28 +129,28 @@ export type AnthropicTransformerType = BaseTransformer<
 export const ContentUtils = {
   /**
    * Estrae il testo da un array di parti di contenuto.
-   * 
+   *
    * @param content Array di parti di contenuto
    * @returns Testo estratto dalle parti di tipo testo
    */
   getTextFromContent(content: ContentBlock[]): string {
     if (!content || !Array.isArray(content)) return '';
-    
+
     return content
       .filter(isTextBlock)
-      .map(part => part.text)
+      .map((part) => part.text)
       .join('');
   },
 
   /**
    * Estrae le immagini da un array di parti di contenuto.
-   * 
+   *
    * @param content Array di parti di contenuto
    * @returns Array di parti di contenuto di tipo immagine
    */
   getImagesFromContent(content: ContentBlock[]): ImageBlock[] {
     if (!content || !Array.isArray(content)) return [];
-    
+
     return content.filter(isImageBlock);
-  }
-}; 
+  },
+};

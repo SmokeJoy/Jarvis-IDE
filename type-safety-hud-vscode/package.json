@@ -1,0 +1,84 @@
+{
+  "name": "type-safety-hud-vscode",
+  "displayName": "Type Safety HUD",
+  "description": "Visual dashboard for monitoring and improving TypeScript type safety",
+  "version": "0.1.0",
+  "publisher": "jarvis-ai",
+  "author": "Jarvis AI Team",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Visualization",
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact",
+    "onCommand:type-safety-hud.showDashboard",
+    "onCommand:type-safety-hud.analyzeFile",
+    "onCommand:type-safety-hud.analyzeWorkspace"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "type-safety-hud.showDashboard",
+        "title": "Type Safety: Show Dashboard"
+      },
+      {
+        "command": "type-safety-hud.analyzeFile",
+        "title": "Type Safety: Analyze Current File"
+      },
+      {
+        "command": "type-safety-hud.analyzeWorkspace",
+        "title": "Type Safety: Analyze Workspace"
+      }
+    ],
+    "configuration": {
+      "title": "Type Safety HUD",
+      "properties": {
+        "typeSafetyHUD.enableInlineDecorations": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable inline decorations for 'any' types and JS imports"
+        },
+        "typeSafetyHUD.analyzeOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically analyze TypeScript files on save"
+        },
+        "typeSafetyHUD.excludePatterns": {
+          "type": "array",
+          "default": ["**/node_modules/**", "**/dist/**", "**/.git/**"],
+          "description": "Glob patterns for files to exclude from analysis"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -w",
+    "watch:esbuild": "esbuild src/extension.ts --bundle --outfile=out/extension.js --format=cjs --platform=node --watch",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^14.x.x",
+    "@types/vscode": "^1.70.0",
+    "@typescript-eslint/eslint-plugin": "^5.30.0",
+    "@typescript-eslint/parser": "^5.30.0",
+    "eslint": "^8.18.0",
+    "typescript": "^4.7.4",
+    "vscode": "^1.1.37"
+  },
+  "dependencies": {
+    "type-safety-hud": "file:../type-safety-hud"
+  }
+}

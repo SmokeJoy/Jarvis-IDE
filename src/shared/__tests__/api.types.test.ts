@@ -219,4 +219,4 @@ describe('LLMProviderId', () => {
     expect(providers).toContain('azureopenai');
     expect(providers).toContain('openrouter');
   });
-}); 
+});

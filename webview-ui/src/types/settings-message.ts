@@ -23,6 +23,11 @@ export enum SettingsMessageType {
 }
 
 /**
+ * Type for setting value
+ */
+export type SettingValue = string | number | boolean | string[] | null;
+
+/**
  * Interfaccia per le impostazioni dell'IDE
  */
 export interface IDESettings {
@@ -31,7 +36,7 @@ export interface IDESettings {
   contextPrompt?: string;
   selectedModel?: string;
   availableModels?: string[];
-  [key: string]: any; // Per altre impostazioni non tipizzate esplicitamente
+  [key: string]: SettingValue | undefined; // Per altre impostazioni non tipizzate esplicitamente
 }
 
 /**
@@ -62,7 +67,7 @@ export interface SettingsLoadedMessage extends SettingsMessageBase {
 export interface UpdateSettingMessage extends SettingsMessageBase {
   type: SettingsMessageType.UPDATE_SETTING;
   key: string;
-  value: any;
+  value: SettingValue;
 }
 
 /**
@@ -71,7 +76,7 @@ export interface UpdateSettingMessage extends SettingsMessageBase {
 export interface SettingUpdatedMessage extends SettingsMessageBase {
   type: SettingsMessageType.SETTING_UPDATED;
   key: string;
-  value: any;
+  value: SettingValue;
 }
 
 /**

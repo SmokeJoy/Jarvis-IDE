@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { 
-  isWebviewMessage, 
-  isExtensionMessage, 
-  safeCastAs,
-  strictGuard 
-} from '../typeGuards.js';
+import { isWebviewMessage, isExtensionMessage, safeCastAs, strictGuard } from '../typeGuards';
 
 describe('Type Guards', () => {
   describe('isWebviewMessage', () => {
@@ -40,12 +35,12 @@ describe('Type Guards', () => {
   });
 
   describe('safeCastAs', () => {
-    it('dovrebbe restituire l\'oggetto se valido', () => {
+    it("dovrebbe restituire l'oggetto se valido", () => {
       const validMsg = { type: 'chatRequest', payload: { prompt: 'Hello' } };
       expect(safeCastAs(validMsg)).toEqual(validMsg);
     });
 
-    it('dovrebbe lanciare errore se l\'oggetto non è valido', () => {
+    it("dovrebbe lanciare errore se l'oggetto non è valido", () => {
       expect(() => safeCastAs(null)).toThrow();
       expect(() => safeCastAs(undefined)).toThrow();
       expect(() => safeCastAs('string')).toThrow();
@@ -68,4 +63,4 @@ describe('Type Guards', () => {
       expect(() => requireNumber({})).toThrow('Invalid Number format');
     });
   });
-}); 
+});

@@ -43,4 +43,4 @@ export class AgentManager {
   public removeAgent(role: AgentRole): void {
     this.agents.delete(role);
   }
-} 
+}

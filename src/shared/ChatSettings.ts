@@ -3,7 +3,7 @@
  * @description Tipi e funzioni per le impostazioni di chat
  */
 
-import { ChatSettings } from './types/user-settings.types.js';
+import { ChatSettings } from './types/user-settings.types';
 
 // Esporta i tipi usando export type per evitare errori TS1205
 export type { ChatSettings };
@@ -23,6 +23,6 @@ export function normalizeChatSettings(settings?: Partial<ChatSettings>): ChatSet
     enableAutoScroll: settings?.enableAutoScroll ?? true,
     displayTimestamps: settings?.displayTimestamps ?? false,
     theme: settings?.theme ?? 'system',
-    useMarkdown: settings?.useMarkdown ?? true
+    useMarkdown: settings?.useMarkdown ?? true,
   };
 }

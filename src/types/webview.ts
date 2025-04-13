@@ -1,5 +1,5 @@
-import { ChatCompletionMessageParam } from "./provider-types/openai-types.js";
-import { ApiConfiguration } from "./global.js";
+import { ChatCompletionMessageParam } from './provider-types/openai-types';
+import { ApiConfiguration } from './global';
 
 export interface WebviewState {
   messages: ChatCompletionMessageParam[];
@@ -23,7 +23,7 @@ export interface WebviewCommand {
 
 export interface WebviewTheme {
   name: string;
-  type: "light" | "dark";
+  type: 'light' | 'dark';
   colors: {
     [key: string]: string;
   };
@@ -36,13 +36,13 @@ export interface WebviewConfiguration {
   showLineNumbers: boolean;
   wordWrap: boolean;
   tabSize: number;
-  renderWhitespace: "none" | "boundary" | "all";
+  renderWhitespace: 'none' | 'boundary' | 'all';
   scrollBeyondLastLine: boolean;
   minimap: {
     enabled: boolean;
     maxColumn: number;
     renderCharacters: boolean;
-    showSlider: "always" | "mouseover";
-    side: "right" | "left";
+    showSlider: 'always' | 'mouseover';
+    side: 'right' | 'left';
   };
-} 
+}

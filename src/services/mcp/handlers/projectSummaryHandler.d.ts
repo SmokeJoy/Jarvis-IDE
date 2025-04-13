@@ -12,7 +12,7 @@
  * @returns Riepilogo del progetto in formato Markdown
  */
 export declare function projectSummaryHandler(args: {
-    depth?: number;
-    includeFiles?: boolean;
+  depth?: number;
+  includeFiles?: boolean;
 }): Promise<string>;
 //# sourceMappingURL=projectSummaryHandler.d.ts.map

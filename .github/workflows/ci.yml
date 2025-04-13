@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+          
+      - name: Install dependencies
+        run: pnpm install
+        
+      - name: Check for inline ChatMessage objects
+        run: pnpm refactor:chat --check
+        
+      - name: Check TypeScript
+        run: pnpm tsc --noEmit
+        
+      - name: Lint
+        run: pnpm lint
+        
+      - name: Test
+        run: pnpm test 

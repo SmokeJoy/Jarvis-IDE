@@ -1,7 +1,7 @@
 /**
  * Tipi di messaggi supportati tra Webview ed Estensione
  */
-export type ExtensionMessageType = 
+export type ExtensionMessageType =
   | 'log.update'
   | 'chat.update'
   | 'model.update'
@@ -91,7 +91,7 @@ export interface InfoMessage extends BaseExtensionMessage {
 /**
  * Unione di tutti i tipi di messaggi
  */
-export type ExtensionMessage = 
+export type ExtensionMessage =
   | LogUpdateMessage
   | ChatUpdateMessage
   | ModelUpdateMessage
@@ -137,4 +137,4 @@ export interface ToolResponse {
   success: boolean;
   output?: unknown;
   error?: string;
-} 
+}

@@ -2,44 +2,25 @@
 	"compilerOptions": {
 		"target": "ES2020",
 		"module": "ESNext",
-		"moduleResolution": "node",
-		"esModuleInterop": true,
-		"strict": true,
-		"noImplicitAny": true,
-		"strictNullChecks": true,
-		"noImplicitThis": true,
-		"alwaysStrict": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"noImplicitReturns": true,
-		"noFallthroughCasesInSwitch": true,
-		"allowJs": true,
-		"checkJs": true,
+		"lib": ["ES2020", "DOM", "DOM.Iterable"],
 		"skipLibCheck": true,
-		"forceConsistentCasingInFileNames": true,
+		"moduleResolution": "bundler",
+		"esModuleInterop": true,
+		"allowImportingTsExtensions": true,
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"noEmit": true,
 		"jsx": "react-jsx",
-		"lib": ["ES2020", "DOM", "DOM.Iterable"],
-		"baseUrl": ".",
+		"strict": true,
+		"noUnusedLocals": false,
+		"noUnusedParameters": false,
+		"noFallthroughCasesInSwitch": true,
+		"types": ["node", "vitest", "@testing-library/jest-dom", "vscode"],
+		"typeRoots": ["./node_modules/@types", "./src/types"],
 		"paths": {
-			"@/*": ["src/*"],
-			"@components/*": ["src/components/*"],
-			"@hooks/*": ["src/hooks/*"],
-			"@utils/*": ["src/utils/*"],
-			"@types/*": ["src/types/*"]
-		},
-		"types": ["vitest/globals", "node"]
+			"@/*": ["./src/*"]
+		}
 	},
-	"include": [
-		"src/**/*",
-		"tests/**/*",
-		"vitest.config.ts"
-	],
-	"exclude": [
-		"node_modules",
-		"dist",
-		"coverage"
-	]
+	"include": ["src/**/*", "tests/**/*"],
+	"references": [{ "path": "./tsconfig.node.json" }]
 }

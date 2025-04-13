@@ -8,9 +8,9 @@ export const isRequestModelsMessage = (
 
 export const isModelSelectedMessage = (
   message: ModelSelectorMessageUnion
-): message is { 
-  type: ModelSelectorMessageType.MODEL_SELECTED,
-  payload: { modelId: string }
+): message is {
+  type: ModelSelectorMessageType.MODEL_SELECTED;
+  payload: { modelId: string };
 } => {
   return message.type === ModelSelectorMessageType.MODEL_SELECTED;
 };
@@ -18,8 +18,8 @@ export const isModelSelectedMessage = (
 export const isModelListUpdatedMessage = (
   message: ModelSelectorMessageUnion
 ): message is {
-  type: ModelSelectorMessageType.MODEL_LIST_UPDATED,
-  payload: Array<{ id: string; name: string }>
+  type: ModelSelectorMessageType.MODEL_LIST_UPDATED;
+  payload: Array<{ id: string; name: string }>;
 } => {
   return message.type === ModelSelectorMessageType.MODEL_LIST_UPDATED;
 };

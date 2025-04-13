@@ -1,11 +1,5 @@
 import React, { useRef } from 'react';
-import ReactFlow, {
-  Background,
-  Controls,
-  MiniMap,
-  Node,
-  Edge
-} from 'reactflow';
+import ReactFlow, { Background, Controls, MiniMap, Node, Edge } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useDecisionGraphData } from '../hooks/useDecisionGraphData';
 import { useProviderBlacklist } from '../hooks/useProviderBlacklist';
@@ -24,19 +18,22 @@ const ProviderNode = React.memo(({ data }: { data: any }) => {
   const blockReason = isBlockedProvider ? getBlockReason(data.id) : null;
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ scale: 1 }}
-      animate={{ 
+      animate={{
         scale: isBlockedProvider ? [1, 1.05, 1] : 1,
-        backgroundColor: isBlockedProvider ? '#991b1b' : 
-          data.status === 'selected' ? '#059669' :
-          data.status === 'excluded' ? '#dc2626' :
-          '#4b5563'
+        backgroundColor: isBlockedProvider
+          ? '#991b1b'
+          : data.status === 'selected'
+            ? '#059669'
+            : data.status === 'excluded'
+              ? '#dc2626'
+              : '#4b5563',
       }}
-      transition={{ 
+      transition={{
         duration: 0.3,
         repeat: isBlockedProvider ? Infinity : 0,
-        repeatDelay: 2
+        repeatDelay: 2,
       }}
       className="px-4 py-2 rounded-lg shadow-lg"
     >
@@ -49,13 +46,13 @@ const ProviderNode = React.memo(({ data }: { data: any }) => {
                 🚫 Bloccato
               </div>
             </Tooltip.Trigger>
-            <Tooltip.Content 
+            <Tooltip.Content
               className="bg-gray-900 text-white p-2 rounded shadow-lg max-w-xs"
               side="top"
             >
               <div className="text-sm font-medium">Provider Bloccato</div>
               <div className="text-xs text-gray-300 mt-1">
-                {blockReason || "Provider bloccato tramite auto-mitigation"}
+                {blockReason || 'Provider bloccato tramite auto-mitigation'}
               </div>
               <div className="text-xs text-gray-400 mt-1">
                 Ultimo aggiornamento: {new Date().toLocaleTimeString()}
@@ -64,10 +61,10 @@ const ProviderNode = React.memo(({ data }: { data: any }) => {
           </Tooltip.Root>
         )}
       </div>
-      
+
       <AnimatePresence>
         {data.score && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -80,7 +77,7 @@ const ProviderNode = React.memo(({ data }: { data: any }) => {
 
       <AnimatePresence>
         {data.stats && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -107,18 +104,18 @@ const nodeTypes = {
     <div className="px-4 py-2 rounded-lg shadow-lg bg-blue-600">
       <div className="text-white font-medium">{data.label}</div>
     </div>
-  )
+  ),
 };
 
 const edgeTypes = {
   default: {
     style: { stroke: '#94a3b8' },
-    animated: false
+    animated: false,
   },
   selected: {
     style: { stroke: '#10b981' },
-    animated: true
-  }
+    animated: true,
+  },
 };
 
 export const DecisionGraphView: React.FC<DecisionGraphViewProps> = ({ entry }) => {
@@ -127,13 +124,13 @@ export const DecisionGraphView: React.FC<DecisionGraphViewProps> = ({ entry }) =
 
   const handleExportPNG = async () => {
     if (!graphRef.current) return;
-    
+
     try {
       const dataUrl = await exportGraphAsPNG(graphRef.current);
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       downloadFile(dataUrl, `decision-graph-${timestamp}.png`, 'image/png');
     } catch (error) {
-      console.error('Errore durante l\'export del grafo come PNG:', error);
+      console.error("Errore durante l'export del grafo come PNG:", error);
     }
   };
 
@@ -144,34 +141,28 @@ export const DecisionGraphView: React.FC<DecisionGraphViewProps> = ({ entry }) =
         edges: edges,
         metadata: {
           timestamp: new Date().toISOString(),
-          version: '1.0'
-        }
+          version: '1.0',
+        },
       };
-      
+
       const jsonString = exportGraphAsJSON(graphData);
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       downloadFile(jsonString, `decision-graph-${timestamp}.json`, 'application/json');
     } catch (error) {
-      console.error('Errore durante l\'export del grafo come JSON:', error);
+      console.error("Errore durante l'export del grafo come JSON:", error);
     }
   };
 
   return (
     <div className="relative w-full h-full">
       <div ref={graphRef} className="w-full h-full">
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          fitView
-        >
+        <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes} fitView>
           <Background />
           <Controls />
           <MiniMap />
         </ReactFlow>
       </div>
-      
+
       <div className="absolute top-4 right-4 flex gap-2">
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -181,7 +172,7 @@ export const DecisionGraphView: React.FC<DecisionGraphViewProps> = ({ entry }) =
         >
           Export PNG
         </motion.button>
-        
+
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -214,4 +205,4 @@ export const DecisionGraphView: React.FC<DecisionGraphViewProps> = ({ entry }) =
       </div>
     </div>
   );
-}; 
+};

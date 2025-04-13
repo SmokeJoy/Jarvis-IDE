@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useReducer } from 'react';
-import { ExtensionStateContextType, ExtensionStateProviderProps } from './types.js';
-import { ExtensionState } from '../types/extension.js';
-import { ApiConfiguration } from '../types/api.types.js';
-import { ConfigModelInfo } from '../types/models.js';
+import { ExtensionStateContextType, ExtensionStateProviderProps } from './types';
+import { ExtensionState } from '../types/extension';
+import { ApiConfiguration } from '../types/api.types';
+import { ConfigModelInfo } from '../types/models';
 
 const ExtensionStateContext = createContext<ExtensionStateContextType | null>(null);
 
@@ -14,12 +14,15 @@ type ExtensionStateAction =
   | { type: 'SET_SYSTEM_PROMPT_PATH'; payload: string }
   | { type: 'SET_AVAILABLE_MODELS'; payload: ExtensionState['availableModels'] };
 
-function extensionStateReducer(state: ExtensionState, action: ExtensionStateAction): ExtensionState {
+function extensionStateReducer(
+  state: ExtensionState,
+  action: ExtensionStateAction
+): ExtensionState {
   switch (action.type) {
     case 'SET_API_CONFIGURATION':
       return {
         ...state,
-        apiConfiguration: { ...state.apiConfiguration, ...action.payload }
+        apiConfiguration: { ...state.apiConfiguration, ...action.payload },
       };
     case 'SET_TELEMETRY_SETTING':
       return { ...state, telemetrySetting: action.payload };
@@ -38,7 +41,7 @@ function extensionStateReducer(state: ExtensionState, action: ExtensionStateActi
 
 export const ExtensionStateProvider: React.FC<ExtensionStateProviderProps> = ({
   initialState,
-  children
+  children,
 }) => {
   const [state, dispatch] = useReducer(extensionStateReducer, initialState);
 
@@ -46,17 +49,14 @@ export const ExtensionStateProvider: React.FC<ExtensionStateProviderProps> = ({
     state,
     setApiConfiguration: (config) => dispatch({ type: 'SET_API_CONFIGURATION', payload: config }),
     setTelemetrySetting: (setting) => dispatch({ type: 'SET_TELEMETRY_SETTING', payload: setting }),
-    setCustomInstructions: (instructions) => dispatch({ type: 'SET_CUSTOM_INSTRUCTIONS', payload: instructions }),
+    setCustomInstructions: (instructions) =>
+      dispatch({ type: 'SET_CUSTOM_INSTRUCTIONS', payload: instructions }),
     setSystemPrompt: (prompt) => dispatch({ type: 'SET_SYSTEM_PROMPT', payload: prompt }),
     setSystemPromptPath: (path) => dispatch({ type: 'SET_SYSTEM_PROMPT_PATH', payload: path }),
-    setAvailableModels: (models) => dispatch({ type: 'SET_AVAILABLE_MODELS', payload: models })
+    setAvailableModels: (models) => dispatch({ type: 'SET_AVAILABLE_MODELS', payload: models }),
   };
 
-  return (
-    <ExtensionStateContext.Provider value={value}>
-      {children}
-    </ExtensionStateContext.Provider>
-  );
+  return <ExtensionStateContext.Provider value={value}>{children}</ExtensionStateContext.Provider>;
 };
 
 export const useExtensionState = (): ExtensionStateContextType => {
@@ -65,4 +65,4 @@ export const useExtensionState = (): ExtensionStateContextType => {
     throw new Error('useExtensionState must be used within an ExtensionStateProvider');
   }
   return context;
-}; 
+};

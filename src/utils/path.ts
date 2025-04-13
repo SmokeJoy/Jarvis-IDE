@@ -1,5 +1,5 @@
-import * as path from "path"
-import * as os from "os"
+import * as path from 'path';
+import * as os from 'os';
 
 /*
 The Node.js 'path' module resolves and normalizes paths differently depending on the platform:
@@ -27,86 +27,86 @@ Observations:
 */
 
 function toPosixPath(p: string) {
-	// Extended-Length Paths in Windows start with "\\?\" to allow longer paths and bypass usual parsing. If detected, we return the path unmodified to maintain functionality, as altering these paths could break their special syntax.
-	const isExtendedLengthPath = p.startsWith("\\\\?\\")
+  // Extended-Length Paths in Windows start with "\\?\" to allow longer paths and bypass usual parsing. If detected, we return the path unmodified to maintain functionality, as altering these paths could break their special syntax.
+  const isExtendedLengthPath = p.startsWith('\\\\?\\');
 
-	if (isExtendedLengthPath) {
-		return p
-	}
+  if (isExtendedLengthPath) {
+    return p;
+  }
 
-	return p.replace(/\\/g, "/")
+  return p.replace(/\\/g, '/');
 }
 
 // Declaration merging allows us to add a new method to the String type
 // You must import this file in your entry point (extension.ts) to have access at runtime
 declare global {
-	interface String {
-		toPosix(): string
-	}
+  interface String {
+    toPosix(): string;
+  }
 }
 
 String.prototype.toPosix = function (this: string): string {
-	return toPosixPath(this)
-}
+  return toPosixPath(this);
+};
 
 // Safe path comparison that works across different platforms
 export function arePathsEqual(path1: string, path2: string): boolean {
-	const normalized1 = path.normalize(path1).toLowerCase();
-	const normalized2 = path.normalize(path2).toLowerCase();
-	return normalized1 === normalized2;
+  const normalized1 = path.normalize(path1).toLowerCase();
+  const normalized2 = path.normalize(path2).toLowerCase();
+  return normalized1 === normalized2;
 }
 
 export function getRelativePath(from: string, to: string): string {
-	return path.relative(from, to);
+  return path.relative(from, to);
 }
 
 export function getAbsolutePath(relativePath: string, basePath: string): string {
-	return path.resolve(basePath, relativePath);
+  return path.resolve(basePath, relativePath);
 }
 
 export function isSubPath(parent: string, child: string): boolean {
-	const relative = path.relative(parent, child);
-	return !relative.startsWith("..") && !path.isAbsolute(relative);
+  const relative = path.relative(parent, child);
+  return !relative.startsWith('..') && !path.isAbsolute(relative);
 }
 
 export function joinPaths(...paths: string[]): string {
-	return path.join(...paths);
+  return path.join(...paths);
 }
 
 export function normalizePath(filePath: string): string {
-	return path.normalize(filePath);
+  return path.normalize(filePath);
 }
 
 export function getExtension(filePath: string): string {
-	return path.extname(filePath);
+  return path.extname(filePath);
 }
 
 export function getBasename(filePath: string): string {
-	return path.basename(filePath);
+  return path.basename(filePath);
 }
 
 export function getDirname(filePath: string): string {
-	return path.dirname(filePath);
+  return path.dirname(filePath);
 }
 
 export function getReadablePath(cwd: string, relPath?: string): string {
-	relPath = relPath || ""
-	// path.resolve is flexible in that it will resolve relative paths like '../../' to the cwd and even ignore the cwd if the relPath is actually an absolute path
-	const absolutePath = path.resolve(cwd, relPath)
-	if (arePathsEqual(cwd, path.join(os.homedir(), "Desktop"))) {
-		// User opened vscode without a workspace, so cwd is the Desktop. Show the full absolute path to keep the user aware of where files are being created
-		return absolutePath.toPosix()
-	}
-	if (arePathsEqual(path.normalize(absolutePath), path.normalize(cwd))) {
-		return path.basename(absolutePath).toPosix()
-	} else {
-		// show the relative path to the cwd
-		const normalizedRelPath = path.relative(cwd, absolutePath)
-		if (absolutePath.includes(cwd)) {
-			return normalizedRelPath.toPosix()
-		} else {
-			// we are outside the cwd, so show the absolute path (useful for when jarvis-ide passes in '../../' for example)
-			return absolutePath.toPosix()
-		}
-	}
+  relPath = relPath || '';
+  // path.resolve is flexible in that it will resolve relative paths like '../../' to the cwd and even ignore the cwd if the relPath is actually an absolute path
+  const absolutePath = path.resolve(cwd, relPath);
+  if (arePathsEqual(cwd, path.join(os.homedir(), 'Desktop'))) {
+    // User opened vscode without a workspace, so cwd is the Desktop. Show the full absolute path to keep the user aware of where files are being created
+    return absolutePath.toPosix();
+  }
+  if (arePathsEqual(path.normalize(absolutePath), path.normalize(cwd))) {
+    return path.basename(absolutePath).toPosix();
+  } else {
+    // show the relative path to the cwd
+    const normalizedRelPath = path.relative(cwd, absolutePath);
+    if (absolutePath.includes(cwd)) {
+      return normalizedRelPath.toPosix();
+    } else {
+      // we are outside the cwd, so show the absolute path (useful for when jarvis-ide passes in '../../' for example)
+      return absolutePath.toPosix();
+    }
+  }
 }

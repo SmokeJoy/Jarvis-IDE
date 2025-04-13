@@ -1,4 +1,3 @@
-
 /**
  * File di test creato dall'agente Jarvis
  * Prompt: Crea un file di test per l'agente Jarvis
@@ -10,7 +9,7 @@ describe('Jarvis Agent Test', () => {
   it('should pass a simple test', () => {
     expect(true).toBe(true);
   });
-  
+
   it('should correctly add numbers', () => {
     expect(1 + 1).toBe(2);
   });

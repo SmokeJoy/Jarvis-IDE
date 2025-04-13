@@ -1,46 +1,48 @@
-import { vscode } from '../../../webview-ui/src/utils/vscode.js'
+import { vscode } from '../../../webview-ui/src/utils/vscode';
+import { createSafeMessage } from "../../shared/types/message";
 
 interface LMStudioResponse {
-  response: string
-  error?: string
+  response: string;
+  error?: string;
 }
 
 export class LMStudioService {
-  private static instance: LMStudioService
-  private baseUrl: string = 'http://localhost:1234/v1'
-  private isConnected: boolean = false
+  private static instance: LMStudioService;
+  private baseUrl: string = 'http://localhost:1234/v1';
+  private isConnected: boolean = false;
 
   private constructor() {}
 
   public static getInstance(): LMStudioService {
     if (!LMStudioService.instance) {
-      LMStudioService.instance = new LMStudioService()
+      LMStudioService.instance = new LMStudioService();
     }
-    return LMStudioService.instance
+    return LMStudioService.instance;
   }
 
   public async connect(): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/models`)
+      const response = await fetch(`${this.baseUrl}/models`);
       if (response.ok) {
-        this.isConnected = true
-        return true
+        this.isConnected = true;
+        return true;
       }
-      return false
+      return false;
     } catch (error) {
-      console.error('Errore di connessione a LM Studio:', error)
-      return false
+      console.error('Errore di connessione a LM Studio:', error);
+      return false;
     }
   }
 
   public async sendPrompt(prompt: string): Promise<LMStudioResponse> {
     if (!this.isConnected) {
-      const connected = await this.connect()
+      const connected = await this.connect();
       if (!connected) {
         return {
           response: '',
-          error: 'Impossibile connettersi a LM Studio. Assicurati che il servizio sia in esecuzione.'
-        }
+          error:
+            'Impossibile connettersi a LM Studio. Assicurati che il servizio sia in esecuzione.',
+        };
       }
     }
 
@@ -52,31 +54,28 @@ export class LMStudioService {
         },
         body: JSON.stringify({
           messages: [
-            {
-              role: 'user',
-              content: prompt
-            }
+            createSafeMessage({role: 'user', content: prompt}),
           ],
           model: 'local-model',
           temperature: 0.7,
-          max_tokens: 2000
-        })
-      })
+          max_tokens: 2000,
+        }),
+      });
 
       if (!response.ok) {
-        throw new Error(`Errore HTTP: ${response.status}`)
+        throw new Error(`Errore HTTP: ${response.status}`);
       }
 
-      const data = await response.json()
+      const data = await response.json();
       return {
-        response: data.choices[0].message.content
-      }
+        response: data.choices[0].message.content,
+      };
     } catch (error) {
-      console.error('Errore nell\'invio del prompt:', error)
+      console.error("Errore nell'invio del prompt:", error);
       return {
         response: '',
-        error: 'Errore durante l\'elaborazione del prompt. Riprova più tardi.'
-      }
+        error: "Errore durante l'elaborazione del prompt. Riprova più tardi.",
+      };
     }
   }
-} 
+}

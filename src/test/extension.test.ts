@@ -1,43 +1,48 @@
-import { readFile } from "fs/promises"
-import { describe, it, after } from "mocha"
-import path from "path"
-import { expect } from 'chai'
-import * as vscode from "vscode"
-import { test, beforeEach, afterEach, vi } from "vitest"
-import { activate, deactivate } from "../extension.js"
-import { JarvisProvider } from "../core/webview/JarvisProvider.js"
-import { TelemetryService } from "../services/TelemetryService.js"
-import { ApiConfiguration } from "../types/global.js"
+import { readFile } from 'fs/promises';
+import { describe, it, after } from 'mocha';
+import path from 'path';
+import { expect } from 'chai';
+import * as vscode from 'vscode';
+import { test, beforeEach, afterEach, vi } from 'vitest';
+import { activate, deactivate } from '../extension';
+import { JarvisProvider } from '../core/webview/JarvisProvider';
+import { TelemetryService } from '../services/TelemetryService';
+import { ApiConfiguration } from '../types/global';
 
-const packagePath = path.join(__dirname, "..", "..", "package.json")
+const packagePath = path.join(__dirname, '..', '..', 'package.json');
 
-describe("Jarvis IDE Extension", () => {
-	after(() => {
-		vscode.window.showInformationMessage("All tests done!")
-	})
+describe('Jarvis IDE Extension', () => {
+  after(() => {
+    vscode.window.showInformationMessage('All tests done!');
+  });
 
-	it("should verify extension ID matches package.json", async () => {
-		const packageJSON = JSON.parse(await readFile(packagePath, "utf8"))
-		const id = packageJSON.publisher + "." + packageJSON.name
-		const jarvisExtensionApi = vscode.extensions.getExtension(id)
+  it('should verify extension ID matches package.json', async () => {
+    const packageJSON = JSON.parse(await readFile(packagePath, 'utf8'));
+    const id = packageJSON.publisher + '.' + packageJSON.name;
+    const jarvisExtensionApi = vscode.extensions.getExtension(id);
 
-		jarvisExtensionApi?.id.should.equal(id)
-	})
+    jarvisExtensionApi?.id.should.equal(id);
+  });
 
-	it("should successfully execute the plus button command", async () => {
-		await new Promise((resolve) => setTimeout(resolve, 400))
-		await vscode.commands.executeCommand("jarvis-ide.plusButtonClicked")
-	})
+  it('should successfully execute the plus button command', async () => {
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    await vscode.commands.executeCommand('jarvis-ide.plusButtonClicked');
+  });
 
-	// New test to verify xvfb and webview functionality
-	it("should create and display a webview panel", async () => {
-		// Create a webview panel
-		const panel = vscode.window.createWebviewPanel("testWebview", "CI/CD Test", vscode.ViewColumn.One, {
-			enableScripts: true,
-		})
+  // New test to verify xvfb and webview functionality
+  it('should create and display a webview panel', async () => {
+    // Create a webview panel
+    const panel = vscode.window.createWebviewPanel(
+      'testWebview',
+      'CI/CD Test',
+      vscode.ViewColumn.One,
+      {
+        enableScripts: true,
+      }
+    );
 
-		// Set some HTML content
-		panel.webview.html = `
+    // Set some HTML content
+    panel.webview.html = `
 			<!DOCTYPE html>
 			<html>
 				<head>
@@ -48,29 +53,34 @@ describe("Jarvis IDE Extension", () => {
 					<div id="test">Testing xvfb display server</div>
 				</body>
 			</html>
-		`
+		`;
 
-		// Verify panel exists
-		expect(panel).to.exist
-		expect(panel.visible).to.be.true()
+    // Verify panel exists
+    expect(panel).to.exist;
+    expect(panel.visible).to.be.true();
 
-		// Clean up
-		panel.dispose()
-	})
+    // Clean up
+    panel.dispose();
+  });
 
-	// Test webview message passing
-	it("should handle webview messages", async () => {
-		const panel = vscode.window.createWebviewPanel("testWebview", "Message Test", vscode.ViewColumn.One, {
-			enableScripts: true,
-		})
+  // Test webview message passing
+  it('should handle webview messages', async () => {
+    const panel = vscode.window.createWebviewPanel(
+      'testWebview',
+      'Message Test',
+      vscode.ViewColumn.One,
+      {
+        enableScripts: true,
+      }
+    );
 
-		// Set up message handling
-		const messagePromise = new Promise<string>((resolve) => {
-			panel.webview.onDidReceiveMessage((message) => resolve(message.text), undefined)
-		})
+    // Set up message handling
+    const messagePromise = new Promise<string>((resolve) => {
+      panel.webview.onDidReceiveMessage((message) => resolve(message.text), undefined);
+    });
 
-		// Add message sending script
-		panel.webview.html = `
+    // Add message sending script
+    panel.webview.html = `
 			<!DOCTYPE html>
 			<html>
 				<head>
@@ -84,58 +94,58 @@ describe("Jarvis IDE Extension", () => {
 					</script>
 				</body>
 			</html>
-		`
+		`;
 
-		// Wait for message
-		const message = await messagePromise
-		message.should.equal("test-message")
+    // Wait for message
+    const message = await messagePromise;
+    message.should.equal('test-message');
 
-		// Clean up
-		panel.dispose()
-	})
-})
+    // Clean up
+    panel.dispose();
+  });
+});
 
-describe("Extension", () => {
-	let context: vscode.ExtensionContext;
+describe('Extension', () => {
+  let context: vscode.ExtensionContext;
 
-	beforeEach(() => {
-		context = {
-			subscriptions: [],
-			extensionPath: "/test/path",
-			globalState: {
-				get: vi.fn(),
-				update: vi.fn(),
-			},
-			workspaceState: {
-				get: vi.fn(),
-				update: vi.fn(),
-			},
-		} as any;
-	});
+  beforeEach(() => {
+    context = {
+      subscriptions: [],
+      extensionPath: '/test/path',
+      globalState: {
+        get: vi.fn(),
+        update: vi.fn(),
+      },
+      workspaceState: {
+        get: vi.fn(),
+        update: vi.fn(),
+      },
+    } as any;
+  });
 
-	afterEach(() => {
-		vi.clearAllMocks();
-	});
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
 
-	test("should activate extension", async () => {
-		const extension = await activate(context);
-		expect(extension).toBeDefined();
-	});
+  test('should activate extension', async () => {
+    const extension = await activate(context);
+    expect(extension).toBeDefined();
+  });
 
-	test("should register commands", async () => {
-		await activate(context);
-		expect(vscode.commands.registerCommand).toHaveBeenCalled();
-	});
+  test('should register commands', async () => {
+    await activate(context);
+    expect(vscode.commands.registerCommand).toHaveBeenCalled();
+  });
 
-	test("activate should register extension", async () => {
-		const id = "claude-dev.jarvis-ide"
-		const jarvisExtensionApi = await activate()
-		expect(jarvisExtensionApi?.id).toBe(id)
-	})
+  test('activate should register extension', async () => {
+    const id = 'claude-dev.jarvis-ide';
+    const jarvisExtensionApi = await activate();
+    expect(jarvisExtensionApi?.id).toBe(id);
+  });
 
-	test("deactivate should dispose extension", async () => {
-		const message = "test-message"
-		await deactivate(message)
-		expect(message).toBe("test-message")
-	})
-})
+  test('deactivate should dispose extension', async () => {
+    const message = 'test-message';
+    await deactivate(message);
+    expect(message).toBe('test-message');
+  });
+});

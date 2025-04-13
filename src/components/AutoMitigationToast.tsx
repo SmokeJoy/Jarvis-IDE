@@ -44,4 +44,4 @@ export const AutoMitigationToast: React.FC = () => {
       )}
     </AnimatePresence>
   );
-}; 
+};

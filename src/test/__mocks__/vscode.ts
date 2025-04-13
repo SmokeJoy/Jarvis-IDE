@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { vi } from 'vitest';
 
 export const window = {
   showInformationMessage: vi.fn(),
@@ -65,4 +65,4 @@ export default {
   WorkspaceEdit,
   ConfigurationTarget,
   ViewColumn,
-}; 
+};

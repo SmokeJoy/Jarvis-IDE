@@ -18,14 +18,14 @@ export {
   FallbackMonitorPanel,
   FallbackAuditPanel,
   FallbackChartPanel,
-  
+
   // Hooks
   useFallbackTelemetry,
   useFallbackAudit,
   useFallbackChartData,
-  
+
   // Types
   FallbackAudit,
   FallbackSnapshot,
-  ProviderStats
-}; 
+  ProviderStats,
+};

@@ -2,17 +2,29 @@
  * @file provider-registry.ts
  * @description Registro centralizzato per i provider LLM
  * @version 1.0.0
- * 
+ *
  * Implementa un layer di astrazione per i provider LLM con supporto dinamico
  */
 
-import { logger } from '../utils/logger.js';
+import { logger } from '../utils/logger';
 
 /**
  * Identificatore univoco per un provider LLM
  * Elenco ufficiale dei provider supportati dall'orchestratore
  */
-export type LLMProviderId = 'openai' | 'openrouter' | 'ollama' | 'anthropic' | 'mistral' | 'google' | 'cohere';
+export type LLMProviderId =
+  | 'openai'
+  | 'openrouter'
+  | 'ollama'
+  | 'anthropic'
+  | 'mistral'
+  | 'google'
+  | 'cohere'
+  | 'mock'
+  | 'mock1'
+  | 'mock2'
+  | 'invalid'
+  | 'non-existent';
 
 /**
  * Interfaccia base per tutti i parametri di configurazione dei provider
@@ -53,11 +65,14 @@ export interface ValidationRules {
   /** Valori enumerati validi: {campo: [valore1, valore2, ...]} */
   enums?: Record<string, string[]>;
   /** Regole per validare le stringhe: {campo: {minLength, maxLength, regex}} */
-  stringRules?: Record<string, {
-    minLength?: number;
-    maxLength?: number;
-    regex?: RegExp;
-  }>;
+  stringRules?: Record<
+    string,
+    {
+      minLength?: number;
+      maxLength?: number;
+      regex?: RegExp;
+    }
+  >;
 }
 
 /**
@@ -100,26 +115,26 @@ export interface LLMProviderHandler {
   readonly isAvailable: boolean;
   /** Configurazione corrente del provider */
   readonly config?: Record<string, any>;
-  
+
   /**
    * Aggiorna la configurazione del provider
    * @param config Nuova configurazione
    */
   updateConfig?(config: Record<string, any>): void;
-  
+
   /**
    * Effettua una chiamata al modello
    * @param options Opzioni della richiesta
    * @returns Promise con la risposta del modello
    */
   call(options: LLMRequestOptions): Promise<LLMResponse>;
-  
+
   /**
    * Ottiene la lista dei modelli disponibili
    * @returns Promise con l'array dei modelli
    */
   getAvailableModels(): Promise<Model[]>;
-  
+
   /**
    * Valida le opzioni della richiesta
    * @param options Opzioni da validare
@@ -139,10 +154,7 @@ export type LLMProviderClass = new () => LLMProviderHandler;
  * @param rules Regole di validazione
  * @returns true se l'oggetto è valido, false altrimenti
  */
-export function validateObject(
-  obj: Record<string, any>, 
-  rules: ValidationRules
-): boolean {
+export function validateObject(obj: Record<string, any>, rules: ValidationRules): boolean {
   // Verifica campi richiesti
   if (rules.required) {
     for (const field of rules.required) {
@@ -152,7 +164,7 @@ export function validateObject(
       }
     }
   }
-  
+
   // Verifica intervalli numerici
   if (rules.numericRanges) {
     for (const [field, [min, max]] of Object.entries(rules.numericRanges)) {
@@ -164,33 +176,39 @@ export function validateObject(
       }
     }
   }
-  
+
   // Verifica valori enumerati
   if (rules.enums) {
     for (const [field, allowedValues] of Object.entries(rules.enums)) {
       if (obj[field] !== undefined && !allowedValues.includes(obj[field])) {
-        console.error(`Valore non valido per ${field}: ${obj[field]}. Valori permessi: ${allowedValues.join(', ')}`);
+        console.error(
+          `Valore non valido per ${field}: ${obj[field]}. Valori permessi: ${allowedValues.join(', ')}`
+        );
         return false;
       }
     }
   }
-  
+
   // Verifica regole per stringhe
   if (rules.stringRules) {
     for (const [field, rule] of Object.entries(rules.stringRules)) {
       if (obj[field] !== undefined && typeof obj[field] === 'string') {
         const value = obj[field] as string;
-        
+
         if (rule.minLength !== undefined && value.length < rule.minLength) {
-          console.error(`Campo ${field} troppo corto: ${value.length} caratteri (min: ${rule.minLength})`);
+          console.error(
+            `Campo ${field} troppo corto: ${value.length} caratteri (min: ${rule.minLength})`
+          );
           return false;
         }
-        
+
         if (rule.maxLength !== undefined && value.length > rule.maxLength) {
-          console.error(`Campo ${field} troppo lungo: ${value.length} caratteri (max: ${rule.maxLength})`);
+          console.error(
+            `Campo ${field} troppo lungo: ${value.length} caratteri (max: ${rule.maxLength})`
+          );
           return false;
         }
-        
+
         if (rule.regex !== undefined && !rule.regex.test(value)) {
           console.error(`Campo ${field} non corrisponde al pattern richiesto: ${value}`);
           return false;
@@ -198,7 +216,7 @@ export function validateObject(
       }
     }
   }
-  
+
   return true;
 }
 
@@ -222,30 +240,30 @@ export class LLMProviderRegistry {
    * @returns true se il provider è stato registrato con successo
    */
   static registerProvider(
-    id: LLMProviderId, 
-    handler: LLMProviderHandler, 
+    id: LLMProviderId,
+    handler: LLMProviderHandler,
     setAsDefault: boolean = false
   ): boolean {
     return LLMProviderRegistry.instance.registerProvider(id, handler, setAsDefault);
   }
 
   private registerProvider(
-    id: LLMProviderId, 
-    handler: LLMProviderHandler, 
+    id: LLMProviderId,
+    handler: LLMProviderHandler,
     setAsDefault: boolean = false
   ): boolean {
     try {
       this.validateProviderHandler(id, handler);
-      
+
       this.providers.set(id, handler);
       logger.info(`Provider LLM registrato: ${id} (${handler.name})`);
-      
+
       // Imposta come default se è il primo o se richiesto
       if (setAsDefault || this.defaultProviderId === null) {
         this.defaultProviderId = id;
         logger.info(`Provider predefinito impostato: ${id}`);
       }
-      
+
       return true;
     } catch (error) {
       logger.error(`Errore durante la registrazione del provider ${id}: ${error.message}`);
@@ -265,7 +283,7 @@ export class LLMProviderRegistry {
     if (!this.providers.has(id)) {
       throw new Error(`Impossibile impostare provider default: ${id} non registrato`);
     }
-    
+
     this.defaultProviderId = id;
     logger.info(`Provider predefinito impostato: ${id}`);
   }
@@ -297,7 +315,7 @@ export class LLMProviderRegistry {
     if (!this.providers.has(id)) {
       throw new Error(`Provider LLM '${id}' non trovato nel registry`);
     }
-    
+
     return this.providers.get(id)!;
   }
 
@@ -314,7 +332,7 @@ export class LLMProviderRegistry {
     if (this.defaultProviderId === null) {
       throw new Error('Nessun provider LLM predefinito configurato');
     }
-    
+
     return this.providers.get(this.defaultProviderId)!;
   }
 
@@ -339,16 +357,16 @@ export class LLMProviderRegistry {
     if (!this.providers.has(id)) {
       return false;
     }
-    
+
     this.providers.delete(id);
     logger.info(`Provider LLM rimosso: ${id}`);
-    
+
     // Resetta il provider default se è quello rimosso
     if (this.defaultProviderId === id) {
       this.defaultProviderId = null;
       logger.info('Provider predefinito resettato');
     }
-    
+
     return true;
   }
 
@@ -374,13 +392,13 @@ export class LLMProviderRegistry {
    */
   static getAvailableProviders(): Map<LLMProviderId, LLMProviderHandler> {
     const available = new Map<LLMProviderId, LLMProviderHandler>();
-    
+
     for (const [id, handler] of LLMProviderRegistry.instance.providers.entries()) {
       if (handler.isAvailable) {
         available.set(id, handler);
       }
     }
-    
+
     return available;
   }
 
@@ -395,19 +413,21 @@ export class LLMProviderRegistry {
     if (!handler.name || handler.name.trim() === '') {
       throw new Error(`Provider ${id} invalido: proprietà 'name' mancante o vuota`);
     }
-    
+
     // Verifica metodi obbligatori
     if (!handler.call || typeof handler.call !== 'function') {
       throw new Error(`Provider ${id} invalido: metodo 'call' mancante`);
     }
-    
+
     if (!handler.getAvailableModels || typeof handler.getAvailableModels !== 'function') {
       throw new Error(`Provider ${id} invalido: metodo 'getAvailableModels' mancante`);
     }
-    
+
     // Verifica metodi opzionali se presenti
     if (handler.validateRequest && typeof handler.validateRequest !== 'function') {
-      throw new Error(`Provider ${id} invalido: metodo 'validateRequest' presente ma non è una funzione`);
+      throw new Error(
+        `Provider ${id} invalido: metodo 'validateRequest' presente ma non è una funzione`
+      );
     }
   }
 
@@ -430,8 +450,11 @@ export const registerProvider = (
 
 export const hasProvider = (id: LLMProviderId): boolean => LLMProviderRegistry.hasProvider(id);
 
-export const getProvider = (id: LLMProviderId): LLMProviderHandler => LLMProviderRegistry.getProvider(id);
+export const getProvider = (id: LLMProviderId): LLMProviderHandler =>
+  LLMProviderRegistry.getProvider(id);
 
-export const getDefaultProvider = (): LLMProviderHandler => LLMProviderRegistry.getDefaultProvider();
+export const getDefaultProvider = (): LLMProviderHandler =>
+  LLMProviderRegistry.getDefaultProvider();
 
-export const unregisterProvider = (id: LLMProviderId): boolean => LLMProviderRegistry.unregisterProvider(id); 
+export const unregisterProvider = (id: LLMProviderId): boolean =>
+  LLMProviderRegistry.unregisterProvider(id);

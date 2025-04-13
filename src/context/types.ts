@@ -1,6 +1,6 @@
-import { ExtensionState } from '../types/extension.js';
-import { ApiConfiguration } from '../types/api.types.js';
-import { ConfigModelInfo } from '../types/models.js';
+import { ExtensionState } from '../types/extension';
+import { ApiConfiguration } from '../types/api.types';
+import { ConfigModelInfo } from '../types/models';
 
 export interface ExtensionStateContextType {
   state: ExtensionState;
@@ -15,4 +15,4 @@ export interface ExtensionStateContextType {
 export interface ExtensionStateProviderProps {
   initialState: ExtensionState;
   children: React.ReactNode;
-} 
+}

@@ -154,4 +154,4 @@ export type WebviewMessage =
   | LoadContextMessage
   | ModelSwitchMessage
   | ProgressUpdateMessage
-  | SearchDocsMessage; 
+  | SearchDocsMessage;

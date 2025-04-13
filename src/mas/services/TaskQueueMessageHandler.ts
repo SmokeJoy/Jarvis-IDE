@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { MasManager } from '../MasManager.js';
-import { AgentStatus } from '../../shared/types/mas.types.js';
-import { WebviewMessage } from '../../types/webview.types.js';
-import { Logger } from '../../utils/logger.js';
-import { TaskQueueService } from './TaskQueueService.js';
+import { MasManager } from '../MasManager';
+import { AgentStatus } from '../../shared/types/mas.types';
+import { WebviewMessage } from '../../types/webview.types';
+import { Logger } from '../../utils/logger';
+import { TaskQueueService } from './TaskQueueService';
 
 // Definiamo interfacce per i messaggi specifici se non esistono nei file centralizzati
 interface TaskQueueViewMessage extends WebviewMessage {
@@ -40,7 +40,7 @@ interface SetFilterMessage extends WebviewMessage {
 }
 
 // Tipo unione per tutti i messaggi supportati
-type AllWebViewMessages = 
+type AllWebViewMessages =
   | TaskQueueViewMessage
   | AbortTaskMessage
   | RerunTaskMessage
@@ -103,23 +103,31 @@ export class TaskQueueMessageHandler {
 
     // Ottieni tutti i task nel sistema
     const allTasks = this.masManager.getAllTasks();
-    
+
     // Ottieni lo stato corrente dal MasManager
     const masQueueState = this.masManager.getTaskQueueState();
     const agents = this.masManager.getAllAgentsStatus();
-    
+
     // Converti lo stato per la WebView utilizzando gli array di task
     const queueState = {
       total: allTasks.length,
-      pending: allTasks.filter(task => task.status === 'pending').length,
+      pending: allTasks.filter((task) => task.status === 'pending').length,
       active: masQueueState.active || null,
-      completed: allTasks.filter(task => task.status === 'completed').length,
-      failed: allTasks.filter(task => task.status === 'failed').length,
+      completed: allTasks.filter((task) => task.status === 'completed').length,
+      failed: allTasks.filter((task) => task.status === 'failed').length,
       priorityDistribution: {
-        high: allTasks.filter(task => task.status === 'pending' && task.instruction.priority === 'high'),
-        normal: allTasks.filter(task => task.status === 'pending' && (task.instruction.priority === 'normal' || !task.instruction.priority)),
-        low: allTasks.filter(task => task.status === 'pending' && task.instruction.priority === 'low')
-      }
+        high: allTasks.filter(
+          (task) => task.status === 'pending' && task.instruction.priority === 'high'
+        ),
+        normal: allTasks.filter(
+          (task) =>
+            task.status === 'pending' &&
+            (task.instruction.priority === 'normal' || !task.instruction.priority)
+        ),
+        low: allTasks.filter(
+          (task) => task.status === 'pending' && task.instruction.priority === 'low'
+        ),
+      },
     };
 
     // Invia l'aggiornamento alla WebView
@@ -128,8 +136,8 @@ export class TaskQueueMessageHandler {
       payload: {
         queueState: queueState,
         agents: agents,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     };
 
     this.panel.webview.postMessage(message);
@@ -188,7 +196,7 @@ export class TaskQueueMessageHandler {
    */
   private handleAbortTask(message: AbortTaskMessage): void {
     const taskId = message.payload.taskId;
-    
+
     if (!taskId) {
       this.logger.warn('ID task mancante nella richiesta di annullamento');
       return;
@@ -196,7 +204,7 @@ export class TaskQueueMessageHandler {
 
     this.logger.debug(`Richiesta di annullamento del task: ${taskId}`);
     const aborted = this.masManager.abortTask(taskId);
-    
+
     if (!aborted) {
       this.logger.warn(`Impossibile annullare il task: ${taskId}`);
     }
@@ -208,14 +216,14 @@ export class TaskQueueMessageHandler {
    */
   private handleRerunTask(message: RerunTaskMessage): void {
     const task = message.payload.task;
-    
+
     if (!task || !task.instruction) {
       this.logger.warn('Task o istruzione mancante nella richiesta di ri-esecuzione');
       return;
     }
 
     this.logger.debug(`Richiesta di ri-esecuzione del task: ${task.id}`);
-    
+
     try {
       // Usa le stesse impostazioni del task originale per crearne uno nuovo
       const newTask = this.masManager.queueInstruction(
@@ -250,4 +258,4 @@ export class TaskQueueMessageHandler {
       this.updateQueueView();
     }, 5000);
   }
-} 
+}
