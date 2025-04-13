@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "node_modules",
+    "dist",
+    "dist-scripts",
+    "out",
+    "coverage",
+    "tests",
+    "**/__tests__",
+    "**/mocks/**",
+    "src/webview/**",
+    "src/webview-ui/**",
+    "src/mas/**",
+    "scripts/refactor/dashboard/vite.config.ts"
+  ]
+} 
