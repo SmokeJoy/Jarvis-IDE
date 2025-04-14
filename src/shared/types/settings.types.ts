@@ -27,3 +27,20 @@ export interface Settings {
   availableModels?: AvailableModel[]; // nuovo campo persistente
   code_style?: 'standard' | 'concise' | 'verbose';
 }
+
+export interface TelemetrySetting {
+  id: string;
+  enabled: boolean;
+  lastUpdated?: number;
+}
+
+export interface ChatSettings {
+  modelId: string;
+  temperature: number;
+  topP?: number;
+  maxTokens?: number;
+  systemPrompt?: string;
+  useStreaming?: boolean;
+  functionCall?: boolean;
+  [key: string]: unknown;
+}

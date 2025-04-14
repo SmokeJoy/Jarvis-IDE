@@ -54,7 +54,7 @@ export interface ApiHandlerOptions<TRequest = unknown, TResponse = unknown> {
  */
 export interface ApiStreamTextChunk {
   type: 'text';
-  text: string;
+  content: string;
 }
 
 /**
@@ -62,7 +62,7 @@ export interface ApiStreamTextChunk {
  */
 export interface ApiStreamReasoningChunk {
   type: 'reasoning';
-  text: string;
+  reasoning: string;
 }
 
 /**
@@ -73,6 +73,9 @@ export interface ApiStreamUsageChunk {
   usageData: {
     inputTokens: number;
     outputTokens: number;
+    totalCost?: number;
+    cacheReadTokens?: number;
+    cacheWriteTokens?: number;
   };
 }
 
@@ -87,8 +90,47 @@ export type ApiMessageGenerator = AsyncGenerator<
  * Interfaccia per i componenti stream API
  */
 export interface ApiStream {
-  stream: ApiMessageGenerator;
+  type: 'stream';
+  chunks: AsyncGenerator<ApiStreamChunk>;
 }
 
-// Rimuovo anche i re-export iniziali perché ora il file ha uno scopo più specifico
-// export * from './llm.types';
+export interface ApiStreamToolCallChunk {
+  type: 'tool_call';
+  toolName: string;
+  input: unknown;
+}
+
+export type ApiStreamChunk =
+  | ApiStreamTextChunk
+  | ApiStreamReasoningChunk
+  | ApiStreamUsageChunk
+  | ApiStreamToolCallChunk;
+
+export interface ApiError {
+  type: 'error';
+  message: string;
+  code?: string;
+  cause?: unknown;
+}
+
+// Definizione base per ApiConfiguration
+export interface ApiConfiguration {
+  modelId: string;
+  apiKey?: string;
+  apiHost?: string; // Rinominato da baseUrl per evitare conflitti?
+  organizationId?: string;
+  [key: string]: unknown;
+}
+
+// Definizione base per ModelInfo
+export interface ModelInfo {
+  id: string;
+  name: string;
+  provider: string; // Potrebbe usare LLMProviderId?
+  contextSize?: number;
+  maxOutputTokens?: number;
+  supportsStreaming?: boolean;
+  supportsFunctions?: boolean;
+  tags?: string[];
+  // Aggiungere altre proprietà comuni se necessario (es. pricing)
+}

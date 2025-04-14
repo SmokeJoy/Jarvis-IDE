@@ -25,7 +25,7 @@ export type {
 /**
  * Tipo di contenuto supportato nei messaggi multimodali
  */
-export const enum ContentType {
+export enum ContentType {
   Text = 'text',
   Image = 'image_url',
   ToolUse = 'tool_use',
@@ -35,20 +35,19 @@ export const enum ContentType {
 /**
  * Blocco di testo per un messaggio
  */
-export interface TextBlock {
-  readonly type: ContentType.Text;
+export type TextBlock = {
+  type: ContentType.Text;
   text: string;
-}
+};
 
 /**
  * Blocco immagine per un messaggio
  */
-export interface ImageBlock {
-  readonly type: ContentType.Image;
-  url?: string;
-  base64Data?: string;
-  media_type?: string;
-}
+export type ImageBlock = {
+  type: ContentType.Image;
+  image_url: string;
+  alt?: string;
+};
 
 /**
  * Tipo per gli input degli strumenti
@@ -69,26 +68,74 @@ export type ToolResult = string | {
 /**
  * Blocco generico per uso di strumenti
  */
-export interface ToolUseBlock {
-  readonly type: ContentType.ToolUse;
-  readonly id: string;
-  readonly name: string;
-  input: ToolInput;
-}
+export type ToolUseBlock = {
+  type: ContentType.ToolUse;
+  toolName: string;
+  input: unknown;
+};
 
 /**
  * Blocco generico per risultati di strumenti
  */
-export interface ToolResultBlock {
-  readonly type: ContentType.ToolResult;
-  readonly toolUseId: string;
-  content: ToolResult;
-}
+export type ToolResultBlock = {
+  type: ContentType.ToolResult;
+  toolName: string;
+  result: unknown;
+};
 
 /**
  * Tipo unione per tutti i possibili blocchi di contenuto
  */
-export type ContentBlock = TextBlock | ImageBlock | ToolUseBlock | ToolResultBlock;
+export type ContentBlock =
+  | TextBlock
+  | ImageBlock
+  | ToolUseBlock
+  | ToolResultBlock;
+
+export interface ChatMessage {
+  id: string;
+  role: ChatRole;
+  content: string | ContentBlock[];
+  name?: string;
+  timestamp?: number;
+  streaming?: boolean;
+  providerFields?: Record<string, unknown>;
+}
+
+/**
+ * Creates a standard ChatMessage object.
+ * Ensures required fields and defaults.
+ *
+ * @param message Partial message data
+ * @returns A validated ChatMessage object
+ */
+export function createChatMessage(message: Partial<ChatMessage> & Pick<ChatMessage, 'role' | 'content'>): ChatMessage {
+  if (!message.id) {
+    // Simple unique ID generation for client-side messages
+    message.id = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  }
+  if (!message.timestamp) {
+    message.timestamp = Date.now();
+  }
+  // Ensure content is not empty or just whitespace if it's a string
+  if (typeof message.content === 'string' && !message.content.trim()) {
+    throw new Error('ChatMessage content cannot be empty or just whitespace.');
+  }
+  // Ensure content array is not empty if it's an array
+  if (Array.isArray(message.content) && message.content.length === 0) {
+    throw new Error('ChatMessage content array cannot be empty.');
+  }
+
+  return {
+    id: message.id,
+    role: message.role,
+    content: message.content,
+    name: message.name,
+    timestamp: message.timestamp,
+    streaming: message.streaming ?? false,
+    providerFields: message.providerFields,
+  };
+}
 
 /**
  * @deprecated Use the equivalent function in message.types.ts

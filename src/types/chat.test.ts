@@ -7,12 +7,12 @@ import {
   StreamResponse,
   ErrorResponse,
 } from './chat';
-import { createSafeMessage } from "../shared/types/message";
+import { createChatMessage as createChatMessage } from "../src/shared/types/chat.types";
 
 describe('Chat Types', () => {
   test('Message should have correct structure', () => {
-    const message: Message = createSafeMessage({role: 'user', content: 'test message', timestamp: Date.now(), streaming: false});
-    expect(message).toMatchObject(createSafeMessage({role: expect.stringMatching(/^(user|assistant)$/), content: expect.any(String), timestamp: expect.any(Number), streaming: expect.any(Boolean)}));
+    const message: Message = createChatMessage({role: 'user', content: 'test message', timestamp: Date.now(), streaming: false});
+    expect(message).toMatchObject(createChatMessage({role: expect.stringMatching(/^(user|assistant)$/), content: expect.any(String), timestamp: expect.any(Number), streaming: expect.any(Boolean)}));
   });
 
   test('WebviewMessage should have correct structure', () => {
@@ -29,13 +29,13 @@ describe('Chat Types', () => {
   test('ChatRequest should have correct structure', () => {
     const request: ChatRequest = {
       messages: [
-        createSafeMessage({role: 'user', content: 'test message', timestamp: Date.now()}),
+        createChatMessage({role: 'user', content: 'test message', timestamp: Date.now()}),
       ],
       stream: true,
     };
     expect(request).toMatchObject({
       messages: expect.arrayContaining([
-        expect.objectContaining(createSafeMessage({role: expect.any(String), content: expect.any(String), timestamp: expect.any(Number)})),
+        expect.objectContaining(createChatMessage({role: expect.any(String), content: expect.any(String), timestamp: expect.any(Number)})),
       ]),
       stream: expect.any(Boolean),
     });
@@ -43,10 +43,10 @@ describe('Chat Types', () => {
 
   test('ChatResponse should have correct structure', () => {
     const response: ChatResponse = {
-      message: createSafeMessage({role: 'assistant', content: 'test response', timestamp: Date.now()}),
+      message: createChatMessage({role: 'assistant', content: 'test response', timestamp: Date.now()}),
     };
     expect(response).toMatchObject({
-      message: expect.objectContaining(createSafeMessage({role: expect.stringMatching(/^assistant$/), content: expect.any(String), timestamp: expect.any(Number)})),
+      message: expect.objectContaining(createChatMessage({role: expect.stringMatching(/^assistant$/), content: expect.any(String), timestamp: expect.any(Number)})),
     });
   });
 

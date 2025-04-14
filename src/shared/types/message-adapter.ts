@@ -6,8 +6,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ChatMessage as SharedChatMessage } from './message.types';
 import { ChatMessage as ExtensionChatMessage } from '../types/extension';
-import { ChatMessage as ChatTypesChatMessage, ContentBlock } from '../types/chat.types';
-import { createSafeMessage } from "/message";
+import { ChatMessage as ChatTypesChatMessage, ContentBlock } from '../../src/shared/types/chat.types';
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 /**
  * Funzione helper per creare un messaggio ChatMessage compatibile con tutte le interfacce
@@ -30,7 +30,7 @@ export function createSafeMessage(
   const now = Date.now();
   const messageId = options?.id || uuidv4();
   
-  return createSafeMessage({role: role, content: content, id: messageId, timestamp: options?.timestamp || now, streaming: options?.streaming || false, name: options?.name}) as SharedChatMessage & ExtensionChatMessage;
+  return createChatMessage({role: role, content: content, id: messageId, timestamp: options?.timestamp || now, streaming: options?.streaming || false, name: options?.name}) as SharedChatMessage & ExtensionChatMessage;
 }
 
 /**

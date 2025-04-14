@@ -17,6 +17,8 @@ import type {
   ApiConfiguration as ApiApiConfiguration,
 } from './api.types';
 
+import { ChatRole, ContentBlock } from './chat.types';
+
 // Re-export types from api.types.ts
 export type {
   ModelInfoBase,
@@ -142,9 +144,9 @@ export interface LLMProvider {
  * Utilizzati nelle API di chat completion
  */
 export interface MessageParam {
-  readonly role: MessageRole;
-  content: string | readonly (ChatCompletionContentPartText | ChatCompletionContentPartImage)[];
-  readonly name?: string;
+  role: ChatRole;
+  content: ContentBlock[]; // sempre strutturato per invio API
+  name?: string;
 }
 
 /**
@@ -215,4 +217,13 @@ export interface OpenAiCompatibleModelInfo {
   supportsStreaming?: boolean;
   supportsFunctions?: boolean;
   tags?: string[];
+}
+
+export interface LLMOptions {
+  temperature?: number;
+  top_p?: number;
+  stop?: string[];
+  max_tokens?: number;
+  stream?: boolean;
+  [key: string]: unknown;
 }

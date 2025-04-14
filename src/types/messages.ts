@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 
-import { ApiConfiguration } from '../shared/types/api.types';
+import { ApiConfiguration } from '../src/shared/types/api.types';
 import { WebviewMessage, WebviewMessageType } from '../shared/types/webview.types';
 
 export interface WebviewMessageBase {
