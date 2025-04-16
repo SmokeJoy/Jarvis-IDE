@@ -1,6 +1,6 @@
-import { ExtensionMessage, ExtensionMessageType } from '@/shared/types/messages';
-import { ModelInfo } from '@/shared/types/api.types';
-import { ExtensionSettings } from '@/shared/types/settings.types';
+import { ExtensionMessage, ExtensionMessageType } from '../../../src/shared/types/chat.types';
+import { ModelInfo } from '../../../src/shared/types/api.types';
+import { ExtensionSettings } from '../../../shared/types/settings.types';
 import {
   MockedChatMessage,
   MessageSeverity,
@@ -9,7 +9,8 @@ import {
   ChatStatus,
   MockMessageCreator,
 } from '@/shared/types/test-utils.types';
-import { createSafeMessage } from "@/shared/types/message-adapter";
+import { createChatMessage } from "../../../src/shared/types/chat.types";
+import { ApiConfiguration } from '../../../shared/types/api.types';
 
 export const mockModelInfo: ModelInfo = {
   id: 'test-model',
@@ -34,7 +35,7 @@ export const mockExtensionSettings: ExtensionSettings = {
   },
 };
 
-export const mockChatMessages: MockedChatMessage[] = [createSafeMessage('user', 'Hello, how are you?', { id: 'msg1', timestamp: Date.now(), metadata: {} }), createSafeMessage('assistant', 'I am fine, thank you!', { id: 'msg2', timestamp: Date.now() + 1000, metadata: {} })];
+export const mockChatMessages: MockedChatMessage[] = [createChatMessage('user', 'Hello, how are you?', { id: 'msg1', timestamp: Date.now(), metadata: {} }), createChatMessage('assistant', 'I am fine, thank you!', { id: 'msg2', timestamp: Date.now() + 1000, metadata: {} })];
 
 export const mockMessageCreator: MockMessageCreator = {
   createMessage: <T extends ExtensionMessageType>(

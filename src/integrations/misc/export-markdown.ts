@@ -8,7 +8,7 @@ import {
   isTextBlock,
   isToolUseBlock,
   isToolResultBlock,
-} from '../../types/chat.types';
+} from '../../src/shared/types/chat.types';
 import { AnthropicMessage } from '../../types/provider-types/anthropic-types';
 
 export async function downloadTask(dateTs: number, conversationHistory: AnthropicMessage[]) {

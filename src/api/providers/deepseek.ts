@@ -6,16 +6,16 @@ import {
 } from '../../types/provider-types/openai-types';
 import { Anthropic } from '@anthropic-ai/sdk';
 import { ApiHandler } from '../index';
-import { ApiHandlerOptions, ModelInfo } from '../../shared/types/api.types';
+import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';
 import { logger } from '../../utils/logger';
-import { ApiStream, ApiStreamChunk } from '../transform/stream';
+import { ApiStream, ApiStreamChunk } from '../../src/shared/types/api.types';
 import { convertToOpenAiMessages } from '../transform/openai-format';
 import { convertToR1Format } from '../transform/r1-format';
 import { BaseStreamHandler } from '../handlers/BaseStreamHandler';
 import { getDeepseekConfig } from './config/deepseek-config';
 import { deepseekModelInfoSaneDefaults } from '../../shared/api';
 import { calculateApiCostDeepSeek } from '../../utils/cost';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage } from '../../src/shared/types/chat.types';
 
 /**
  * Handler per l'API DeepSeek, estende BaseStreamHandler
@@ -54,13 +54,17 @@ export class DeepseekHandler extends BaseStreamHandler<ChatCompletionChunk> impl
     logger.debug(`[DeepseekHandler] Preparazione richiesta per modello: ${modelId}`);
 
     let openAiMessages: ChatCompletionMessageParam[] = [
-      createSafeMessage({role: 'system', content: systemPrompt}),
+      createChatMessage({role: 'system', content: systemPrompt,
+          timestamp: Date.now()
+    }),
       ...convertToOpenAiMessages(messages),
     ];
 
     if (config.useR1Format) {
       logger.debug(`[DeepseekHandler] Conversione messaggio al formato R1 richiesto`);
-      openAiMessages = convertToR1Format([createSafeMessage({role: 'user', content: systemPrompt}), ...messages]);
+      openAiMessages = convertToR1Format([createChatMessage({role: 'user', content: systemPrompt,
+          timestamp: Date.now()
+    }), ...messages]);
     }
 
     logger.info(

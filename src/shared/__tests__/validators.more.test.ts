@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as validators from '../validators';
 import { ChatMessage } from '../types/index';
 import { ChatSettings, ApiConfiguration } from '../../types/extension';
-import { createSafeMessage } from "@/shared/types/message-adapter";
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 // Mock dei moduli
 vi.mock('../../utils/logger', () => ({
@@ -31,15 +31,15 @@ describe('Test avanzati dei validatori', () => {
 
   describe('validateChatMessageArrayOrThrow', () => {
     it('dovrebbe accettare array validi', () => {
-      const validArray: ChatMessage[] = [createSafeMessage('user', 'Domanda?', { id: 'msg1', timestamp: Date.now() }), createSafeMessage('assistant', 'Risposta!', { id: 'msg2', timestamp: Date.now() })];
+      const validArray: ChatMessage[] = [createChatMessage('user', 'Domanda?', { id: 'msg1', timestamp: Date.now() }), createChatMessage('assistant', 'Risposta!', { id: 'msg2', timestamp: Date.now() })];
 
       expect(() => validators.validateChatMessageArrayOrThrow(validArray)).not.toThrow();
     });
 
     it('dovrebbe lanciare un errore per array con elementi non validi', () => {
       const invalidArray = [
-        createSafeMessage({role: 'user', content: 'Valido', id: 'msg1', timestamp: Date.now()}),
-        createSafeMessage({role: 'unknown', content: 'Non valido', timestamp: Date.now()}), // Ruolo non valido
+        createChatMessage({role: 'user', content: 'Valido', id: 'msg1', timestamp: Date.now()}),
+        createChatMessage({role: 'unknown', content: 'Non valido', timestamp: Date.now()}), // Ruolo non valido
         { content: 'Manca il ruolo' }, // Manca role e timestamp
       ];
 
@@ -126,7 +126,7 @@ describe('Test avanzati dei validatori', () => {
 
     it('dovrebbe gestire oggetti molto grandi', () => {
       const largeContent = 'a'.repeat(100000);
-      const largeObject = createSafeMessage({role: 'user', content: largeContent, id: 'msg1', timestamp: Date.now()});
+      const largeObject = createChatMessage({role: 'user', content: largeContent, id: 'msg1', timestamp: Date.now()});
 
       // Non dovrebbe lanciare eccezioni
       expect(() => validators.isValidChatMessage(largeObject)).not.toThrow();
@@ -138,7 +138,7 @@ describe('Test avanzati dei validatori', () => {
         deepObject = { nested: deepObject };
       }
 
-      const nestedMessage = createSafeMessage({role: 'user', content: 'test', id: 'msg1', timestamp: Date.now(), metadata: deepObject});
+      const nestedMessage = createChatMessage({role: 'user', content: 'test', id: 'msg1', timestamp: Date.now(), metadata: deepObject});
 
       // Non dovrebbe lanciare eccezioni
       expect(() => validators.isValidChatMessage(nestedMessage as any)).not.toThrow();

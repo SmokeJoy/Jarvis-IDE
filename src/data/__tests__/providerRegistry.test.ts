@@ -5,7 +5,7 @@
 
 import { fetchModels, registerProvider, isProviderRegistered } from '../providerRegistry';
 import { getCachedModels, cacheModels, clearAllCachedModels } from '../modelCache';
-import { LLMProviderId, OpenAiCompatibleModelInfo } from '../../shared/types/api.types';
+import { LLMProviderId, OpenAiCompatibleModelInfo } from '../../src/shared/types/api.types';
 import { ANTHROPIC_MODELS } from '../providers/anthropicModels';
 
 // Mock di fetch per simulare chiamate API

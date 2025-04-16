@@ -5,6 +5,7 @@
  */
 
 import type { WebviewMessageUnion } from '../../../src/shared/types/webviewMessageUnion';
+import type { WebviewMessage } from '@shared/types/webview.types';
 
 /**
  * Enum per i tipi di messaggi delle impostazioni
@@ -42,8 +43,9 @@ export interface IDESettings {
 /**
  * Interfaccia base per tutti i messaggi di impostazioni
  */
-export interface SettingsMessageBase extends WebviewMessageUnion {
-  type: SettingsMessageType | string;
+export interface SettingsMessageBase extends WebviewMessage<SettingsMessageType> {
+  type: SettingsMessageType;
+  payload: unknown;
 }
 
 /**

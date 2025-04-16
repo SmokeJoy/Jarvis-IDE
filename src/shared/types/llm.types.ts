@@ -25,7 +25,7 @@ export type {
   ModelInfoStandard,
   ModelCapabilitiesInfo,
   ModelPricingInfo,
-};
+} from './model.types';
 
 /**
  * Dettaglio supportato per le immagini
@@ -227,3 +227,51 @@ export interface LLMOptions {
   stream?: boolean;
   [key: string]: unknown;
 }
+
+/**
+ * Payload standard per una richiesta LLM
+ */
+export interface PromptPayload {
+  text: string;
+  requestId: string;
+  modelId?: string;
+  temperature?: number;
+  [key: string]: unknown;
+}
+
+/**
+ * Risposta standard LLM
+ */
+export interface LLMResponse {
+  requestId: string;
+  output: string;
+  modelId?: string;
+  usage?: {
+    promptTokens?: number;
+    completionTokens?: number;
+    totalTokens?: number;
+  };
+  [key: string]: unknown;
+}
+
+/**
+ * Token di stream LLM
+ */
+export interface LLMStreamToken {
+  requestId: string;
+  token: string;
+  isFinal?: boolean;
+  [key: string]: unknown;
+}
+
+/**
+ * Handler standard per provider LLM
+ */
+export interface LLMProviderHandler {
+  sendPrompt(payload: PromptPayload): Promise<LLMResponse>;
+  streamPrompt(payload: PromptPayload, onToken: (token: LLMStreamToken) => void): Promise<void>;
+  cancel(requestId: string): void;
+}
+
+// Esporto i tipi principali definiti qui
+export type { MessageParam, LLMOptions, ImageDetail, ChatCompletionContentPartText, ChatCompletionContentPartImage, ChatCompletionContentPart };

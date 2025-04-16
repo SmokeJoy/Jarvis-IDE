@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { activate, deactivate } from './extension';
 import { JarvisProvider } from './core/webview/JarvisProvider';
 import { TelemetryService } from './services/TelemetryService';
-import { ApiConfiguration } from './types/global';
+import { ApiConfiguration } from './src/shared/types/global';
 
 vi.mock('vscode');
 vi.mock('./core/webview/JarvisProvider');

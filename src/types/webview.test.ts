@@ -14,6 +14,7 @@ describe('Webview Types', () => {
       config: {
         provider: 'openai',
         apiKey: 'test-key',
+        modelId: 'test-model-id',
       },
       isLoading: false,
       mcpConnected: false,
@@ -23,6 +24,7 @@ describe('Webview Types', () => {
       config: expect.objectContaining({
         provider: expect.any(String),
         apiKey: expect.any(String),
+        modelId: expect.any(String),
       }),
       isLoading: expect.any(Boolean),
       mcpConnected: expect.any(Boolean),

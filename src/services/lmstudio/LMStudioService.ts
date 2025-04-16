@@ -1,5 +1,5 @@
 import { vscode } from '../../../webview-ui/src/utils/vscode';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 interface LMStudioResponse {
   response: string;
@@ -54,7 +54,9 @@ export class LMStudioService {
         },
         body: JSON.stringify({
           messages: [
-            createSafeMessage({role: 'user', content: prompt}),
+            createChatMessage({role: 'user', content: prompt,
+                timestamp: Date.now()
+            }),
           ],
           model: 'local-model',
           temperature: 0.7,

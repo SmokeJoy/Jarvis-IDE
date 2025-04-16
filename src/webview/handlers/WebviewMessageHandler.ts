@@ -5,29 +5,33 @@ import {
   ActionMessage,
   ResponseMessage,
   InstructionMessage,
-  SendPromptMessage,
-  StateUpdateMessage,
-  WebviewMessage,
+  StateMessage,
+  ErrorMessage,
+  ActionType,
+  InstructionCompletedMessage,
 } from '../../shared/types/webview.types';
 import { BaseWebviewMessageHandler } from './BaseWebviewMessageHandler';
 
 export class WebviewMessageHandler extends BaseWebviewMessageHandler {
-  constructor(webview: Webview, context: ExtensionContext) {
-    super(webview, context);
+  constructor(context: ExtensionContext) {
+    super(context);
+  }
+
+  initialize(webview: Webview): void {
+    super.initialize(webview);
   }
 
   handleMessage(message: WebviewMessageBase): void {
     if (!message || !message.type) {
       this._sendError({
         error: new Error('Invalid message format'),
-        timestamp: Date.now(),
       });
       return;
     }
 
     switch (message.type) {
       case WebviewMessageType.SEND_PROMPT:
-        this._handleSendPrompt(message as SendPromptMessage);
+        this._handleSendPrompt(message as any);
         break;
       case WebviewMessageType.ACTION:
         this._handleAction(message as ActionMessage);
@@ -36,7 +40,7 @@ export class WebviewMessageHandler extends BaseWebviewMessageHandler {
         this._handleResponse(message as ResponseMessage);
         break;
       case WebviewMessageType.STATE_UPDATE:
-        this._handleStateUpdate(message as StateUpdateMessage);
+        this._handleStateUpdate(message as StateMessage);
         break;
       case WebviewMessageType.INSTRUCTION:
         this._handleInstruction(message as InstructionMessage);
@@ -46,98 +50,95 @@ export class WebviewMessageHandler extends BaseWebviewMessageHandler {
     }
   }
 
-  protected _handleSendPrompt(message: SendPromptMessage): void {
-    if (!message.payload?.prompt) {
+  protected _handleSendPrompt(message: any): void {
+    const payload = message.payload as { prompt?: string };
+    if (!payload?.prompt) {
       this._sendError({
         error: new Error('Missing prompt in message payload'),
-        timestamp: Date.now(),
       });
       return;
     }
 
     this._updateState({
       ...this.state,
-      lastPrompt: message.payload.prompt,
-      timestamp: Date.now(),
+      lastPrompt: payload.prompt,
     });
   }
 
   protected _handleAction(message: ActionMessage): void {
-    if (!message.payload?.action) {
+    const payload = message.payload as { action?: ActionType };
+    if (!payload?.action) {
       this._sendError({
         error: new Error('Missing action in message payload'),
-        timestamp: Date.now(),
       });
       return;
     }
 
     this._updateState({
       ...this.state,
-      lastAction: message.payload.action,
-      timestamp: Date.now(),
+      lastAction: payload.action,
     });
   }
 
   protected _handleResponse(message: ResponseMessage): void {
-    if (!message.payload?.response) {
+    const payload = message.payload;
+    if (!payload) {
       this._sendError({
-        error: new Error('Missing response in message payload'),
-        timestamp: Date.now(),
+        error: new Error('Missing payload in response message'),
       });
       return;
     }
 
     this._updateState({
       ...this.state,
-      lastResponse: message.payload.response,
-      timestamp: Date.now(),
+      lastResponse: payload,
     });
   }
 
-  protected _handleStateUpdate(message: StateUpdateMessage): void {
-    if (!message.payload) {
+  protected _handleStateUpdate(message: StateMessage): void {
+    if (!message.state) {
       this._sendError({
-        error: new Error('Missing payload in state update message'),
-        timestamp: Date.now(),
+        error: new Error('Missing state in state update message'),
       });
       return;
     }
 
     this._updateState({
       ...this.state,
-      ...message.payload,
-      timestamp: Date.now(),
+      ...message.state,
     });
   }
 
   protected _handleInstruction(message: InstructionMessage): void {
-    if (!message.payload?.instruction) {
+    const payload = message.payload as { instruction?: string };
+    if (!payload?.instruction) {
       this._sendError({
         error: new Error('Missing instruction in message payload'),
-        timestamp: Date.now(),
       });
       return;
     }
 
-    // Process instruction
-    const response: WebviewMessage = {
-      type: WebviewMessageType.INSTRUCTION,
-      id: message.id,
-      agentId: message.agentId,
-      payload: {
-        instruction: message.payload.instruction,
-        result: 'Instruction processed successfully',
-      },
-      timestamp: Date.now(),
+    const response: InstructionCompletedMessage = {
+      type: WebviewMessageType.INSTRUCTION_COMPLETED,
+      id: message.id || 'unknown-id',
+      agentId: message.agentId || 'unknown-agent',
+      instruction: payload.instruction,
+      result: 'Instruction processed successfully',
     };
 
-    // Update state with instruction result
     this._updateState({
       ...this.state,
-      lastInstructionResult: response.payload.result,
-      timestamp: response.timestamp,
+      lastInstructionResult: response.result,
     });
 
     this._sendMessage(response);
+  }
+
+  protected _sendError(errorDetails: { error: Error | string }): void {
+    const errorToSend: ErrorMessage = {
+      type: WebviewMessageType.ERROR,
+      error: errorDetails.error instanceof Error ? errorDetails.error.message : errorDetails.error,
+    };
+    this._sendMessage(errorToSend);
   }
 }

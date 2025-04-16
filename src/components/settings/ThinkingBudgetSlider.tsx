@@ -1,6 +1,6 @@
 import React from 'react';
 import { VSCodeSlider } from '@vscode/webview-ui-toolkit/react';
-import { ApiConfiguration } from '../../types/api.types';
+import { ApiConfiguration } from '../../src/shared/types/api.types';
 
 interface ThinkingBudgetSliderProps {
   apiConfiguration: ApiConfiguration;

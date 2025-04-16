@@ -3,18 +3,17 @@ import { useExtensionMessage } from '../../hooks/useExtensionMessage';
 import { useExtensionState } from '../../context/ExtensionStateContext';
 import {
   PromptHistoryMessageType,
-  PromptHistoryMessageUnion,
+  type PromptHistoryEntry,
+  type PromptHistoryMessageUnion,
 } from '../../../../webview/messages/prompt-history-message';
 import {
   isPromptHistoryLoadedMessage,
   isPromptHistoryUpdatedMessage,
-  isPromptHistoryError,
+  isPromptHistoryErrorMessage,
 } from '../../../../webview/messages/prompt-history-message-guards';
 
 export const PromptHistory = () => {
-  const [history, setHistory] = useState<Array<{ id: string; prompt: string; timestamp: number }>>(
-    []
-  );
+  const [history, setHistory] = useState<PromptHistoryEntry[]>([]);
   const [error, setError] = useState<string>('');
 
   const { postMessage, onMessage } = useExtensionMessage<PromptHistoryMessageUnion>();
@@ -23,14 +22,16 @@ export const PromptHistory = () => {
   useEffect(() => {
     postMessage({ type: PromptHistoryMessageType.REQUEST_HISTORY });
 
-    const unsubscribe = onMessage((message) => {
+    const unsubscribe = onMessage((message: PromptHistoryMessageUnion) => {
       if (isPromptHistoryLoadedMessage(message)) {
-        setHistory(message.payload.history);
+        setHistory(message.payload);
         setError('');
       } else if (isPromptHistoryUpdatedMessage(message)) {
-        setHistory((prev) => [message.payload.newEntry, ...prev]);
-      } else if (isPromptHistoryError(message)) {
-        setError(`Errore cronologia: ${message.payload.error}`);
+        if (message.payload?.newEntry) {
+          setHistory((prev) => [message.payload.newEntry!, ...prev]);
+        }
+      } else if (isPromptHistoryErrorMessage(message)) {
+        setError(`Errore cronologia: ${message.payload?.error ?? 'Unknown error'}`);
       }
     });
 

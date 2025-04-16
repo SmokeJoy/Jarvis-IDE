@@ -1,7 +1,7 @@
 import { Anthropic } from '@anthropic-ai/sdk';
 import { AnthropicVertex } from '@anthropic-ai/vertex-sdk';
 import { ApiHandler } from '../index';
-import { ApiHandlerOptions, ModelInfo } from '../../shared/types/api.types';
+import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';
 import { calculateApiCostOpenAI } from '../../utils/cost';
 import { convertToOpenAiMessages } from '../transform/openai-format';
 import { ApiStream, ApiStreamChunk } from '../transform/stream';

@@ -1,6 +1,6 @@
-import { ChatMessage, ContentType, TextContent, ImageContent } from '../../types/chat.types';
+import { ChatMessage, ContentType, TextContent, ImageContent } from '../../src/shared/types/chat.types';
 import { logger } from '../../utils/logger';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 /**
  * Tipo rappresentante un messaggio nel formato Ollama
@@ -147,6 +147,8 @@ export function processOllamaImages(messages: ChatMessage[]): OllamaMessage[] {
       })
       .trim();
 
-    return createSafeMessage({role: message.role, content: textContent});
+    return createChatMessage({role: message.role, content: textContent,
+        timestamp: Date.now()
+    });
   });
 }

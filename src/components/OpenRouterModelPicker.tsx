@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { OpenRouterModelId } from '../shared/api';
-import { OpenAiCompatibleModelInfo } from '../types/global';
+import { OpenAiCompatibleModelInfo } from '../src/shared/types/global';
 
 const Select = styled.select`
   width: 100%;

@@ -5,7 +5,7 @@
  * - Eliminazione impliciti
  */
 
-import { WebviewMessage, McpToolCall, ToolResponse } from '../../shared/types/messages';
+import { WebviewMessage, McpToolCall, ToolResponse } from '../../shared/types/chat.types';
 import {
   isErrorMessage,
   isResponseMessage,
@@ -40,28 +40,6 @@ import { contextNavigateHandler } from './handlers/contextNavigateHandler';
 import { loadMemoryFromDisk } from './memory/memory';
 import { Memory } from './memory/memory';
 import {
-  ReadFileArgs,
-  SearchDocsArgs,
-  MemoryQueryArgs,
-  ProjectSummaryArgs,
-  CodeGenerateArgs,
-  FsWriteArgs,
-  RefactorSnippetArgs,
-  AskDocsArgs,
-  ProjectLintArgs,
-  FsFormatArgs,
-  TestRunArgs,
-  ProjectDepGraphArgs,
-  ContextInjectArgs,
-  ContextListArgs,
-  ContextClearArgs,
-  ContextTagArgs,
-  ContextSearchByTagsArgs,
-  ContextExportArgs,
-  ContextImportArgs,
-  ContextEditArgs,
-  ContextLinkArgs,
-  ContextLinksOfArgs,
   ContextGraphArgs,
   ContextUnlinkArgs,
   ContextGraphExportArgs,
@@ -172,7 +150,7 @@ export class McpDispatcher {
           args.mode ?? 'semantic',
           options,
           args.includeContent ?? false,
-          args.includeMetadata ?? false,
+          args.includeProviderFields ?? false,
           args.format ?? 'graph'
         );
       } else {

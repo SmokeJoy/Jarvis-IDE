@@ -3,8 +3,8 @@
  * che ogni provider deve implementare.
  */
 
-import { LLMProvider } from '../shared/types/api.types';
-import { createSafeMessage } from "../shared/types/message";
+import { LLMProvider } from '../src/shared/types/api.types';
+import { createChatMessage as createChatMessage } from "../src/shared/types/chat.types";
 
 export interface LLMMessage {
   role: 'system' | 'user' | 'assistant';
@@ -106,7 +106,9 @@ export abstract class BaseLLMProvider implements LLMProvider {
         };
       } else {
         // Aggiungi un nuovo messaggio di sistema all'inizio
-        processedMessages.unshift(createSafeMessage({role: 'system', content: options.contextPrompt}));
+        processedMessages.unshift(createChatMessage({role: 'system', content: options.contextPrompt,
+            timestamp: Date.now()
+        }));
       }
     }
 

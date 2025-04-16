@@ -8,7 +8,7 @@
 import { OpenAiCompatibleModelInfo, LLMProviderId } from '../shared/types/api.types';
 import { getCachedModels, cacheModels, hasCachedModels } from './modelCache';
 import { fetchModels as fetchModelsFromRegistry } from './providerRegistry';
-import { Logger } from '../shared/logger';
+import { Logger } from '../utils/logger';
 
 /**
  * Recupera i modelli disponibili da un provider specifico

@@ -8,12 +8,12 @@ export type {
 } from '../components/MitigatorOverlay';
 
 // Componenti
-export { MitigatorOverlay } from '../components/MitigatorOverlay';
-export { DebuggerTimeline } from '../components/DebuggerTimeline';
-export { SnapshotDetail } from '../components/SnapshotDetail';
-export { DecisionGraphView } from '../components/DecisionGraphView';
-export { AutoMitigationToast } from '../components/AutoMitigationToast';
-export { PredictiveWarningPanel } from '../components/PredictiveWarningPanel';
+export type { MitigatorOverlay } from '../components/MitigatorOverlay';
+export type { DebuggerTimeline } from '../components/DebuggerTimeline';
+export type { SnapshotDetail } from '../components/SnapshotDetail';
+export type { DecisionGraphView } from '../components/DecisionGraphView';
+export type { AutoMitigationToast } from '../components/AutoMitigationToast';
+export type { PredictiveWarningPanel } from '../components/PredictiveWarningPanel';
 
 // Hooks
 export { useDebuggerOverlay } from '../hooks/useDebuggerOverlay';
@@ -25,3 +25,6 @@ export { useProviderBlacklist } from '../hooks/useProviderBlacklist';
 // Utilità
 export { calculateConfidence } from '../utils/confidence';
 export { determineNextProvider } from '../utils/provider-selection';
+
+// Esporta i tipi (già usano export type o export *)
+export type { MitigationStrategy, MitigationAction, MitigationResult } from './types';

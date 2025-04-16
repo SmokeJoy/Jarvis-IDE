@@ -1,9 +1,9 @@
 import { Anthropic } from '@anthropic-ai/sdk';
 import { ApiHandler } from '../index';
-import { ApiHandlerOptions, ModelInfo } from '../../shared/types/api.types';
-import OpenAI, { ChatCompletionMessageParam } from 'openai';
+import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';
+import OpenAI, { ChatCompletionMessageParam, ChatCompletionChunk } from 'openai';
 import { convertToOpenAiMessages } from '../transform/openai-format';
-import { ApiStream, ApiStreamChunk } from '../../types/global';
+import { ApiStream, ApiStreamChunk } from '../../src/shared/types/api.types';
 import { convertToR1Format } from '../transform/r1-format';
 import {
   qwenDefaultModelId,
@@ -12,7 +12,7 @@ import {
   MainlandQwenModelId,
   InternationalQwenModelId,
 } from '../../shared/api';
-import { createSafeMessage } from "../../shared/types/message";
+import { ChatMessage, createChatMessage } from '../../src/shared/types/chat.types';
 
 export interface QwenConfig {
   apiKey: string;
@@ -34,7 +34,9 @@ export class QwenProvider {
     messages: ChatCompletionMessageParam[],
     signal?: AbortSignal
   ): AsyncGenerator<ApiStreamChunk> {
-    const anthropicMessages = messages.map((msg) => (createSafeMessage({role: msg.role === 'assistant' ? 'assistant' : 'user', content: msg.content}))) as Anthropic.Messages.MessageParam[];
+    const anthropicMessages = messages.map((msg) => (createChatMessage({role: msg.role === 'assistant' ? 'assistant' : 'user', content: msg.content as string,
+        timestamp: Date.now()
+    }))) as Anthropic.Messages.MessageParam[];
 
     const response = await fetch(`${this.baseUrl}/v1/chat/completions`, {
       method: 'POST',
@@ -104,7 +106,9 @@ export class QwenProvider {
   }
 
   async chat(messages: ChatCompletionMessageParam[], signal?: AbortSignal): Promise<ApiStream> {
-    const anthropicMessages = messages.map((msg) => (createSafeMessage({role: msg.role === 'assistant' ? 'assistant' : 'user', content: msg.content}))) as Anthropic.Messages.MessageParam[];
+    const anthropicMessages = messages.map((msg) => (createChatMessage({role: msg.role === 'assistant' ? 'assistant' : 'user', content: msg.content as string,
+        timestamp: Date.now()
+    }))) as Anthropic.Messages.MessageParam[];
 
     const response = await fetch(`${this.baseUrl}/v1/chat/completions`, {
       method: 'POST',
@@ -186,11 +190,15 @@ export class QwenHandler implements ApiHandler {
     const model = this.getModel();
     const isDeepseekReasoner = model.id.includes('deepseek-r1');
     let openAiMessages: ChatCompletionMessageParam[] = [
-      createSafeMessage({role: 'system', content: systemPrompt}),
+      createChatMessage({role: 'system', content: systemPrompt,
+          timestamp: Date.now()
+    }),
       ...convertToOpenAiMessages(messages),
     ];
     if (isDeepseekReasoner) {
-      openAiMessages = convertToR1Format([createSafeMessage({role: 'user', content: systemPrompt}), ...messages]);
+      openAiMessages = convertToR1Format([createChatMessage({role: 'user', content: systemPrompt,
+          timestamp: Date.now()
+    }), ...messages]);
     }
     const stream = await this.client.chat.completions.create({
       model: model.id,

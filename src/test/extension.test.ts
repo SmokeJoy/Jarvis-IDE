@@ -7,7 +7,7 @@ import { test, beforeEach, afterEach, vi } from 'vitest';
 import { activate, deactivate } from '../extension';
 import { JarvisProvider } from '../core/webview/JarvisProvider';
 import { TelemetryService } from '../services/TelemetryService';
-import { ApiConfiguration } from '../types/global';
+import { ApiConfiguration } from '../src/shared/types/global';
 
 const packagePath = path.join(__dirname, '..', '..', 'package.json');
 

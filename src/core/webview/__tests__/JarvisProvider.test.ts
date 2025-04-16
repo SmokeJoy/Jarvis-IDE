@@ -12,7 +12,8 @@ import {
   mockChatMessages,
   mockMessageCreator,
 } from './testUtils';
-import { MockedContext } from '@/shared/types/test-utils.types';
+import { MockedContext } from '../../../shared/types/test-utils.types';
+import { WebviewMessage, WebviewMessageType } from '../../../shared/types/webview.types';
 
 // Mock di vscode usando MockedContext
 vi.mock('vscode', () => ({

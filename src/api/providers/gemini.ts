@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ApiHandler } from '../index';
-import { ApiHandlerOptions, ModelInfo } from '../../shared/types/api.types';
-import { ChatMessage } from '../../types/chat.types';
+import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';
+import { ChatMessage } from '../../src/shared/types/chat.types';
 import { ApiStream, ApiStreamChunk } from '../transform/stream';
 import { BaseStreamHandler } from '../handlers/BaseStreamHandler';
 import { logger } from '../../utils/logger';

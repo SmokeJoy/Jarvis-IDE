@@ -48,7 +48,7 @@ export type Platform =
 
 // Importa i tipi necessari per RetroCompatibilità
 import { GitCommit } from '../utils/git';
-import { ApiConfiguration, OpenAiCompatibleModelInfo, ModelInfo } from './types/api.types';
+import { ApiConfiguration, OpenAiCompatibleModelInfo, ModelInfo } from '../src/shared/types/api.types';
 import { AutoApprovalSettings } from './AutoApprovalSettings';
 import { BrowserSettings } from './BrowserSettings';
 import { ChatSettings } from './ChatSettings';

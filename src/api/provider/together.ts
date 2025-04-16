@@ -4,11 +4,11 @@ import {
   ChatCompletion,
   LLMProviderId,
   StreamChunk,
-} from '../../types/global';
-import { ModelInfo } from '../../shared/types/api.types';
+} from '../../src/shared/types/global';
+import { ModelInfo } from '../../src/shared/types/api.types';
 import { Logger } from '../../utils/logger';
 import OpenAI from 'openai';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 /**
  * Provider per Together.ai
@@ -171,16 +171,22 @@ export class TogetherProvider implements ApiProvider {
 
     // Aggiungi il prompt di sistema
     if (options.systemPrompt) {
-      messages.push(createSafeMessage({role: 'system', content: options.systemPrompt}));
+      messages.push(createChatMessage({role: 'system', content: options.systemPrompt,
+          timestamp: Date.now()
+    }));
     }
 
     // Aggiungi i messaggi
     for (const msg of options.messages) {
       if (isDeepseekReasoner && msg.role === 'user') {
         // Per DeepSeek Reasoner, formatta i messaggi utente in modo speciale
-        messages.push(createSafeMessage({role: 'user', content: msg.content}));
+        messages.push(createChatMessage({role: 'user', content: msg.content,
+            timestamp: Date.now()
+        }));
       } else {
-        messages.push(createSafeMessage({role: msg.role === 'function' ? 'assistant' : msg.role, content: msg.content}));
+        messages.push(createChatMessage({role: msg.role === 'function' ? 'assistant' : msg.role, content: msg.content,
+            timestamp: Date.now()
+        }));
       }
     }
 

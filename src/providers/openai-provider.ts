@@ -5,7 +5,7 @@
  */
 
 import { LLMProviderHandler, LLMRequestOptions, registerProvider } from './provider-registry';
-import { createSafeMessage } from "../shared/types/message";
+import { createChatMessage as createChatMessage } from "../src/shared/types/chat.types";
 
 /**
  * Configurazione per il provider OpenAI
@@ -95,8 +95,12 @@ export class OpenAIProvider implements LLMProviderHandler {
       const requestBody = {
         model,
         messages: [
-          ...(options.systemMessage ? [createSafeMessage({role: 'system', content: options.systemMessage})] : []),
-          createSafeMessage({role: 'user', content: options.prompt}),
+          ...(options.systemMessage ? [createChatMessage({role: 'system', content: options.systemMessage,
+              timestamp: Date.now()
+        })] : []),
+          createChatMessage({role: 'user', content: options.prompt,
+              timestamp: Date.now()
+        }),
         ],
         temperature,
         max_tokens: maxTokens,

@@ -22,7 +22,7 @@ export async function findSemanticPath(
   targetId: string,
   options: NavigationOptions = {},
   includeContent: boolean = false,
-  includeMetadata: boolean = false
+  includeProviderFields: boolean = false
 ): Promise<{
   success: boolean;
   path?: {
@@ -146,7 +146,7 @@ export async function findSemanticPath(
     const context = await getContextById(nodeId);
     if (!context) continue;
 
-    resultNodes.push(buildNodeResult(context, includeContent, includeMetadata));
+    resultNodes.push(buildNodeResult(context, includeContent, includeProviderFields));
 
     if (i < path.length - 1) {
       const nextId = path[i + 1];
@@ -157,7 +157,7 @@ export async function findSemanticPath(
       );
 
       if (link) {
-        resultEdges.push(buildEdgeResult(link, includeMetadata));
+        resultEdges.push(buildEdgeResult(link, includeProviderFields));
       }
     }
   }

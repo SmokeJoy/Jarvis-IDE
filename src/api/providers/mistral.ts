@@ -1,10 +1,10 @@
 import { Anthropic } from '@anthropic-ai/sdk';
 import { MistralClient } from '@mistralai/mistralai';
 import { ApiHandler } from '../index';
-import { ApiHandlerOptions, ModelInfo } from '../../shared/types/api.types';
+import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';
 import { calculateApiCostOpenAI } from '../../utils/cost';
 import { convertToOpenAiMessages } from '../transform/openai-format';
-import { ApiStream, ApiStreamChunk } from '../transform/stream';
+import { ApiStream, ApiStreamChunk } from '../../src/shared/types/api.types';
 import { convertToR1Format } from '../transform/r1-format';
 import { BaseStreamHandler } from '../handlers/BaseStreamHandler';
 import { logger } from '../../utils/logger';
@@ -19,7 +19,7 @@ import {
   openAiNativeModels,
 } from '../../shared/api';
 import { convertToMistralMessages } from '../transform/mistral-format';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage } from '../../src/shared/types/chat.types';
 
 /**
  * Interfaccia per le statistiche di utilizzo token di Mistral
@@ -112,7 +112,9 @@ export class MistralHandler implements ApiHandler {
           model: this.getModel().id,
           temperature: 0,
           messages: [
-            createSafeMessage({role: 'system', content: systemPrompt}),
+            createChatMessage({role: 'system', content: systemPrompt,
+                timestamp: Date.now()
+            }),
             ...convertToMistralMessages(messages),
           ],
           stream: true,

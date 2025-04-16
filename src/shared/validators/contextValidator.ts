@@ -36,51 +36,16 @@ export function validateContextData(data: ContextData): ContextValidationResult 
     errors.push(`Tipo di contesto non supportato: ${data.type}`);
   }
 
-  // Validazione metadata
-  if (data.metadata) {
-    const metadataResult = validateContextMetadata(data.metadata);
-    if (!metadataResult.isValid) {
-      errors.push(...(metadataResult.errors || []));
-    }
-  }
+  // // Validazione metadata (rimossa, gestita dove usata)
+  // if (data.metadata) {
+  //   const metadataResult = validateContextMetadata(data.metadata);
+  //   if (!metadataResult.isValid) {
+  //     errors.push(...(metadataResult.errors || []));
+  //   }
+  // }
 
   if (errors.length > 0) {
     logger.error('Validazione contesto fallita:', errors);
-    return { isValid: false, errors };
-  }
-
-  return { isValid: true };
-}
-
-/**
- * Valida i metadata del contesto
- */
-export function validateContextMetadata(metadata: ContextMetadata): ContextValidationResult {
-  const errors: string[] = [];
-
-  // Validazione timestamp
-  if (metadata.timestamp && typeof metadata.timestamp !== 'number') {
-    errors.push('Timestamp deve essere un numero');
-  }
-
-  // Validazione source
-  if (metadata.source && typeof metadata.source !== 'string') {
-    errors.push('Source deve essere una stringa');
-  }
-
-  // Validazione tags
-  if (metadata.tags) {
-    if (!Array.isArray(metadata.tags)) {
-      errors.push('Tags deve essere un array');
-    } else {
-      const invalidTags = metadata.tags.filter((tag) => typeof tag !== 'string');
-      if (invalidTags.length > 0) {
-        errors.push('Tutti i tag devono essere stringhe');
-      }
-    }
-  }
-
-  if (errors.length > 0) {
     return { isValid: false, errors };
   }
 

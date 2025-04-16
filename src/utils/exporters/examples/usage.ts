@@ -5,19 +5,26 @@
 
 import { exportSession, exportSessionToFile } from '../index';
 import { ExportableSession, ExportFormat } from '../types';
-import { createSafeMessage } from "../../../shared/types/message";
+import { createChatMessage } from "../../../src/shared/types/chat.types";
 
 // Esempio di sessione di chat
 const sessionExample: ExportableSession = {
   messages: [
-    createSafeMessage({role: 'system', content: 'Sei un assistente AI disponibile in italiano.'}),
-    createSafeMessage({role: 'user', content: "Ciao, come funziona l'esportazione?"}),
-    createSafeMessage({role: 'assistant', content: "L'esportazione permette di salvare la conversazione in vari formati come JSON o YAML. È utile per il backup o la condivisione dei dati."}),
+    createChatMessage({role: 'system', content: 'Sei un assistente AI disponibile in italiano.',
+        timestamp: Date.now()
+    }),
+    createChatMessage({role: 'user', content: "Ciao, come funziona l'esportazione?",
+        timestamp: Date.now()
+    }),
+    createChatMessage({role: 'assistant', content: "L'esportazione permette di salvare la conversazione in vari formati come JSON o YAML. È utile per il backup o la condivisione dei dati.",
+        timestamp: Date.now()
+    }),
   ],
   settings: {
     temperature: 0.7,
     model: 'gpt-4',
     maxTokens: 1000,
+    modelId: 'gpt-4',
   },
   systemPrompt: 'Sei un assistente AI disponibile in italiano.',
   contextFiles: ['README.md', 'documentation.md'],

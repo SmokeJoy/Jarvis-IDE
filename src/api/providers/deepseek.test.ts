@@ -2,11 +2,11 @@ import { DeepSeekHandler } from './deepseek';
 import { createMockStream } from '../transform/stream';
 import { expect } from 'chai';
 import { describe, it } from 'mocha';
-import { ApiHandlerOptions } from '../../shared/types/api.types';
+import { ApiHandlerOptions } from '../../src/shared/types/api.types';
 import { ApiStreamChunk } from '../transform/stream';
 import { DeepSeekModelId } from '../../shared/api';
 import { Anthropic } from '@anthropic-ai/sdk';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 // Creiamo una versione più semplice della classe di test che evita tipi specifici di OpenAI
 class TestDeepSeekHandler extends DeepSeekHandler {
@@ -200,7 +200,9 @@ describe('DeepSeekHandler', () => {
     // Esegui
     const result: ApiStreamChunk[] = [];
     for await (const chunk of handler.createMessage('System prompt', [
-      createSafeMessage({role: 'user', content: 'Domanda'}),
+      createChatMessage({role: 'user', content: 'Domanda',
+          timestamp: Date.now()
+    }),
     ])) {
       result.push(chunk);
     }

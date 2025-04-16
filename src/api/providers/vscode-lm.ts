@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ApiHandler } from '../index';
-import { ApiHandlerOptions, ModelInfo } from '../../shared/types/api.types';
+import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';
 import { openAiModelInfoSaneDefaults } from '../../shared/api';
 import { convertToVsCodeLmMessages } from '../transform/vscode-lm-format';
 import { ApiStream } from '../transform/stream';

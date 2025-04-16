@@ -1,11 +1,10 @@
 import { Message, Ollama } from 'ollama';
 import { ApiHandler } from '../index';
-import { ApiHandlerOptions, ModelInfo } from '../../shared/types/api.types';
+import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';
 import { openAiModelInfoSaneDefaults } from '../../shared/api';
 import { convertToOllamaMessages } from '../transform/ollama-format';
-import { ApiStream } from '../transform/stream';
-import { ChatMessage } from '../../types/chat.types';
-import { createSafeMessage } from "../../shared/types/message";
+import { ApiStream } from '../../src/shared/types/api.types';
+import { ChatMessage, createChatMessage } from '../../src/shared/types/chat.types';
 
 export class OllamaHandler implements ApiHandler {
   private options: ApiHandlerOptions;
@@ -18,7 +17,9 @@ export class OllamaHandler implements ApiHandler {
 
   async *createMessage(systemPrompt: string, messages: ChatMessage[]): ApiStream {
     const ollamaMessages: Message[] = [
-      createSafeMessage({role: 'system', content: systemPrompt}),
+      createChatMessage({role: 'system', content: systemPrompt,
+          timestamp: Date.now()
+    }),
       ...convertToOllamaMessages(messages),
     ];
 

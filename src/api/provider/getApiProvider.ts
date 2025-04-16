@@ -1,4 +1,4 @@
-import { LLMProviderId } from '../../types/global';
+import { LLMProviderId } from '../../src/shared/types/global';
 import { getProvider } from '../../../mas/providers/provider-registry';
 import { ApiProvider, ProviderOptions } from './base';
 import { OpenAIProvider } from './openai';

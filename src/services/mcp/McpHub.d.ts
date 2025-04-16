@@ -1,5 +1,5 @@
 import { ChatCompletionMessageParam } from '../../types/provider-types/openai-types';
-import { ApiConfiguration } from '../../shared/types/api.types';
+import { ApiConfiguration } from '../../src/shared/types/api.types';
 import { JarvisProvider } from '../../core/webview/JarvisProvider';
 import {
   McpServer,

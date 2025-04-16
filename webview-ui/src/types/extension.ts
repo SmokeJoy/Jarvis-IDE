@@ -4,7 +4,7 @@ import type {
     TelemetrySetting,
     WebviewMessage as UnifiedWebviewMessage
 } from '@/shared/types'
-import { WebviewMessageType } from '@/shared/WebviewMessageType'
+import { WebviewMessageType } from '@shared/types/webview.types'
 import { Anthropic } from '@anthropic-ai/sdk'
 import { ConfigModelInfo } from './models'
 

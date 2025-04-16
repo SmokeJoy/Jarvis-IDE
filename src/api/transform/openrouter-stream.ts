@@ -2,9 +2,9 @@ import { ModelInfo } from '../../shared/api';
 import { OpenAITransformer } from './openai-format';
 import { ApiStream } from './stream';
 import OpenAI from 'openai';
-import { ChatMessage } from '../../types/ChatMessage';
+import { ChatMessage } from '../../src/shared/types/chat.types';
 import { logger } from '../../utils/logger';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 export interface OpenRouterModel extends ModelInfo {
   id: string;
@@ -26,7 +26,7 @@ export async function createOpenRouterStream(
   try {
     // Prepara la lista di messaggi
     const allMessages = [
-      createSafeMessage({role: 'system', content: systemPrompt, timestamp: Date.now()}) as ChatMessage,
+      createChatMessage({role: 'system', content: systemPrompt, timestamp: Date.now()}) as ChatMessage,
       ...messages,
     ];
 
@@ -126,13 +126,15 @@ function isReasoningEnabledModel(modelId: string): boolean {
  */
 function setupCacheControl(options: any): void {
   if (typeof options.messages[0].content === 'string') {
-    options.messages[0] = createSafeMessage({role: 'system', content: [
+    options.messages[0] = createChatMessage({role: 'system', content: [
                             {
                               type: 'text',
                               text: options.messages[0].content,
                               cache_control: { type: 'ephemeral' },
                             },
-                          ]});
+                          ],
+        timestamp: Date.now()
+    });
   }
 
   // Aggiungi cache_control agli ultimi due messaggi utente

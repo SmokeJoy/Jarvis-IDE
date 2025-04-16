@@ -1,0 +1,562 @@
+import type {
+  PromptPayload,
+  LLMResponse,
+  LLMStreamToken,
+  LLMProviderHandler
+} from '@shared/types/llm.types';
+
+async function sendPrompt(payload: PromptPayload): Promise<LLMResponse> {
+  const { requestId, text = '' } = payload;
+  return {
+    requestId,
+    output: `echo: ${text}`,
+  };
+}
+
+async function streamPrompt(
+  payload: PromptPayload,
+  onToken: (token: LLMStreamToken) => void
+): Promise<void> {
+  const { requestId, text = '' } = payload;
+  const words = text.split(/\s+/).filter(Boolean);
+  for (const word of words) {
+    onToken({ requestId, token: word });
+    // Simula un piccolo delay per realismo (opzionale)
+    // await new Promise((r) => setTimeout(r, 10));
+  }
+  onToken({ requestId, token: '', isFinal: true });
+}
+
+function cancel(requestId: string): void {
+  // eslint-disable-next-line no-console
+  console.info(`[JarvisProvider] Cancel richiesto per requestId: ${requestId} (no-op)`);
+}
+
+export const JarvisProvider: LLMProviderHandler = {
+  sendPrompt,
+  streamPrompt,
+  cancel,
+}; 
+
+
+
+
+
+
+/**
+ * @file provider-registry.ts
+ * @description Registro centralizzato per i provider LLM
+ * @version 1.0.0
+ *
+ * Implementa un layer di astrazione per i provider LLM con supporto dinamico
+ */
+
+import { logger } from '../utils/logger';
+import type { LLMProviderHandler, LLMProviderId } from '@shared/types/llm.types';
+import { OpenAIProvider } from './remote/OpenAIProvider';
+import { JarvisProvider } from './remote/JarvisProvider';
+
+/**
+ * Interfaccia base per tutti i parametri di configurazione dei provider
+ */
+export interface ProviderParams {
+  /** Nome del provider da utilizzare */
+  provider?: string;
+  /** Parametri specifici del provider */
+  [key: string]: any;
+}
+
+/**
+ * Opzioni per le richieste ai modelli LLM
+ */
+export interface LLMRequestOptions {
+  /** Prompt o messaggio da inviare al modello */
+  prompt: string;
+  /** Modello specifico da utilizzare (opzionale) */
+  model?: string;
+  /** Temperatura per il sampling (0.0-1.0) */
+  temperature?: number;
+  /** Numero massimo di token da generare */
+  maxTokens?: number;
+  /** Token di stop per terminare la generazione */
+  stopTokens?: string[];
+  /** Parametri specifici del provider */
+  providerParams?: ProviderParams;
+}
+
+/**
+ * Configurazione per le validazioni dei parametri
+ */
+export interface ValidationRules {
+  /** Campi richiesti */
+  required?: string[];
+  /** Limiti per i valori numerici: {campo: [min, max]} */
+  numericRanges?: Record<string, [number, number]>;
+  /** Valori enumerati validi: {campo: [valore1, valore2, ...]} */
+  enums?: Record<string, string[]>;
+  /** Regole per validare le stringhe: {campo: {minLength, maxLength, regex}} */
+  stringRules?: Record<
+    string,
+    {
+      minLength?: number;
+      maxLength?: number;
+      regex?: RegExp;
+    }
+  >;
+}
+
+/**
+ * Risposta base da un provider LLM
+ */
+export interface LLMResponse {
+  text: string;
+  model: string;
+  tokenUsage?: {
+    input?: number;
+    output?: number;
+    total?: number;
+  };
+  metadata?: Record<string, any>;
+}
+
+/**
+ * Modello LLM supportato da un provider
+ */
+export interface Model {
+  id: string;
+  name: string;
+  provider: LLMProviderId;
+  contextSize?: number;
+  supportsStreaming?: boolean;
+  supportsFunctions?: boolean;
+  maxOutputTokens?: number;
+  tags?: string[];
+}
+
+/**
+ * Handler di base per i provider LLM
+ */
+export interface LLMProviderHandler {
+  /** Nome univoco del provider */
+  readonly name: string;
+  /** Descrizione del provider */
+  readonly description?: string;
+  /** Flag che indica se il provider è attualmente disponibile */
+  readonly isAvailable: boolean;
+  /** Configurazione corrente del provider */
+  readonly config?: Record<string, any>;
+
+  /**
+   * Aggiorna la configurazione del provider
+   * @param config Nuova configurazione
+   */
+  updateConfig?(config: Record<string, any>): void;
+
+  /**
+   * Effettua una chiamata al modello
+   * @param options Opzioni della richiesta
+   * @returns Promise con la risposta del modello
+   */
+  call(options: LLMRequestOptions): Promise<LLMResponse>;
+
+  /**
+   * Ottiene la lista dei modelli disponibili
+   * @returns Promise con l'array dei modelli
+   */
+  getAvailableModels(): Promise<Model[]>;
+
+  /**
+   * Valida le opzioni della richiesta
+   * @param options Opzioni da validare
+   * @returns true se valide, false altrimenti
+   */
+  validateRequest(options: LLMRequestOptions): boolean;
+}
+
+/**
+ * Tipo di classe di implementazione di provider
+ */
+export type LLMProviderClass = new () => LLMProviderHandler;
+
+/**
+ * Valida un oggetto rispetto a un insieme di regole
+ * @param obj Oggetto da validare
+ * @param rules Regole di validazione
+ * @returns true se l'oggetto è valido, false altrimenti
+ */
+export function validateObject(obj: Record<string, any>, rules: ValidationRules): boolean {
+  // Verifica campi richiesti
+  if (rules.required) {
+    for (const field of rules.required) {
+      if (obj[field] === undefined || obj[field] === null) {
+        console.error(`Campo richiesto mancante: ${field}`);
+        return false;
+      }
+    }
+  }
+
+  // Verifica intervalli numerici
+  if (rules.numericRanges) {
+    for (const [field, [min, max]] of Object.entries(rules.numericRanges)) {
+      if (obj[field] !== undefined && typeof obj[field] === 'number') {
+        if (obj[field] < min || obj[field] > max) {
+          console.error(`Campo ${field} fuori dall'intervallo [${min}, ${max}]: ${obj[field]}`);
+          return false;
+        }
+      }
+    }
+  }
+
+  // Verifica valori enumerati
+  if (rules.enums) {
+    for (const [field, allowedValues] of Object.entries(rules.enums)) {
+      if (obj[field] !== undefined && !allowedValues.includes(obj[field])) {
+        console.error(
+          `Valore non valido per ${field}: ${obj[field]}. Valori permessi: ${allowedValues.join(', ')}`
+        );
+        return false;
+      }
+    }
+  }
+
+  // Verifica regole per stringhe
+  if (rules.stringRules) {
+    for (const [field, rule] of Object.entries(rules.stringRules)) {
+      if (obj[field] !== undefined && typeof obj[field] === 'string') {
+        const value = obj[field] as string;
+
+        if (rule.minLength !== undefined && value.length < rule.minLength) {
+          console.error(
+            `Campo ${field} troppo corto: ${value.length} caratteri (min: ${rule.minLength})`
+          );
+          return false;
+        }
+
+        if (rule.maxLength !== undefined && value.length > rule.maxLength) {
+          console.error(
+            `Campo ${field} troppo lungo: ${value.length} caratteri (max: ${rule.maxLength})`
+          );
+          return false;
+        }
+
+        if (rule.regex !== undefined && !rule.regex.test(value)) {
+          console.error(`Campo ${field} non corrisponde al pattern richiesto: ${value}`);
+          return false;
+        }
+      }
+    }
+  }
+
+  return true;
+}
+
+// Registry centralizzato type-safe
+const registry = new Map<LLMProviderId, LLMProviderHandler>();
+
+// Provider di default
+registry.set('openai', OpenAIProvider);
+registry.set('jarvis', JarvisProvider);
+
+export function registerProvider(id: LLMProviderId, handler: LLMProviderHandler) {
+  registry.set(id, handler);
+}
+
+export function getProvider(id: LLMProviderId): LLMProviderHandler {
+  const provider = registry.get(id);
+  if (!provider) {
+    throw new Error(`[provider-registry] Provider non registrato: ${id}`);
+  }
+  return provider;
+}
+
+export function hasProvider(id: LLMProviderId): boolean {
+  return registry.has(id);
+}
+
+export function listProviders(): LLMProviderId[] {
+  return Array.from(registry.keys());
+}
+
+export { registry };
+
+
+
+/**
+ * Router centrale per i provider LLM
+ * Permette di ottenere un'istanza di provider configurata in base al nome
+ */
+
+import { BaseLLMProvider } from './BaseLLMProvider';
+import type {
+  PromptPayload,
+  LLMResponse,
+  LLMStreamToken,
+  LLMProviderHandler,
+  LLMProviderId
+} from '@shared/types/llm.types';
+
+// Provider locali
+import { OllamaProvider } from './local/OllamaProvider';
+import { LMStudioProvider } from './local/LMStudioProvider';
+import { GGUFProvider, GGUFConfig } from './local/GGUFProvider';
+import { LMDeployProvider } from './local/LMDeployProvider';
+
+// Provider remoti
+import { OpenAIProvider } from './remote/OpenAIProvider';
+import { AnthropicProvider } from './remote/AnthropicProvider';
+import { MistralProvider } from './remote/MistralProvider';
+import { GroqProvider } from './remote/GroqProvider';
+import { GoogleAIProvider } from './remote/GoogleAIProvider';
+
+// Costanti per i nomi dei provider
+export const PROVIDER_NAMES = {
+  // Provider locali
+  OLLAMA: 'ollama',
+  LM_STUDIO: 'lmstudio',
+  GGUF: 'gguf',
+  LM_DEPLOY: 'lmdeploy',
+
+  // Provider remoti
+  OPENAI: 'openai',
+  ANTHROPIC: 'anthropic',
+  MISTRAL: 'mistral',
+  GROQ: 'groq',
+  GOOGLE_AI: 'googleai',
+};
+
+// Lista di tutti i provider supportati
+export const SUPPORTED_PROVIDERS = Object.values(PROVIDER_NAMES);
+
+// Opzioni di configurazione per il provider
+export interface ProviderOptions {
+  apiKey?: string;
+  baseUrl?: string;
+  ggufConfig?: GGUFConfig;
+}
+
+// Registry type-safe dei provider
+const registry = new Map<LLMProviderId, LLMProviderHandler>();
+
+// Registra provider di default
+registry.set('openai', OpenAIProvider);
+
+export function registerProvider(id: LLMProviderId, handler: LLMProviderHandler) {
+  registry.set(id, handler);
+}
+
+function getProvider(id: LLMProviderId): LLMProviderHandler {
+  const provider = registry.get(id);
+  if (!provider) {
+    throw new Error(`[LLMRouter] Provider non registrato: ${id}`);
+  }
+  return provider;
+}
+
+/**
+ * Verifica se un provider è supportato
+ * @param name Nome del provider da verificare
+ * @returns true se il provider è supportato, false altrimenti
+ */
+export function isProviderSupported(name: string): boolean {
+  return SUPPORTED_PROVIDERS.includes(name.toLowerCase());
+}
+
+/**
+ * Restituisce la lista dei provider locali disponibili
+ * @returns Array con i nomi dei provider locali
+ */
+export function getLocalProviders(): string[] {
+  return [
+    PROVIDER_NAMES.OLLAMA,
+    PROVIDER_NAMES.LM_STUDIO,
+    PROVIDER_NAMES.GGUF,
+    PROVIDER_NAMES.LM_DEPLOY,
+  ];
+}
+
+/**
+ * Restituisce la lista dei provider remoti disponibili
+ * @returns Array con i nomi dei provider remoti
+ */
+export function getRemoteProviders(): string[] {
+  return [
+    PROVIDER_NAMES.OPENAI,
+    PROVIDER_NAMES.ANTHROPIC,
+    PROVIDER_NAMES.MISTRAL,
+    PROVIDER_NAMES.GROQ,
+    PROVIDER_NAMES.GOOGLE_AI,
+  ];
+}
+
+/**
+ * Ottiene un'istanza del provider richiesto, già configurata e pronta all'uso
+ * @param name Nome del provider (es. 'ollama', 'openai', 'groq')
+ * @param options Opzioni di configurazione (es. apiKey, baseUrl)
+ * @returns Istanza di BaseLLMProvider configurata
+ * @throws Error se il provider non è supportato o manca una configurazione necessaria
+ */
+export function getProvider(name: string, options: ProviderOptions = {}): BaseLLMProvider {
+  const providerName = name.toLowerCase();
+
+  if (!isProviderSupported(providerName)) {
+    throw new Error(
+      `Provider LLM non supportato: ${name}. Provider disponibili: ${SUPPORTED_PROVIDERS.join(', ')}`
+    );
+  }
+
+  // Ottieni l'istanza del provider appropriato in base al nome
+  switch (providerName) {
+    // Provider locali
+    case PROVIDER_NAMES.OLLAMA:
+      return new OllamaProvider(options.baseUrl);
+
+    case PROVIDER_NAMES.LM_STUDIO:
+      return new LMStudioProvider(options.baseUrl);
+
+    case PROVIDER_NAMES.GGUF:
+      if (!options.ggufConfig) {
+        throw new Error(
+          `${PROVIDER_NAMES.GGUF.toUpperCase()}Provider richiede ggufConfig con binaryPath e modelsPath`
+        );
+      }
+      return new GGUFProvider(options.ggufConfig);
+
+    case PROVIDER_NAMES.LM_DEPLOY:
+      return new LMDeployProvider(options.baseUrl);
+
+    // Provider remoti
+    case PROVIDER_NAMES.OPENAI:
+      if (!options.apiKey) {
+        throw new Error(`${PROVIDER_NAMES.OPENAI.toUpperCase()}Provider richiede una API key`);
+      }
+      return new OpenAIProvider(options.apiKey, options.baseUrl);
+
+    case PROVIDER_NAMES.ANTHROPIC:
+      if (!options.apiKey) {
+        throw new Error(`${PROVIDER_NAMES.ANTHROPIC.toUpperCase()}Provider richiede una API key`);
+      }
+      return new AnthropicProvider(options.apiKey, options.baseUrl);
+
+    case PROVIDER_NAMES.MISTRAL:
+      if (!options.apiKey) {
+        throw new Error(`${PROVIDER_NAMES.MISTRAL.toUpperCase()}Provider richiede una API key`);
+      }
+      return new MistralProvider(options.apiKey, options.baseUrl);
+
+    case PROVIDER_NAMES.GROQ:
+      if (!options.apiKey) {
+        throw new Error(`${PROVIDER_NAMES.GROQ.toUpperCase()}Provider richiede una API key`);
+      }
+      return new GroqProvider(options.apiKey, options.baseUrl);
+
+    case PROVIDER_NAMES.GOOGLE_AI:
+      if (!options.apiKey) {
+        throw new Error(`${PROVIDER_NAMES.GOOGLE_AI.toUpperCase()}Provider richiede una API key`);
+      }
+      return new GoogleAIProvider(options.apiKey, options.baseUrl);
+
+    default:
+      // Questo caso non dovrebbe mai verificarsi grazie al controllo isProviderSupported,
+      // ma lo includiamo per sicurezza e completezza TypeScript
+      throw new Error(`Provider LLM non supportato: ${name}`);
+  }
+}
+
+/**
+ * Utility per inizializzare velocemente un provider con le impostazioni comuni
+ * @param settings Impostazioni della configurazione globale
+ * @returns Provider LLM configurato in base alle impostazioni
+ */
+export function getProviderFromSettings(settings: any): BaseLLMProvider | null {
+  const providerName = settings.provider?.name;
+
+  if (!providerName || !isProviderSupported(providerName)) {
+    console.warn(`Provider '${providerName}' non valido o non supportato`);
+    return null;
+  }
+
+  try {
+    const options: ProviderOptions = {};
+
+    // Configura le opzioni in base al provider
+    if (getRemoteProviders().includes(providerName)) {
+      options.apiKey = settings.provider?.apiKey;
+      options.baseUrl = settings.provider?.baseUrl;
+    } else if (providerName === PROVIDER_NAMES.GGUF) {
+      options.ggufConfig = settings.provider?.ggufConfig;
+    } else {
+      options.baseUrl = settings.provider?.baseUrl;
+    }
+
+    return getProvider(providerName, options);
+  } catch (error) {
+    console.error(`Errore nella creazione del provider da impostazioni:`, error);
+    return null;
+  }
+}
+
+export const LLMRouter = {
+  sendPrompt(payload: PromptPayload): Promise<LLMResponse> {
+    const { providerId } = payload;
+    const provider = getProvider(providerId);
+    return provider.sendPrompt(payload);
+  },
+  async streamPrompt(payload: PromptPayload, onToken: (token: LLMStreamToken) => void): Promise<void> {
+    const { providerId } = payload;
+    const provider = getProvider(providerId);
+    return provider.streamPrompt(payload, onToken);
+  },
+  cancel(requestId: string): void {
+    // Cancella su tutti i provider registrati (multi-request safety)
+    for (const provider of registry.values()) {
+      provider.cancel(requestId);
+    }
+  },
+  registerProvider,
+};
+
+import { describe, it, expect, vi } from 'vitest';
+import { JarvisProvider } from '../remote/JarvisProvider';
+import type { PromptPayload, LLMStreamToken } from '@shared/types/llm.types';
+
+describe('JarvisProvider', () => {
+  it('should echo back text in sendPrompt', async () => {
+    const payload: PromptPayload = {
+      requestId: 'echo-1',
+      text: 'Hello Jarvis',
+      providerId: 'jarvis' as any,
+    };
+    const res = await JarvisProvider.sendPrompt(payload);
+    expect(res.output).toBe('echo: Hello Jarvis');
+    expect(res.requestId).toBe(payload.requestId);
+  });
+
+  it('should stream individual words with streamPrompt', async () => {
+    const tokens: LLMStreamToken[] = [];
+    const payload: PromptPayload = {
+      requestId: 'stream-1',
+      text: 'this is a test',
+      providerId: 'jarvis' as any,
+    };
+
+    await JarvisProvider.streamPrompt(payload, (token) => tokens.push(token));
+
+    expect(tokens).toEqual([
+      { requestId: 'stream-1', token: 'this' },
+      { requestId: 'stream-1', token: 'is' },
+      { requestId: 'stream-1', token: 'a' },
+      { requestId: 'stream-1', token: 'test' },
+      { requestId: 'stream-1', token: '', isFinal: true },
+    ]);
+  });
+
+  it('should log cancel (no-op)', () => {
+    const spy = vi.spyOn(console, 'info').mockImplementation(() => {});
+    JarvisProvider.cancel('cancel-123');
+    expect(spy).toHaveBeenCalledWith(
+      '[JarvisProvider] Cancel richiesto per requestId: cancel-123 (no-op)'
+    );
+    spy.mockRestore();
+  });
+});
+

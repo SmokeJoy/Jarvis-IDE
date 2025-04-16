@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
-import { render, screen } from '@testing-library/react'; from '@testing-library/react'; from '@testing-library/react'; from '@testing-library/react'; from '@testing-library/react'; from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { ChatMessage } from '../../../src/shared/types/webview.types';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { useChatMessages } from '../hooks/useChatMessages';

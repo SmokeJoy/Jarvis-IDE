@@ -1,5 +1,6 @@
+// import { FallbackMonitorPanel } from '@jarvis/visix'; // Commentato - Modulo non trovato
 import * as vscode from 'vscode';
-import { FallbackMonitorPanel } from '@jarvis/visix';
+import * as path from 'path';
 import { LLMEventBus } from '../mas/core/fallback/LLMEventBus';
 import { FallbackStrategy } from '../mas/core/fallback/strategies/FallbackStrategy';
 
@@ -27,11 +28,12 @@ export class VisixPanel {
       {
         enableScripts: true,
         retainContextWhenHidden: true,
-        localResourceRoots: [vscode.Uri.joinPath(this.context.extensionUri, 'dist')],
+        localResourceRoots: [vscode.Uri.file(path.join(this.context.extensionUri.fsPath, 'dist'))],
+        scriptSrc: ["'unsafe-inline'", this.panel?.webview.cspSource],
       }
     );
 
-    this.panel.webview.html = this.getWebviewContent();
+    this.panel.webview.html = "<html><body>Visix Panel Disabilitato (Modulo non trovato)</body></html>"; // Fallback HTML
 
     this.panel.onDidDispose(
       () => {
@@ -44,8 +46,8 @@ export class VisixPanel {
   }
 
   private getWebviewContent(): string {
-    const scriptUri = this.panel!.webview.asWebviewUri(
-      vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'visix.esm.js')
+    const reactAppUri = this.panel.webview.asWebviewUri(
+      vscode.Uri.file(path.join(this.context.extensionUri.fsPath, 'dist', 'visix.esm.js'))
     );
 
     return `
@@ -70,7 +72,7 @@ export class VisixPanel {
         <body>
           <div id="root"></div>
           <script type="module">
-            import { FallbackMonitorPanel } from '${scriptUri}';
+            import { FallbackMonitorPanel } from '${reactAppUri}';
             import React from 'react';
             import { createRoot } from 'react-dom/client';
 

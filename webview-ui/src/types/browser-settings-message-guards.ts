@@ -21,8 +21,13 @@ import {
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un BrowserSettingsMessageUnion
  */
-export function isBrowserSettingsMessage(message: WebviewMessage<any>): message is BrowserSettingsMessageUnion {
-  return Object.values(BrowserSettingsMessageType).includes(message?.type as BrowserSettingsMessageType);
+export function isBrowserSettingsMessage(message: unknown): message is BrowserSettingsMessageUnion {
+  return (
+    typeof message === 'object' &&
+    message !== null &&
+    'type' in message &&
+    Object.values(BrowserSettingsMessageType).includes((message as any).type)
+  );
 }
 
 /**

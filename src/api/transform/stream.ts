@@ -9,7 +9,7 @@ import {
   ApiStreamTextChunk,
   ApiStreamReasoningChunk,
   ApiStreamUsageChunk,
-} from '../../shared/types/api.types';
+} from '../../src/shared/types/api.types';
 
 // Tipo di compatibilità per supportare codice legacy
 export type ApiStreamOld = AsyncGenerator<ApiStreamChunk>;

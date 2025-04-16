@@ -14,7 +14,7 @@ export async function findHybridPath(
   targetId: string,
   options: HybridNavigationOptions,
   includeContent: boolean = true,
-  includeMetadata: boolean = true
+  includeProviderFields: boolean = true
 ) {
   // 1. Prima prova con navigazione semantica
   try {
@@ -23,7 +23,7 @@ export async function findHybridPath(
       targetId,
       options,
       includeContent,
-      includeMetadata
+      includeProviderFields
     );
 
     if (semanticResult.success && semanticResult.path) {
@@ -46,7 +46,7 @@ export async function findHybridPath(
       maxSteps: options.maxExploratorySteps,
     },
     includeContent,
-    includeMetadata,
+    includeProviderFields,
     'graph' // Usa formato graph per mantenere tutti i possibili percorsi
   );
 
@@ -81,7 +81,7 @@ function calculateAverageSemanticScore(edges: any[], options: HybridNavigationOp
 }
 
 function calculateEdgeSemanticScore(edge: ContextLink, options: HybridNavigationOptions): number {
-  let score = (edge.strength || 0) * (edge.metadata?.confidence || 0);
+  let score = (edge.strength || 0) * ((edge.providerFields?.confidence as number | undefined) || 0);
 
   // Applica moltiplicatori per relazioni preferite
   if (options.preferredRelations?.includes(edge.relation)) {
@@ -89,9 +89,9 @@ function calculateEdgeSemanticScore(edge: ContextLink, options: HybridNavigation
   }
 
   // Applica pesi per tipo di fonte
-  if (edge.metadata?.source === 'user') {
+  if (edge.providerFields?.source === 'user') {
     score *= 1.2; // 20% di bonus per fonti umane
-  } else if (edge.metadata?.source === 'tool') {
+  } else if (edge.providerFields?.source === 'tool') {
     score *= 0.8; // 20% di penalità per fonti automatiche
   }
 

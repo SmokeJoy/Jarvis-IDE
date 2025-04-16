@@ -1,14 +1,14 @@
 import { Anthropic } from '@anthropic-ai/sdk';
-import type OpenAI from 'openai';
-import { ApiHandlerOptions } from '../../shared/types/api.types';
+import OpenAI, { ChatCompletionMessageParam } from 'openai';
+import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';
+import { ApiHandlerOptions as ApiHandlerOptionsTs } from '../../src/shared/types/api.types';
 import { liteLlmDefaultModelId, liteLlmModelInfoSaneDefaults } from '../../shared/api';
 import { ApiHandler } from '../index';
-import { ApiStream } from '../transform/stream';
+import { ApiStream } from '../../src/shared/types/api.types';
 import { convertToOpenAiMessages } from '../transform/openai-format';
 import { logger } from '../../utils/logger';
-import { ApiHandlerOptions as ApiHandlerOptionsTs, ModelInfo } from '../../shared/types/api.types';
 import { openAiModelInfoSaneDefaults } from '../../shared/api';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage } from '../../src/shared/types/chat.types';
 
 export class LiteLlmHandler implements ApiHandler {
   private options: ApiHandlerOptions;
@@ -69,7 +69,9 @@ export class LiteLlmHandler implements ApiHandler {
     messages: Anthropic.Messages.MessageParam[]
   ): ApiStream {
     const formattedMessages = convertToOpenAiMessages(messages);
-    const systemMessage: ChatCompletionMessageParam = createSafeMessage({role: 'system', content: systemPrompt});
+    const systemMessage: ChatCompletionMessageParam = createChatMessage({role: 'system', content: systemPrompt,
+        timestamp: Date.now()
+    });
     const modelId = this.options.liteLlmModelId || liteLlmDefaultModelId;
     const isOminiModel = modelId.includes('o1-mini') || modelId.includes('o3-mini');
     let temperature: number | undefined = 0;

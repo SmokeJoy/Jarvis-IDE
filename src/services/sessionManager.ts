@@ -7,7 +7,7 @@ interface Session {
   timestamp: number;
   messages: Array<{
     role: string;
-    message: string;
+    content: string;
     timestamp: number;
   }>;
 }
@@ -78,7 +78,7 @@ export class SessionManager {
     if (this.currentSession) {
       this.currentSession.messages.push({
         role,
-        message,
+        content: message,
         timestamp: Date.now(),
       });
       this.saveSession(this.currentSession);

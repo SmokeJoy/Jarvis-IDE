@@ -1,5 +1,5 @@
 import { Anthropic } from '@anthropic-ai/sdk';
-import { ApiConfiguration, ModelInfo } from '../shared/types/api.types';
+import { ApiConfiguration, ModelInfo } from '../src/shared/types/api.types';
 import { ApiStream, ApiStreamUsageChunk } from './transform/stream';
 
 // Import handlers

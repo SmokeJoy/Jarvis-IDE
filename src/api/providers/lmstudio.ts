@@ -1,14 +1,14 @@
 import { Anthropic } from '@anthropic-ai/sdk';
 import OpenAI, { ChatCompletionMessageParam } from 'openai';
 import { ApiHandler } from '../index';
-import { ApiHandlerOptions, ModelInfo } from '../../shared/types/api.types';
+import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';
 import { openAiModelInfoSaneDefaults } from '../../shared/api';
 import { convertToOpenAiMessages } from '../transform/openai-format';
-import { ApiStream, ApiStreamChunk } from '../../shared/types/api.types';
+import { ApiStream, ApiStreamChunk } from '../../src/shared/types/api.types';
 import { logger } from '../../utils/logger';
-import { createSafeMessage } from '../../shared/types/message';
+import { createChatMessage } from '../../src/shared/types/chat.types';
 import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider';
-import { LLMProviderId } from '../../shared/types/llm.types';
+import { LLMProviderId } from '../../src/shared/types/providers.types';
 
 export class LMStudioHandler extends BaseLLMProvider {
   readonly provider = LLMProviderId.LMStudio;
@@ -35,7 +35,9 @@ export class LMStudioHandler extends BaseLLMProvider {
     messages: Anthropic.Messages.MessageParam[]
   ): ApiStream {
     const openAiMessages: ChatCompletionMessageParam[] = [
-      createSafeMessage({role: 'system', content: systemPrompt}),
+      createChatMessage({role: 'system', content: systemPrompt,
+          timestamp: Date.now()
+    }),
       ...convertToOpenAiMessages(messages),
     ];
 

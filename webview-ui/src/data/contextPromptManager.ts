@@ -119,8 +119,8 @@ async function initializeProfiles(): Promise<PromptProfile[]> {
       const removeListener = webviewBridge.on('promptProfiles', (message) => {
         removeListener(); // Deregistra il listener
         
-        if (message.profiles && Array.isArray(message.profiles)) {
-          profilesCache = message.profiles;
+        if (isProfilesListMessage(message)) {
+          profilesCache = message.payload.profiles;
           
           // Trova il profilo attivo
           const activeProfile = profilesCache.find(p => p.isDefault);
@@ -414,11 +414,11 @@ export async function switchProfile(profileId: string): Promise<PromptProfile> {
         return;
       }
       
-      if (message.profiles && Array.isArray(message.profiles)) {
-        profilesCache = message.profiles;
+      if (message.payload.profiles && Array.isArray(message.payload.profiles)) {
+        profilesCache = message.payload.profiles;
       }
       
-      if (message.profileId === profileId) {
+      if (isProfileUpdatedMessage(message) && message.payload.profile.id === profileId) {
         activeProfileId = profileId;
         
         // Aggiorna promptCache con il nuovo profilo
@@ -450,6 +450,7 @@ export async function switchProfile(profileId: string): Promise<PromptProfile> {
         profileId
       }
     });
+    postMessage({ type: 'PROFILE_UPDATE', payload: { id: profileId } })
   });
 }
 
@@ -471,23 +472,23 @@ export async function createProfile(profile: Partial<PromptProfile>): Promise<Pr
         return;
       }
       
-      if (message.profile) {
+      if (isProfileUpdatedMessage(message)) {
         // Aggiorna la cache dei profili
         if (!profilesCache) {
-          profilesCache = [message.profile];
+          profilesCache = [message.payload.profile];
         } else {
-          profilesCache.push(message.profile);
+          profilesCache.push(message.payload.profile);
         }
         
         // Se è il profilo di default, aggiornare anche activeProfileId
-        if (message.profile.isDefault) {
-          activeProfileId = message.profile.id;
-          promptCache = { ...message.profile.contextPrompt };
+        if (message.payload.profile.isDefault) {
+          activeProfileId = message.payload.profile.id;
+          promptCache = { ...message.payload.profile.contextPrompt };
           saveToLocalStorage();
         }
         
         saveProfilesToLocalStorage();
-        resolve(message.profile);
+        resolve(message.payload.profile);
       } else {
         reject(new Error('Profilo non creato correttamente'));
       }
@@ -529,28 +530,28 @@ export async function updateProfile(profileId: string, updates: Partial<PromptPr
         return;
       }
       
-      if (message.profile && message.profile.id === profileId) {
+      if (message.payload.profile && message.payload.profile.id === profileId) {
         // Aggiorna la cache dei profili
         const profileIndex = profilesCache!.findIndex(p => p.id === profileId);
         if (profileIndex >= 0) {
-          profilesCache![profileIndex] = message.profile;
+          profilesCache![profileIndex] = message.payload.profile;
         }
         
         // Se è il profilo attivo, aggiorna anche promptCache
         if (activeProfileId === profileId) {
-          promptCache = { ...message.profile.contextPrompt };
+          promptCache = { ...message.payload.profile.contextPrompt };
           saveToLocalStorage();
         }
         
         // Se è diventato il profilo di default, aggiorna activeProfileId
-        if (message.profile.isDefault && activeProfileId !== profileId) {
+        if (message.payload.profile.isDefault && activeProfileId !== profileId) {
           activeProfileId = profileId;
-          promptCache = { ...message.profile.contextPrompt };
+          promptCache = { ...message.payload.profile.contextPrompt };
           saveToLocalStorage();
         }
         
         saveProfilesToLocalStorage();
-        resolve(message.profile);
+        resolve(message.payload.profile);
       } else {
         reject(new Error('Profilo non aggiornato correttamente'));
       }
@@ -592,10 +593,10 @@ export async function deleteProfile(profileId: string): Promise<void> {
         return;
       }
       
-      if (message.profileId === profileId) {
+      if (isProfileUpdatedMessage(message) && message.payload.profile.id === profileId) {
         // Aggiorna la cache dei profili
-        if (message.profiles && Array.isArray(message.profiles)) {
-          profilesCache = message.profiles;
+        if (isProfilesListMessage(message)) {
+          profilesCache = message.payload.profiles;
           
           // Trova il nuovo profilo attivo
           const defaultProfile = profilesCache.find(p => p.isDefault);
@@ -645,4 +646,53 @@ export async function updateActiveProfilePrompt(contextPrompt: ContextPrompt): P
   
   // Sincronizza con l'estensione
   syncToExtension();
-} 
+}
+
+// === MAS thread/agent context ===
+export type MASPromptContext = {
+  agentId: string;
+  threadId: string;
+  contextPrompt: string;
+};
+
+// Mappa globale (lifetime sessione webview) per MAS
+const masPromptMap: Record<string, Record<string, string>> = {};
+
+/**
+ * Applica un prompt di contesto MAS per una coppia agentId/threadId
+ * Se contextPrompt === '', elimina la chiave.
+ */
+export function applyContextPrompt(
+  input: MASPromptContext
+): void {
+  const { agentId, threadId, contextPrompt } = input;
+  if (!agentId || !threadId) return;
+  if (!masPromptMap[agentId]) masPromptMap[agentId] = {};
+  // Persiste/disabilita context
+  if(contextPrompt?.trim()) {
+    masPromptMap[agentId][threadId] = contextPrompt;
+  } else {
+    delete masPromptMap[agentId][threadId];
+    // Pulisci agent se vuoto
+    if (Object.keys(masPromptMap[agentId]).length === 0) {
+      delete masPromptMap[agentId];
+    }
+  }
+  // Notifica visual MAS-UI (eventualmente via eventBus o websocket)
+  if(typeof window !== 'undefined' && window.dispatchEvent) {
+    const event = new CustomEvent('MASPromptContextChanged', { detail: { agentId, threadId, contextPrompt } });
+    window.dispatchEvent(event);
+  }
+  // Sincronizza con estensione (o altra logica dispatch, es: WebSocketMessageUnion)
+  webviewBridge.sendMessage({
+    type: 'MAS_CONTEXT_PROMPT_SET',
+    payload: { agentId, threadId, contextPrompt }
+  });
+}
+
+/**
+ * Recupera prompt di contesto associato ad un agentId/threadId corrente
+ */
+export function getMASContextPrompt(agentId: string, threadId: string): string | undefined {
+  return masPromptMap[agentId]?.[threadId];
+}

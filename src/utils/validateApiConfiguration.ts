@@ -1,4 +1,5 @@
 import { ApiConfiguration } from '../shared/types/api.types';
+import { MultiAgentConfiguration } from '../shared/types/multi-agent.types';
 
 interface Agent {
   name: string;

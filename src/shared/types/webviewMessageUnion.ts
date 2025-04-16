@@ -17,25 +17,23 @@ import {
 } from './webview.types';
 
 import { ZodSchemaMap } from '../../utils/validation';
+import type { LLMStreamToken } from './llm.types';
 
 /**
  * Unione discriminata di tutti i tipi di messaggi WebView conosciuti.
  * Questo tipo permette al compilatore TypeScript di distinguere
  * automaticamente il tipo specifico basandosi sul campo 'type'.
  */
-export type WebviewMessageUnion = (
-  | SendPromptMessage
-  | ActionMessage
-  | ErrorMessage
-  | ResponseMessage
-  | StateMessage
-  | InstructionMessage
+export type WebviewMessageUnion =
   | InstructionCompletedMessage
-) & {
-  agentId: string;
-  payload: unknown;
-  type: string;
-};
+  | InstructionFailedMessage
+  | AgentTypingMessage
+  | AgentTypingDoneMessage
+  | LlmCancelMessage
+  | DisconnectMessage
+  | AgentTaskCreatedMessage
+  | AgentTaskDoneMessage
+  | WebSocketErrorMessage;
 
 /**
  * Type guard per verificare se un messaggio è un SendPromptMessage
@@ -242,3 +240,68 @@ export const isWebviewCommandMessage = (
 export const isWebviewResponseMessage = (
   message: WebviewMessage
 ): message is WebviewResponseMessage => message.type === WebviewMessageType.RESPONSE;
+
+export type BaseWebviewMessage<T extends string = string> = {
+  type: T;
+  agentId?: string;
+  threadId?: string;
+};
+
+export type InstructionCompletedMessage = BaseWebviewMessage<'INSTRUCTION_COMPLETED'> & {
+  payload: {
+    output: string;
+    tokens?: LLMStreamToken[];
+  };
+};
+
+export type InstructionFailedMessage = BaseWebviewMessage<'INSTRUCTION_FAILED'> & {
+  error: string;
+};
+
+export type AgentTypingMessage = BaseWebviewMessage<'AGENT_TYPING'>;
+export type AgentTypingDoneMessage = BaseWebviewMessage<'AGENT_TYPING_DONE'>;
+
+export type LlmCancelMessage = BaseWebviewMessage<'LLM_CANCEL'> & {
+  payload: { requestId: string };
+};
+
+export type DisconnectMessage = BaseWebviewMessage<'DISCONNECT'>;
+
+export type AgentTaskCreatedMessage = BaseWebviewMessage<'AGENT_TASK_CREATED'> & {
+  payload: {
+    taskId: string;
+    description: string;
+  };
+};
+
+export type AgentTaskDoneMessage = BaseWebviewMessage<'AGENT_TASK_DONE'> & {
+  payload: {
+    taskId: string;
+    result: string;
+  };
+};
+
+export type WebSocketErrorMessage = BaseWebviewMessage<'WS_ERROR'> & {
+  error: string;
+};
+
+// Type Guards
+export function isWebviewMessage<T extends WebviewMessageUnion>(msg: unknown): msg is T {
+  return typeof (msg as any)?.type === 'string';
+}
+
+export function isAgentMessage(
+  msg: WebviewMessageUnion
+): msg is AgentTypingMessage | AgentTypingDoneMessage | InstructionCompletedMessage {
+  return (
+    msg.type.startsWith('AGENT_') ||
+    msg.type === 'INSTRUCTION_COMPLETED' ||
+    msg.type === 'INSTRUCTION_FAILED'
+  );
+}
+
+export function isLlmCancelMessage(
+  msg: WebviewMessageUnion
+): msg is LlmCancelMessage {
+  return msg.type === 'LLM_CANCEL';
+}

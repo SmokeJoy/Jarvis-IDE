@@ -3,7 +3,7 @@ import {
   ApiConfiguration,
   ModelInfo,
   ApiHandlerOptions,
-} from './types/api.types';
+} from '../src/shared/types/api.types';
 import { ApiProvider } from '../agent/api/ApiProvider';
 
 // Esporta esplicitamente i tipi importati

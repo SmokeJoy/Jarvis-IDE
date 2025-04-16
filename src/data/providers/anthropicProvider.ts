@@ -4,7 +4,7 @@
  * Implementa le funzionalità di caricamento modelli per Anthropic
  */
 
-import { OpenAiCompatibleModelInfo, LLMProviderId } from '../../shared/types/api.types';
+import { OpenAiCompatibleModelInfo, LLMProviderId } from '../../src/shared/types/api.types';
 import { ANTHROPIC_MODELS } from './anthropicModels';
 import { Logger } from '../../shared/logger';
 

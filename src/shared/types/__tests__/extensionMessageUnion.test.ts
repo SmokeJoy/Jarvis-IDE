@@ -4,7 +4,8 @@ import {
   ExtensionMessage,
   ExtensionMessageType,
 } from '../extensionMessageUnion';
-import { mockModelInfo } from '@/core/webview/__tests__/testUtils';
+import { WebviewMessageType, WebviewMessage } from '../webview.types';
+import { mockModelInfo } from '../../../core/webview/__tests__/testUtils';
 
 describe('extensionMessageUnion', () => {
   describe('isExtensionMessage', () => {

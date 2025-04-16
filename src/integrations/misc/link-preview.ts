@@ -1,6 +1,6 @@
 import axios from 'axios';
 import ogs from 'open-graph-scraper';
-import { OpenGraphData } from '../../types/global';
+import { OpenGraphData } from '../../src/shared/types/global';
 
 /**
  * Fetches Open Graph metadata from a URL

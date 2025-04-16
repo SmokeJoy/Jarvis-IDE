@@ -13,7 +13,7 @@ import {
   OpenRouterModelInfo,
   AzureOpenAIModelInfo,
   LLMProviderId,
-} from '../types/api.types';
+} from '../../src/shared/types/api.types';
 
 describe('ModelInfoBase', () => {
   it('Should accept a valid ModelInfoBase', () => {

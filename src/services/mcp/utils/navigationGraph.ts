@@ -35,8 +35,8 @@ export function calculateSemanticScore(link: ContextLink, options: NavigationOpt
   if (link.strength) {
     score *= link.strength;
   }
-  if (link.metadata?.confidence) {
-    score *= link.metadata.confidence;
+  if (link.providerFields?.confidence) {
+    score *= link.providerFields.confidence as number;
   }
 
   // Filtri su strength e confidence
@@ -45,8 +45,8 @@ export function calculateSemanticScore(link: ContextLink, options: NavigationOpt
   }
   if (
     options.minConfidence &&
-    link.metadata?.confidence &&
-    link.metadata.confidence < options.minConfidence
+    link.providerFields?.confidence &&
+    (link.providerFields.confidence as number) < options.minConfidence
   ) {
     score = 0;
   }
@@ -57,21 +57,21 @@ export function calculateSemanticScore(link: ContextLink, options: NavigationOpt
 export function buildNodeResult(
   context: any,
   includeContent: boolean,
-  includeMetadata: boolean
+  includeProviderFields: boolean
 ): NodeResult {
   const node: NodeResult = { id: context.id };
 
   if (includeContent) {
     node.text = context.text;
   }
-  if (includeMetadata) {
+  if (includeContent) {
     node.tags = context.tags;
   }
 
   return node;
 }
 
-export function buildEdgeResult(link: ContextLink, includeMetadata: boolean): EdgeResult {
+export function buildEdgeResult(link: ContextLink, includeProviderFields: boolean): EdgeResult {
   const edge: EdgeResult = {
     id: link.id,
     sourceId: link.sourceId,
@@ -79,9 +79,9 @@ export function buildEdgeResult(link: ContextLink, includeMetadata: boolean): Ed
     relation: link.relation,
   };
 
-  if (includeMetadata) {
+  if (includeProviderFields) {
     edge.strength = link.strength;
-    edge.confidence = link.metadata?.confidence;
+    edge.confidence = link.providerFields?.confidence as number | undefined;
   }
 
   return edge;
@@ -98,8 +98,8 @@ export function filterLinksByOptions(
     }
     if (
       options.minConfidence &&
-      link.metadata?.confidence &&
-      link.metadata.confidence < options.minConfidence
+      link.providerFields?.confidence &&
+      (link.providerFields.confidence as number) < options.minConfidence
     ) {
       return false;
     }

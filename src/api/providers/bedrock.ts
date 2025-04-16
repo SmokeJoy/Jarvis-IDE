@@ -1,9 +1,9 @@
 import AnthropicBedrock from '@anthropic-ai/bedrock-sdk';
 import { ApiHandler } from '../index';
 import { convertToR1Format } from '../transform/r1-format';
-import { ApiHandlerOptions, ModelInfo } from '../../shared/types/api.types';
+import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';
 import { calculateApiCostOpenAI } from '../../utils/cost';
-import { ApiStream, ApiStreamChunk } from '../../types/global';
+import { ApiStream, ApiStreamChunk } from '../../src/shared/types/api.types';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import {
   BedrockRuntimeClient,
@@ -16,8 +16,7 @@ import { bedrockDefaultModelId, BedrockModelId, bedrockModels } from '../../shar
 import { ChatCompletionContentPartText } from '../transform/r1-format';
 import { ChatCompletionMessageParam } from '../../types/provider-types/openai-types';
 import { BaseStreamHandler } from '../handlers/BaseStreamHandler';
-import { ChatMessage } from '../../types/chat.types';
-import { createSafeMessage } from "../../shared/types/message";
+import { ChatMessage, createChatMessage } from '../../src/shared/types/chat.types';
 
 export interface BedrockConfig {
   region: string;
@@ -524,7 +523,9 @@ export class AwsBedrockHandler implements ApiHandler {
    */
   private formatDeepseekR1Prompt(systemPrompt: string, messages: ChatMessage[]): string {
     // First use convertToR1Format to merge consecutive messages with the same role
-    const r1Messages = convertToR1Format([createSafeMessage({role: 'user', content: systemPrompt}), ...messages]);
+    const r1Messages = convertToR1Format([createChatMessage({role: 'user', content: systemPrompt,
+        timestamp: Date.now()
+    }), ...messages]);
 
     // Then convert to the special string format expected by DeepSeek R1
     let combinedContent = '';
@@ -804,7 +805,9 @@ ${combinedContent}
   }
 
   async *streamChat(messages: ChatCompletionMessageParam[]) {
-    const anthropicMessages = messages.map((msg) => (createSafeMessage({role: msg.role === 'assistant' ? 'assistant' : 'user', content: msg.content}))) as ChatMessage[];
+    const anthropicMessages = messages.map((msg) => (createChatMessage({role: msg.role === 'assistant' ? 'assistant' : 'user', content: msg.content,
+        timestamp: Date.now()
+    }))) as ChatMessage[];
 
     const command = new InvokeModelCommand({
       modelId: this.getModelId(),
@@ -859,7 +862,9 @@ ${combinedContent}
   }
 
   async chat(messages: ChatCompletionMessageParam[]) {
-    const anthropicMessages = messages.map((msg) => (createSafeMessage({role: msg.role === 'assistant' ? 'assistant' : 'user', content: msg.content}))) as ChatMessage[];
+    const anthropicMessages = messages.map((msg) => (createChatMessage({role: msg.role === 'assistant' ? 'assistant' : 'user', content: msg.content,
+        timestamp: Date.now()
+    }))) as ChatMessage[];
 
     const command = new InvokeModelCommand({
       modelId: this.getModelId(),
@@ -886,13 +891,19 @@ ${combinedContent}
           'text' in responseBody.content[0]
         ) {
           return convertToR1Format([
-            createSafeMessage({role: 'assistant', content: responseBody.content[0].text}),
+            createChatMessage({role: 'assistant', content: responseBody.content[0].text,
+                timestamp: Date.now()
+            }),
           ])[0];
         }
         // Se non riusciamo a estrarre il testo, restituiamo un messaggio vuoto
-        return createSafeMessage({role: 'assistant', content: ''});
+        return createChatMessage({role: 'assistant', content: '',
+            timestamp: Date.now()
+        });
       }
-      return createSafeMessage({role: 'assistant', content: ''});
+      return createChatMessage({role: 'assistant', content: '',
+          timestamp: Date.now()
+    });
     } catch (error) {
       console.error('Error in chat:', error);
       throw error;

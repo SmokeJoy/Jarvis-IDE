@@ -1,4 +1,4 @@
-import { LogLevel } from '../types/global';
+import { LogLevel } from '../shared/types/global';
 import { JarvisProvider as JarvisProviderType } from '../core/webview/JarvisProvider';
 import { appendLogToFile as appendLogToFileType } from './logStorage';
 import * as vscode from 'vscode';

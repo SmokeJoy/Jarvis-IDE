@@ -12,9 +12,9 @@ import {
   ContentType,
   isTextBlock,
   isImageBlock,
-} from '../../types/chat.types';
+} from '../../src/shared/types/chat.types';
 import { BaseTransformer } from './BaseTransformer';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 /**
  * Transformer per il formato R1 (DeepSeek Reasoner)
@@ -109,7 +109,9 @@ export class R1Transformer {
         }
       } else {
         // Aggiungi nuovo messaggio con il tipo corretto in base al ruolo
-        merged.push(createSafeMessage({role: message.role === 'assistant' ? 'assistant' : 'user', content: messageContent}) as ChatCompletionMessageParam);
+        merged.push(createChatMessage({role: message.role === 'assistant' ? 'assistant' : 'user', content: messageContent,
+            timestamp: Date.now()
+        }) as ChatCompletionMessageParam);
       }
 
       return merged;
@@ -163,7 +165,7 @@ export class R1Transformer {
       };
     } catch (error) {
       logger.error(`Errore durante la conversione della risposta R1: ${error.message}`);
-      return createSafeMessage({role: 'assistant', content: [
+      return createChatMessage({role: 'assistant', content: [
                                         {
                                           type: ContentType.Text,
                                           text: '',
@@ -223,7 +225,7 @@ export class R1Transformer {
         });
       }
 
-      return createSafeMessage({role: message.role, content: content, name: message.name || undefined, timestamp: new Date().toISOString()}) as ChatMessage;
+      return createChatMessage({role: message.role, content: content, name: message.name || undefined, timestamp: new Date().toISOString()}) as ChatMessage;
     });
   }
 }

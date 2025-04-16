@@ -3,10 +3,10 @@ import os from 'os';
 import osName from 'os-name';
 import { McpHub } from '../../services/mcp/McpHub';
 import { BrowserSettings } from '../../shared/BrowserSettings';
-import { ChatSettings } from '../../shared/types/chat.types';
+import { ChatSettings } from '../../src/shared/types/chat.types';
 import { AutoApprovalSettings } from '../../shared/AutoApprovalSettings';
 import { TelemetrySetting } from '../../shared/TelemetrySetting';
-import { Platform } from '../../types/global';
+import { Platform } from '../../src/shared/types/global';
 
 export function getSystemPrompt(settings: ChatSettings, platform: Platform): string {
   const prompt = `You are a powerful agentic AI coding assistant, powered by Claude 3.5 Sonnet. You operate exclusively in Cursor, the world's best IDE.

@@ -10,8 +10,9 @@ import {
   anyCondition,
   notCondition,
   providerCostAbove,
+  checkAvailability,
 } from '../adaptive-conditions';
-import { ProviderStats } from '@/mas/types/llm-provider.types';
+import { ProviderStats } from '../../../types/llm-provider.types';
 
 describe('Adaptive Conditions', () => {
   const createMockStats = (overrides: Partial<ProviderStats> = {}): ProviderStats => ({

@@ -7,7 +7,7 @@ import {
   StreamResponse,
   ErrorResponse,
 } from './chat';
-import { createChatMessage as createChatMessage } from "../src/shared/types/chat.types";
+import { createChatMessage } from "../shared/types/chat.types";
 
 describe('Chat Types', () => {
   test('Message should have correct structure', () => {

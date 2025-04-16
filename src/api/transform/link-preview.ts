@@ -1,6 +1,6 @@
 import { ChatCompletionMessageParam } from 'openai';
-import { ChatCompletionContentPartText, ChatCompletionContentPartImage } from '../../types/global';
-import { createSafeMessage } from "../../shared/types/message";
+import { ChatCompletionContentPartText, ChatCompletionContentPartImage } from '../../src/shared/types/global';
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 export async function fetchOpenGraphData(url: string): Promise<{
   title?: string;
@@ -65,5 +65,7 @@ export function formatLinkPreview(
     parts.push(formatImageUrl(ogData.image));
   }
 
-  return createSafeMessage({role: 'assistant', content: parts});
+  return createChatMessage({role: 'assistant', content: parts,
+      timestamp: Date.now()
+});
 }

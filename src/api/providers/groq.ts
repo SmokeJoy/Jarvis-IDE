@@ -1,12 +1,15 @@
 import { ApiHandler } from '../index';
-import { ApiHandlerOptions, ModelInfo } from '../../shared/types/api.types';
+import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';
 import { calculateApiCostOpenAI } from '../../utils/cost';
 import { convertToOpenAiMessages } from '../transform/openai-format';
 import { ApiStream, ApiStreamChunk } from '../transform/stream';
 import { convertToR1Format } from '../transform/r1-format';
 import { BaseStreamHandler } from '../handlers/BaseStreamHandler';
 import { logger } from '../../utils/logger';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
+import Groq from 'groq-sdk';
+import { ChatMessage } from '../../src/shared/types/chat.types';
+import type { ApiStreamTextChunk } from '../../src/shared/types/api.types';
 
 interface GroqUsage {
   prompt_tokens: number;
@@ -15,11 +18,11 @@ interface GroqUsage {
 }
 
 export class GroqHandler extends BaseStreamHandler implements ApiHandler {
-  private client: OpenAI;
+  private client: Groq;
 
   constructor(options: ApiHandlerOptions) {
     super(options);
-    this.client = new OpenAI({
+    this.client = new Groq({
       baseURL: 'https://api.groq.com/v1',
       apiKey: this.options.groqApiKey,
     });
@@ -37,7 +40,9 @@ export class GroqHandler extends BaseStreamHandler implements ApiHandler {
     logger.info(`[GroqHandler] Preparazione richiesta per modello: ${model.id}`);
 
     const openAiMessages: ChatCompletionMessageParam[] = [
-      createSafeMessage({role: 'system', content: systemPrompt}),
+      createChatMessage({role: 'system', content: systemPrompt,
+          timestamp: Date.now()
+    }),
       ...convertToOpenAiMessages(messages),
     ];
 
@@ -71,7 +76,7 @@ export class GroqHandler extends BaseStreamHandler implements ApiHandler {
 
   async *createMessage(
     systemPrompt: string,
-    messages: Anthropic.Messages.MessageParam[]
+    messages: ChatMessage[]
   ): ApiStream {
     logger.info(`[GroqHandler] Creazione messaggio con modello ${this.getModel().id}`);
 
@@ -89,7 +94,7 @@ export class GroqHandler extends BaseStreamHandler implements ApiHandler {
           results.push({
             type: 'text',
             text: delta.content,
-          });
+          } as ApiStreamTextChunk);
         }
       }
 

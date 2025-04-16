@@ -375,7 +375,8 @@ class LLMOrchestrator {
         // Invia messaggio di cancellazione
         this.webSocketBridge.sendLlmMessage({
           type: WebSocketMessageType.LLM_CANCEL,
-          requestId
+          requestId,
+          payload: {}
         });
         
         // Rimuovi la richiesta

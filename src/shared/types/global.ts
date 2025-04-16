@@ -24,3 +24,11 @@ export type { ChatCompletionMessageParam };
 export type { ChatCompletionContentPartText, ChatCompletionContentPartImage } from './api.types';
 
 // Rimuovo la definizione duplicata di ApiConfiguration, che ora viene importata da api.types.js
+
+// Definizione centralizzata per LogLevel
+export enum LogLevel {
+  DEBUG = 'DEBUG',
+  INFO = 'INFO',
+  WARN = 'WARN',
+  ERROR = 'ERROR',
+}

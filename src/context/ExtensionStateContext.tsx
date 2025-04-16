@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useReducer } from 'react';
 import { ExtensionStateContextType, ExtensionStateProviderProps } from './types';
 import { ExtensionState } from '../types/extension';
-import { ApiConfiguration } from '../types/api.types';
+import { ApiConfiguration } from '../src/shared/types/api.types';
 import { ConfigModelInfo } from '../types/models';
 
 const ExtensionStateContext = createContext<ExtensionStateContextType | null>(null);

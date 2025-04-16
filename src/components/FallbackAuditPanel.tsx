@@ -130,8 +130,8 @@ export const FallbackAuditPanel: React.FC<FallbackAuditPanelProps> = ({
                 </div>
                 <div className="mt-2">
                   <div className="text-sm text-gray-300">
-                    Strategy: {event.metadata.strategy}
-                    {event.metadata.provider && ` | Provider: ${event.metadata.provider}`}
+                    Strategy: {event.providerFields?.strategy ?? 'unknown'}
+                    {event.providerFields?.provider && ` | Provider: ${event.providerFields.provider}`}
                   </div>
                   <pre className="mt-2 text-xs bg-gray-900 p-2 rounded overflow-x-auto">
                     {JSON.stringify(event.payload, null, 2)}

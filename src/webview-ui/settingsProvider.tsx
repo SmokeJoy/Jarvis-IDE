@@ -4,7 +4,7 @@ import { Settings } from '../shared/types';
 /**
  * Interfaccia per le impostazioni dell'applicazione
  */
-interface Settings {
+interface SettingsData {
   theme: 'light' | 'dark' | 'system';
   fontSize: number;
   enableNotifications: boolean;
@@ -17,8 +17,8 @@ interface Settings {
  * Interfaccia per il contesto delle impostazioni
  */
 interface SettingsContextType {
-  settings: Settings;
-  updateSettings: (newSettings: Partial<Settings>) => void;
+  settings: SettingsData;
+  updateSettings: (newSettings: Partial<SettingsData>) => void;
 }
 
 /**
@@ -26,13 +26,13 @@ interface SettingsContextType {
  */
 interface SettingsUpdateMessage {
   type: 'updateSettings';
-  payload: Partial<Settings>;
+  payload: Partial<SettingsData>;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [settings, setSettings] = useState<Settings>({
+  const [settings, setSettings] = useState<SettingsData>({
     theme: 'system',
     fontSize: 14,
     enableNotifications: true,
@@ -41,7 +41,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     availableModels: [],
   });
 
-  const updateSettings = useCallback((newSettings: Partial<Settings>) => {
+  const updateSettings = useCallback((newSettings: Partial<SettingsData>) => {
     setSettings((prev) => ({ ...prev, ...newSettings }));
     window.vscode?.postMessage({
       type: 'updateSetting',

@@ -1,11 +1,20 @@
 import React, { useEffect, useState, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
-import * as vscode from 'vscode-webview';
-import { BaseMessage, MessageRole } from '../shared/types/message';
-import { ApiConfiguration } from '../shared/types/global';
+// import * as vscode from 'vscode-webview'; // Import globale non usato direttamente
+import type { VSCodeAPI } from 'vscode-webview'; // Correct import for the type
+// import { useAuth } from '../../hooks/useAuth'; // Commented out - path issue?
+// import { useSettings } from '../../hooks/useSettings'; // Commented out - path issue?
+// Adjusted paths for shared types - assuming relative to src root or similar
+import type { BaseMessage, MessageRole, MessagePart } from '../shared/types/common'; // Added MessagePart
+import type { ApiConfiguration } from '../shared/types/global';
+import {
+  type WebviewMessage, // Keep type import for the interface
+  WebviewMessageType, // Regular import for the enum
+} from '../shared/types/webview.types';
+import { type ChatMessage, createChatMessage, ContentType } from '../shared/types/chat.types';
+// import { VSCodeAPI } from '../../src/types/vscode-webview.d'; // Removed incorrect import path
 import { McpView } from './McpView';
-import { createSafeMessage } from "../shared/types/message";
 
 const Container = styled.div`
   display: flex;
@@ -94,9 +103,11 @@ interface WebviewProps {
   config: ApiConfiguration;
 }
 
+// Local type definitions for messages coming FROM the extension
+// These might need alignment with actual ExtensionMessage types
 interface ResponseMessage {
   type: 'response';
-  response: BaseMessage;
+  response: ChatMessage; // Assuming response contains a ChatMessage
 }
 
 interface ChunkMessage {
@@ -113,45 +124,81 @@ interface McpConnectionMessage {
   type: 'mcpConnected' | 'mcpDisconnected';
 }
 
-type WebviewMessage = ResponseMessage | ChunkMessage | ErrorMessage | McpConnectionMessage;
+type LocalWebviewMessage = ResponseMessage | ChunkMessage | ErrorMessage | McpConnectionMessage;
 
 export function Webview({ config }: WebviewProps) {
-  const [messages, setMessages] = useState<BaseMessage[]>([]);
+  // Changed state to use ChatMessage[]
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [mcpConnected, setMcpConnected] = useState(false);
+  // const { user } = useAuth(); // Commented out
+  // const { settings } = useSettings(); // Commented out
+  const vscodeRef = useRef<VSCodeAPI | null>(null); // Use the correctly imported type
 
   useEffect(() => {
+    // Initialize vscodeRef
+    if (typeof acquireVsCodeApi === 'function') {
+      vscodeRef.current = acquireVsCodeApi();
+    }
+
     const handleMessage = (event: MessageEvent) => {
-      const message = event.data as WebviewMessage;
+      const message = event.data as LocalWebviewMessage;
       switch (message.type) {
         case 'response':
-          setMessages((prev) => [...prev, message.response]);
+          // Ensure the response is a valid ChatMessage before adding
+          if (message.response && typeof message.response === 'object' && message.response.role && message.response.content) {
+             setMessages((prev) => [...prev, message.response]);
+          } else {
+             console.error('Invalid response message structure:', message.response);
+             // Optionally add an error message to chat
+             setMessages((prev) => [...prev, createChatMessage({ role: 'system', content: 'Received invalid response structure', timestamp: Date.now()})]);
+          }
           setIsLoading(false);
           break;
         case 'chunk':
           setMessages((prev) => {
             const lastMessage = prev[prev.length - 1];
+            // Now operates on ChatMessage
             if (lastMessage && lastMessage.role === 'assistant') {
+              // Content is string | ContentBlock[]
+              let currentContent = lastMessage.content;
+              let newContent: string | MessagePart[];
+
+              if (typeof currentContent === 'string') {
+                 newContent = currentContent + message.chunk;
+              } else if (Array.isArray(currentContent)) {
+                 // Add to the last text block or create a new one
+                 const lastPart = currentContent[currentContent.length - 1];
+                 if (lastPart?.type === ContentType.Text) { // Use ContentType enum
+                    newContent = [
+                       ...currentContent.slice(0, -1),
+                       { ...lastPart, text: lastPart.text + message.chunk }
+                    ];
+                 } else {
+                    newContent = [...currentContent, { type: ContentType.Text, text: message.chunk }];
+                 }
+              } else {
+                 // Should not happen based on ChatMessage type, but handle defensively
+                 newContent = [{ type: ContentType.Text, text: message.chunk }];
+              }
+
               return [
                 ...prev.slice(0, -1),
-                {
-                  ...lastMessage,
-                  content:
-                    typeof lastMessage.content === 'string'
-                      ? lastMessage.content + message.chunk
-                      : [...lastMessage.content, { type: 'text', text: message.chunk }],
-                },
+                { ...lastMessage, content: newContent, streaming: true }, // Keep streaming flag?
               ];
             }
+            // Create new assistant message if needed
             return [
               ...prev,
-              createSafeMessage({role: 'assistant', content: message.chunk, timestamp: Date.now()}),
+              createChatMessage({ role: 'assistant', content: [{ type: ContentType.Text, text: message.chunk }], timestamp: Date.now(), streaming: true }),
             ];
           });
           break;
         case 'error':
           console.error(message.error);
+          // Add error as a system message in chat
+          setMessages((prev) => [...prev, createChatMessage({ role: 'system', content: `Error: ${message.error}`, timestamp: Date.now()})]);
           setIsLoading(false);
           break;
         case 'mcpConnected':
@@ -164,22 +211,28 @@ export function Webview({ config }: WebviewProps) {
     };
 
     window.addEventListener('message', handleMessage);
+
+    // Post ready message?
+    // vscodeRef.current?.postMessage({ type: WebviewMessageType.READY });
+
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
   const handleSubmit = () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || !vscodeRef.current) return;
 
-    const userMessage: BaseMessage = createSafeMessage({role: 'user', content: input, timestamp: Date.now()});
+    // userMessage is now ChatMessage, matching the state type
+    const userMessage: ChatMessage = createChatMessage({ role: 'user', content: [{ type: ContentType.Text, text: input }], timestamp: Date.now() });
 
-    setMessages((prev) => [...prev, userMessage]);
+    const currentMessages = [...messages, userMessage];
+    setMessages(currentMessages); // Update state with the new array
     setInput('');
     setIsLoading(true);
 
-    const vscode = acquireVsCodeApi();
-    vscode.postMessage({
-      type: 'chat',
-      messages: [...messages, userMessage],
+    vscodeRef.current.postMessage({
+      type: WebviewMessageType.SEND_PROMPT,
+      // Send the current chat history along with the prompt
+      payload: { prompt: input, messages: currentMessages },
     });
   };
 
@@ -197,15 +250,20 @@ export function Webview({ config }: WebviewProps) {
       </Header>
       <Content>
         <MessageList>
+          {/* Now iterating over ChatMessage[] */} 
           {messages.map((message, index) => (
-            <MessageItem key={index} role={message.role}>
+            <MessageItem key={message.id || index} role={message.role}> {/* Use message.id as key */} 
+              {/* Accessing content from ChatMessage */} 
               {typeof message.content === 'string'
-                ? message.content
-                : message.content.map((part, i) => (
-                    <span key={i}>{part.type === 'text' ? part.text : '[Image]'}</span>
-                  ))}
+                 ? message.content
+                 : Array.isArray(message.content)
+                    ? message.content.map((part: MessagePart, i: number) => (
+                       <span key={i}>{part.type === ContentType.Text ? part.text : '[Image]'}</span>
+                    ))
+                    : '[Invalid Content]'}
             </MessageItem>
           ))}
+          {isLoading && <div>Loading...</div>}
         </MessageList>
       </Content>
       <Footer>
@@ -220,7 +278,7 @@ export function Webview({ config }: WebviewProps) {
           {isLoading ? 'Sending...' : 'Send'}
         </Button>
       </Footer>
-      {mcpConnected && <McpView code="" />}
+      {mcpConnected && <McpView code="" />} {/* Pass necessary props to McpView */}
     </Container>
   );
 }

@@ -4,10 +4,11 @@
  */
 
 // Importo tipi necessari da altri moduli
-import type { LLMProviderId, ModelInfo, MessageParam, ApiError as CommonApiError } from './llm.types'; // Importo LLMProviderId come tipo
+import type { LLMProviderId, ModelInfo as LLMModelInfo, MessageParam, ApiError as CommonApiError } from './llm.types'; // Importo LLMProviderId come tipo, Rinomino ModelInfo per evitare clash
 import type { TelemetrySetting } from './telemetry.types';
 
-export type { TelemetrySetting };
+// Esporto i tipi importati che servono all'esterno
+export type { LLMProviderId, LLMModelInfo, MessageParam, TelemetrySetting };
 
 // Rimuovo definizioni duplicate o obsolete
 // - OpenRouterModelInfo (obsoleta)
@@ -18,7 +19,6 @@ export type { TelemetrySetting };
 // - ApiConfiguration (definita in llm.types o api.types)
 // - ApiError (usare quella da common.ts o llm.types.ts)
 // - ApiResponse (usare quella da common.ts)
-// - LLMProviderId (usare enum da llm.types.ts)
 // - LLMProvider (definita in llm.types.ts)
 // - MessageParam (definita in llm.types.ts)
 // - ImageBlockParam (rimuovo duplicato)
@@ -35,16 +35,20 @@ export interface ApiTransformer<TRequest = unknown, TResponse = unknown> {
 }
 
 /**
- * Opzioni per gli handler API
+ * Opzioni di base per gli handler API (da estendere per provider specifici)
  */
-export interface ApiHandlerOptions<TRequest = unknown, TResponse = unknown> {
-  readonly timeout?: number;
-  readonly transformer?: ApiTransformer<TRequest, TResponse>;
-  readonly retryConfig?: {
-    readonly maxRetries: number;
-    readonly initialDelay: number;
-    readonly maxDelay: number;
+export interface ApiHandlerOptions {
+  timeout?: number;
+  transformer?: ApiTransformer;
+  retryConfig?: {
+    maxRetries: number;
+    initialDelay: number;
+    maxDelay: number;
   };
+  // Campi comuni, ma le chiavi API e model ID dovrebbero stare nelle opzioni specifiche
+  apiModelId?: string; // Potrebbe essere deprecato in favore di opzioni specifiche
+  endpoint?: string; // Potrebbe essere deprecato
+  apiKey?: string; // Generico, usare quello specifico del provider
 }
 
 // Tipi per lo streaming (potrebbero stare in llm.types.ts ma li lascio qui per ora)
@@ -117,7 +121,7 @@ export interface ApiError {
 export interface ApiConfiguration {
   modelId: string;
   apiKey?: string;
-  apiHost?: string; // Rinominato da baseUrl per evitare conflitti?
+  apiHost?: string;
   organizationId?: string;
   [key: string]: unknown;
 }
@@ -126,11 +130,17 @@ export interface ApiConfiguration {
 export interface ModelInfo {
   id: string;
   name: string;
-  provider: string; // Potrebbe usare LLMProviderId?
+  provider: string; // Potrebbe usare LLMProviderId
   contextSize?: number;
   maxOutputTokens?: number;
   supportsStreaming?: boolean;
   supportsFunctions?: boolean;
   tags?: string[];
-  // Aggiungere altre proprietà comuni se necessario (es. pricing)
+}
+
+// Interfaccia specifica per modelli compatibili OpenAI (potrebbe estendere ModelInfo)
+export interface OpenAiCompatibleModelInfo extends ModelInfo {
+  // Aggiungere proprietà specifiche se ci sono, es:
+  // apiVersion?: string;
+  // deploymentId?: string; // Per Azure
 }

@@ -4,7 +4,7 @@
  */
 
 import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 interface AnthropicChatRequest {
   model: string;
@@ -259,7 +259,9 @@ export class AnthropicProvider extends BaseLLMProvider {
     // Converti i messaggi nel formato richiesto da Anthropic
     const anthropicMessages = messages
       .filter((m) => m.role !== 'system') // Rimuovi i messaggi di sistema, che verranno trattati separatamente
-      .map((m) => (createSafeMessage({role: m.role === 'assistant' ? ('assistant' as const) : ('user' as const), content: m.content})));
+      .map((m) => (createChatMessage({role: m.role === 'assistant' ? ('assistant' as const) : ('user' as const), content: m.content,
+          timestamp: Date.now()
+    })));
 
     // Prepara la richiesta
     const request: AnthropicChatRequest = {

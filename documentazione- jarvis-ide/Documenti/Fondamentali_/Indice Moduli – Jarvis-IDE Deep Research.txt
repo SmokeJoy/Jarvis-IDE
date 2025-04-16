@@ -1,0 +1,85 @@
+Perfetto Andrea! Ecco l’indice strutturato e aggiornato dei moduli già completati finora nella tua Formazione Strategica Deep Research per dominare il codice di Jarvis-IDE:
+
+⸻
+
+Indice Moduli – Jarvis-IDE Deep Research
+
+Ogni modulo rappresenta uno stadio evolutivo nella comprensione e nella padronanza dell’architettura, della tipizzazione e dell’interazione estensione-UI.
+
+⸻
+
+Modulo 1 – Fondamenti di TypeScript & VS Code API
+	•	Differenze tra type e interface
+	•	Tipi opzionali, readonly, generici
+	•	Introduzione API VS Code: executeCommand, postMessage, showInformationMessage, ExtensionContext
+	•	Mappatura tra teoria e codice reale (WebviewMessageHandler, CommandMessageHandler)
+
+⸻
+
+Modulo 2 – Tipi Avanzati & Sicurezza Webview
+	•	Mapped Types, Conditional Types, Discriminated Unions
+	•	Type Guards & validazione strutturale postMessage
+	•	Zod/io-ts per la validazione runtime
+	•	Refactoring suggeriti nei messaggi Webview
+	•	Test sugli isReadyMessage + best practice nella comunicazione UI → backend
+
+⸻
+
+Modulo 3 – Ciclo di Vita, Persistenza & Serializzazione
+	•	activate() / deactivate() e loro ruolo nel ciclo vita estensione
+	•	ExtensionContext: differenza tra globalState e workspaceState
+	•	Comunicazione bidirezionale Webview → handleMessage() & postMessage()
+	•	Serializzazione sicura di Map, Set, Date
+	•	Modulo Storage.ts come layer tipizzato per context.globalState
+	•	Convalida su codice reale di Jarvis-IDE + suggerimenti di refactor
+
+⸻
+
+Modulo 4 – Architettura degli Handler e Gestione Messaggi
+	•	Analisi WebviewMessageHandler.ts, CommandMessageHandler.ts, SettingsHandler.ts
+	•	Routing dinamico dei messaggi e centralizzazione
+	•	Iniezione e disaccoppiamento dei dispatcher
+	•	Ruolo di WebviewMessageType come discriminatore centrale
+	•	Proposte: factory per createMessage<T>, aliasing path tipi comuni, rifattorizzazione dei dispatch globali
+
+⸻
+
+Modulo 5 – Architettura dei Provider LLM & Strategie di Fallback
+	•	Tipi coinvolti: LLMProviderHandler, LLMRequestOptions, LLMResponse, ProviderStats
+	•	AdaptiveFallbackStrategy & LLMFallbackManager
+	•	Condizioni di attivazione, cooldown, metodi enable/disable/selectProvider
+	•	Pattern StrategyWithCondition
+	•	Proposte di miglioramento: dynamic provider registry, fallback visual debugger
+
+⸻
+
+Modulo 6 – Tracciamento, Telemetria & Provider Metrics
+	•	Struttura TelemetryTracker, eventi provider:success, failure, cooldown
+	•	LLMEventBus come TypedEmitter, listener dinamici, testabilità
+	•	ProviderStats: successo, fallimento, tempo risposta, cooldown
+	•	Estendibilità con costPerToken, successRate, lastUsed
+	•	Integrazione con fallback manager e strategie condizionali
+
+⸻
+
+Modulo 7 – Architettura Test Layer & Mock Strategy
+	•	Strategia globale di mocking: mockProvider, createMockStrategy, createMockEventBus
+	•	Test di fallback, Webview handler, dispatcher
+	•	tests/mocks/*.ts e tests/utils/test-helpers.ts
+	•	Eliminazione as unknown e new InterfaceName
+	•	Copertura edge-case (cooldown attivo + fallback chain)
+
+⸻
+
+Moduli Futuri (Proposti)
+
+Vuoi che prepari i contenuti per uno di questi prossimi moduli?
+	1.	Modulo 8 – Runtime Multi-Agente e Orchestrazione MAS
+	2.	Modulo 9 – Sicurezza, Sanificazione Input e Isolamento Esecuzione
+	3.	Modulo 10 – Design Patterns nel Codice di Jarvis-IDE (Factory, Strategy, Observer)
+	4.	Modulo 11 – Gestione File, Workspace e Documenti
+	5.	Modulo 12 – Distribuzione, Build e Publishing su VS Code Marketplace
+
+⸻
+
+Dimmi con quale modulo vuoi procedere oppure se desideri includere anche un approfondimento laterale (es. diagramma architettura LLM).

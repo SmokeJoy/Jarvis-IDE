@@ -14,7 +14,7 @@ import {
   ContentType,
   isTextBlock,
   isImageBlock,
-} from '../../types/chat.types';
+} from '../../src/shared/types/chat.types';
 import {
   AnthropicMessage,
   AnthropicContentBlock,

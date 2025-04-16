@@ -46,3 +46,6 @@ declare module 'vscode-webview' {
     }
   }
 }
+
+// Aggiungo export vuoto per trattare il file come modulo
+export {};

@@ -35,12 +35,12 @@ export function isMessageOfType<T extends SettingsMessageUnion>(
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un messaggio di impostazioni
  */
-export function isSettingsMessage(message: WebviewMessage<any>): message is SettingsMessageUnion {
+export function isSettingsMessage(message: unknown): message is SettingsMessageUnion {
   return (
-    message &&
     typeof message === 'object' &&
+    message !== null &&
     'type' in message &&
-    Object.values(SettingsMessageType).includes(message.type as SettingsMessageType)
+    Object.values(SettingsMessageType).includes((message as any).type)
   );
 }
 

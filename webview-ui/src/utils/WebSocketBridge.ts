@@ -34,8 +34,9 @@ export enum WebSocketMessageType {
 /**
  * Interfaccia base per i messaggi del WebSocketBridge
  */
-export interface WebSocketMessageBase extends WebviewMessageUnion {
-  type: WebSocketMessageType | string;
+export interface WebSocketMessageBase extends WebviewMessage<WebSocketMessageType> {
+  type: WebSocketMessageType;
+  payload: unknown;
 }
 
 /**
@@ -329,7 +330,8 @@ export class WebSocketBridge {
     
     // Invia un messaggio di connessione iniziale
     this.postMessage<ConnectMessage>({
-      type: WebSocketMessageType.CONNECT
+      type: WebSocketMessageType.CONNECT,
+      payload: {}
     });
   }
 
@@ -344,7 +346,8 @@ export class WebSocketBridge {
         this.postMessage<PingMessage>({
           type: WebSocketMessageType.PING,
           id: Math.random().toString(36).substring(2, 15),
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          payload: {}
         });
       }
     }, 30000);
@@ -356,7 +359,8 @@ export class WebSocketBridge {
         
         // Tenta di riconnettersi
         this.postMessage<ConnectMessage>({
-          type: WebSocketMessageType.CONNECT
+          type: WebSocketMessageType.CONNECT,
+          payload: {}
         });
       }
     }, 10000);
@@ -381,52 +385,64 @@ export class WebSocketBridge {
    */
   private dispatchMessage(message: unknown): void {
     try {
-      // Verifica che sia un messaggio WebSocket valido
-      if (!isWebSocketMessage(message)) {
-        // Prova a gestirlo come messaggio generico dell'estensione
-        this.notifySubscribers<WebviewMessageUnion>('message', message as WebviewMessageUnion);
+      // Validazione avanzata: WebSocketMessageUnion o WebviewMessageUnion
+      if (isWebSocketMessage(message)) {
+        // Dispatch type-safe per WebSocketMessageUnion
+        switch (message.type) {
+          case WebSocketMessageType.PING:
+            if (isPingMessage(message)) this.handlePing(message);
+            break;
+          case WebSocketMessageType.PONG:
+            if (isPongMessage(message)) this.handlePong(message);
+            break;
+          case WebSocketMessageType.ERROR:
+            if (isWebSocketErrorMessage(message)) this.handleWebSocketError(message);
+            break;
+          case WebSocketMessageType.CONNECT:
+            if (isConnectMessage(message)) this.handleConnect(message);
+            break;
+          case WebSocketMessageType.DISCONNECT:
+            if (isDisconnectMessage(message)) this.handleDisconnect(message);
+            break;
+          case WebSocketMessageType.LLM_STATUS:
+            if (isLlmStatusMessage(message)) this.handleLlmStatus(message);
+            break;
+          case WebSocketMessageType.LLM_REQUEST:
+            if (isLlmRequestMessage(message)) this.handleLlmRequest(message);
+            break;
+          case WebSocketMessageType.LLM_RESPONSE:
+            if (isLlmResponseMessage(message)) this.handleLlmResponse(message);
+            break;
+          case WebSocketMessageType.LLM_CANCEL:
+            if (isLlmCancelMessage(message)) this.handleLlmCancel(message);
+            break;
+          default:
+            logger.warn('Unknown WebSocket message type', message);
+            this.handleError({
+              type: WebSocketMessageType.ERROR,
+              error: `Tipo di messaggio sconosciuto: ${String((message as any).type)}`,
+              payload: {}
+            });
+        }
+        this.notifySubscribers(message.type, message);
         return;
       }
-      
-      // Implementazione del pattern Union Discriminated Type per WebSocketMessageUnion
-      // Gestisce ogni tipo di messaggio con il suo handler specifico
-      if (isPingMessage(message)) {
-        this.handlePing(message);
-      } else if (isPongMessage(message)) {
-        this.handlePong(message);
-      } else if (isWebSocketErrorMessage(message)) {
-        this.handleWebSocketError(message);
-      } else if (isConnectMessage(message)) {
-        this.handleConnect(message);
-      } else if (isDisconnectMessage(message)) {
-        this.handleDisconnect(message);
-      } else if (isLlmStatusMessage(message)) {
-        this.handleLlmStatus(message);
-      } else if (isLlmRequestMessage(message)) {
-        this.handleLlmRequest(message);
-      } else if (isLlmResponseMessage(message)) {
-        this.handleLlmResponse(message);
-      } else if (isLlmCancelMessage(message)) {
-        this.handleLlmCancel(message);
-      } else {
-        // Gestione di messaggi sconosciuti
-        logger.warn('Unknown WebSocket message type', message);
-        const errorMessage: WebSocketErrorMessage = {
-          type: WebSocketMessageType.ERROR,
-          error: `Tipo di messaggio sconosciuto: ${(message as WebSocketMessageBase).type}`
-        };
-        this.handleError(errorMessage);
+      // Se non è un WebSocketMessage, prova come WebviewMessageUnion
+      if (typeof message === 'object' && message !== null && 'type' in message) {
+        // Validazione con isWebviewMessage (importalo se non presente)
+        // Qui puoi aggiungere switch su altri tipi di messaggi se necessario
+        this.notifySubscribers('message', message);
+        return;
       }
-      
-      // Notifica tutti i sottoscrittori
-      this.notifySubscribers<WebSocketMessageUnion>(message.type as string, message);
+      // Messaggio sconosciuto
+      logger.warn('Messaggio non riconosciuto dal bridge', message);
     } catch (error) {
       logger.error('Error dispatching message', error);
-      const errorMessage: WebSocketErrorMessage = {
+      this.handleError({
         type: WebSocketMessageType.ERROR,
-        error: `Errore nella gestione del messaggio: ${error}`
-      };
-      this.handleError(errorMessage);
+        error: `Errore nella gestione del messaggio: ${error}`,
+        payload: {}
+      });
     }
   }
 
@@ -440,7 +456,8 @@ export class WebSocketBridge {
     this.postMessage<PongMessage>({
       type: WebSocketMessageType.PONG,
       id: message.id,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      payload: {}
     });
   }
 
@@ -671,7 +688,8 @@ export class WebSocketBridge {
     
     // Invia un messaggio di disconnessione
     this.postMessage<DisconnectMessage>({
-      type: WebSocketMessageType.DISCONNECT
+      type: WebSocketMessageType.DISCONNECT,
+      payload: {}
     });
     
     // Resetta lo stato

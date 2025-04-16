@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { Settings } from '../../shared/types/settings.types';
-import { ApiConfiguration, LLMProviderId } from '../../shared/types/api.types';
+import { ApiConfiguration, LLMProviderId } from '../../src/shared/types/api.types';
 import { ContextPrompt } from '../../shared/types/webview.types';
 import { TelemetrySetting } from '../../shared/types/telemetry.types';
 import { v4 as uuidv4 } from 'uuid';

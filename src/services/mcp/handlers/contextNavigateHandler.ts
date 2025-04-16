@@ -41,11 +41,7 @@ export interface ContextLink {
   relation: string;
   bidirectional: boolean;
   strength: number;
-  metadata: {
-    confidence: number;
-    source: string;
-    timestamp: string;
-  };
+  providerFields?: Record<string, unknown>;
 }
 
 /**
@@ -69,7 +65,7 @@ export interface NavigationOptions {
   mode?: (typeof SUPPORTED_MODES)[number];
   strategy?: NavigationStrategy;
   includeContent?: boolean;
-  includeMetadata?: boolean;
+  includeProviderFields?: boolean;
   format?: (typeof SUPPORTED_FORMATS)[number];
 }
 
@@ -152,7 +148,7 @@ async function findWeightedPath(
   contexts: ContextItem[],
   strategy?: NavigationStrategy,
   includeContent: boolean = true,
-  includeMetadata: boolean = true
+  includeProviderFields: boolean = true
 ): Promise<NavigationResult> {
   // Costruisci il grafo
   const graph = buildGraph(links);
@@ -175,7 +171,7 @@ async function findWeightedPath(
 
     // Peso base inverso (1 - strength * confidence)
     const strength = link.strength || 1;
-    const confidence = link.metadata?.confidence || 1;
+    const confidence = link.providerFields?.confidence || 1;
     weight = 1 - strength * confidence;
 
     // Penalità per relazioni non preferite
@@ -203,7 +199,7 @@ async function findWeightedPath(
 
       // Filtra per forza e confidenza minima
       if (strategy?.minStrength && (edge.strength || 0) < strategy.minStrength) continue;
-      if (strategy?.minConfidence && (edge.metadata?.confidence || 0) < strategy.minConfidence)
+      if (strategy?.minConfidence && (edge.providerFields?.confidence || 0) < strategy.minConfidence)
         continue;
 
       const weight = calculateWeight(edge);
@@ -257,8 +253,8 @@ async function findWeightedPath(
       sourceId,
       targetId,
       relation: link.relation,
-      ...(includeMetadata && { strength: link.strength }),
-      ...(includeMetadata && { confidence: link.metadata?.confidence }),
+      ...(includeProviderFields && { strength: link.strength }),
+      ...(includeProviderFields && { confidence: link.providerFields?.confidence }),
     };
   });
 
@@ -328,7 +324,7 @@ async function navigateShortest(
     if (options.includeContent) {
       node.text = context.text;
     }
-    if (options.includeMetadata) {
+    if (options.includeProviderFields) {
       node.tags = context.tags;
     }
 
@@ -352,9 +348,9 @@ async function navigateShortest(
       relation: link.relation,
     };
 
-    if (options.includeMetadata) {
+    if (options.includeProviderFields) {
       edge.strength = link.strength;
-      edge.confidence = link.metadata.confidence;
+      edge.confidence = link.providerFields?.confidence;
     }
 
     result.path!.edges.push(edge);
@@ -371,7 +367,7 @@ async function findSemanticPath(
   targetId: string,
   strategy: NavigationStrategy,
   includeContent: boolean = true,
-  includeMetadata: boolean = true
+  includeProviderFields: boolean = true
 ): Promise<NavigationResult> {
   // Cache per i contesti
   const contextCache = new Map<string, ContextItem>();
@@ -430,7 +426,7 @@ async function findSemanticPath(
 
     // Moltiplicatore per forza e confidenza
     const strength = link.strength || 1;
-    const confidence = link.metadata?.confidence || 1;
+    const confidence = link.providerFields?.confidence || 1;
     score *= strength * confidence;
 
     return score;
@@ -447,7 +443,7 @@ async function findSemanticPath(
 
     // Applica filtri
     if (strategy.minStrength && (link.strength || 0) < strategy.minStrength) continue;
-    if (strategy.minConfidence && (link.metadata?.confidence || 0) < strategy.minConfidence)
+    if (strategy.minConfidence && (link.providerFields?.confidence || 0) < strategy.minConfidence)
       continue;
 
     graph.get(link.sourceId)!.push({
@@ -517,7 +513,7 @@ async function findSemanticPath(
     nodes.push({
       id: context.id,
       ...(includeContent && { text: context.text }),
-      ...(includeContent && { tags: context.tags }),
+      ...(includeProviderFields && { tags: context.tags }),
     });
 
     if (i < path.length - 1) {
@@ -532,8 +528,8 @@ async function findSemanticPath(
           sourceId: link.sourceId,
           targetId: link.targetId,
           relation: link.relation,
-          ...(includeMetadata && { strength: link.strength }),
-          ...(includeMetadata && { confidence: link.metadata?.confidence }),
+          ...(includeProviderFields && { strength: link.strength }),
+          ...(includeProviderFields && { confidence: link.providerFields?.confidence }),
         });
       }
     }
@@ -555,7 +551,7 @@ async function findExploratoryPath(
   startId: string,
   strategy: NavigationStrategy,
   includeContent: boolean = true,
-  includeMetadata: boolean = true,
+  includeProviderFields: boolean = true,
   format: 'tree' | 'graph' = 'graph'
 ): Promise<NavigationResult> {
   // Cache per i contesti
@@ -618,7 +614,7 @@ async function findExploratoryPath(
 
     // Moltiplicatore per forza e confidenza
     const strength = link.strength || 1;
-    const confidence = link.metadata?.confidence || 1;
+    const confidence = link.providerFields?.confidence || 1;
     score *= strength * confidence;
 
     return score;
@@ -640,7 +636,7 @@ async function findExploratoryPath(
     nodes.set(current.id, {
       id: current.id,
       ...(includeContent && { text: context.text }),
-      ...(includeContent && { tags: context.tags }),
+      ...(includeProviderFields && { tags: context.tags }),
     });
 
     // Trova link uscenti
@@ -662,7 +658,7 @@ async function findExploratoryPath(
     const validLinks = scoredLinks
       .filter(({ link, score }) => {
         if (strategy.minStrength && (link.strength || 0) < strategy.minStrength) return false;
-        if (strategy.minConfidence && (link.metadata?.confidence || 0) < strategy.minConfidence)
+        if (strategy.minConfidence && (link.providerFields?.confidence || 0) < strategy.minConfidence)
           return false;
         return true;
       })
@@ -686,8 +682,8 @@ async function findExploratoryPath(
           sourceId: link.sourceId,
           targetId: link.targetId,
           relation: link.relation,
-          ...(includeMetadata && { strength: link.strength }),
-          ...(includeMetadata && { confidence: link.metadata?.confidence }),
+          ...(includeProviderFields && { strength: link.strength }),
+          ...(includeProviderFields && { confidence: link.providerFields?.confidence }),
         });
       }
     }
@@ -838,7 +834,7 @@ export async function contextNavigateHandler(
           options.targetId,
           options.strategy || {},
           options.includeContent ?? false,
-          options.includeMetadata ?? false
+          options.includeProviderFields ?? false
         );
 
       case 'exploratory':
@@ -846,7 +842,7 @@ export async function contextNavigateHandler(
           options.startId,
           options.strategy || {},
           options.includeContent ?? false,
-          options.includeMetadata ?? false,
+          options.includeProviderFields ?? false,
           (options.format as 'tree' | 'graph') || DEFAULT_FORMAT
         );
 

@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AdaptiveFallbackStrategy } from '../strategies/AdaptiveFallbackStrategy';
+import { AdaptiveFallbackStrategy } from '../AdaptiveFallbackStrategy';
 import { createMockEventBus } from '../../../../tests/mocks/mock-event-bus';
 import { createMockProvider } from '../../../../tests/mocks/mock-provider';
-import { LLMProviderHandler } from '@/mas/types/llm-provider.types';
-import { LLMEventType, LLMEventPayload, ProviderStats } from '@/mas/types/llm-events';
+import { LLMProviderHandler } from '../../../types/llm-provider.types';
+import { LLMEventType, LLMEventPayload, ProviderStats } from '../../../types/llm-events';
 import { createMockStats } from '../../../../tests/mocks/mock-stats';
 
 describe('AdaptiveFallbackStrategy', () => {

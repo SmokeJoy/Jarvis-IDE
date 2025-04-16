@@ -6,6 +6,7 @@
 
 import type { WebviewMessageUnion } from '../../../src/shared/types/webviewMessageUnion';
 import type { BrowserSettings } from '../../../src/shared/types/user-settings.types';
+import type { WebviewMessage } from '@shared/types/webview.types';
 
 /**
  * Enum per i tipi di messaggi delle impostazioni browser
@@ -27,8 +28,9 @@ export enum BrowserSettingsMessageType {
 /**
  * Interfaccia base per tutti i messaggi di impostazioni browser
  */
-export interface BrowserSettingsMessageBase extends WebviewMessageUnion {
-  type: BrowserSettingsMessageType | string;
+export interface BrowserSettingsMessageBase extends WebviewMessage<BrowserSettingsMessageType> {
+  type: BrowserSettingsMessageType;
+  payload: unknown;
 }
 
 /**

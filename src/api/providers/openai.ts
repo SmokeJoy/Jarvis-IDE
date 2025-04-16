@@ -1,5 +1,5 @@
 import OpenAI, { AzureOpenAI } from 'openai';
-import { ApiHandlerOptions, ModelInfo } from '../../shared/types/api.types';
+import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';
 import {
   ChatCompletionChunk,
   ChatCompletionMessageParam,
@@ -9,13 +9,13 @@ import { Anthropic } from '@anthropic-ai/sdk';
 import { azureOpenAiDefaultApiVersion, openAiModelInfoSaneDefaults } from '../../shared/api';
 import { ApiHandler } from '../index';
 import { convertToOpenAiMessages } from '../transform/openai-format';
-import { ApiStream, ApiStreamChunk } from '../transform/stream';
+import { ApiStream, ApiStreamChunk } from '../../src/shared/types/api.types';
 import { convertToR1Format } from '../transform/r1-format';
 import { BaseStreamHandler } from '../handlers/BaseStreamHandler';
 import { logger } from '../../utils/logger';
 import { calculateApiCostOpenAI } from '../../utils/cost';
 import { getOpenAiConfig } from './config/openai-config';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage } from '../../src/shared/types/chat.types';
 
 /**
  * Interfaccia per le informazioni di utilizzo delle API OpenAI
@@ -109,13 +109,17 @@ export class OpenAiHandler extends BaseStreamHandler<ChatCompletionChunk> implem
     logger.debug(`[OpenAiHandler] Preparazione richiesta per modello: ${modelId}`);
 
     let openAiMessages: ChatCompletionMessageParam[] = [
-      createSafeMessage({role: 'system', content: systemPrompt}),
+      createChatMessage({role: 'system', content: systemPrompt,
+          timestamp: Date.now()
+    }),
       ...convertToOpenAiMessages(messages),
     ];
 
     if (isDeepseekReasoner || isR1FormatRequired) {
       logger.debug(`[OpenAiHandler] Conversione messaggio al formato R1 richiesto`);
-      openAiMessages = convertToR1Format([createSafeMessage({role: 'user', content: systemPrompt}), ...messages]);
+      openAiMessages = convertToR1Format([createChatMessage({role: 'user', content: systemPrompt,
+          timestamp: Date.now()
+    }), ...messages]);
     }
 
     const config = getOpenAiConfig(modelId, this.options.openAiModelInfo);

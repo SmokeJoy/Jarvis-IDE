@@ -9,7 +9,7 @@ import { Logger } from '../logger';
 import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage } from "../../src/shared/types/chat.types";
 
 const readFileAsync = promisify(fs.readFile);
 const logger = Logger.getInstance('importers');
@@ -304,7 +304,10 @@ function importFromMarkdown(content: string): ExportableSession {
 
   const session: ExportableSession = {
     messages: [],
-    settings: {},
+    settings: {
+      modelId: 'unknown',
+      temperature: 0.7,
+    },
   };
 
   // Estrai il titolo come systemPrompt (se presente)
@@ -336,6 +339,7 @@ function importFromMarkdown(content: string): ExportableSession {
     session.messages.push({
       role,
       content: messageContent,
+      timestamp: Date.now()
     });
   }
 
@@ -451,7 +455,9 @@ function importFromCSV(content: string): ExportableSession {
       continue; // Salta righe invalide
     }
 
-    const message: any = createSafeMessage({role: values[roleIndex], content: values[contentIndex]});
+    const message: any = createChatMessage({role: values[roleIndex], content: values[contentIndex],
+        timestamp: Date.now()
+    });
 
     // Aggiungi timestamp se disponibile
     if (timestampIndex !== -1 && values[timestampIndex]) {
@@ -525,7 +531,10 @@ function importFromHTML(content: string): ExportableSession {
 
   const session: ExportableSession = {
     messages: [],
-    settings: {},
+    settings: {
+      modelId: 'unknown',
+      temperature: 0.7,
+    },
   };
 
   // Estrai i messaggi (Pattern semplificato: <div class="message [role]">)
@@ -554,6 +563,7 @@ function importFromHTML(content: string): ExportableSession {
     session.messages.push({
       role,
       content: messageContent,
+      timestamp: Date.now()
     });
   }
 

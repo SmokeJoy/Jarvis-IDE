@@ -6,7 +6,7 @@ import { BenchmarkStatsView } from './BenchmarkStatsView';
 import { BenchmarkTimelineView } from './BenchmarkTimelineView';
 import { SessionDetailView } from './SessionDetailView';
 import { useVSCodeApi } from '../../hooks/useVSCodeApi';
-import { WebviewMessageType } from '@/shared/WebviewMessageType';
+import { WebviewMessageType } from '@shared/types/webview.types';
 import { BenchmarkSession, BenchmarkSessionDetail, ProviderStats, TimelineStats } from '@/shared/WebviewMessage';
 
 const Container = styled.div`

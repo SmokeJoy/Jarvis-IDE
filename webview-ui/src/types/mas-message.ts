@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 
-import type { WebviewMessageUnion } from '../../../src/shared/types/webviewMessageUnion';
+import type { WebviewMessage } from '@shared/types/webview.types';
 import type { AgentStatus, Task, TaskQueueState, AgentMode, CodeStyle, PriorityLevel, MasConfig } from './mas-types';
 
 /**
@@ -52,8 +52,9 @@ export enum MasMessageType {
 /**
  * Interfaccia base per tutti i messaggi MAS
  */
-export interface MasMessageBase extends WebviewMessageUnion {
-  type: MasMessageType | string;
+export interface MasMessageBase extends WebviewMessage<MasMessageType> {
+  type: MasMessageType;
+  payload: unknown;
 }
 
 /**
@@ -370,9 +371,7 @@ export interface ErrorMessage extends MasMessageBase {
   };
 }
 
-/**
- * Unione di tutti i tipi di messaggi MAS (utilizzata per le type guards)
- */
+// --- AgentMessageUnion: Unione discriminata di tutti i messaggi MAS ---
 export type AgentMessageUnion =
   | GetAgentsStatusMessage
   | GetTaskQueueStatusMessage
@@ -394,12 +393,10 @@ export type AgentMessageUnion =
   | InstructionFailedMessage
   | ConfigurationSavedMessage
   | ConfigurationErrorMessage
-  | ErrorMessage
-  // Nuovi tipi aggiunti per M8-S2
   | AgentRetryRequestMessage
   | AgentMemoryRequestMessage
   | AgentToggleDashboardMessage
   | AgentMemoryResponseMessage
   | AgentRetryResultMessage
-  // Nuovi tipi aggiunti per M9-S4
-  | AgentToggleEnableMessage; 
+  | AgentToggleEnableMessage
+  | ErrorMessage; 

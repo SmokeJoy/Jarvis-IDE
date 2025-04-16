@@ -4,7 +4,7 @@
  */
 
 import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 interface OllamaGenerateRequest {
   model: string;
@@ -277,14 +277,18 @@ export class OllamaProvider extends BaseLLMProvider {
       model: 'llama2', // Valore di default, sarà sovrascritto dalle opzioni
       messages: messages
         .filter((m) => m.role !== 'system') // Rimuovi i messaggi di sistema qui
-        .map((m) => (createSafeMessage({role: m.role, content: m.content}))),
+        .map((m) => (createChatMessage({role: m.role, content: m.content,
+            timestamp: Date.now()
+        }))),
       stream: false,
     };
 
     // Se c'è un messaggio di sistema, aggiungilo nel formato appropriato
     // per Ollama, che gestisce il messaggio di sistema separatamente
     if (systemMessage) {
-      request.messages.unshift(createSafeMessage({role: 'system', content: systemMessage.content}));
+      request.messages.unshift(createChatMessage({role: 'system', content: systemMessage.content,
+          timestamp: Date.now()
+    }));
     }
 
     return request;

@@ -1,30 +1,25 @@
 /**
  * Utility per l'integrazione con l'API del webview di VS Code
  */
-
-// Dichiarazione del tipo per l'API di VS Code
-declare global {
-  interface Window {
-    vscode: any;
-    resourceBaseUrl: string;
-    isDarkTheme: boolean;
-  }
-}
+import type { VSCodeAPI } from 'vscode-webview';
 
 /**
  * Restituisce l'istanza dell'API VS Code
  */
-export function getVsCodeApi() {
-  if (typeof window.vscode !== 'undefined') {
-    return window.vscode;
+export function getVsCodeApi(): VSCodeAPI {
+  if (typeof window.acquireVsCodeApi === 'function') {
+    return window.acquireVsCodeApi();
   }
 
-  // Fallback per ambiente di sviluppo o test
+  console.warn('VS Code API not found, using mock.');
   return {
     postMessage: (message: any) => {
       console.log('VS Code API mock: postMessage', message);
     },
-    getState: () => ({}),
+    getState: () => {
+      console.log('VS Code API mock: getState');
+      return undefined;
+    },
     setState: (state: any) => {
       console.log('VS Code API mock: setState', state);
     },
@@ -35,14 +30,14 @@ export function getVsCodeApi() {
  * Restituisce l'URL base per le risorse
  */
 export function getResourceBaseUrl(): string {
-  return window.resourceBaseUrl || '';
+  return (window as any).resourceBaseUrl || '';
 }
 
 /**
  * Verifica se il tema attuale è scuro
  */
 export function isDarkTheme(): boolean {
-  return window.isDarkTheme || false;
+  return (window as any).isDarkTheme || false;
 }
 
 /**

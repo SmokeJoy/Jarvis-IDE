@@ -24,10 +24,15 @@ import {
  * @returns True se il messaggio è del tipo specificato
  */
 export function isAuthMessageOfType<T extends AuthMessageUnion>(
-  message: WebviewMessage<any>, 
+  message: unknown,
   type: AuthMessageType
 ): message is T {
-  return message?.type === type;
+  return (
+    typeof message === 'object' &&
+    message !== null &&
+    'type' in message &&
+    (message as any).type === type
+  );
 }
 
 /**
@@ -35,7 +40,7 @@ export function isAuthMessageOfType<T extends AuthMessageUnion>(
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un RequestAuthTokenMessage
  */
-export function isRequestAuthTokenMessage(message: WebviewMessage<any>): message is RequestAuthTokenMessage {
+export function isRequestAuthTokenMessage(message: unknown): message is RequestAuthTokenMessage {
   return isAuthMessageOfType<RequestAuthTokenMessage>(message, AuthMessageType.REQUEST_AUTH_TOKEN);
 }
 
@@ -44,10 +49,16 @@ export function isRequestAuthTokenMessage(message: WebviewMessage<any>): message
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un AuthStateChangedMessage
  */
-export function isAuthStateChangedMessage(message: WebviewMessage<any>): message is AuthStateChangedMessage {
-  return isAuthMessageOfType<AuthStateChangedMessage>(message, AuthMessageType.AUTH_STATE_CHANGED) &&
-         typeof message?.payload === 'object' &&
-         (message.payload.user === null || isSimplifiedUser(message.payload.user));
+export function isAuthStateChangedMessage(message: unknown): message is AuthStateChangedMessage {
+  return (
+    typeof message === 'object' &&
+    message !== null &&
+    'type' in message &&
+    (message as { type?: unknown }).type === AuthMessageType.AUTH_STATE_CHANGED &&
+    'payload' in message &&
+    typeof (message as { payload?: unknown }).payload === 'object' &&
+    'user' in (message as { payload: { user?: unknown } }).payload
+  );
 }
 
 /**
@@ -55,8 +66,15 @@ export function isAuthStateChangedMessage(message: WebviewMessage<any>): message
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un SignOutMessage
  */
-export function isSignOutMessage(message: WebviewMessage<any>): message is SignOutMessage {
-  return isAuthMessageOfType<SignOutMessage>(message, AuthMessageType.SIGN_OUT);
+export function isSignOutMessage(message: unknown): message is SignOutMessage {
+  return (
+    typeof message === 'object' &&
+    message !== null &&
+    'type' in message &&
+    (message as { type?: unknown }).type === AuthMessageType.SIGN_OUT &&
+    'payload' in message &&
+    typeof (message as { payload?: unknown }).payload === 'object'
+  );
 }
 
 /**
@@ -64,10 +82,17 @@ export function isSignOutMessage(message: WebviewMessage<any>): message is SignO
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un AuthCallbackMessage
  */
-export function isAuthCallbackMessage(message: WebviewMessage<any>): message is AuthCallbackMessage {
-  return isAuthMessageOfType<AuthCallbackMessage>(message, AuthMessageType.AUTH_CALLBACK) &&
-         typeof message?.payload === 'object' &&
-         typeof message.payload.customToken === 'string';
+export function isAuthCallbackMessage(message: unknown): message is AuthCallbackMessage {
+  return (
+    typeof message === 'object' &&
+    message !== null &&
+    'type' in message &&
+    (message as { type?: unknown }).type === AuthMessageType.AUTH_CALLBACK &&
+    'payload' in message &&
+    typeof (message as { payload?: unknown }).payload === 'object' &&
+    'customToken' in (message as { payload: { customToken?: unknown } }).payload &&
+    typeof (message as { payload: { customToken?: unknown } }).payload.customToken === 'string'
+  );
 }
 
 /**
@@ -75,10 +100,17 @@ export function isAuthCallbackMessage(message: WebviewMessage<any>): message is 
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un AuthErrorMessage
  */
-export function isAuthErrorMessage(message: WebviewMessage<any>): message is AuthErrorMessage {
-  return isAuthMessageOfType<AuthErrorMessage>(message, AuthMessageType.AUTH_ERROR) &&
-         typeof message?.payload === 'object' &&
-         typeof message.payload.error === 'string';
+export function isAuthErrorMessage(message: unknown): message is AuthErrorMessage {
+  return (
+    typeof message === 'object' &&
+    message !== null &&
+    'type' in message &&
+    (message as { type?: unknown }).type === AuthMessageType.AUTH_ERROR &&
+    'payload' in message &&
+    typeof (message as { payload?: unknown }).payload === 'object' &&
+    'error' in (message as { payload: { error?: unknown } }).payload &&
+    typeof (message as { payload: { error?: unknown } }).payload.error === 'string'
+  );
 }
 
 /**
@@ -86,8 +118,15 @@ export function isAuthErrorMessage(message: WebviewMessage<any>): message is Aut
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un AuthSignedOutMessage
  */
-export function isAuthSignedOutMessage(message: WebviewMessage<any>): message is AuthSignedOutMessage {
-  return isAuthMessageOfType<AuthSignedOutMessage>(message, AuthMessageType.AUTH_SIGNED_OUT);
+export function isAuthSignedOutMessage(message: unknown): message is AuthSignedOutMessage {
+  return (
+    typeof message === 'object' &&
+    message !== null &&
+    'type' in message &&
+    (message as { type?: unknown }).type === AuthMessageType.AUTH_SIGNED_OUT &&
+    'payload' in message &&
+    typeof (message as { payload?: unknown }).payload === 'object'
+  );
 }
 
 /**
@@ -95,12 +134,14 @@ export function isAuthSignedOutMessage(message: WebviewMessage<any>): message is
  * @param obj L'oggetto da verificare
  * @returns True se l'oggetto è un SimplifiedUser
  */
-export function isSimplifiedUser(obj: any): obj is SimplifiedUser {
-  return obj !== null &&
-         typeof obj === 'object' &&
-         (obj.displayName === null || typeof obj.displayName === 'string') &&
-         (obj.email === null || typeof obj.email === 'string') &&
-         (obj.photoURL === null || typeof obj.photoURL === 'string');
+export function isSimplifiedUser(obj: unknown): obj is SimplifiedUser {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'displayName' in obj &&
+    ('email' in obj) &&
+    ('photoURL' in obj)
+  );
 }
 
 /**
@@ -108,6 +149,11 @@ export function isSimplifiedUser(obj: any): obj is SimplifiedUser {
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un AuthMessageUnion
  */
-export function isAuthMessage(message: WebviewMessage<any>): message is AuthMessageUnion {
-  return Object.values(AuthMessageType).includes(message?.type as AuthMessageType);
+export function isAuthMessage(message: unknown): message is AuthMessageUnion {
+  return (
+    typeof message === 'object' &&
+    message !== null &&
+    'type' in message &&
+    Object.values(AuthMessageType).includes((message as { type?: unknown }).type as AuthMessageType)
+  );
 } 

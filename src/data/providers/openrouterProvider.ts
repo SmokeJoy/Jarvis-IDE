@@ -4,6 +4,8 @@
  * Implementa le funzionalità di caricamento modelli per OpenRouter
  */
 
+import * as vscode from 'vscode';
+import axios from 'axios';
 import {
   OpenAiCompatibleModelInfo,
   OpenRouterModelInfo,
@@ -11,7 +13,8 @@ import {
 } from '../../shared/types/api.types';
 import { OPENROUTER_MODELS } from '../openrouterModels';
 import { isOpenRouterModelInfo } from '../../shared/validators';
-import { Logger } from '../../shared/logger';
+import { Logger } from '../../utils/logger';
+import { getCachedModels, cacheModels, hasCachedModels } from '../modelCache';
 
 /**
  * Interfaccia per la risposta dell'API di OpenRouter

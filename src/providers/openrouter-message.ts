@@ -1,11 +1,13 @@
 import { z } from 'zod';
-import { createSafeMessage } from "../shared/types/message";
+import { createChatMessage as createChatMessage } from "../src/shared/types/chat.types";
 
 export const OpenRouterRequestSchema = z.object({
   model: z.string().describe('Modello OpenRouter da utilizzare'),
   provider: z.literal('openrouter'),
   messages: z.array(
-    z.object(createSafeMessage({role: z.enum(['user', 'assistant', 'system']), content: z.string()}))
+    z.object(createChatMessage({role: z.enum(['user', 'assistant', 'system']), content: z.string(),
+        timestamp: Date.now()
+    }))
   ),
   temperature: z.number().optional(),
   max_tokens: z.number().optional(),
@@ -23,7 +25,9 @@ export type OpenRouterRequest = z.infer<typeof OpenRouterRequestSchema>;
 export const OpenRouterResponseSchema = z.object({
   choices: z.array(
     z.object({
-      message: z.object(createSafeMessage({role: z.string(), content: z.string()})),
+      message: z.object(createChatMessage({role: z.string(), content: z.string(),
+          timestamp: Date.now()
+    })),
       finish_reason: z.string(),
     })
   ),

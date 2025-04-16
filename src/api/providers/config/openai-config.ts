@@ -1,4 +1,4 @@
-import { ModelInfo } from '../../../shared/types/api.types';
+import { ModelInfo } from '../../../src/shared/types/api.types';
 import { openAiModelInfoSaneDefaults } from '../../../shared/api';
 
 export interface OpenAiConfig {

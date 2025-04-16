@@ -9,9 +9,9 @@ import {
   allConditions,
   notCondition,
 } from '../strategies/adaptive-conditions';
-import { LLMProviderHandler } from '../../../providers/provider-registry-stub';
+import { LLMProviderHandler } from '../../../types/llm-provider.types';
 import { ProviderStats } from '../LLMFallbackManager';
-import { LLMEventBus } from '@/mas/types/llm-events';
+import { LLMEventBus } from '../../../types/llm-events';
 
 describe('AdaptiveFallbackStrategy E2E', () => {
   let providers: LLMProviderHandler[];

@@ -1,6 +1,6 @@
 import { FileManager } from '../file-operations/FileManager';
 import * as vscode from 'vscode';
-import { OpenAiCompatibleModelInfo } from '../../shared/types/api.types';
+import { OpenAiCompatibleModelInfo } from '../../src/shared/types/api.types';
 import { ApiProvider } from '../../agent/api/ApiProvider';
 
 interface AIFileOperation {

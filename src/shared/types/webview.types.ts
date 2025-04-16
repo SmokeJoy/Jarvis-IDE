@@ -118,19 +118,18 @@ export interface WebviewMessageBase extends BaseMessage {
   /** Tipo del messaggio */
   type: WebviewMessageType | string;
   /** Payload opzionale del messaggio, può essere sovrascritto nelle interfacce derivate */
-  payload?: Record<string, unknown>;
+  payload?: unknown;
 }
 
 /**
  * Interfaccia generica standardizzata per i messaggi WebView
  * con payload di tipo generico T
  * @template T Tipo del messaggio
- * @template P Tipo del payload
  */
-export interface WebviewMessage<T = string, P = Record<string, unknown>> {
+export interface WebviewMessage<T = string> {
   type: T;
   timestamp?: number;
-  payload?: P;
+  payload?: unknown;
 }
 
 /**
@@ -210,7 +209,7 @@ export interface ExtensionMessage extends BaseMessage {
  * Tipo unione per rappresentare tutti i possibili messaggi
  * nei due sensi di comunicazione
  */
-export type Message = WebviewMessage<string, Record<string, unknown>> | ExtensionMessage;
+export type Message = WebviewMessage<string> | ExtensionMessage;
 
 /**
  * Tipo di unione per tutti i messaggi WebView specifici
@@ -232,7 +231,7 @@ export type WebviewMessageUnion =
  * Tipo di unione per tutti i tipi di messaggi WebView
  * Usato per la tipizzazione dei payload nei metodi di invio messaggi
  */
-export type WebviewMessagePayload = WebviewMessage<string, Record<string, unknown>> | WebviewMessageUnion;
+export type WebviewMessagePayload = WebviewMessage<string> | WebviewMessageUnion;
 
 /**
  * Funzione di type-guard per verificare se un messaggio è ExtensionMessage
@@ -253,7 +252,7 @@ export function isExtensionMessage(message: Message): message is ExtensionMessag
  * Funzione di type-guard per verificare se un messaggio è WebviewMessage
  * @param message Il messaggio da verificare
  */
-export function isWebviewMessage(message: Message): message is WebviewMessage<string, Record<string, unknown>> {
+export function isWebviewMessage(message: Message): message is WebviewMessage<string> {
   // Logica per determinare se il messaggio è un WebviewMessage
   return (
     message !== undefined &&
@@ -306,7 +305,7 @@ export interface StateMessage extends ExtensionMessage {
 /**
  * Messaggio di invio prompt (da WebView a Extension)
  */
-export interface SendPromptMessage extends WebviewMessage {
+export interface SendPromptMessage extends WebviewMessage<WebviewMessageType.SEND_PROMPT> {
   type: WebviewMessageType.SEND_PROMPT;
   payload: {
     prompt: string;
@@ -318,7 +317,7 @@ export interface SendPromptMessage extends WebviewMessage {
 /**
  * Tipo di ritorno esteso per WebviewMessage usato nella conversione
  */
-export interface ConvertedWebviewMessage extends WebviewMessage<string, Record<string, unknown>> {
+export interface ConvertedWebviewMessage extends WebviewMessage<string> {
   action?: ActionType;
   message?: ChatMessage | string;
   apiConfiguration?: ApiConfiguration;
@@ -357,7 +356,7 @@ export function convertToWebviewMessage(
   if ('message' in message && message.message) baseMessage.message = message.message;
   if ('error' in message && message.error)
     baseMessage.payload = {
-      ...baseMessage.payload,
+      ...(typeof baseMessage.payload === 'object' && baseMessage.payload !== null ? baseMessage.payload : {}),
       error: message.error,
     };
 
@@ -367,19 +366,23 @@ export function convertToWebviewMessage(
     message.apiConfiguration &&
     typeof message.apiConfiguration === 'object'
   ) {
-    // Assicurati che ci sia almeno il provider richiesto
+    // Assicurati che ci sia almeno il provider richiesto e modelId
+    const sourceConfig = message.apiConfiguration as Partial<ApiConfiguration>; // Cast to partial
     baseMessage.apiConfiguration = {
-      provider: message.apiConfiguration.provider || 'default',
-      ...((message.apiConfiguration as object) || {}),
+      provider: sourceConfig.provider || 'default',
+      modelId: sourceConfig.modelId || 'default-model', // Provide modelId
+      ...(sourceConfig || {}),
     };
   } else if (
     message.state?.apiConfiguration &&
     typeof message.state.apiConfiguration === 'object'
   ) {
-    // Assicurati che ci sia almeno il provider richiesto
+    // Assicurati che ci sia almeno il provider richiesto e modelId
+    const sourceConfig = message.state.apiConfiguration as Partial<ApiConfiguration>; // Cast to partial
     baseMessage.apiConfiguration = {
-      provider: message.state.apiConfiguration.provider || 'default',
-      ...((message.state.apiConfiguration as object) || {}),
+      provider: sourceConfig.provider || 'default',
+      modelId: sourceConfig.modelId || 'default-model', // Provide modelId
+      ...(sourceConfig || {}),
     };
   }
 
@@ -476,8 +479,8 @@ export interface InstructionMessage extends WebviewMessageBase {
 /**
  * Interfaccia per messaggio di istruzione completata
  */
-export interface InstructionCompletedMessage extends WebviewMessage {
-  type: 'instructionCompleted';
+export interface InstructionCompletedMessage extends WebviewMessage<WebviewMessageType.INSTRUCTION_COMPLETED> {
+  type: WebviewMessageType.INSTRUCTION_COMPLETED;
   id: string;
   agentId: string;
   instruction: string;
@@ -547,15 +550,15 @@ export interface ResponsePayload {
 /**
  * Messaggio di log
  */
-export interface WebviewLogMessage extends WebviewMessage<'log', LogMessagePayload> {
-  type: 'log';
+export interface WebviewLogMessage extends WebviewMessage<WebviewMessageType.LOG_EXPORT> {
+  type: WebviewMessageType.LOG_EXPORT;
   payload: LogMessagePayload;
 }
 
 /**
  * Messaggio di errore della WebView
  */
-export interface WebviewErrorMessage extends WebviewMessage<WebviewMessageType.ERROR, ErrorMessagePayload> {
+export interface WebviewErrorMessage extends WebviewMessage<WebviewMessageType.ERROR> {
   type: WebviewMessageType.ERROR;
   payload: ErrorMessagePayload;
 }
@@ -563,7 +566,7 @@ export interface WebviewErrorMessage extends WebviewMessage<WebviewMessageType.E
 /**
  * Messaggio di aggiornamento stato della WebView
  */
-export interface WebviewStateUpdateMessage extends WebviewMessage<WebviewMessageType.STATE_UPDATE, StateUpdatePayload> {
+export interface WebviewStateUpdateMessage extends WebviewMessage<WebviewMessageType.STATE_UPDATE> {
   type: WebviewMessageType.STATE_UPDATE;
   payload: StateUpdatePayload;
 }
@@ -571,7 +574,7 @@ export interface WebviewStateUpdateMessage extends WebviewMessage<WebviewMessage
 /**
  * Messaggio di comando della WebView
  */
-export interface WebviewCommandMessage extends WebviewMessage<WebviewMessageType.COMMAND, CommandPayload> {
+export interface WebviewCommandMessage extends WebviewMessage<WebviewMessageType.COMMAND> {
   type: WebviewMessageType.COMMAND;
   payload: CommandPayload;
 }
@@ -579,7 +582,7 @@ export interface WebviewCommandMessage extends WebviewMessage<WebviewMessageType
 /**
  * Messaggio di risposta della WebView
  */
-export interface WebviewResponseMessage extends WebviewMessage<WebviewMessageType.RESPONSE, ResponsePayload> {
+export interface WebviewResponseMessage extends WebviewMessage<WebviewMessageType.RESPONSE> {
   type: WebviewMessageType.RESPONSE;
   payload: ResponsePayload;
 }

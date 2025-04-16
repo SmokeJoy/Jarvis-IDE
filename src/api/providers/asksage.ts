@@ -6,7 +6,7 @@ import {
   askSageDefaultModelId,
   askSageDefaultURL,
 } from '../../shared/api';
-import { ApiHandlerOptions, ModelInfo } from '../../shared/types/api.types';
+import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';
 import { ApiStream } from '../transform/stream';
 
 type AskSageRequest = {

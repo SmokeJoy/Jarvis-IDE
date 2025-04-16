@@ -1,4 +1,4 @@
-import { ChatMessage } from '../shared/types';
+import { ChatMessage } from '../shared/types/chat.types';
 import { ApiConfiguration } from '../shared/types/api.types';
 import { ExtensionMessage } from '../shared/ExtensionMessage';
 import * as vscode from 'vscode';
@@ -27,11 +27,11 @@ export async function exportChatToMarkdown(messages: ChatMessage[]): Promise<str
 
     markdown += `${content}\n\n`;
 
-    // Aggiungi metadata del messaggio se presenti
-    if (message.metadata) {
-      markdown += '<details>\n<summary>Metadata</summary>\n\n';
+    // Aggiungi providerFields del messaggio se presenti
+    if (message.providerFields && Object.keys(message.providerFields).length > 0) {
+      markdown += '<details>\n<summary>Provider Fields</summary>\n\n';
       markdown += '```json\n';
-      markdown += JSON.stringify(message.metadata, null, 2);
+      markdown += JSON.stringify(message.providerFields, null, 2);
       markdown += '\n```\n\n';
       markdown += '</details>\n\n';
     }

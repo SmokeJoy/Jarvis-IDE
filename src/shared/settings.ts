@@ -1,9 +1,9 @@
-import { ApiConfiguration } from './types/api.types';
+import { ApiConfiguration } from '../src/shared/types/api.types';
 import { TelemetrySetting } from './types';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { LLMProviderId } from '../types/global';
+import { LLMProviderId } from '../src/shared/types/global';
 import { Settings, AvailableModel } from './types/settings.types';
 
 export class SettingsManager {

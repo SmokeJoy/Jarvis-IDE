@@ -27,10 +27,23 @@ export interface ExtensionMessage<T = any> extends WebviewMessageBase {
   payload: T;
 }
 
-export interface ChatMessage {
-  role: 'user' | 'assistant' | 'system';
+export type MessageRole = 'user' | 'assistant' | 'system' | 'code';
+
+export interface MessagePart {
+  type: 'text' | 'code';
   content: string;
+  language?: string;
+}
+
+export interface ChatMessage {
+  role: MessageRole;
+  parts: MessagePart[];
   timestamp: number;
+  metadata?: {
+    executionTime?: number;
+    tokensUsed?: number;
+    source?: 'webview' | 'extension';
+  };
 }
 
 export interface WebviewState {

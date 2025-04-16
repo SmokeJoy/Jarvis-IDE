@@ -4,6 +4,7 @@
  * Implementa un sistema di lookup dinamico provider → loader
  */
 
+import * as vscode from 'vscode';
 import { OpenAiCompatibleModelInfo, LLMProviderId } from '../shared/types/api.types';
 import {
   fetchModelsFromOpenRouter,

@@ -5,6 +5,7 @@
  */
 
 import type { WebviewMessageUnion } from '../../../src/shared/types/webviewMessageUnion';
+import type { WebviewMessage } from '@shared/types/webview.types';
 
 /**
  * Enumerazione dei tipi di messaggio per il pannello dei suggerimenti
@@ -20,14 +21,15 @@ export enum SuggestionsMessageType {
 /**
  * Interfaccia base per tutti i messaggi di suggerimenti
  */
-export interface SuggestionsMessageBase extends WebviewMessageUnion {
-  type: SuggestionsMessageType | string;
+export interface SuggestionsMessageBase<T extends SuggestionsMessageType = SuggestionsMessageType, P = unknown> extends WebviewMessage<T> {
+  type: T;
+  payload: P;
 }
 
 /**
  * Interfaccia per il messaggio di richiesta suggerimenti
  */
-export interface RequestSuggestionsMessage extends SuggestionsMessageBase {
+export interface RequestSuggestionsMessage extends SuggestionsMessageBase<SuggestionsMessageType.REQUEST_SUGGESTIONS> {
   type: SuggestionsMessageType.REQUEST_SUGGESTIONS;
   payload: {
     context?: string;
@@ -50,7 +52,7 @@ export interface Suggestion {
 /**
  * Interfaccia per il messaggio di aggiornamento suggerimenti
  */
-export interface SuggestionsUpdatedMessage extends SuggestionsMessageBase {
+export interface SuggestionsUpdatedMessage extends SuggestionsMessageBase<SuggestionsMessageType.SUGGESTIONS_UPDATED> {
   type: SuggestionsMessageType.SUGGESTIONS_UPDATED;
   payload: {
     suggestions: Suggestion[];
@@ -61,7 +63,7 @@ export interface SuggestionsUpdatedMessage extends SuggestionsMessageBase {
 /**
  * Interfaccia per il messaggio di accettazione di un suggerimento
  */
-export interface SuggestionAcceptedMessage extends SuggestionsMessageBase {
+export interface SuggestionAcceptedMessage extends SuggestionsMessageBase<SuggestionsMessageType.SUGGESTION_ACCEPTED> {
   type: SuggestionsMessageType.SUGGESTION_ACCEPTED;
   payload: {
     suggestionId: string;
@@ -73,7 +75,7 @@ export interface SuggestionAcceptedMessage extends SuggestionsMessageBase {
 /**
  * Interfaccia per il messaggio di rifiuto di un suggerimento
  */
-export interface SuggestionRejectedMessage extends SuggestionsMessageBase {
+export interface SuggestionRejectedMessage extends SuggestionsMessageBase<SuggestionsMessageType.SUGGESTION_REJECTED> {
   type: SuggestionsMessageType.SUGGESTION_REJECTED;
   payload: {
     suggestionId: string;
@@ -84,11 +86,9 @@ export interface SuggestionRejectedMessage extends SuggestionsMessageBase {
 /**
  * Interfaccia per il messaggio di pulizia dei suggerimenti
  */
-export interface SuggestionsClearedMessage extends SuggestionsMessageBase {
+export interface SuggestionsClearedMessage extends SuggestionsMessageBase<SuggestionsMessageType.SUGGESTIONS_CLEARED, { reason?: string } | undefined> {
   type: SuggestionsMessageType.SUGGESTIONS_CLEARED;
-  payload?: {
-    reason?: string;
-  };
+  payload: { reason?: string } | undefined;
 }
 
 /**

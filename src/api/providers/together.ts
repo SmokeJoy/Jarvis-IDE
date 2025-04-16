@@ -1,18 +1,18 @@
 import OpenAI from 'openai';
 import { ApiHandler } from '../index';
-import { ApiHandlerOptions, ModelInfo } from '../../shared/types/api.types';
+import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';
 import { openAiModelInfoSaneDefaults } from '../../shared/api';
 import { calculateApiCostOpenAI } from '../../utils/cost';
 import { convertToOpenAiMessages } from '../transform/openai-format';
-import { ApiStream, ApiStreamChunk } from '../../shared/types/api.types';
+import { ApiStream, ApiStreamChunk } from '../../src/shared/types/api.types';
 import { convertToR1Format } from '../transform/r1-format';
 import { BaseStreamHandler } from '../handlers/BaseStreamHandler';
 import { logger } from '../../utils/logger';
-import { ChatMessage } from '../../types/chat.types';
+import { ChatMessage, createChatMessage } from '../../src/shared/types/chat.types';
 import { ChatCompletionMessageParam } from '../../types/provider-types/openai-types';
-import { createSafeMessage } from '../../shared/types/message';
-import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider';
-import { LLMProviderId } from '../../shared/types/llm.types';
+import { BaseLLMProvider, LLMMessage } from '../BaseLLMProvider';
+import { LLMOptions } from '../../src/shared/types/llm.types';
+import { LLMProviderId } from '../../src/shared/types/providers.types';
 
 export class TogetherHandler extends BaseLLMProvider {
   readonly provider = LLMProviderId.Together;
@@ -43,13 +43,17 @@ export class TogetherHandler extends BaseLLMProvider {
         const isDeepseekReasoner = modelId.includes('deepseek-reasoner');
 
         let openAiMessages: ChatCompletionMessageParam[] = [
-          createSafeMessage({role: 'system', content: systemPrompt}),
+          createChatMessage({role: 'system', content: systemPrompt,
+              timestamp: Date.now()
+        }),
           ...convertToOpenAiMessages(messages),
         ];
 
         if (isDeepseekReasoner) {
           openAiMessages = convertToR1Format([
-            createSafeMessage({role: 'user', content: systemPrompt}),
+            createChatMessage({role: 'user', content: systemPrompt,
+                timestamp: Date.now()
+            }),
             ...messages,
           ]);
         }
@@ -133,3 +137,4 @@ export class TogetherHandler extends BaseLLMProvider {
 
   // ... eventuale logica specifica ...
 }
+

@@ -1,7 +1,7 @@
 import { ChatMessage } from './types/message';
-import { ApiConfiguration } from './types/api.types';
+import { ApiConfiguration } from '../src/shared/types/api.types';
 import { AutoApprovalSettings, BrowserSettings, ChatSettings } from './types/user-settings.types';
-import { ChatCompletionContentPartText, ChatCompletionContentPartImage } from './types/api.types';
+import { ChatCompletionContentPartText, ChatCompletionContentPartImage } from '../src/shared/types/api.types';
 
 // Definisco l'interfaccia con i tipi corretti importati dal file centralizzato
 export interface HistoryItem {

@@ -1,0 +1,485 @@
+Strategia di Recupero per Fork di Progetti TypeScript con Refactoring Incompleto
+Introduzione
+Questo documento presenta una strategia dettagliata, basata su una ricerca approfondita, per il recupero e la stabilizzazione del fork del progetto Cline, mirato allo sviluppo di Jarvis IDE. La codebase attuale presenta sfide significative dovute a un refactoring incompleto, ma con un approccio sistematico e l'uso degli strumenti giusti, è possibile trasformarla in una base solida e manutenibile per un IDE AI-native.
+Piano d'Azione Dettagliato e Fasato
+La strategia si articola in fasi sequenziali e iterative, progettate per ridurre gradualmente il debito tecnico e aumentare la robustezza del codice.
+Fase 1: Diagnosi Approfondita e Setup Iniziale (Durata stimata: 1-2 settimane)
+Obiettivi:
+ * Comprendere appieno lo stato attuale del progetto.
+ * Configurare l'ambiente per un monitoraggio continuo.
+ * Stabilire una baseline per le metriche di refactoring.
+Azioni Specifiche:
+ * Mappatura delle Dipendenze:
+   * Utilizzare dependency-cruiser con una configurazione rigorosa per visualizzare e identificare dipendenze circolari, moduli orfani (non importati da nessuno) e violazioni delle regole architetturali definite (es. moduli UI che non dovrebbero importare moduli core direttamente).
+     # Installazione
+npm install --save-dev dependency-cruiser
+# Genera configurazione iniziale
+npx depcruise --init
+# Esegui analisi e genera report (html, L'output può essere configurato)
+npx depcruise src --config .dependency-cruiser.js --output-type err-html --output-to report.html
+
+   * Configurare dependency-cruiser per segnalare specificamente import da file .js e moduli non risolti.
+ * Analisi Statica Iniziale:
+   * Configurare ESLint con @typescript-eslint/parser e plugin come @typescript-eslint, eslint-plugin-import.
+   * Regole Chiave Iniziali (impostate su "warn" per non bloccare subito):
+     * @typescript-eslint/no-explicit-any: Identifica tutti gli usi di any.
+     * import/no-unresolved: Trova import che TypeScript/Node non riescono a risolvere.
+     * import/extensions: Forza o vieta estensioni specifiche (inizialmente per trovare i .js).
+     * @typescript-eslint/no-unused-vars: Trova variabili/tipi dichiarati ma non usati (potenziali residui di refactoring).
+     * no-restricted-imports: Vieta import da specifici percorsi "legacy" o problematici man mano che vengono identificati.
+   * Eseguire tsc --noEmit --skipLibCheck per ottenere un elenco completo degli errori di tipo attuali senza generare output. Loggare l'output per riferimento.
+ * Audit dei Tipi any:
+   * Utilizzare uno script (vedi Sezione Strumenti) per contare e categorizzare le occorrenze di any.
+   * Identificare pattern comuni: any in parametri di funzione, tipi restituiti, dichiarazioni di variabili, cast (as any).
+ * Revisione dei Test:
+   * Eseguire la suite di test esistente e valutare la copertura (nyc, vitest coverage).
+   * Identificare aree critiche scoperte o test "flaky" (instabili).
+ * Setup del Monitoraggio:
+   * Creare un file docs/refactoring-progress.md per tracciare le metriche chiave (Numero di any, Numero di import .js, Errori tsc --noEmit, Copertura test). Aggiornarlo regolarmente (es. settimanalmente).
+Output Atteso:
+ * Report di dependency-cruiser visualizzando la struttura e i problemi.
+ * Elenco completo degli errori ESLint e TypeScript iniziali.
+ * File refactoring-progress.md con le metriche baseline.
+ * Chiara comprensione delle aree più problematiche della codebase.
+Fase 2: Stabilizzazione Urgente - Correzione Import e Moduli (Durata stimata: 2-4 settimane)
+Obiettivi:
+ * Risolvere i problemi di importazione più gravi (.js, moduli mancanti).
+ * Eliminare le dipendenze circolari più critiche.
+ * Garantire che il progetto compili senza errori tsc --noEmit (anche se con molti any).
+Azioni Specifiche:
+ * Fix degli Import .js:
+   * Strategia: Rinominare i file .js rilevanti in .ts o .tsx. Aggiornare tutti gli import corrispondenti per rimuovere l'estensione .js.
+   * Automazione Parziale: Usare jscodeshift o ts-morph con uno script specifico per trovare e sostituire gli import .js. Attenzione: La rinomina dei file richiede spesso intervento manuale o script più complessi.
+     // Esempio (molto semplificato) di codemod jscodeshift per rimuovere .js
+// npx jscodeshift -t transform.js src
+export default function transformer(file, api) {
+  const j = api.jscodeshift;
+  return j(file.source)
+    .find(j.ImportDeclaration)
+    .forEach(path => {
+      if (path.value.source.value.endsWith('.js')) {
+        path.value.source.value = path.value.source.value.slice(0, -3);
+      }
+    })
+    .toSource();
+}
+
+   * Verifica: Eseguire tsc --noEmit e eslint per confermare la risoluzione.
+ * Risoluzione Moduli Fantasma:
+   * Identificare i moduli importati ma non esistenti (da tsc --noEmit e eslint-plugin-import).
+   * Strategia:
+     * Se il modulo è stato rinominato/spostato: aggiornare l'import.
+     * Se il modulo è stato cancellato: rimuovere l'import e il codice che lo utilizzava (potrebbe richiedere refactoring).
+     * Se il modulo manca da node_modules: installare la dipendenza corretta.
+ * Rottura Dipendenze Circolari:
+   * Utilizzare l'output di dependency-cruiser per identificare i cicli.
+   * Strategie Comuni:
+     * Inversione delle Dipendenze: Introdurre interfacce o tipi in un modulo "neutrale" da cui entrambi i moduli dipendono.
+     * Estrazione: Spostare la funzionalità condivisa in un nuovo modulo di livello inferiore.
+     * Import Dinamici (import()): Usare con cautela se il ciclo è legato a tipi o inizializzazioni non strettamente necessarie al caricamento iniziale.
+ * Configurazione tsconfig.json:
+   * Assicurarsi che baseUrl e paths siano configurati correttamente per supportare import non relativi (es. @/core/*). Questo aiuta a gestire spostamenti di file durante il refactoring.
+   * Impostare "moduleResolution": "node" o "bundler" (se si usa un bundler moderno) e "allowJs": false (una volta eliminati tutti gli import .js e i file sorgente .js).
+Output Atteso:
+ * Progetto compilabile con tsc --noEmit (errori di tipo any attesi).
+ * Nessun import .js rimanente nei file .ts/.tsx.
+ * Risoluzione dei moduli non trovati.
+ * Riduzione significativa o eliminazione delle dipendenze circolari critiche.
+ * Aggiornamento delle metriche in refactoring-progress.md.
+Fase 3: Refactoring Guidato dai Tipi (Iterativo - Durata stimata: Continuo, con sprint dedicati)
+Obiettivi:
+ * Ridurre sistematicamente l'uso di any.
+ * Introdurre tipi specifici e coerenti.
+ * Migliorare la sicurezza e la manutenibilità del codice.
+Metodologia "Type Hardening" Incrementale:
+ * Prioritizzazione:
+   * Confini del Sistema: Iniziare dai tipi che definiscono le API esterne, la comunicazione tra componenti (es. messaggi tra webview ed estensione in VS Code), configurazioni e dati persistenti. Questi forniscono il massimo beneficio in termini di stabilità.
+   * Moduli Core: Tipizzare le logiche di business fondamentali e le strutture dati condivise.
+   * Flussi Utente Critici: Seguire un flusso utente importante e tipizzare tutti i componenti coinvolti.
+   * Aree con Bug Frequenti: Il codice con any è spesso fonte di errori runtime.
+   * Nuovo Codice: Applicare la tipizzazione rigorosa a tutto il nuovo codice e alle funzionalità in sviluppo.
+ * Strategia di Migrazione per any:
+   * any -> unknown: Il primo passo sicuro. unknown forza controlli espliciti ( typeof, instanceof, type guards) prima dell'uso, rendendo il codice più sicuro senza dover definire subito il tipo perfetto.
+   * unknown -> Tipi Specifici: Una volta che si capisce come viene usata la variabile unknown, definirne il tipo corretto (interfaccia, tipo alias, classe).
+   * Tipi Generici: Utilizzare i generici per funzioni e classi che operano su diversi tipi mantenendo la sicurezza del tipo (es. function process<T>(data: T): Result<T>).
+   * Tipi Utilità di TypeScript: Sfruttare Partial, Required, Readonly, Pick, Omit, Record<K, T> per manipolare e creare tipi complessi in modo conciso.
+   * Type Guards / Assertion Functions: Creare funzioni (isMyType(obj): obj is MyType) o assertion functions (assertIsMyType(obj): asserts obj is MyType) per raffinare i tipi all'interno del codice, specialmente quando si lavora con dati esterni o unknown.
+ * Progettazione del Sistema di Tipi (Specifico per IDE AI-native):
+   * Comunicazione tra Agenti/Componenti: Definire interfacce di messaggistica chiare ({ type: 'ACTION_TYPE', payload: SpecificPayloadType }). Utilizzare tipi unione discriminati per gestire diversi tipi di messaggi in modo sicuro.
+     interface RequestFileAction {
+  type: 'requestFile';
+  payload: { filePath: string };
+}
+interface AnalyzeCodeAction {
+  type: 'analyzeCode';
+  payload: { code: string; language: string };
+}
+// ... altre azioni
+
+type AgentMessage = RequestFileAction | AnalyzeCodeAction /* | ... */;
+
+function handleMessage(message: AgentMessage) {
+  switch (message.type) {
+    case 'requestFile':
+      // message.payload è sicuramente { filePath: string }
+      console.log('Richiesta file:', message.payload.filePath);
+      break;
+    case 'analyzeCode':
+      // message.payload è sicuramente { code: string, language: string }
+      console.log('Analisi codice per:', message.payload.language);
+      break;
+    // default: // Gestire tipi sconosciuti o lanciare errore
+  }
+}
+
+   * Configurazioni: Utilizzare interfacce con proprietà opzionali (?) e valori di default ben definiti. Sfruttare Readonly<T> per configurazioni immutabili.
+   * Stato dell'Applicazione: Se si usa un gestore di stato (Redux, Zustand, etc.), definire tipi rigorosi per lo stato, le azioni e i selettori.
+   * Tipi Condivisi: Creare un pacchetto dedicato (@jarvis-ide/types) o una cartella (src/shared/types) per tipi usati in più moduli (frontend, backend, estensione) per evitare duplicazioni e garantire coerenza.
+ * Refactoring Assistito:
+   * Utilizzare le funzionalità di refactoring dell'IDE (VdS Code ecc.) come "Rename Symbol", "Extract Type", "Infer type".
+   * Configurare ESLint per applicare fix automatici (eslint --fix) per regole semplici (es. aggiunta tipi primitivi inferibili).
+   * Valutare strumenti come ts-migrate (da Airbnb, anche se potrebbe essere meno mantenuto) per tentativi di migrazione automatica su larga scala, ma usarlo con cautela e revisionare attentamente l'output.
+Output Atteso (Iterativo):
+ * Riduzione progressiva del numero di any tracciata in refactoring-progress.md.
+ * Introduzione di tipi specifici e documentati (/** JSDoc */).
+ * Miglioramento del type checking da parte di tsc.
+ * Aumento della fiducia nel codice e riduzione degli errori runtime.
+Fase 4: Mantenimento della Funzionalità e Test (Continuo, parallelo alle Fasi 2 e 3)
+Obiettivi:
+ * Assicurare che il refactoring non introduca regressioni.
+ * Permettere refactoring incrementali senza bloccare lo sviluppo di funzionalità.
+Azioni Specifiche:
+ * Test di Regressione:
+   * Priorità: Scrivere test (unitari, integrazione, E2E) per le aree critiche prima di iniziare il refactoring su di esse.
+   * Strategia:
+     * Test Unitari (Vitest/Jest): Verificare la logica di singole funzioni/moduli, specialmente quelli con tipi complessi o logica di business critica. Mockare le dipendenze esterne.
+     * Test di Integrazione: Testare l'interazione tra moduli chiave (es. comunicazione webview-estensione, interazione API).
+     * Test E2E (Playwright/Cypress): Simulare flussi utente reali nell'IDE per verificare il comportamento end-to-end. Sono più lenti ma catturano regressioni a livello di UI/UX.
+   * Copertura: Mirare a una copertura >80-85% per le aree refattorizzate e il nuovo codice.
+ * Feature Flagging:
+   * Per refactoring di grandi dimensioni o rischiosi che non possono essere completati in un singolo PR/sprint.
+   * Implementazione: Utilizzare una libreria di feature flagging (es. launchdarkly-js-client-sdk, flagsmith, o una soluzione custom semplice basata su variabili d'ambiente/configurazione).
+   * Strategia: Introdurre il nuovo codice tipizzato accanto a quello vecchio. Un flag determina quale implementazione viene utilizzata.
+     import { isFeatureEnabled } from './featureFlags';
+import { legacyGetData } from './legacyApi';
+import { newGetData } from './newTypedApi'; // <- Nuova implementazione tipizzata
+
+async function fetchData(params: SomeParams): Promise<ResultType> { // Nota: il tipo restituito deve essere compatibile
+  if (isFeatureEnabled('useNewTypedApi')) {
+    return newGetData(params); // Usa la nuova API tipizzata
+  } else {
+    // Potrebbe essere necessario un adattatore se i tipi restituiti differiscono leggermente
+    const legacyResult = await legacyGetData(params as any); // Cast necessario se legacy non è tipizzato
+    return adaptLegacyResult(legacyResult); // Adatta al tipo restituito atteso
+  }
+}
+
+   * Cleanup: Pianificare la rimozione del vecchio codice e del flag una volta che la nuova implementazione è stabile e testata.
+ * Struttura del Codice Transitorio (Branching/Fencing):
+   * Branching Strategy: Utilizzare branch di lunga durata per refactoring importanti (es. feature/type-hardening-core), facendo regolarmente merge da main per evitare divergenze eccessive. Fare PR piccoli e focalizzati da questi branch verso main.
+   * Code Fencing: Isolare il codice in fase di refactoring. Ad esempio, creare module.new.ts accanto a module.ts e usare l'import dinamico o il feature flag per scegliere quale usare, finché il nuovo modulo non sostituisce completamente il vecchio.
+Output Atteso:
+ * Suite di test robusta che fornisce fiducia durante il refactoring.
+ * Capacità di rilasciare funzionalità anche durante refactoring estesi.
+ * Riduzione del rischio di regressioni.
+Fase 5: Automazione e CI/CD Enforcement (Continuo, rafforzato progressivamente)
+Obiettivi:
+ * Automatizzare il rilevamento di problemi.
+ * Impedire l'introduzione di nuovo debito tecnico.
+ * Garantire la qualità del codice in modo consistente.
+Azioni Specifiche:
+ * Configurazione Linter Rigorosa:
+   * Passare gradualmente le regole chiave da "warn" a "error" in ESLint man mano che il codice viene ripulito (es. @typescript-eslint/no-explicit-any).
+   * Introdurre regole più avanzate:
+     * @typescript-eslint/explicit-function-return-type: Richiede tipi restituiti espliciti.
+     * @typescript-eslint/explicit-module-boundary-types: Richiede tipi espliciti ai confini dei moduli (funzioni esportate).
+     * @typescript-eslint/no-unused-vars: Configurato per segnalare errore.
+     * Regole specifiche per la codebase (es. no-restricted-syntax per vietare pattern specifici).
+ * Hook Pre-commit:
+   * Utilizzare husky e lint-staged per eseguire automaticamente ESLint e tsc --noEmit sui file modificati prima di ogni commit. Questo previene l'introduzione di errori nel repository.
+     // package.json o .lintstagedrc.js
+{
+  "*.{ts,tsx}": [
+    "eslint --fix",
+    "tsc --noEmit" // Potrebbe essere lento su tutto il progetto, considera tsc-files o alternative
+  ]
+}
+
+ * Pipeline CI/CD:
+   * Build e Linting: Aggiungere step nella pipeline (GitHub Actions, GitLab CI, etc.) che eseguono:
+     * npm ci (installazione pulita delle dipendenze)
+     * npm run lint (con regole impostate su "error")
+     * tsc --noEmit --project tsconfig.strict.json (utilizzare un tsconfig separato e più rigoroso per la CI, es. abilitando strictNullChecks, noImplicitAny, etc., anche se non ancora attivi nello sviluppo quotidiano).
+     * npm test (esecuzione di tutti i test).
+   * Blocco del Merge: Configurare la CI per bloccare i Pull Request/Merge Request se uno qualsiasi di questi step fallisce.
+ * Script di Supporto:
+   * Mantenere e migliorare script come scripts/count-any.ts, scripts/find-js-imports.ts, scripts/check-circular-deps.ts (usando dependency-cruiser programmaticamente). Eseguirli periodicamente o nella CI per monitorare i progressi.
+Output Atteso:
+ * Feedback rapido agli sviluppatori su problemi di codice.
+ * Prevenzione dell'accumulo di nuovo debito tecnico.
+ * Garanzia che solo codice di qualità verificata venga integrato nel branch principale.
+Raccomandazioni di Strumenti Specifici e Configurazioni
+ * Analisi Dipendenze:
+   * dependency-cruiser: Altamente raccomandato per la sua configurabilità nel rilevare dipendenze circolari, moduli orfani, violazioni architetturali e import problematici.
+     * Configurazione Chiave (.dependency-cruiser.js):
+       module.exports = {
+  forbidden: [
+    // Esempio: Previene dipendenze circolari
+    {
+      name: 'no-circular',
+      severity: 'error',
+      from: {},
+      to: { circular: true }
+    },
+    // Esempio: Impedisce alla UI di importare dal backend direttamente
+    {
+      name: 'ui-cannot-import-backend',
+      severity: 'error',
+      from: { path: '^src/ui' },
+      to: { path: '^src/backend' }
+    },
+    // Esempio: Segnala import da file .js
+    {
+      name: 'no-js-imports',
+      severity: 'warn', // Inizialmente warn, poi error
+      from: { pathNot: '\\.js$' }, // Da file non .js
+      to: { path: '\\.js$' }     // Verso file .js
+    },
+     // Esempio: Segnala moduli non risolti
+     {
+        name: 'no-unresolved',
+        severity: 'error',
+        from: {},
+        to: { couldNotResolve: true }
+     }
+  ],
+  // ... altre opzioni (reporter, caching, tsConfig)
+};
+
+ * Linting e Analisi Statica:
+   * ESLint con @typescript-eslint: Lo standard de facto.
+     * Configurazione Chiave (eslint.config.js o .eslintrc.js):
+       // Esempio eslint.config.js (nuovo formato "flat config")
+import typescriptParser from '@typescript-eslint/parser';
+import typescriptPlugin from '@typescript-eslint/eslint-plugin';
+import importPlugin from 'eslint-plugin-import';
+
+export default [
+  {
+    files: ["**/*.{ts,tsx}"],
+    languageOptions: {
+      parser: typescriptParser,
+      parserOptions: {
+        project: './tsconfig.json', // Necessario per regole type-aware
+      },
+    },
+    plugins: {
+      '@typescript-eslint': typescriptPlugin,
+      import: importPlugin,
+    },
+    rules: {
+      // Iniziare con warn, passare a error gradualmente
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/explicit-module-boundary-types': 'warn',
+      'import/no-unresolved': 'error', // Spesso un errore bloccante
+      'import/no-circular-dependencies': 'warn', // Usa dependency-cruiser per analisi più approfondita
+      'no-unused-vars': 'off', // Disabilitare la regola base JS
+      '@typescript-eslint/no-unused-vars': ['warn', { 'argsIgnorePattern': '^_' }], // Usare quella TS
+      // ... altre regole
+    },
+    settings: {
+      'import/resolver': {
+        typescript: {}, // Aiuta eslint-plugin-import a usare tsconfig.json paths
+      },
+    },
+  }
+];
+
+   * tsc --noEmit: Fondamentale per la verifica dei tipi a livello di progetto. Usare con flag come --strictNullChecks, --noImplicitAny (progressivamente abilitati in tsconfig.strict.json per la CI).
+ * Refactoring Tipi any:
+   * ts-morph: Una libreria eccellente per analisi e trasformazioni programmatiche del codice TypeScript. Più potente e type-safe di jscodeshift per task specifici di TS. Ottima per script custom di refactoring (es. trovare usi specifici di any, rinominare tipi in batch).
+   * IDE Features (VS Code): "Refactor", "Rename Symbol", "Go to Type Definition", "Find All References", "TypeScript Refactorings" (estensione implicita).
+   * (Con Cautela) ts-migrate (Airbnb): Può dare una spinta iniziale su codebase molto grandi, ma richiede sempre revisione manuale approfondita.
+ * Test:
+   * Vitest: Framework di test moderno, veloce e compatibile con l'ecosistema Vite (se applicabile), con API simile a Jest. Ottimo per test unitari e di integrazione.
+   * Jest: Standard consolidato, ottima integrazione e ampio ecosistema.
+   * Playwright / Cypress: Per test E2E robusti che simulano l'interazione utente nell'IDE. Playwright è spesso preferito per la sua velocità e architettura moderna.
+   * @testing-library: Per scrivere test che interagiscono con i componenti UI come farebbe un utente, indipendentemente dall'implementazione interna.
+ * Automazione:
+   * husky & lint-staged: Essenziali per hook pre-commit.
+   * GitHub Actions / GitLab CI / Jenkins etc.: Per l'integrazione continua e il blocco di codice problematico.
+Pattern di Migrazione Tipi per IDE AI-native
+ * Tipi Unione Discriminati per Messaggi/Eventi: Come mostrato prima, usare type o kind come discriminante per gestire in modo sicuro la comunicazione tra componenti (webview, extension host, AI agents, backend).
+ * Interfacce Chiare per API AI: Definire interfacce rigorose per le richieste e le risposte ai modelli AI o ai servizi backend. Gestire potenziali errori e stati (loading, error, success) con tipi specifici.
+   interface AiCodeAnalysisRequest {
+  requestId: string;
+  code: string;
+  language: string;
+  analysisType: 'completion' | 'refactor' | 'explanation';
+}
+
+interface AiCodeAnalysisSuccessResponse {
+  requestId: string;
+  status: 'success';
+  result: {
+    suggestions: string[];
+    explanation?: string;
+  };
+}
+
+interface AiCodeAnalysisErrorResponse {
+  requestId: string;
+  status: 'error';
+  error: {
+    code: string;
+    message: string;
+  };
+}
+
+type AiCodeAnalysisResponse = AiCodeAnalysisSuccessResponse | AiCodeAnalysisErrorResponse;
+
+ * Tipi Nominali Simulati (Branded Types): Per distinguere tipi strutturalmente identici ma semanticamente diversi (es. UserId vs SessionId, entrambi string). Questo previene l'uso accidentale di un ID nel contesto sbagliato.
+   type Brand<K, T> = K & { __brand: T };
+
+type FilePath = Brand<string, 'FilePath'>;
+type Url = Brand<string, 'Url'>;
+
+function readFile(path: FilePath): string { /* ... */ }
+function fetchResource(url: Url): Promise<Response> { /* ... */ }
+
+const myPath = '/data/file.txt' as FilePath; // Cast necessario per creare il tipo "branded"
+const myUrl = 'https://example.com' as Url;
+
+readFile(myPath); // OK
+// readFile(myUrl); // Errore di tipo!
+// fetchResource(myPath); // Errore di tipo!
+
+ * Separazione Tipi Dati vs Tipi Logica: Mantenere i tipi che rappresentano dati (strutture JSON, risposte API) separati dai tipi usati internamente nella logica di business o nell'UI. Usare funzioni di mappatura/trasformazione tra i due.
+ * Generics per Componenti Riutilizzabili: Se si creano componenti UI o logiche (es. un gestore di liste, un parser generico) che operano su diversi tipi di dati, usare i generici per mantenere la flessibilità e la sicurezza dei tipi.
+Strategie per Mantenere la Motivazione del Team
+Un refactoring esteso può essere demotivante. È cruciale renderlo visibile, gratificante e gestibile.
+ * Celebrare le Vittorie: Evidenziare le milestone raggiunte (es. "Modulo X è ora 100% any-free!", "Dipendenze circolari eliminate!", "CI è verde con strict mode!").
+ * Visualizzare i Progressi: Mantenere il refactoring-progress.md aggiornato e visibile. Creare grafici semplici che mostrano la riduzione di any, l'aumento della copertura dei test, ecc.
+ * "Refactoring Fridays" o Sprint Dedicati: Allocare tempo specifico per il refactoring, in modo che non sia sempre in competizione con le nuove funzionalità.
+ * Gamification Leggera: Introdurre "badge" (anche solo emoji nei commenti PR o su Slack) per chi corregge un numero significativo di any o risolve un problema particolarmente ostico. Organizzare piccole "sfide" interne.
+ * Pair Programming / Mob Refactoring: Affrontare le parti più complesse insieme per condividere conoscenza e ridurre la frustrazione individuale.
+ * Collegare il Refactoring ai Benefici: Ricordare costantemente perché lo si sta facendo: meno bug, sviluppo più veloce nel lungo termine, onboarding più facile, possibilità di implementare funzionalità AI avanzate che richiedono una base solida.
+ * Automatizzare il Tedioso: Usare script e strumenti per automatizzare le parti ripetitive (come la correzione di import o la ricerca di any), permettendo al team di concentrarsi sui problemi più interessanti di progettazione dei tipi.
+ * Coinvolgere l'AI (Meta!): Usare strumenti come GitHub Copilot o altri assistenti AI per suggerire tipi o refactoring, ma sempre con revisione critica da parte dello sviluppatore. L'AI può accelerare la fase di "bozza" dei tipi.
+Metriche e Punti di Controllo
+ * Metriche Primarie (da tracciare regolarmente in refactoring-progress.md):
+   * Numero di any esplicite: grep -rnw src -e ': any' | wc -l (o script più sofisticato).
+   * Numero di any implicite: Abilitare noImplicitAny in tsconfig.strict.json ed eseguire tsc --noEmit --project tsconfig.strict.json. Contare gli errori TS7006.
+   * Numero di @ts-ignore / @ts-expect-error: grep -rnw src -e '@ts-' | wc -l.
+   * Numero di import .js: grep -rE 'import .* from.*\.(js|jsx)['\''"]' src | wc -l.
+   * Numero di errori tsc --noEmit --project tsconfig.strict.json: Output del comando.
+   * Numero di regole ESLint impostate su "error" vs "warn": Tracciare manualmente o tramite script che analizza la config.
+   * Copertura Test (Complessiva e per Moduli Chiave): Output dello strumento di coverage.
+   * Numero di Dipendenze Circolari: Output di dependency-cruiser.
+ * Punti di Controllo (Milestone):
+   * Fase 1 Completata: Diagnosi completa, baseline stabilita.
+   * Fase 2 Completata: Progetto compila senza errori di risoluzione/import. tsc --noEmit ha solo errori di tipo.
+   * Milestone Fase 3 (Esempio): Modulo Core X è any-free.
+   * Milestone Fase 3 (Esempio): API di comunicazione tra componenti è completamente tipizzata.
+   * Milestone Fase 4 (Esempio): Copertura test per modulo Y > 85%.
+   * Milestone Fase 5 (Esempio): no-explicit-any è impostato su "error" nella CI.
+   * Milestone Finale (Obiettivo): tsc --noEmit --strict (o con le flag strict desiderate) non riporta errori. Numero di any e @ts-ignore vicino a zero.
+Casi di Studio e Lezioni Apprese (Ricerca Sintetizzata)
+ * VS Code (Microsoft): Migrazione graduale da JavaScript. Hanno investito pesantemente in tooling (ESLint, tsc) e in una strategia incrementale. Lezione chiave: La migrazione richiede tempo e risorse dedicate, ma i benefici a lungo termine sulla manutenibilità di una codebase enorme sono stati fondamentali. Hanno anche definito API chiare per le estensioni fin dall'inizio.
+ * Airbnb (ts-migrate): Hanno tentato una migrazione su larga scala con automazione. Lezione chiave: L'automazione può aiutare, ma non sostituisce la comprensione profonda del codice e la progettazione manuale dei tipi per le parti complesse. ts-migrate è utile per il boilerplate iniziale.
+ * Slack: Hanno adottato TypeScript gradualmente, concentrandosi prima sulle nuove funzionalità e poi aggredendo il debito tecnico nelle aree più critiche o soggette a bug. Lezione chiave: Un approccio pragmatico, bilanciando refactoring e nuove funzionalità, è spesso necessario. L'uso di utility types e type guards è stato cruciale.
+ * Progetti Open Source Generali (Next.js, Storybook, etc.): Molti grandi progetti TS open source enfatizzano l'importanza di CI rigorose, configurazioni di linting condivise (eslint-config-), e test robusti per gestire contributi esterni e refactoring interni. L'uso di paths in tsconfig.json e strutture monorepo (es. con pnpm workspaces o Nx) è comune per gestire la complessità.
+Pattern Comuni Emersi:
+ * Migrazione Incrementale: Quasi nessuno riscrive tutto da zero. Si parte dai confini, dal nuovo codice, o dalle aree più problematiche.
+ * Tooling è Fondamentale: Investire tempo nella configurazione di ESLint, TypeScript (tsconfig), Prettier, dependency-cruiser e CI ripaga ampiamente.
+ * Test Prima del Refactoring: Scrivere test per il comportamento esistente prima di toccare il codice è la rete di sicurezza più importante.
+ * Centralizzazione dei Tipi Condivisi: Evitare duplicazioni definendo tipi comuni in un unico posto.
+ * Comunicazione e Allineamento del Team: Assicurarsi che tutti comprendano la strategia, gli obiettivi e i benefici.
+Gestione del Debito Tecnico e Bilanciamento
+ * Regola del Boy Scout: Lasciare il codice un po' meglio di come lo si è trovato. Incoraggiare piccoli refactoring (rinominare una variabile, aggiungere un tipo mancante semplice) all'interno dei normali task di sviluppo.
+ * Allocazione Dedicata: Assegnare una percentuale del tempo di ogni sprint (es. 10-20%) o avere sprint dedicati al refactoring e alla riduzione del debito tecnico.
+ * Tracciamento Visibile: Usare le metriche e il file refactoring-progress.md per rendere il debito e i progressi visibili a tutto il team e agli stakeholder.
+ * Prioritizzazione Basata sul Rischio/Valore: Affrontare prima il debito tecnico che causa più bug, rallenta maggiormente lo sviluppo futuro, o impedisce l'implementazione di funzionalità strategiche (come quelle AI).
+ * Non Lasciare Refactoring Incompleti (di nuovo!): Se si usa un feature flag o un branch per un refactoring, pianificare attivamente la sua conclusione e la rimozione del vecchio codice. Includere task di "cleanup" nel backlog.
+ * Definizione di "Fatto": Assicurarsi che la Definition of Done per le storie utente includa requisiti di qualità del codice (es. assenza di any, copertura test adeguata, linting pulito).
+Conclusione
+Il recupero del fork di Cline per Jarvis IDE è una sfida significativa ma realizzabile. Seguendo un piano strutturato per fasi, sfruttando gli strumenti di analisi e refactoring disponibili, concentrandosi sulla tipizzazione incrementale e garantendo la stabilità attraverso i test, è possibile trasformare la codebase. Mantenere la motivazione del team attraverso la visibilità dei progressi e la celebrazione delle vittorie sarà altrettanto importante quanto gli aspetti tecnici. Questo investimento nel refactoring non è solo una pulizia, ma la costruzione delle fondamenta necessarie per un IDE AI-native innovativo e robusto.
+(Allegati Suggeriti: Script Esempio)
+// scripts/count-any.ts
+// (Script semplificato - potrebbe necessitare di miglioramenti per edge case)
+import { promises as fs } from 'fs';
+import path from 'path';
+import { glob } from 'glob';
+
+async function countAnyOccurrences(dir: string): Promise<number> {
+  const tsFiles = await glob(`${dir}/**/*.{ts,tsx}`, { ignore: 'node_modules/**' });
+  let anyCount = 0;
+
+  for (const file of tsFiles) {
+    try {
+      const content = await fs.readFile(file, 'utf-8');
+      // Regex semplice: cerca ': any', 'as any', '<any>' - può essere migliorato
+      const matches = content.match(/[:\s(<]any[\s)>;,]/g);
+      if (matches) {
+        anyCount += matches.length;
+      }
+    } catch (err) {
+      console.error(`Errore leggendo ${file}:`, err);
+    }
+  }
+  return anyCount;
+}
+
+async function run() {
+  const targetDirectory = process.argv[2] || 'src';
+  console.log(`Conteggio occorrenze 'any' in ${path.resolve(targetDirectory)}...`);
+  const count = await countAnyOccurrences(targetDirectory);
+  console.log(`Numero totale di occorrenze 'any' trovate: ${count}`);
+  // Scrivi su file o aggiorna metrica
+  await fs.appendFile('docs/refactoring-progress.md', `\n- Any count: ${count} (${new Date().toISOString()})`);
+}
+
+run().catch(console.error);
+
+// scripts/find-js-imports.ts
+// (Script semplificato)
+import { promises as fs } from 'fs';
+import path from 'path';
+import { glob } from 'glob';
+
+async function findJsImports(dir: string): Promise<string[]> {
+  const tsFiles = await glob(`${dir}/**/*.{ts,tsx}`, { ignore: 'node_modules/**' });
+  const jsImports: string[] = [];
+  const importRegex = /import .* from\s+['"](.*\.js)['"]/g; // Regex per import da .js
+
+  for (const file of tsFiles) {
+    try {
+      const content = await fs.readFile(file, 'utf-8');
+      let match;
+      while ((match = importRegex.exec(content)) !== null) {
+        jsImports.push(`File: ${file}, Import: ${match[1]}`);
+      }
+    } catch (err) {
+      console.error(`Errore leggendo ${file}:`, err);
+    }
+  }
+  return jsImports;
+}
+
+async function run() {
+  const targetDirectory = process.argv[2] || 'src';
+  console.log(`Ricerca import '.js' in ${path.resolve(targetDirectory)}...`);
+  const imports = await findJsImports(targetDirectory);
+
+  if (imports.length > 0) {
+    console.log(`Trovati ${imports.length} import da file .js:`);
+    imports.forEach(imp => console.log(`- ${imp}`));
+     await fs.appendFile('docs/refactoring-progress.md', `\n- JS Imports count: ${imports.length} (${new Date().toISOString()})`);
+  } else {
+    console.log("Nessun import da file .js trovato.");
+     await fs.appendFile('docs/refactoring-progress.md', `\n- JS Imports count: 0 (${new Date().toISOString()})`);
+  }
+}
+
+run().catch(console.error);
+

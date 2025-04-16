@@ -57,6 +57,6 @@ export interface NavigationParams {
   mode?: NavigationMode;
   options?: NavigationOptions;
   includeContent?: boolean;
-  includeMetadata?: boolean;
+  includeProviderFields?: boolean;
   format?: NavigationFormat;
 }

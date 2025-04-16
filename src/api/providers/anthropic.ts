@@ -1,7 +1,7 @@
 import { Anthropic } from '@anthropic-ai/sdk';
 import { Stream as AnthropicStream } from '@anthropic-ai/sdk/streaming';
 import { ApiHandler } from '../index';
-import { ApiHandlerOptions, ModelInfo } from '../../shared/types/api.types';
+import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';
 import { anthropicDefaultModelId, AnthropicModelId, anthropicModels } from '../../shared/api.ts';
 import { ApiStream, ApiStreamChunk } from '../transform/stream';
 import { MessageParam } from '../MessageParam';

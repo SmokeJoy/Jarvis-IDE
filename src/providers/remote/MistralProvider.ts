@@ -4,7 +4,7 @@
  */
 
 import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 interface MistralChatRequest {
   model: string;
@@ -254,7 +254,9 @@ export class MistralProvider extends BaseLLMProvider {
   protected formatMessages(messages: LLMMessage[]): MistralChatRequest {
     return {
       model: 'mistral-large-latest', // Sarà sovrascritto dalle opzioni
-      messages: messages.map((m) => (createSafeMessage({role: m.role, content: m.content}))),
+      messages: messages.map((m) => (createChatMessage({role: m.role, content: m.content,
+          timestamp: Date.now()
+    }))),
     };
   }
 }

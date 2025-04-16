@@ -13,41 +13,35 @@ import { DIFF_VIEW_URI_SCHEME } from './integrations/editor/DiffViewProvider';
 import assert from 'node:assert';
 import { v4 as uuidv4 } from 'uuid';
 import { TelemetryService } from './services/TelemetryService';
-import path from 'path';
+import * as path from 'path';
 import { registerSystemPromptCommands } from './commands/systemPrompt';
 import { registerAgentCommands } from './commands/agentCommands';
 import { registerExportCommands } from './commands/exportCommands';
 import { LLMProviderId } from './shared/types/api.types';
-import { registerTestCommand } from './services/mcp/test-script';
-import { logger } from './utils/logger';
-import { LogLevel } from './types/global';
-import { initLogFile } from './utils/logStorage';
-import { exportCurrentLog, openLogDirectory } from './utils/logExport';
-import { castAs } from './shared/types/webview.types';
-
-// Importazioni di tipo, lasciare così
-import { OpenRouterHandler } from './api/providers/openrouter';
-import { WebviewMessage, WebviewMessageType, ExtensionMessage } from './shared/types/webview.types';
+import { LogLevel } from './shared/types/global';
+import { ModelInfo } from './shared/types/api.types';
+import { TaskQueueService } from './services/TaskQueueService';
+import { isDevelopmentMode } from './utils/environment';
+import { ChatMessage } from './shared/types/chat.types';
+import {
+  WebviewMessage,
+  WebviewMessageType,
+  ExtensionMessage,
+} from './shared/ExtensionMessage';
+import { createChatMessage as createChatMessage } from './shared/types/chat.types';
+import {
+  OpenRouterHandler,
+} from './api/providers/openrouter';
 import { JarvisSettings } from './types/settings.types';
-
-// Aggiungi l'importazione del Command Center e degli agenti
 import { commandCenter } from './core/command-center';
 import { initializeAgents, terminateAgents } from './core/mas/agents';
-
-// Importazioni di tipo aggiuntive
-import { ModelInfo } from './shared/types/api.types';
+import { SettingsManager } from './services/settings/SettingsManager';
 import { JarvisAPI } from './api/JarvisAPI';
-import { ChatMessage } from './shared/types/message.types';
 import type { SettingsManager as SettingsManagerType } from './types/settings.types';
-
-// Importa il provider per il refactoring overlay
 import { RefactorOverlayProvider } from './integrations/refactor/RefactorOverlayProvider';
 
-// Importa il nuovo adapter per la creazione di messaggi sicuri
-import { createSafeMessage } from './shared/types/message-adapter';
-
 // Definizione della modalità sviluppo
-const isDevelopmentMode = process.env['NODE_ENV'] === 'development';
+const isDevelopment = isDevelopmentMode();
 
 // Interfacce per i moduli dinamici
 interface ChatHistoryModule {
@@ -87,7 +81,6 @@ let saveChatMessage: ChatHistoryModule['saveChatMessage'];
 let loadChatHistory: ChatHistoryModule['loadChatHistory'];
 let clearChatHistory: ChatHistoryModule['clearChatHistory'];
 let loadModels: ModelLoaderModule['loadModels'];
-let SettingsManagerInstance: SettingsManagerModule['SettingsManager'];
 let exportChatToMarkdown: ExportChatModule['exportChatToMarkdown'];
 let createJarvisAPI: ExportsModule['createJarvisAPI'];
 
@@ -101,9 +94,6 @@ async function loadDynamicModules() {
 
     const modelLoaderModule = await import('./data/modelLoader.js');
     loadModels = modelLoaderModule.loadModels;
-
-    const settingsManagerModule = await import('./services/settings/SettingsManager.js');
-    SettingsManagerInstance = settingsManagerModule.SettingsManager;
 
     const exportChatModule = await import('./utils/exportChat.js');
     exportChatToMarkdown = exportChatModule.exportChatToMarkdown;
@@ -158,7 +148,7 @@ async function handleSettingsUpdate(
 ): Promise<void> {
   try {
     // Ottieni il SettingsManager
-    const settingsManager = SettingsManagerInstance.getInstance();
+    const settingsManager = SettingsManager.getInstance();
 
     // Recupera le impostazioni correnti
     const currentSettings = settingsManager.getSettings();
@@ -218,7 +208,7 @@ async function handleSettingsUpdate(
 async function handleGetSettings(panel: vscode.WebviewPanel): Promise<void> {
   try {
     // Ottieni il SettingsManager
-    const settingsManager = SettingsManagerInstance.getInstance();
+    const settingsManager = SettingsManager.getInstance();
 
     // Carica le impostazioni dal disco
     const settings = settingsManager.getSettings();
@@ -262,7 +252,7 @@ async function handleGetSettings(panel: vscode.WebviewPanel): Promise<void> {
 async function handleGetPromptProfiles(panel: vscode.WebviewPanel): Promise<void> {
   try {
     // Ottieni il SettingsManager
-    const settingsManager = SettingsManagerInstance.getInstance();
+    const settingsManager = SettingsManager.getInstance();
 
     // Ottieni tutti i profili di prompt
     const profiles = settingsManager.getPromptProfiles();
@@ -298,7 +288,7 @@ async function handleCreatePromptProfile(
     }
 
     // Ottieni il SettingsManager
-    const settingsManager = SettingsManagerInstance.getInstance();
+    const settingsManager = SettingsManager.getInstance();
 
     // Crea il nuovo profilo
     const newProfile = await settingsManager.createPromptProfile(message.payload['profile']);
@@ -333,7 +323,7 @@ async function handleUpdatePromptProfile(
     }
 
     // Ottieni il SettingsManager
-    const settingsManager = SettingsManagerInstance.getInstance();
+    const settingsManager = SettingsManager.getInstance();
 
     // Aggiorna il profilo esistente
     const updatedProfile = await settingsManager.updatePromptProfile(
@@ -371,7 +361,7 @@ async function handleDeletePromptProfile(
     }
 
     // Ottieni il SettingsManager
-    const settingsManager = SettingsManagerInstance.getInstance();
+    const settingsManager = SettingsManager.getInstance();
 
     // Elimina il profilo
     await settingsManager.deletePromptProfile(message.payload['profileId']);
@@ -410,7 +400,7 @@ async function handleSwitchPromptProfile(
     }
 
     // Ottieni il SettingsManager
-    const settingsManager = SettingsManagerInstance.getInstance();
+    const settingsManager = SettingsManager.getInstance();
 
     // Imposta il profilo attivo
     const activeProfile = await settingsManager.setActivePromptProfile(
@@ -510,7 +500,7 @@ export async function activate(context: vscode.ExtensionContext) {
   }, 3000);
 
   // Inizializza il SettingsManager
-  const settingsManager = SettingsManagerInstance.getInstance(context);
+  const settingsManager = SettingsManager.getInstance(context);
 
   // Carica le impostazioni dal disco
   await settingsManager.loadSettings();
@@ -551,7 +541,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   provider = new JarvisProvider(context, outputChannel, settings);
 
-  vscode.commands.executeCommand('setContext', 'jarvis-ide.isDevMode', isDevelopmentMode);
+  vscode.commands.executeCommand('setContext', 'jarvis-ide.isDevMode', isDevelopment);
 
   // Registra i comandi del system prompt
   registerSystemPromptCommands(context, provider);
@@ -568,7 +558,7 @@ export async function activate(context: vscode.ExtensionContext) {
   registerMasCommands(context, provider);
 
   // Registra il comando di test per McpDispatcher (solo in modalità sviluppo)
-  if (isDevelopmentMode) {
+  if (isDevelopment) {
     registerTestCommand(context);
     logger.info('Comando di test McpDispatcher registrato');
   }
@@ -704,7 +694,7 @@ export async function activate(context: vscode.ExtensionContext) {
           break;
         case WebviewMessageType.SAVE_SETTINGS:
           if (message.payload) {
-            const settingsManager = SettingsManagerInstance.getInstance();
+            const settingsManager = SettingsManager.getInstance();
             settingsManager.saveSettings({
               apiConfiguration: message.payload.apiConfiguration,
               telemetrySetting: { enabled: message.payload.telemetryEnabled ? true : false },
@@ -714,7 +704,7 @@ export async function activate(context: vscode.ExtensionContext) {
           }
           break;
         case WebviewMessageType.RESET_SETTINGS:
-          SettingsManagerInstance.getInstance().resetSettings();
+          SettingsManager.getInstance().resetSettings();
           break;
         case WebviewMessageType.GET_PROMPT_PROFILES:
           await handleGetPromptProfiles(panel);
@@ -749,7 +739,7 @@ export async function activate(context: vscode.ExtensionContext) {
             .then(async (uri) => {
               if (uri) {
                 try {
-                  await SettingsManagerInstance.getInstance().exportToFile(uri.fsPath);
+                  await SettingsManager.getInstance().exportToFile(uri.fsPath);
                   vscode.window.showInformationMessage('Impostazioni esportate con successo!');
                 } catch (error) {
                   vscode.window.showErrorMessage(
@@ -769,10 +759,10 @@ export async function activate(context: vscode.ExtensionContext) {
             .then(async (uris) => {
               if (uris && uris[0]) {
                 try {
-                  await SettingsManagerInstance.getInstance().importFromFile(uris[0].fsPath);
+                  await SettingsManager.getInstance().importFromFile(uris[0].fsPath);
                   vscode.window.showInformationMessage('Impostazioni importate con successo!');
                   // Ricarica le impostazioni nella WebView
-                  const savedSettings = await SettingsManagerInstance.getInstance().loadSettings();
+                  const savedSettings = await SettingsManager.getInstance().loadSettings();
                   if (savedSettings) {
                     const visibleProvider = JarvisProvider.getVisibleInstance();
                     if (visibleProvider) {
@@ -817,7 +807,7 @@ export async function activate(context: vscode.ExtensionContext) {
             });
 
             // Crea il messaggio utente
-            const userMessage = createSafeMessage('user', prompt, {
+            const userMessage = createChatMessage('user', prompt, {
               id: uuidv4(),
               streaming: false
             });
@@ -838,7 +828,7 @@ export async function activate(context: vscode.ExtensionContext) {
             );
 
             // Crea il messaggio assistente per lo streaming
-            const assistantMessage = createSafeMessage('assistant', '', {
+            const assistantMessage = createChatMessage('assistant', '', {
               id: uuidv4(),
               streaming: true
             });
@@ -846,7 +836,9 @@ export async function activate(context: vscode.ExtensionContext) {
             // Inizia lo streaming della risposta
             let fullResponse = '';
             const messageGenerator = openRouterHandler.createMessage(prompt, [
-              createSafeMessage({role: 'user', content: prompt}),
+              createChatMessage({role: 'user', content: prompt,
+                  timestamp: Date.now()
+            }),
             ]);
 
             for await (const chunk of messageGenerator) {
@@ -1132,7 +1124,7 @@ ${fileContent}
   context.subscriptions.push(vscode.window.registerUriHandler({ handleUri }));
 
   // Register size testing commands in development mode
-  if (isDevelopmentMode) {
+  if (isDevelopment) {
     // Use dynamic import to avoid loading the module in production
     import('./dev/commands/tasks')
       .then((module) => {

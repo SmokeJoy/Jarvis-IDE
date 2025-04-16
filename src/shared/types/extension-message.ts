@@ -1,4 +1,4 @@
-import { BaseMessage } from './message';
+import type { WebviewMessage } from './webview.types';
 
 export enum ExtensionMessageType {
   REQUEST_STATUS = 'requestStatus',
@@ -8,53 +8,82 @@ export enum ExtensionMessageType {
   ERROR = 'error',
 }
 
-export interface ExtensionMessage<T extends ExtensionMessageType> extends BaseMessage<T> {
-  payload: T extends ExtensionMessageType.REQUEST_STATUS
-    ? void
-    : T extends ExtensionMessageType.STATUS_UPDATED
-      ? {
-          status: {
-            isEnabled: boolean;
-            currentStrategy: string;
-            lastSwitch: number;
-            reason?: string;
-          };
-          providers: Array<{
-            name: string;
-            priority: number;
-            lastUsed: number;
-            successCount: number;
-            failureCount: number;
-          }>;
-        }
-      : T extends ExtensionMessageType.REQUEST_CONFIG
-        ? void
-        : T extends ExtensionMessageType.CONFIG_UPDATED
-          ? {
-              config: {
-                strategy: string;
-                maxRetries: number;
-                retryDelay: number;
-                successThreshold: number;
-                failureThreshold: number;
-                blacklistDuration: number;
-              };
-              lastUpdated: number;
-            }
-          : T extends ExtensionMessageType.ERROR
-            ? {
-                error: string;
-              }
-            : never;
+export interface RequestStatusMessage extends WebviewMessage<ExtensionMessageType.REQUEST_STATUS, {}> {
+  type: ExtensionMessageType.REQUEST_STATUS;
+  payload: {};
 }
 
-export type ExtensionMessageUnion = {
-  [K in ExtensionMessageType]: ExtensionMessage<K>;
-}[ExtensionMessageType];
-
-export function createExtensionMessage<T extends ExtensionMessageType>(
-  type: T,
-  payload: ExtensionMessage<T>['payload']
-): ExtensionMessage<T> {
-  return { type, payload } as ExtensionMessage<T>;
+export interface StatusUpdatedMessage extends WebviewMessage<ExtensionMessageType.STATUS_UPDATED, {
+  status: {
+    isEnabled: boolean;
+    currentStrategy: string;
+    lastSwitch: number;
+    reason?: string;
+  };
+  providers: Array<{
+    name: string;
+    priority: number;
+    lastUsed: number;
+    successCount: number;
+    failureCount: number;
+  }>;
+}> {
+  type: ExtensionMessageType.STATUS_UPDATED;
+  payload: {
+    status: {
+      isEnabled: boolean;
+      currentStrategy: string;
+      lastSwitch: number;
+      reason?: string;
+    };
+    providers: Array<{
+      name: string;
+      priority: number;
+      lastUsed: number;
+      successCount: number;
+      failureCount: number;
+    }>;
+  };
 }
+
+export interface RequestConfigMessage extends WebviewMessage<ExtensionMessageType.REQUEST_CONFIG, {}> {
+  type: ExtensionMessageType.REQUEST_CONFIG;
+  payload: {};
+}
+
+export interface ConfigUpdatedMessage extends WebviewMessage<ExtensionMessageType.CONFIG_UPDATED, {
+  config: {
+    strategy: string;
+    maxRetries: number;
+    retryDelay: number;
+    successThreshold: number;
+    failureThreshold: number;
+    blacklistDuration: number;
+  };
+  lastUpdated: number;
+}> {
+  type: ExtensionMessageType.CONFIG_UPDATED;
+  payload: {
+    config: {
+      strategy: string;
+      maxRetries: number;
+      retryDelay: number;
+      successThreshold: number;
+      failureThreshold: number;
+      blacklistDuration: number;
+    };
+    lastUpdated: number;
+  };
+}
+
+export interface ExtensionErrorMessage extends WebviewMessage<ExtensionMessageType.ERROR, { error: string }> {
+  type: ExtensionMessageType.ERROR;
+  payload: { error: string };
+}
+
+export type ExtensionMessageUnion =
+  | RequestStatusMessage
+  | StatusUpdatedMessage
+  | RequestConfigMessage
+  | ConfigUpdatedMessage
+  | ExtensionErrorMessage;

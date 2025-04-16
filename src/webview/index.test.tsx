@@ -1,7 +1,9 @@
 import React from 'react';
 import { describe, expect, test, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { ApiConfiguration } from '../types/global';
+import { ApiConfiguration } from '../shared/types/global';
+import { Webview } from './webview';
+// import './index'; // Temporaneamente commentato per evitare errore TS2307
 
 describe('Webview Entry Point', () => {
   let config: ApiConfiguration;

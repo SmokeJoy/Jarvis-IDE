@@ -20,10 +20,9 @@
 .chat-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  padding: 1rem;
-  background-color: var(--vscode-editor-background);
-  color: var(--vscode-editor-foreground);
+  height: 100vh;
+  background-color: var(--vscode-sideBar-background);
+  color: var(--vscode-sideBar-foreground);
 }
 
 .messages-container {
@@ -43,13 +42,14 @@
 
 .message.user {
   align-self: flex-end;
-  background-color: var(--vscode-button-background);
-  color: var(--vscode-button-foreground);
+  background-color: var(--vscode-inputOption-activeBackground);
+  border: 1px solid var(--vscode-inputOption-activeBorder);
 }
 
 .message.assistant {
   align-self: flex-start;
-  background-color: var(--vscode-editor-inactiveSelectionBackground);
+  background-color: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border);
 }
 
 .message-header {
@@ -63,6 +63,52 @@
 .message-content {
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.code-block {
+  margin: 8px 0;
+  background-color: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-editorWidget-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  background-color: var(--vscode-editorLineNumber-activeForeground);
+}
+
+.language-tag {
+  font-size: 0.8em;
+  color: var(--vscode-descriptionForeground);
+}
+
+.copy-button {
+  background: none;
+  border: none;
+  color: var(--vscode-button-foreground);
+  cursor: pointer;
+  padding: 4px;
+  transition: opacity 0.2s ease;
+}
+
+.copy-button:hover {
+  opacity: 0.8;
+}
+
+pre {
+  margin: 0;
+  padding: 12px;
+  overflow-x: auto;
+}
+
+code {
+  font-family: var(--vscode-editor-font-family);
+  font-size: 0.9em;
+  color: var(--vscode-editor-foreground);
 }
 
 .input-container {
@@ -137,4 +183,4 @@ button:disabled {
 
 .chat-actions button:active {
   background: var(--vscode-button-activeBackground);
-} 
+}

@@ -3,7 +3,7 @@
  * @description Registro dei provider LLM
  */
 
-import { LLMProviderId } from '../../types/global';
+import { LLMProviderId } from '../../src/shared/types/global';
 import { ApiProvider, ProviderOptions } from '../../../api/provider/base';
 import { OpenAIProvider } from '../../../api/provider/openai';
 import { OpenRouterProvider } from '../../../api/provider/openrouter';

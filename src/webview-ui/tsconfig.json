@@ -6,7 +6,7 @@
     "baseUrl": ".",
     "jsx": "react-jsx",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "types": ["vscode-webview", "node"],
+    "types": ["vscode-webview", "node", "vitest", "@testing-library/jest-dom"],
     "moduleResolution": "bundler",
     "paths": {
       "@/*": ["src/*"],
@@ -18,5 +18,6 @@
     }
   },
   "include": ["src/**/*"],
-  "exclude": ["**/*.test.ts", "**/*.test.tsx"]
+  // Remove exclude for test files to allow TS checking
+  // "exclude": ["**/*.test.ts", "**/*.test.tsx"]
 } 

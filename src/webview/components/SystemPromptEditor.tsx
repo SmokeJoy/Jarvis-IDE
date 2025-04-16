@@ -19,9 +19,12 @@ export const SystemPromptEditor: React.FC = () => {
     // Listener per i messaggi dal backend
     const messageListener = (event: MessageEvent<ExtensionMessage>) => {
       const message = event.data;
-      if (message.type === 'systemPromptLoaded') {
-        setPromptContent(message.content);
-        setFilePath(message.filePath);
+      if (message.payload && typeof message.payload === 'object' && 'promptContent' in message.payload) {
+        setPromptContent((message.payload as any).promptContent);
+      }
+
+      if (message.filePaths && message.filePaths.length > 0) {
+        setFilePath(message.filePaths[0]);
       }
     };
 
@@ -108,7 +111,9 @@ export const SystemPromptEditor: React.FC = () => {
             <TabsTrigger value="source">Sorgente</TabsTrigger>
           </TabsList>
           <TabsContent value="preview" className="h-64 overflow-auto bg-slate-900 p-3 rounded">
-            <ReactMarkdown className="prose prose-invert">{promptContent}</ReactMarkdown>
+            <div className="mt-2 text-sm text-gray-400 overflow-auto max-h-32 prose prose-invert">
+              <ReactMarkdown>{promptContent}</ReactMarkdown>
+            </div>
           </TabsContent>
           <TabsContent
             value="source"

@@ -1,15 +1,14 @@
 import OpenAI from 'openai';
-import { ApiHandlerOptions, ModelInfo } from '../../shared/types/api.types';
+import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';
 import { SambanovaModelId, sambanovaDefaultModelId, sambanovaModels } from '../../shared/api';
 import { ApiHandler } from '../index';
 import { convertToOpenAiMessages } from '../transform/openai-format';
-import { ApiStream, ApiStreamChunk } from '../../shared/types/api.types';
+import { ApiStream, ApiStreamChunk } from '../../src/shared/types/api.types';
 import { convertToR1Format } from '../transform/r1-format';
-import { ChatMessage } from '../../types/chat.types';
+import { ChatMessage, createChatMessage } from '../../src/shared/types/chat.types';
 import { ChatCompletionMessageParam } from '../../types/provider-types/openai-types';
-import { createSafeMessage } from '../../shared/types/message';
 import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider';
-import { LLMProviderId } from '../../shared/types/llm.types';
+import { LLMProviderId } from '../../src/shared/types/providers.types';
 
 export class SambanovaHandler extends BaseLLMProvider {
   readonly provider = LLMProviderId.SambaNova;
@@ -39,7 +38,9 @@ export class SambanovaHandler extends BaseLLMProvider {
         const model = this.getModel();
 
         let openAiMessages: ChatCompletionMessageParam[] = [
-          createSafeMessage({role: 'system', content: systemPrompt}),
+          createChatMessage({role: 'system', content: systemPrompt,
+              timestamp: Date.now()
+        }),
           ...convertToOpenAiMessages(messages),
         ];
 
@@ -47,7 +48,9 @@ export class SambanovaHandler extends BaseLLMProvider {
 
         if (modelId.includes('deepseek') || modelId.includes('qwen') || modelId.includes('qwq')) {
           openAiMessages = convertToR1Format([
-            createSafeMessage({role: 'user', content: systemPrompt}),
+            createChatMessage({role: 'user', content: systemPrompt,
+                timestamp: Date.now()
+            }),
             ...messages,
           ]);
         }

@@ -11,7 +11,7 @@ import {
   ImageContent,
   ToolUseContent,
   ToolResultContent,
-} from '../../types/chat.types';
+} from '../../src/shared/types/chat.types';
 import {
   AnthropicMessage,
   AnthropicMessageOptions,
@@ -27,7 +27,7 @@ import {
 } from '../../types/provider-types/anthropic-types';
 import { BaseTransformer, TokenUsage, BaseRequestOptions, ContentUtils } from './BaseTransformer';
 import { logger } from '../../utils/logger';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 /**
  * Transformer per convertire tra il formato ChatMessage standard e il formato Anthropic
@@ -256,7 +256,7 @@ export class AnthropicTransformer
    */
   fromLLMResponse(response: AnthropicMessageResponse): ChatMessage {
     if (!response || !response.content || !Array.isArray(response.content)) {
-      return createSafeMessage({role: 'assistant', content: '', timestamp: new Date().toISOString()});
+      return createChatMessage({role: 'assistant', content: '', timestamp: new Date().toISOString()});
     }
 
     // Converti i content block Anthropic in ContentPart
@@ -316,7 +316,7 @@ export class AnthropicTransformer
     const tokenUsage = this.extractTokenUsage(response);
 
     // Crea l'oggetto ChatMessage
-    return createSafeMessage({role: 'assistant', content: contentParts, timestamp: new Date().toISOString(), providerFields: {
+    return createChatMessage({role: 'assistant', content: contentParts, timestamp: new Date().toISOString(), providerFields: {
                             id: response.id,
                             model: response.model,
                             stopReason: response.stop_reason,

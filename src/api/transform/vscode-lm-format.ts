@@ -12,7 +12,7 @@ import {
   isImageBlock,
   isToolUseBlock,
   isToolResultBlock,
-} from '../../types/chat.types';
+} from '../../src/shared/types/chat.types';
 
 /**
  * Safely converts a value into a plain object.

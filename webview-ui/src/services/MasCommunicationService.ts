@@ -119,7 +119,8 @@ export class MasCommunicationService {
    */
   public requestAgentsStatus(): void {
     const message: GetAgentsStatusMessage = {
-      type: MasMessageType.GET_AGENTS_STATUS
+      type: MasMessageType.GET_AGENTS_STATUS,
+      payload: {}
     };
     
     this.sendTypeSafeMessage(message);
@@ -130,7 +131,8 @@ export class MasCommunicationService {
    */
   public requestTaskQueueStatus(): void {
     const message: GetTaskQueueStatusMessage = {
-      type: MasMessageType.GET_TASK_QUEUE_STATUS
+      type: MasMessageType.GET_TASK_QUEUE_STATUS,
+      payload: {}
     };
     
     this.sendTypeSafeMessage(message);
@@ -141,7 +143,8 @@ export class MasCommunicationService {
    */
   public abortCurrentCoderInstruction(): void {
     const message: AbortCoderInstructionMessage = {
-      type: MasMessageType.ABORT_CODER_INSTRUCTION
+      type: MasMessageType.ABORT_CODER_INSTRUCTION,
+      payload: {}
     };
     
     this.sendTypeSafeMessage(message);
@@ -233,7 +236,8 @@ export class MasCommunicationService {
    */
   public requestMasConfiguration(): void {
     const message: GetMasConfigurationMessage = {
-      type: MasMessageType.GET_MAS_CONFIGURATION
+      type: MasMessageType.GET_MAS_CONFIGURATION,
+      payload: {}
     };
     
     this.sendTypeSafeMessage(message);

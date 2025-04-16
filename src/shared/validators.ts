@@ -11,7 +11,7 @@ import { ChatSettings, ApiConfiguration } from '../types/extension';
 import { Logger } from './logger';
 import { ChatSession } from './types/session';
 import { isChatSession } from './types/session';
-import { OpenRouterModelInfo } from './types/api.types';
+import { OpenRouterModelInfo } from '../src/shared/types/api.types';
 
 // Usa require per importare gli schemi JSON
 // (assicurati che i path siano corretti rispetto a dove verranno generati)

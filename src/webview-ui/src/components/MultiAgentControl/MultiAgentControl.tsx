@@ -2,26 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { useExtensionMessage } from '../../hooks/useExtensionMessage';
 import { useExtensionState } from '../../context/ExtensionStateContext';
 import {
+  type MultiAgentMessage,
   MultiAgentMessageType,
-  MultiAgentMessageUnion,
 } from '../../../../webview/messages/multi-agent-message';
 import {
-  isAgentStatusUpdatedMessage,
-  isAgentErrorMessage,
+  isAgentStatusUpdateMessage,
 } from '../../../../webview/messages/multi-agent-message-guards';
 
 export const MultiAgentControl = () => {
   const [agents, setAgents] = useState<Array<{ id: string; name: string; active: boolean }>>([]);
   const [error, setError] = useState<string>('');
 
-  const { postMessage, onMessage } = useExtensionMessage<MultiAgentMessageUnion>();
+  const { postMessage, onMessage } = useExtensionMessage<MultiAgentMessage>();
   const { state } = useExtensionState();
 
   useEffect(() => {
     postMessage({ type: MultiAgentMessageType.REQUEST_AGENT_STATUS });
 
-    const unsubscribe = onMessage((message) => {
-      if (isAgentStatusUpdatedMessage(message)) {
+    const unsubscribe = onMessage((message: MultiAgentMessage) => {
+      if (isAgentStatusUpdateMessage(message)) {
         setAgents(message.payload.agents);
         setError('');
       } else if (isAgentErrorMessage(message)) {

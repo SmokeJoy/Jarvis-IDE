@@ -1,6 +1,10 @@
 import React, { useMemo } from 'react';
 import { useAgentFlow } from '../../../context/AgentFlowContext';
 import './styles.css';
+import { useEffect, useRef } from 'react';
+import { useAgentTypingState } from '../../../hooks/useAgentTypingState';
+import { AgentBadge } from '../../chat/badges/AgentBadge';
+import { useAgentEventBus } from '../../../context/AgentFlowContext';
 
 interface AgentFlowTimelineProps {
   filters: {
@@ -17,6 +21,8 @@ interface AgentFlowTimelineProps {
  */
 const AgentFlowTimeline: React.FC<AgentFlowTimelineProps> = ({ filters }) => {
   const { flowData, loading } = useAgentFlow();
+  const agentEventBus = useAgentEventBus && useAgentEventBus();
+  const typing = useAgentTypingState(agentEventBus);
 
   // Filtra e ordina le interazioni in base ai filtri e al timestamp
   const timelineEvents = useMemo(() => {
@@ -124,14 +130,16 @@ const AgentFlowTimeline: React.FC<AgentFlowTimelineProps> = ({ filters }) => {
   return (
     <div className="agentflowdebugger-timeline-container">
       <h3>Cronologia</h3>
-      
       <div className="agentflowdebugger-timeline">
         {timelineEvents.map((interaction, index) => {
           const sourceAgent = flowData.agents.find(agent => agent.id === interaction.sourceId);
           const targetAgent = flowData.agents.find(agent => agent.id === interaction.targetId);
           const previousTimestamp = index > 0 ? timelineEvents[index - 1].timestamp : null;
           const relativeTime = calculateRelativeTime(interaction.timestamp, previousTimestamp);
-          
+
+          const typingSource = typing?.[interaction.threadId]?.[interaction.sourceId];
+          const typingTarget = typing?.[interaction.threadId]?.[interaction.targetId];
+
           return (
             <div 
               key={interaction.id} 
@@ -147,33 +155,28 @@ const AgentFlowTimeline: React.FC<AgentFlowTimelineProps> = ({ filters }) => {
                   </div>
                 )}
               </div>
-              
               <div 
                 className="agentflowdebugger-timeline-type-indicator"
                 style={{ backgroundColor: getInteractionTypeColor(interaction.type) }}
               />
-              
               <div className="agentflowdebugger-timeline-content">
                 <div className="agentflowdebugger-timeline-header">
                   <span className="agentflowdebugger-timeline-agents">
                     <span className="agentflowdebugger-timeline-agent source">
-                      {sourceAgent?.name || interaction.sourceId}
+                      <AgentBadge agentId={sourceAgent?.id || interaction.sourceId} isTyping={!!typingSource} />
                     </span>
                     {" → "}
                     <span className="agentflowdebugger-timeline-agent target">
-                      {targetAgent?.name || interaction.targetId}
+                      <AgentBadge agentId={targetAgent?.id || interaction.targetId} isTyping={!!typingTarget} />
                     </span>
                   </span>
-                  
                   <span className="agentflowdebugger-timeline-type">
                     {interaction.type}
                   </span>
                 </div>
-                
                 <div className="agentflowdebugger-timeline-label">
                   {interaction.label}
                 </div>
-                
                 {interaction.content && (
                   <div className="agentflowdebugger-timeline-message">
                     <pre>{interaction.content}</pre>
@@ -188,4 +191,4 @@ const AgentFlowTimeline: React.FC<AgentFlowTimelineProps> = ({ filters }) => {
   );
 };
 
-export default AgentFlowTimeline; 
+export default AgentFlowTimeline;

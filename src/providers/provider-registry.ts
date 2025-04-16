@@ -7,24 +7,10 @@
  */
 
 import { logger } from '../utils/logger';
-
-/**
- * Identificatore univoco per un provider LLM
- * Elenco ufficiale dei provider supportati dall'orchestratore
- */
-export type LLMProviderId =
-  | 'openai'
-  | 'openrouter'
-  | 'ollama'
-  | 'anthropic'
-  | 'mistral'
-  | 'google'
-  | 'cohere'
-  | 'mock'
-  | 'mock1'
-  | 'mock2'
-  | 'invalid'
-  | 'non-existent';
+import type { LLMProviderHandler, LLMProviderId } from '@shared/types/llm.types';
+import { OpenAIProvider } from './remote/OpenAIProvider';
+import { JarvisProvider } from './remote/JarvisProvider';
+import { OpenRouterProvider } from './remote/OpenRouterProvider';
 
 /**
  * Interfaccia base per tutti i parametri di configurazione dei provider
@@ -220,241 +206,32 @@ export function validateObject(obj: Record<string, any>, rules: ValidationRules)
   return true;
 }
 
-/**
- * Classe che implementa il registry dei provider LLM
- */
-export class LLMProviderRegistry {
-  private static instance: LLMProviderRegistry = new LLMProviderRegistry();
-  private providers: Map<LLMProviderId, LLMProviderHandler> = new Map();
-  private defaultProviderId: LLMProviderId | null = null;
+// Registry centralizzato type-safe
+const registry = new Map<LLMProviderId, LLMProviderHandler>();
 
-  private constructor() {
-    // Singleton
-  }
+// Provider di default
+registry.set('openai', OpenAIProvider);
+registry.set('jarvis', JarvisProvider);
+registry.set('openrouter', OpenRouterProvider);
 
-  /**
-   * Registra un provider nel registry
-   * @param id Identificatore del provider
-   * @param handler Implementazione del provider
-   * @param setAsDefault Imposta come provider predefinito
-   * @returns true se il provider è stato registrato con successo
-   */
-  static registerProvider(
-    id: LLMProviderId,
-    handler: LLMProviderHandler,
-    setAsDefault: boolean = false
-  ): boolean {
-    return LLMProviderRegistry.instance.registerProvider(id, handler, setAsDefault);
-  }
-
-  private registerProvider(
-    id: LLMProviderId,
-    handler: LLMProviderHandler,
-    setAsDefault: boolean = false
-  ): boolean {
-    try {
-      this.validateProviderHandler(id, handler);
-
-      this.providers.set(id, handler);
-      logger.info(`Provider LLM registrato: ${id} (${handler.name})`);
-
-      // Imposta come default se è il primo o se richiesto
-      if (setAsDefault || this.defaultProviderId === null) {
-        this.defaultProviderId = id;
-        logger.info(`Provider predefinito impostato: ${id}`);
-      }
-
-      return true;
-    } catch (error) {
-      logger.error(`Errore durante la registrazione del provider ${id}: ${error.message}`);
-      return false;
-    }
-  }
-
-  /**
-   * Imposta un provider come predefinito
-   * @param id Identificatore del provider
-   */
-  static setDefaultProvider(id: LLMProviderId): void {
-    LLMProviderRegistry.instance.setDefaultProvider(id);
-  }
-
-  private setDefaultProvider(id: LLMProviderId): void {
-    if (!this.providers.has(id)) {
-      throw new Error(`Impossibile impostare provider default: ${id} non registrato`);
-    }
-
-    this.defaultProviderId = id;
-    logger.info(`Provider predefinito impostato: ${id}`);
-  }
-
-  /**
-   * Verifica se un provider è registrato
-   * @param id Identificatore del provider
-   * @returns true se il provider è registrato
-   */
-  static hasProvider(id: LLMProviderId): boolean {
-    return LLMProviderRegistry.instance.hasProvider(id);
-  }
-
-  private hasProvider(id: LLMProviderId): boolean {
-    return this.providers.has(id);
-  }
-
-  /**
-   * Ottiene un provider dal registry
-   * @param id Identificatore del provider
-   * @returns Istanza del provider
-   * @throws Error se il provider non è registrato
-   */
-  static getProvider(id: LLMProviderId): LLMProviderHandler {
-    return LLMProviderRegistry.instance.getProvider(id);
-  }
-
-  private getProvider(id: LLMProviderId): LLMProviderHandler {
-    if (!this.providers.has(id)) {
-      throw new Error(`Provider LLM '${id}' non trovato nel registry`);
-    }
-
-    return this.providers.get(id)!;
-  }
-
-  /**
-   * Ottiene il provider predefinito
-   * @returns Provider predefinito
-   * @throws Error se non è stato impostato un provider predefinito
-   */
-  static getDefaultProvider(): LLMProviderHandler {
-    return LLMProviderRegistry.instance.getDefaultProvider();
-  }
-
-  private getDefaultProvider(): LLMProviderHandler {
-    if (this.defaultProviderId === null) {
-      throw new Error('Nessun provider LLM predefinito configurato');
-    }
-
-    return this.providers.get(this.defaultProviderId)!;
-  }
-
-  /**
-   * Ottiene l'id del provider predefinito
-   * @returns ID del provider predefinito o null se non impostato
-   */
-  static getDefaultProviderId(): LLMProviderId | null {
-    return LLMProviderRegistry.instance.defaultProviderId;
-  }
-
-  /**
-   * Rimuove un provider dal registry
-   * @param id Identificatore del provider
-   * @returns true se il provider è stato rimosso con successo
-   */
-  static unregisterProvider(id: LLMProviderId): boolean {
-    return LLMProviderRegistry.instance.unregisterProvider(id);
-  }
-
-  private unregisterProvider(id: LLMProviderId): boolean {
-    if (!this.providers.has(id)) {
-      return false;
-    }
-
-    this.providers.delete(id);
-    logger.info(`Provider LLM rimosso: ${id}`);
-
-    // Resetta il provider default se è quello rimosso
-    if (this.defaultProviderId === id) {
-      this.defaultProviderId = null;
-      logger.info('Provider predefinito resettato');
-    }
-
-    return true;
-  }
-
-  /**
-   * Ottiene tutti i provider registrati
-   * @returns Map con tutti i provider
-   */
-  static getAllProviders(): Map<LLMProviderId, LLMProviderHandler> {
-    return new Map(LLMProviderRegistry.instance.providers);
-  }
-
-  /**
-   * Ottiene gli ID di tutti i provider registrati
-   * @returns Array di ID dei provider
-   */
-  static getProviderIds(): LLMProviderId[] {
-    return Array.from(LLMProviderRegistry.instance.providers.keys());
-  }
-
-  /**
-   * Ottiene solo i provider disponibili
-   * @returns Map con i provider disponibili
-   */
-  static getAvailableProviders(): Map<LLMProviderId, LLMProviderHandler> {
-    const available = new Map<LLMProviderId, LLMProviderHandler>();
-
-    for (const [id, handler] of LLMProviderRegistry.instance.providers.entries()) {
-      if (handler.isAvailable) {
-        available.set(id, handler);
-      }
-    }
-
-    return available;
-  }
-
-  /**
-   * Valida un provider prima della registrazione
-   * @param id ID del provider
-   * @param handler Istanza del provider
-   * @throws Error se il provider non è valido
-   */
-  private validateProviderHandler(id: LLMProviderId, handler: LLMProviderHandler): void {
-    // Verifica proprietà obbligatorie
-    if (!handler.name || handler.name.trim() === '') {
-      throw new Error(`Provider ${id} invalido: proprietà 'name' mancante o vuota`);
-    }
-
-    // Verifica metodi obbligatori
-    if (!handler.call || typeof handler.call !== 'function') {
-      throw new Error(`Provider ${id} invalido: metodo 'call' mancante`);
-    }
-
-    if (!handler.getAvailableModels || typeof handler.getAvailableModels !== 'function') {
-      throw new Error(`Provider ${id} invalido: metodo 'getAvailableModels' mancante`);
-    }
-
-    // Verifica metodi opzionali se presenti
-    if (handler.validateRequest && typeof handler.validateRequest !== 'function') {
-      throw new Error(
-        `Provider ${id} invalido: metodo 'validateRequest' presente ma non è una funzione`
-      );
-    }
-  }
-
-  /**
-   * Resetta il registry (utilizzato principalmente per i test)
-   */
-  static reset(): void {
-    LLMProviderRegistry.instance.providers.clear();
-    LLMProviderRegistry.instance.defaultProviderId = null;
-    logger.debug('Provider registry resettato');
-  }
+export function registerProvider(id: LLMProviderId, handler: LLMProviderHandler) {
+  registry.set(id, handler);
 }
 
-// Esporta le funzioni helper per interagire con il registry
-export const registerProvider = (
-  id: LLMProviderId,
-  handler: LLMProviderHandler,
-  setAsDefault: boolean = false
-): boolean => LLMProviderRegistry.registerProvider(id, handler, setAsDefault);
+export function getProvider(id: LLMProviderId): LLMProviderHandler {
+  const provider = registry.get(id);
+  if (!provider) {
+    throw new Error(`[provider-registry] Provider non registrato: ${id}`);
+  }
+  return provider;
+}
 
-export const hasProvider = (id: LLMProviderId): boolean => LLMProviderRegistry.hasProvider(id);
+export function hasProvider(id: LLMProviderId): boolean {
+  return registry.has(id);
+}
 
-export const getProvider = (id: LLMProviderId): LLMProviderHandler =>
-  LLMProviderRegistry.getProvider(id);
+export function listProviders(): LLMProviderId[] {
+  return Array.from(registry.keys()) as LLMProviderId[];
+}
 
-export const getDefaultProvider = (): LLMProviderHandler =>
-  LLMProviderRegistry.getDefaultProvider();
-
-export const unregisterProvider = (id: LLMProviderId): boolean =>
-  LLMProviderRegistry.unregisterProvider(id);
+export { registry };

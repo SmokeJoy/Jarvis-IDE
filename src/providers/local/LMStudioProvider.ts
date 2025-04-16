@@ -4,7 +4,7 @@
  */
 
 import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 interface LMStudioChatRequest {
   messages: Array<{
@@ -246,7 +246,9 @@ export class LMStudioProvider extends BaseLLMProvider {
   protected formatMessages(messages: LLMMessage[]): LMStudioChatRequest {
     // LM Studio utilizza lo stesso formato di OpenAI
     return {
-      messages: messages.map((m) => (createSafeMessage({role: m.role, content: m.content}))),
+      messages: messages.map((m) => (createChatMessage({role: m.role, content: m.content,
+          timestamp: Date.now()
+    }))),
       stream: false,
     };
   }

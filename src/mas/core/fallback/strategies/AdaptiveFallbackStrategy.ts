@@ -4,10 +4,11 @@
  */
 
 import { FallbackStrategy } from './FallbackStrategy';
-import { LLMProviderHandler, ProviderStats } from '@/mas/types/llm-provider.types';
-import { LLMEventBus, AdaptiveStrategyChangePayload } from '@/mas/types/llm-events';
+import { LLMProviderHandler, ProviderStats } from '../../types/llm-provider.types';
+import { LLMEventBus, AdaptiveStrategyChangePayload } from '../../types/llm-events';
 import { PreferredFallbackStrategy } from './PreferredFallbackStrategy';
 import { AdaptiveCondition } from './adaptive-conditions';
+import { conditionFunctions } from './adaptive-conditions';
 
 /**
  * Definisce una strategia con la sua condizione di attivazione

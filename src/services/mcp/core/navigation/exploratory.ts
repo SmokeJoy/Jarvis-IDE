@@ -15,7 +15,7 @@ export async function findExploratoryPath(
   startId: string,
   options: NavigationOptions = {},
   includeContent: boolean = false,
-  includeMetadata: boolean = false,
+  includeProviderFields: boolean = false,
   format: 'tree' | 'graph' = 'graph'
 ): Promise<{
   success: boolean;
@@ -44,7 +44,7 @@ export async function findExploratoryPath(
   // Aggiungi il nodo iniziale
   visited.add(startId);
   queue.push({ id: startId, depth: 0, score: 1 });
-  resultNodes.push(buildNodeResult(startContext, includeContent, includeMetadata));
+  resultNodes.push(buildNodeResult(startContext, includeContent, includeProviderFields));
 
   // BFS con punteggio semantico
   while (queue.length > 0) {
@@ -81,8 +81,8 @@ export async function findExploratoryPath(
         const nextContext = await getContextById(nextId);
         if (!nextContext) continue;
 
-        resultNodes.push(buildNodeResult(nextContext, includeContent, includeMetadata));
-        resultEdges.push(buildEdgeResult(link, includeMetadata));
+        resultNodes.push(buildNodeResult(nextContext, includeContent, includeProviderFields));
+        resultEdges.push(buildEdgeResult(link, includeProviderFields));
 
         queue.push({
           id: nextId,

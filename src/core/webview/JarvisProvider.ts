@@ -4,8 +4,8 @@ import * as path from 'path';
 import { promises as fs } from 'fs';
 
 // Importazioni di type necessarie raggruppate
-import { OpenAiCompatibleModelInfo } from '../../shared/types/api.types';
-import { LLMProviderId, ApiConfiguration } from '../../shared/types/api.types';
+import { OpenAiCompatibleModelInfo } from '../../src/shared/types/api.types';
+import { LLMProviderId, ApiConfiguration } from '../../src/shared/types/api.types';
 import { WebviewMessage } from '../../shared/types/webview.types';
 import { OutgoingWebviewMessage } from '../../shared/types/webview.types';
 import { ExtensionState } from '../../shared/ExtensionMessage';

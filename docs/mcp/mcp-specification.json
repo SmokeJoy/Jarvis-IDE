@@ -1,0 +1,32 @@
+{
+  "mcp_spec": {
+    "version": "1.0.0",
+    "message_formats": {
+      "context_request": {
+        "type": "object",
+        "properties": {
+          "request_id": {"type": "string"},
+          "context_type": {"type": "string"},
+          "parameters": {"type": "object"}
+        }
+      },
+      "context_response": {
+        "type": "object",
+        "properties": {
+          "request_id": {"type": "string"},
+          "content": {"type": "array", "items": {"type": "object"}},
+          "metadata": {"type": "object"}
+        }
+      }
+    },
+    "endpoints": {
+      "local_context": "/mcp/context/local",
+      "remote_context": "/mcp/context/remote",
+      "agent_coordination": "/mcp/agents/coordinate"
+    },
+    "error_handling": {
+      "retry_policy": "exponential_backoff",
+      "max_retries": 3
+    }
+  }
+}

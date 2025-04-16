@@ -2,6 +2,7 @@ import { OpenAiCompatibleModelInfo } from '../shared/types/api.types';
 import { OPENROUTER_MODELS } from './openrouterModels';
 
 import { LLMProviderId } from '../shared/types/llm.types';
+import { loadAnthropicModels } from './providers/anthropicProvider';
 
 /**
  * Tipo che rappresenta i provider di modelli supportati

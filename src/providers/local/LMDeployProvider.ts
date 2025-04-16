@@ -4,7 +4,7 @@
  */
 
 import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 interface LMDeployRequest {
   prompt: string;
@@ -227,7 +227,9 @@ export class LMDeployProvider extends BaseLLMProvider {
    */
   protected formatMessages(messages: LLMMessage[]): LMDeployChatRequest {
     return {
-      messages: messages.map((m) => (createSafeMessage({role: m.role, content: m.content}))),
+      messages: messages.map((m) => (createChatMessage({role: m.role, content: m.content,
+          timestamp: Date.now()
+    }))),
       stream: false,
     };
   }

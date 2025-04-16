@@ -4,7 +4,7 @@
  */
 
 import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 interface GroqChatRequest {
   model: string;
@@ -250,7 +250,9 @@ export class GroqProvider extends BaseLLMProvider {
   protected formatMessages(messages: LLMMessage[]): GroqChatRequest {
     return {
       model: 'llama3-70b-8192', // Sarà sovrascritto dalle opzioni
-      messages: messages.map((m) => (createSafeMessage({role: m.role, content: m.content}))),
+      messages: messages.map((m) => (createChatMessage({role: m.role, content: m.content,
+          timestamp: Date.now()
+    }))),
     };
   }
 }

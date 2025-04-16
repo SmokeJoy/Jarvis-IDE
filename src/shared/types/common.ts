@@ -11,7 +11,7 @@ export interface BaseMessage {
   /** Tipo del messaggio */
   type: string;
   /** Payload opzionale del messaggio */
-  payload?: Record<string, unknown>;
+  payload?: unknown;
 }
 
 /**
@@ -88,4 +88,15 @@ export function safeCast<T>(value: unknown, typeName: string): T | null {
   }
 
   return value as T;
+}
+
+// MessageRole: ruolo del messaggio (user, assistant, system, tool)
+export type MessageRole = 'user' | 'assistant' | 'system' | 'tool';
+
+// MessagePart: parte di un messaggio (testo, codice, immagine, ecc.)
+export interface MessagePart {
+  type: 'text' | 'code' | 'image';
+  text?: string;
+  language?: string;
+  url?: string;
 }

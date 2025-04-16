@@ -6,15 +6,19 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useExtensionMessage } from './useExtensionMessage';
-import { 
-  MasMessageType, 
-  AgentMemorySnapshotRequestMessage,
-  AgentMemorySnapshotResponseMessage,
-  AgentTaskRetryRequestMessage,
-  AgentTaskRetryResultMessage,
-  AgentMessageUnion 
-} from '../types/mas-message';
-import { isMessageOfType, isAgentMemorySnapshotResponseMessage, isAgentTaskRetryResultMessage } from '../types/mas-message-guards';
+import {
+  MasMessageType,
+  AgentMemoryRequestMessage,
+  AgentMemoryResponseMessage,
+  AgentRetryRequestMessage,
+  AgentRetryResultMessage,
+  AgentMessageUnion
+} from '@shared/types/mas-message';
+import {
+  isMessageOfType,
+  isAgentMemoryResponseMessage,
+  isAgentRetryResultMessage
+} from '@shared/types/mas-message-guards';
 
 /**
  * Interfaccia per il task dell'agente
@@ -101,25 +105,19 @@ export const useAgentMemory = ({
     (event: MessageEvent) => {
       const message = event.data;
 
-      // Verifica se il messaggio è una risposta di snapshot della memoria
-      if (isMessageOfType<AgentMemorySnapshotResponseMessage>(
-        message,
-        MasMessageType.AGENT_MEMORY_SNAPSHOT_RESPONSE
-      )) {
-        if (message.payload.agentId === agentId) {
-          setMemory(message.payload.items);
+      // Verifica se il messaggio è una risposta di memoria dell'agente
+      if (isAgentMemoryResponseMessage(message)) {
+        const payload = message.payload as AgentMemoryResponseMessage['payload'];
+        if (payload.agentId === agentId) {
+          setMemory(payload.memory);
           setIsLoading(false);
         }
       }
-      
       // Verifica se il messaggio è un risultato di retry di un task
-      else if (isMessageOfType<AgentTaskRetryResultMessage>(
-        message,
-        MasMessageType.AGENT_TASK_RETRY_RESULT
-      )) {
-        if (message.payload.agentId === agentId) {
-          const { taskId, success, result, error } = message.payload;
-          
+      else if (isAgentRetryResultMessage(message)) {
+        const payload = message.payload as AgentRetryResultMessage['payload'];
+        if (payload.agentId === agentId) {
+          const { taskId, success, result, error } = payload;
           setRetryStatus(prev => ({
             ...prev,
             [taskId]: {
@@ -130,7 +128,6 @@ export const useAgentMemory = ({
               timestamp: Date.now()
             }
           }));
-          
           // Aggiorna la memoria se il retry ha avuto successo
           if (success) {
             loadMemory();
@@ -138,7 +135,7 @@ export const useAgentMemory = ({
         }
       }
     },
-    [agentId]
+    [agentId, loadMemory]
   );
 
   /**
@@ -146,17 +143,13 @@ export const useAgentMemory = ({
    */
   const loadMemory = useCallback(() => {
     setIsLoading(true);
-    
-    // Creazione del messaggio type-safe
-    const message: AgentMemorySnapshotRequestMessage = {
-      type: MasMessageType.AGENT_MEMORY_SNAPSHOT_REQUEST,
+    const message: AgentMemoryRequestMessage = {
+      type: MasMessageType.AGENT_MEMORY_REQUEST,
       payload: {
         agentId,
         limit
       }
     };
-    
-    // Invio del messaggio tramite il dispatcher type-safe
     postMessage<AgentMessageUnion>(message);
   }, [agentId, limit, postMessage]);
 
@@ -165,7 +158,6 @@ export const useAgentMemory = ({
    */
   const retryTask = useCallback(
     (taskId: string, params?: RetryParams) => {
-      // Marca il task come "in corso di retry"
       setRetryStatus(prev => ({
         ...prev,
         [taskId]: {
@@ -173,10 +165,8 @@ export const useAgentMemory = ({
           timestamp: Date.now()
         }
       }));
-      
-      // Creazione del messaggio type-safe
-      const message: AgentTaskRetryRequestMessage = {
-        type: MasMessageType.AGENT_TASK_RETRY_REQUEST,
+      const message: AgentRetryRequestMessage = {
+        type: MasMessageType.AGENT_RETRY_REQUEST,
         payload: {
           agentId,
           taskId,
@@ -185,8 +175,6 @@ export const useAgentMemory = ({
           priority: params?.priority
         }
       };
-      
-      // Invio del messaggio tramite il dispatcher type-safe
       postMessage<AgentMessageUnion>(message);
     },
     [agentId, postMessage]

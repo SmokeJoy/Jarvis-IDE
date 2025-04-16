@@ -8,26 +8,26 @@ export enum PromptHistoryMessageType {
   HISTORY_ERROR = 'historyError',
 }
 
+// Define and export the entry type
+export interface PromptHistoryEntry {
+  id: string;
+  prompt: string;
+  timestamp: number;
+}
+
 export interface PromptHistoryMessage<T extends PromptHistoryMessageType>
   extends WebviewMessage<T> {
   payload: T extends PromptHistoryMessageType.REQUEST_HISTORY
     ? void
     : T extends PromptHistoryMessageType.HISTORY_LOADED
-      ? Array<{
-          id: string;
-          prompt: string;
-          timestamp: number;
-        }>
+      ? PromptHistoryEntry[] // Use the exported type
       : T extends PromptHistoryMessageType.SAVE_PROMPT
         ? {
             prompt: string;
           }
         : T extends PromptHistoryMessageType.HISTORY_UPDATED
-          ? Array<{
-              id: string;
-              prompt: string;
-              timestamp: number;
-            }>
+          // Correct payload to match expected usage: an object with newEntry
+          ? { newEntry: PromptHistoryEntry } 
           : T extends PromptHistoryMessageType.HISTORY_ERROR
             ? {
                 error: string;

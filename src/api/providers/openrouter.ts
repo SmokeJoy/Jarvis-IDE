@@ -6,7 +6,7 @@ import {
   ApiStreamChunk,
   ApiStreamTextChunk,
   ApiStreamUsageChunk,
-} from '../../shared/types/api.types';
+} from '../../src/shared/types/api.types';
 import { ApiHandler } from '../index';
 import { BaseStreamHandler } from '../handlers/BaseStreamHandler';
 import { retryAsync } from '../retry';
@@ -15,7 +15,7 @@ import { ChatCompletionMessageParam } from 'openai';
 import { convertToOpenAiMessages } from '../transform/openai-format';
 import { OpenRouterModelId } from '../../shared/api';
 import { convertToR1Format } from '../transform/o1-format';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage } from '../../src/shared/types/chat.types';
 
 /**
  * Tipo per rappresentare la risposta di OpenRouter
@@ -59,8 +59,12 @@ export class OpenRouterHandler extends BaseStreamHandler<OpenRouterChunk> implem
     // Converti il formato dei messaggi se necessario
     const formattedMessages: ChatCompletionMessageParam[] =
       messages.length > 0
-        ? [createSafeMessage({role: 'system', content: systemPrompt}), ...convertToOpenAiMessages(messages)]
-        : [createSafeMessage({role: 'user', content: systemPrompt})];
+        ? [createChatMessage({role: 'system', content: systemPrompt,
+            timestamp: Date.now()
+        }), ...convertToOpenAiMessages(messages)]
+        : [createChatMessage({role: 'user', content: systemPrompt,
+            timestamp: Date.now()
+        })];
 
     logger.info(`[OpenRouterHandler] Inizio chiamata API OpenRouter per modello: ${this.model.id}`);
     logger.debug(

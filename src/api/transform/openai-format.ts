@@ -3,6 +3,11 @@
  * @description Transformer per il formato OpenAI
  */
 
+import type {
+  ChatCompletionMessageParam,
+  ChatCompletionContentPartText,
+  ChatCompletionContentPartImage,
+} from 'openai/resources';
 import {
   ChatMessage,
   ContentBlock,
@@ -11,19 +16,11 @@ import {
   ContentType,
   isTextBlock,
   isImageBlock,
-} from '../../types/chat.types';
-import {
-  OpenAIOptions,
-  ChatCompletionOptions,
-  ChatCompletionMessageParam,
-  ChatCompletionChunk,
-  ChatCompletion,
-  ChatCompletionContentPartText,
-  ChatCompletionContentPartImage,
-} from '../../types/provider-types/openai-types';
-import { BaseTransformer, TokenUsage, BaseRequestOptions, ContentUtils } from './BaseTransformer';
+  createChatMessage,
+} from '../../src/shared/types/chat.types';
+import type { OpenAIOptions, ChatCompletionOptions, ChatCompletionChunk, ChatCompletion } from 'openai/resources';
+import { BaseTransformer, TokenUsage, BaseRequestOptions } from './BaseTransformer';
 import { logger } from '../../utils/logger';
-import { createSafeMessage } from "../../shared/types/message";
 
 /**
  * Transformer per convertire tra il formato ChatMessage standard e il formato OpenAI
@@ -45,50 +42,23 @@ export class OpenAITransformer
    */
   static toLLMMessages(messages: ChatMessage[]): ChatCompletionMessageParam[] {
     return messages.map((message) => {
-      // Converti ruolo (system, user, assistant) - già compatibile con OpenAI
       const role = message.role;
-
-      // Gestisci diversi formati di contenuto
-      let content: string | Array<ChatCompletionContentPartText | ChatCompletionContentPartImage>;
+      let content: string;
 
       if (typeof message.content === 'string') {
-        // Se è una stringa, usala direttamente
         content = message.content;
       } else if (Array.isArray(message.content)) {
-        // Se è un array di ContentBlock, convertilo nel formato OpenAI
-        content = message.content.map((part) => {
-          if (isTextBlock(part)) {
-            // Converti parte testuale
-            return {
-              type: 'text',
-              text: part.text,
-            } as ChatCompletionContentPartText;
-          } else if (isImageBlock(part)) {
-            // Converti parte immagine
-            return {
-              type: 'image',
-              source: {
-                type: part.url ? 'url' : 'base64',
-                media_type: part.media_type,
-                data: part.base64Data,
-                url: part.url,
-              },
-            } as ChatCompletionContentPartImage;
-          }
-
-          // Ignora altri tipi di contenuto non supportati da OpenAI
-          return { type: 'text', text: '[Contenuto non supportato]' };
-        });
+        const textParts = message.content.filter(isTextBlock).map(b => b.text);
+        content = textParts.length > 0 ? textParts.join('\n') : '[Contenuto multimodale non elaborato]';
       } else {
-        // Fallback per contenuto non valido
         content = '[Contenuto non valido]';
       }
 
-      return {
-        role,
-        content,
-        name: message.name,
-      } as ChatCompletionMessageParam;
+      const openAiMessage: ChatCompletionMessageParam = {
+        role: role,
+        content: content,
+      };
+      return openAiMessage;
     });
   }
 
@@ -104,21 +74,17 @@ export class OpenAITransformer
     messages: ChatCompletionMessageParam[]
   ): ChatCompletionOptions {
     const openaiOptions: ChatCompletionOptions = {
-      model: options.model,
+      model: options.modelId,
       messages: messages,
       temperature: options.temperature,
       max_tokens: options.maxTokens,
-      stream: options.stream || false,
+      stream: options.stream ?? false,
     };
 
-    // Aggiungi systemPrompt se fornito
     if (options.systemPrompt && options.systemPrompt.trim() !== '') {
-      openaiOptions.messages.unshift(createSafeMessage({role: 'system', content: options.systemPrompt}));
-    }
-
-    // Aggiungi funzioni se fornite
-    if (options.functions && options.functions.length > 0) {
-      openaiOptions.functions = options.functions;
+      openaiOptions.messages.unshift(createChatMessage({role: 'system', content: options.systemPrompt,
+          timestamp: Date.now()
+    }));
     }
 
     return openaiOptions;
@@ -178,7 +144,7 @@ export class OpenAITransformer
    */
   static fromLLMResponse(response: ChatCompletion): ChatMessage {
     if (!response || !response.choices || response.choices.length === 0) {
-      return createSafeMessage({role: 'assistant', content: '', timestamp: new Date().toISOString()});
+      return createChatMessage({role: 'assistant', content: '', timestamp: Date.now()});
     }
 
     const choice = response.choices[0];
@@ -186,85 +152,29 @@ export class OpenAITransformer
 
     if (typeof choice.message.content === 'string') {
       content = choice.message.content;
-    } else if (Array.isArray(choice.message.content)) {
-      // Converti il contenuto multimodale se presente
-      content = choice.message.content.map((part) => {
-        if (part.type === 'text') {
-          return {
-            type: ContentType.Text,
-            text: part.text,
-          } as TextBlock;
-        } else if (part.type === 'image') {
-          return {
-            type: ContentType.Image,
-            url: part.source?.url,
-            base64Data: part.source?.data,
-            media_type: part.source?.media_type,
-          } as ImageBlock;
-        }
-        return {
-          type: ContentType.Text,
-          text: '[Contenuto non supportato]',
-        } as TextBlock;
-      });
+    } else if (choice.message.content === null) {
+        content = '';
+    } else {
+      content = '[Contenuto risposta non testuale]';
     }
 
-    return createSafeMessage({role: 'assistant', content: content, timestamp: new Date().toISOString(), providerFields: {
-                            model: response.model,
-                            stopReason: choice.finish_reason,
-                            usage: {
-                              promptTokens: response.usage?.prompt_tokens,
-                              completionTokens: response.usage?.completion_tokens,
-                              totalTokens: response.usage?.total_tokens,
-                            },
-                          }});
+    return createChatMessage({
+        role: 'assistant',
+        content: content,
+        timestamp: Date.now(),
+        providerFields: {
+            model: response.model,
+            stopReason: choice.finish_reason,
+            usage: {
+                promptTokens: response.usage?.prompt_tokens,
+                completionTokens: response.usage?.completion_tokens,
+                totalTokens: response.usage?.total_tokens,
+            },
+        }
+    });
   }
 }
 
-// Esporta come singolo per evitare accesso alle proprietà come Transformer.property
-export const toLLMMessages = OpenAITransformer.toLLMMessages;
-export const createRequestOptions = OpenAITransformer.createRequestOptions;
-export const extractTextFromChunk = OpenAITransformer.extractTextFromChunk;
-export const extractReasoningFromChunk = OpenAITransformer.extractReasoningFromChunk;
-export const extractTokenUsage = OpenAITransformer.extractTokenUsage;
-export const fromLLMResponse = OpenAITransformer.fromLLMResponse;
-
-/**
- * Utilità per gestire contenuti multimodali e strumenti
- */
-export function processMultimodalContent(content: any[]): ContentBlock[] {
-  return content.map((item) => {
-    if (typeof item === 'string') {
-      return {
-        type: ContentType.Text,
-        text: item,
-      } as TextBlock;
-    }
-
-    if (item.type === 'image_url') {
-      const url = item.image_url.url;
-      // Handle base64 images
-      if (url.startsWith('data:')) {
-        const [metaPart, dataPart] = url.split(',');
-        const mediaType = metaPart.split(':')[1].split(';')[0];
-
-        return {
-          type: ContentType.Image,
-          base64Data: dataPart,
-          media_type: mediaType,
-        } as ImageBlock;
-      }
-
-      // Handle URL images
-      return {
-        type: ContentType.Image,
-        url: url,
-      } as ImageBlock;
-    }
-
-    return {
-      type: ContentType.Text,
-      text: '[Contenuto non supportato]',
-    } as TextBlock;
-  });
-}
+export const convertToOpenAiMessages = OpenAITransformer.toLLMMessages;
+export const createOpenAiRequestOptions = OpenAITransformer.createRequestOptions;
+export const convertOpenAiResponseToChatMessage = OpenAITransformer.fromLLMResponse;

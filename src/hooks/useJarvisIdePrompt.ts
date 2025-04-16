@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { ChatMessage } from '../types/chat.types';
+import { ChatMessage } from '../src/shared/types/chat.types';
 import { AIProvider } from '../types/provider.types';
 
 export const useJarvisIdePrompt = (provider: AIProvider) => {

@@ -18,7 +18,7 @@ import { Logger } from '../../logger';
 import * as fs from 'fs';
 import * as path from 'path';
 import { mockMessage } from '../../../../test/utils/factories';
-import { createSafeMessage } from "../../../shared/types/message";
+import { createChatMessage } from "../../../src/shared/types/chat.types";
 
 // Mock delle dipendenze
 vi.mock('../serializers', () => ({
@@ -314,21 +314,21 @@ describe('validateExportableSession', () => {
 
   it('dovrebbe rifiutare messaggi con ruolo non stringa', () => {
     const invalidSession = {
-      messages: [createSafeMessage({role: 123, content: 'Contenuto', timestamp: Date.now()})],
+      messages: [createChatMessage({role: 123, content: 'Contenuto', timestamp: Date.now()})],
     };
     expect(validateExportableSession(invalidSession)).toBe(false);
   });
 
   it('dovrebbe rifiutare messaggi con ruolo vuoto', () => {
     const invalidSession = {
-      messages: [createSafeMessage({role: '', content: 'Contenuto', timestamp: Date.now()})],
+      messages: [createChatMessage({role: '', content: 'Contenuto', timestamp: Date.now()})],
     };
     expect(validateExportableSession(invalidSession)).toBe(false);
   });
 
   it('dovrebbe rifiutare messaggi con contenuto non stringa', () => {
     const invalidSession = {
-      messages: [createSafeMessage({role: 'user', content: 123, timestamp: Date.now()})],
+      messages: [createChatMessage({role: 'user', content: 123, timestamp: Date.now()})],
     };
     expect(validateExportableSession(invalidSession)).toBe(false);
   });
@@ -379,7 +379,7 @@ describe('importFromString con validazione', () => {
 
   it('dovrebbe lanciare errore su JSON invalido con validation=true', () => {
     const invalidJson = JSON.stringify({
-      messages: [createSafeMessage({role: 123, content: null, timestamp: Date.now()})],
+      messages: [createChatMessage({role: 123, content: null, timestamp: Date.now()})],
     });
 
     expect(() => {
@@ -390,7 +390,7 @@ describe('importFromString con validazione', () => {
   it('non dovrebbe validare con validation=false', () => {
     // Questo JSON è valido come struttura ma invalido secondo le nostre regole
     const invalidJson = JSON.stringify({
-      messages: [createSafeMessage({role: 123, content: 'test', timestamp: Date.now()})],
+      messages: [createChatMessage({role: 123, content: 'test', timestamp: Date.now()})],
     });
 
     // Passerà perché stiamo disattivando la validazione
@@ -402,7 +402,7 @@ describe('importFromString con validazione', () => {
     vi.spyOn(console, 'debug').mockImplementation();
 
     const invalidJson = JSON.stringify({
-      messages: [createSafeMessage({role: '', content: 123, timestamp: Date.now()})],
+      messages: [createChatMessage({role: '', content: 123, timestamp: Date.now()})],
     });
 
     expect(() => {

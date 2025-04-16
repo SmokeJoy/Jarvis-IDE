@@ -4,6 +4,9 @@
  * Fornisce funzionalità di caching per i modelli di diversi provider
  */
 
+import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
 import { LLMProviderId, OpenAiCompatibleModelInfo } from '../shared/types/api.types';
 import { Logger } from '../shared/logger';
 

@@ -1,4 +1,4 @@
-import { ApiConfiguration } from './types/api.types';
+import { ApiConfiguration } from '../src/shared/types/api.types';
 import { ChatMessage } from './types/message';
 import {
   McpServer,

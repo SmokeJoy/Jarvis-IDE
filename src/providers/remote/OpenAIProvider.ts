@@ -4,7 +4,8 @@
  */
 
 import { BaseLLMProvider, LLMMessage, LLMOptions } from '../BaseLLMProvider';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
+import type { PromptPayload, LLMResponse, LLMStreamToken, LLMProviderHandler } from '../../shared/types/llm.types';
 
 interface OpenAIChatCompletionRequest {
   model: string;
@@ -77,6 +78,140 @@ interface OpenAIModelsResponse {
   }>;
   object: string;
 }
+
+const OPENAI_API_URL = 'https://api.openai.com/v1';
+
+function mapOpenAIResponseToLLMResponse(data: any, requestId: string, modelId?: string): LLMResponse {
+  return {
+    requestId,
+    output: data.choices?.[0]?.message?.content ?? '',
+    modelId,
+    usage: data.usage
+      ? {
+          promptTokens: data.usage.prompt_tokens,
+          completionTokens: data.usage.completion_tokens,
+          totalTokens: data.usage.total_tokens,
+        }
+      : undefined,
+  };
+}
+
+async function sendPrompt(payload: PromptPayload): Promise<LLMResponse> {
+  const { text, requestId, modelId = 'gpt-4', temperature = 1, ...rest } = payload;
+  const apiKey = (rest.apiKey as string | undefined) ?? '';
+  if (!apiKey) throw new Error('OpenAIProvider: API key mancante');
+
+  const body = {
+    model: modelId,
+    messages: [
+      {
+        role: 'user',
+        content: text,
+      },
+    ],
+    temperature,
+    stream: false,
+    ...rest,
+  };
+
+  const response = await fetch(`${OPENAI_API_URL}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Errore OpenAI API: ${error}`);
+  }
+
+  const data = await response.json();
+  return mapOpenAIResponseToLLMResponse(data, requestId, modelId);
+}
+
+async function streamPrompt(
+  payload: PromptPayload,
+  onToken: (token: LLMStreamToken) => void
+): Promise<void> {
+  const { text, requestId, modelId = 'gpt-4', temperature = 1, ...rest } = payload;
+  const apiKey = (rest.apiKey as string | undefined) ?? '';
+  if (!apiKey) throw new Error('OpenAIProvider: API key mancante');
+
+  const body = {
+    model: modelId,
+    messages: [
+      {
+        role: 'user',
+        content: text,
+      },
+    ],
+    temperature,
+    stream: true,
+    ...rest,
+  };
+
+  const response = await fetch(`${OPENAI_API_URL}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok || !response.body) {
+    const error = await response.text();
+    throw new Error(`Errore OpenAI API: ${error}`);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let isFinal = false;
+
+  while (!isFinal) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() ?? '';
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || !trimmed.startsWith('data:')) continue;
+      const json = trimmed.replace('data: ', '');
+      if (json === '[DONE]') {
+        isFinal = true;
+        onToken({ requestId, token: '', isFinal: true });
+        break;
+      }
+      try {
+        const chunk = JSON.parse(json);
+        const content = chunk.choices?.[0]?.delta?.content;
+        if (typeof content === 'string') {
+          onToken({ requestId, token: content });
+        }
+      } catch (e) {
+        // Ignora chunk non validi
+      }
+    }
+  }
+}
+
+function cancel(requestId: string): void {
+  // OpenAI API non supporta cancel nativo su HTTP, solo su WebSocket
+  // Qui si può implementare logica custom se si usa un bridge, altrimenti no-op
+  // eslint-disable-next-line no-console
+  console.info(`[OpenAIProvider] Cancel richiesto per requestId: ${requestId} (no-op)`);
+}
+
+export const OpenAIProvider: LLMProviderHandler = {
+  sendPrompt,
+  streamPrompt,
+  cancel,
+};
 
 export class OpenAIProvider extends BaseLLMProvider {
   name = 'openai';
@@ -266,7 +401,9 @@ export class OpenAIProvider extends BaseLLMProvider {
   protected formatMessages(messages: LLMMessage[]): OpenAIChatCompletionRequest {
     return {
       model: 'gpt-4', // Sarà sovrascritto dalle opzioni
-      messages: messages.map((m) => (createSafeMessage({role: m.role, content: m.content}))),
+      messages: messages.map((m) => (createChatMessage({role: m.role, content: m.content,
+          timestamp: Date.now()
+    }))),
     };
   }
 }

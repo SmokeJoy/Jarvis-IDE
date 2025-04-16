@@ -9,11 +9,7 @@ interface ContextLink {
   relation: string;
   bidirectional: boolean;
   strength: number;
-  metadata: {
-    confidence: number;
-    source: string;
-    timestamp: string;
-  };
+  providerFields?: Record<string, unknown>;
 }
 
 interface GraphOptions {
@@ -58,7 +54,11 @@ function filterLinks(links: ContextLink[], options: GraphOptions): ContextLink[]
     if (options.minStrength && link.strength < options.minStrength) return false;
 
     // Filtra per confidenza minima
-    if (options.minConfidence && link.metadata.confidence < options.minConfidence) return false;
+    if (
+      options.minConfidence &&
+      (link.providerFields?.confidence as number | undefined) < options.minConfidence
+    )
+      return false;
 
     return true;
   });

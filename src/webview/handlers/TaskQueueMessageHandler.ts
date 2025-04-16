@@ -1,8 +1,7 @@
 import { ExtensionContext } from 'vscode';
-import { Webview } from 'vscode-webview';
 import { BaseWebviewMessageHandler } from './BaseWebviewMessageHandler';
 import { WebviewMessage, WebviewMessageType } from '../../shared/types/webview.types';
-import { Task, TaskQueueState, TaskStatus } from '../../shared/types/task-queue.types';
+import { TaskQueueState, TaskStatus } from '../../shared/types/task-queue.types';
 import { TaskQueueService } from '../../services/TaskQueueService';
 import { MasManager } from '../../mas/MasManager';
 import { Logger } from '../../utils/logger';
@@ -97,8 +96,8 @@ export class TaskQueueMessageHandler extends BaseWebviewMessageHandler {
   private _masManager: MasManager;
   private _logger: Logger;
 
-  constructor(masManager: MasManager) {
-    super({} as ExtensionContext); // We don't need context for this handler
+  constructor(context: ExtensionContext, masManager: MasManager) {
+    super(context);
     this._masManager = masManager;
     this._queueService = masManager.queueService;
     this._logger = new Logger('TaskQueueMessageHandler');
@@ -120,14 +119,32 @@ export class TaskQueueMessageHandler extends BaseWebviewMessageHandler {
         this._handleAbortRequest();
         break;
       case 'taskQueue:retry':
-        this._handleRetryRequest(message.payload.taskId);
+        if (
+          message.payload &&
+          typeof message.payload === 'object' &&
+          'taskId' in message.payload &&
+          typeof (message.payload as { taskId?: unknown }).taskId === 'string'
+        ) {
+          this._handleRetryRequest((message.payload as { taskId: string }).taskId);
+        }
         break;
       case 'taskQueue:remove':
-        this._handleRemoveRequest(message.payload.taskId);
+        if (
+          message.payload &&
+          typeof message.payload === 'object' &&
+          'taskId' in message.payload &&
+          typeof (message.payload as { taskId?: unknown }).taskId === 'string'
+        ) {
+          this._handleRemoveRequest((message.payload as { taskId: string }).taskId);
+        }
         break;
-      case 'taskQueue:update':
-        this._handleUpdateRequest(message.payload.taskId, message.payload.status as TaskStatus);
+      case 'taskQueue:update': {
+        const updatePayload = message.payload as { taskId?: string; status?: unknown };
+        if (updatePayload && typeof updatePayload.taskId === 'string' && updatePayload.status) {
+          this._handleUpdateRequest(updatePayload.taskId, updatePayload.status as TaskStatus);
+        }
         break;
+      }
       default:
         this._logger.warn(`Unhandled task queue message type: ${message.type}`);
     }
@@ -162,29 +179,27 @@ export class TaskQueueMessageHandler extends BaseWebviewMessageHandler {
   }
 
   private _handleUpdateRequest(taskId: string, status: TaskStatus): void {
-    this._queueService.updateTaskStatus(taskId, status);
-    this._sendQueueState(this._queueService.state);
+    this._updateTaskStatus(taskId, status);
+    this._sendMessage({
+      type: WebviewMessageType.TASK_QUEUE_UPDATE,
+      payload: { tasks: this._getTasksPayload() },
+    });
   }
 
   private _sendQueueState(state: TaskQueueState): void {
-    if (!this._webview) {
-      return;
-    }
-
-    this._webview.postMessage({
+    this._sendMessage({
       type: 'taskQueue:state',
       payload: state,
     });
   }
 
-  private _sendError(message: string): void {
-    if (!this._webview) {
-      return;
-    }
+  private _updateTaskStatus(taskId: string, status: TaskStatus): void {
+    this._queueService.updateTaskStatus(taskId, status);
+    this._sendQueueState(this._queueService.state);
+  }
 
-    this._webview.postMessage({
-      type: WebviewMessageType.ERROR,
-      error: message,
-    });
+  private _getTasksPayload(): any[] {
+    // Implement the logic to get tasks payload
+    return [];
   }
 }

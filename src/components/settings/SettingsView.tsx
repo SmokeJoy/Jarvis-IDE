@@ -1,7 +1,7 @@
 import React from 'react';
 import { VSCodeCheckbox, VSCodeTextArea } from '@vscode/webview-ui-toolkit/react';
 import { TelemetrySetting } from '../../types/extension.ts';
-import { ApiConfiguration } from '../../types/api.types.ts';
+import { ApiConfiguration } from '../../src/shared/types/api.types';
 import { OpenRouterModelPicker } from './OpenRouterModelPicker.ts';
 import { ThinkingBudgetSlider } from './ThinkingBudgetSlider.ts';
 import { SystemPromptEditor } from '../../components/SystemPromptEditor.tsx';

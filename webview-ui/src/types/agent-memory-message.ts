@@ -5,6 +5,7 @@
  */
 
 import type { WebviewMessageUnion } from '../../../src/shared/types/webviewMessageUnion';
+import type { WebviewMessage } from '@shared/types/webview.types';
 
 /**
  * Interfaccia per la struttura di una memoria di agente
@@ -41,8 +42,9 @@ export enum AgentMemoryMessageType {
 /**
  * Interfaccia base per tutti i messaggi della memoria degli agenti
  */
-export interface AgentMemoryMessageBase extends WebviewMessageUnion {
-  type: AgentMemoryMessageType | string;
+export interface AgentMemoryMessageBase extends WebviewMessage<AgentMemoryMessageType> {
+  type: AgentMemoryMessageType;
+  payload: unknown;
 }
 
 /**

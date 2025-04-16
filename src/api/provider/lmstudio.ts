@@ -4,8 +4,8 @@ import {
   ChatCompletion,
   LLMProviderId,
   StreamChunk,
-} from '../../types/global';
-import { ModelInfo } from '../../shared/types/api.types';
+} from '../../src/shared/types/global';
+import { ModelInfo } from '../../src/shared/types/api.types';
 import { Logger } from '../../utils/logger';
 import * as http from 'http';
 

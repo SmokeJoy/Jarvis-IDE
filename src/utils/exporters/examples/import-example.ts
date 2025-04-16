@@ -14,7 +14,7 @@ import {
 import { ExportFormat } from '../types';
 import * as fs from 'fs';
 import * as path from 'path';
-import { createSafeMessage } from "../../../shared/types/message";
+import { createChatMessage } from "../../../src/shared/types/chat.types";
 
 /**
  * Esempio 1: Importazione da file
@@ -135,13 +135,20 @@ function fullCycle() {
     // Crea una sessione di esempio
     const originalSession = {
       messages: [
-        createSafeMessage({role: 'system', content: 'Sei un assistente AI italiano.'}),
-        createSafeMessage({role: 'user', content: 'Puoi mostrare un ciclo completo di export-import?'}),
-        createSafeMessage({role: 'assistant', content: 'Certo! Ecco come funziona:\n\n1. Esportazione in Markdown\n2. Importazione dal Markdown\n3. Verifica che i dati siano corretti'}),
+        createChatMessage({role: 'system', content: 'Sei un assistente AI italiano.',
+            timestamp: Date.now()
+        }),
+        createChatMessage({role: 'user', content: 'Puoi mostrare un ciclo completo di export-import?',
+            timestamp: Date.now()
+        }),
+        createChatMessage({role: 'assistant', content: 'Certo! Ecco come funziona:\n\n1. Esportazione in Markdown\n2. Importazione dal Markdown\n3. Verifica che i dati siano corretti',
+            timestamp: Date.now()
+        }),
       ],
       settings: {
         temperature: 0.7,
         model: 'gpt-4',
+        modelId: 'gpt-4',
       },
       systemPrompt: 'Sei un assistente AI italiano.',
       modelId: 'gpt-4',
@@ -181,12 +188,16 @@ async function importWithValidation() {
 
   // Sessione valida
   const validSession = JSON.stringify({
-    messages: [createSafeMessage({role: 'user', content: 'Esempio di messaggio valido'})],
+    messages: [createChatMessage({role: 'user', content: 'Esempio di messaggio valido',
+        timestamp: Date.now()
+    })],
   });
 
   // Sessione non valida (ruolo non stringa)
   const invalidSession = JSON.stringify({
-    messages: [createSafeMessage({role: 123, content: 'Questo non passerà la validazione'})],
+    messages: [createChatMessage({role: 123, content: 'Questo non passerà la validazione',
+        timestamp: Date.now()
+    })],
   });
 
   try {

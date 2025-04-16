@@ -39,6 +39,7 @@ describe('Extension Types', () => {
       api: {
         provider: 'openai',
         apiKey: 'test-key',
+        modelId: 'test-model-id',
       },
       telemetry: {
         enabled: true,
@@ -54,6 +55,7 @@ describe('Extension Types', () => {
       api: expect.objectContaining({
         provider: expect.any(String),
         apiKey: expect.any(String),
+        modelId: expect.any(String),
       }),
       telemetry: expect.objectContaining({
         enabled: expect.any(Boolean),

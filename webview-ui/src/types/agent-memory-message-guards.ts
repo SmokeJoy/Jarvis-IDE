@@ -5,8 +5,7 @@
  */
 
 import type { WebviewMessage } from '../../../src/shared/types/webview.types';
-import {
-  AgentMemoryMessageType,
+import type {
   AgentMemoryMessageUnion,
   RequestMemorySnapshotMessage,
   MemorySnapshotReceivedMessage,
@@ -16,9 +15,11 @@ import {
   MemoryItemSavedMessage,
   DeleteMemoryItemMessage,
   MemoryItemDeletedMessage,
-  AgentMemory,
-  MemoryItem
+  AgentMemoryMessageType,
+  MemoryItem,
+  AgentMemory
 } from './agent-memory-message';
+import { AgentMemoryMessageType as AgentMemoryMessageTypeImport } from './agent-memory-message';
 
 /**
  * Type for unknown message payload
@@ -32,10 +33,15 @@ type UnknownPayload = Record<string, unknown>;
  * @returns True se il messaggio è del tipo specificato
  */
 export function isMessageOfType<T extends AgentMemoryMessageUnion>(
-  message: WebviewMessage<UnknownPayload>,
+  message: unknown,
   type: AgentMemoryMessageType
 ): message is T {
-  return message?.type === type;
+  return (
+    typeof message === 'object' &&
+    message !== null &&
+    'type' in message &&
+    (message as any).type === type
+  );
 }
 
 /**
@@ -43,8 +49,13 @@ export function isMessageOfType<T extends AgentMemoryMessageUnion>(
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un'unione di messaggi della memoria dell'agente
  */
-export function isAgentMemoryMessage(message: WebviewMessage<UnknownPayload>): message is AgentMemoryMessageUnion {
-  return Object.values(AgentMemoryMessageType).includes(message?.type as AgentMemoryMessageType);
+export function isAgentMemoryMessage(message: unknown): message is AgentMemoryMessageUnion {
+  return (
+    typeof message === 'object' &&
+    message !== null &&
+    'type' in message &&
+    Object.values(AgentMemoryMessageTypeImport).includes((message as any).type)
+  );
 }
 
 /**
@@ -52,13 +63,9 @@ export function isAgentMemoryMessage(message: WebviewMessage<UnknownPayload>): m
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è una richiesta di snapshot della memoria
  */
-export function isRequestMemorySnapshotMessage(
-  message: WebviewMessage<UnknownPayload>
-): message is RequestMemorySnapshotMessage {
-  return isMessageOfType<RequestMemorySnapshotMessage>(
-    message,
-    AgentMemoryMessageType.REQUEST_MEMORY_SNAPSHOT
-  ) && validateRequestMemorySnapshotPayload(message.payload);
+export function isRequestMemorySnapshotMessage(message: unknown): message is RequestMemorySnapshotMessage {
+  return isMessageOfType<RequestMemorySnapshotMessage>(message, AgentMemoryMessageTypeImport.REQUEST_MEMORY_SNAPSHOT) &&
+    validateRequestMemorySnapshotPayload((message as any).payload);
 }
 
 /**
@@ -66,13 +73,9 @@ export function isRequestMemorySnapshotMessage(
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è una risposta con snapshot della memoria
  */
-export function isMemorySnapshotReceivedMessage(
-  message: WebviewMessage<UnknownPayload>
-): message is MemorySnapshotReceivedMessage {
-  return isMessageOfType<MemorySnapshotReceivedMessage>(
-    message,
-    AgentMemoryMessageType.MEMORY_SNAPSHOT_RECEIVED
-  ) && validateMemorySnapshotReceivedPayload(message.payload);
+export function isMemorySnapshotReceivedMessage(message: unknown): message is MemorySnapshotReceivedMessage {
+  return isMessageOfType<MemorySnapshotReceivedMessage>(message, AgentMemoryMessageTypeImport.MEMORY_SNAPSHOT_RECEIVED) &&
+    validateMemorySnapshotReceivedPayload((message as any).payload);
 }
 
 /**
@@ -80,13 +83,9 @@ export function isMemorySnapshotReceivedMessage(
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è una richiesta di pulizia della memoria
  */
-export function isClearAgentMemoryMessage(
-  message: WebviewMessage<UnknownPayload>
-): message is ClearAgentMemoryMessage {
-  return isMessageOfType<ClearAgentMemoryMessage>(
-    message,
-    AgentMemoryMessageType.CLEAR_AGENT_MEMORY
-  ) && validateClearAgentMemoryPayload(message.payload);
+export function isClearAgentMemoryMessage(message: unknown): message is ClearAgentMemoryMessage {
+  return isMessageOfType<ClearAgentMemoryMessage>(message, AgentMemoryMessageTypeImport.CLEAR_AGENT_MEMORY) &&
+    validateClearAgentMemoryPayload((message as any).payload);
 }
 
 /**
@@ -94,13 +93,9 @@ export function isClearAgentMemoryMessage(
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è una conferma di pulizia della memoria
  */
-export function isAgentMemoryClearedMessage(
-  message: WebviewMessage<UnknownPayload>
-): message is AgentMemoryClearedMessage {
-  return isMessageOfType<AgentMemoryClearedMessage>(
-    message,
-    AgentMemoryMessageType.AGENT_MEMORY_CLEARED
-  ) && validateAgentMemoryClearedPayload(message.payload);
+export function isAgentMemoryClearedMessage(message: unknown): message is AgentMemoryClearedMessage {
+  return isMessageOfType<AgentMemoryClearedMessage>(message, AgentMemoryMessageTypeImport.AGENT_MEMORY_CLEARED) &&
+    validateAgentMemoryClearedPayload((message as any).payload);
 }
 
 /**
@@ -108,13 +103,9 @@ export function isAgentMemoryClearedMessage(
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è una richiesta di salvataggio di un elemento di memoria
  */
-export function isSaveMemoryItemMessage(
-  message: WebviewMessage<UnknownPayload>
-): message is SaveMemoryItemMessage {
-  return isMessageOfType<SaveMemoryItemMessage>(
-    message,
-    AgentMemoryMessageType.SAVE_MEMORY_ITEM
-  ) && validateSaveMemoryItemPayload(message.payload);
+export function isSaveMemoryItemMessage(message: unknown): message is SaveMemoryItemMessage {
+  return isMessageOfType<SaveMemoryItemMessage>(message, AgentMemoryMessageTypeImport.SAVE_MEMORY_ITEM) &&
+    validateSaveMemoryItemPayload((message as any).payload);
 }
 
 /**
@@ -123,12 +114,13 @@ export function isSaveMemoryItemMessage(
  * @returns True se il messaggio è una conferma di salvataggio di un elemento di memoria
  */
 export function isMemoryItemSavedMessage(
-  message: WebviewMessage<UnknownPayload>
+  message: unknown
 ): message is MemoryItemSavedMessage {
-  return isMessageOfType<MemoryItemSavedMessage>(
-    message,
-    AgentMemoryMessageType.MEMORY_ITEM_SAVED
-  ) && validateMemoryItemSavedPayload(message.payload);
+  return (
+    typeof message === 'object' &&
+    message !== null &&
+    (message as any).type === 'memoryItemSaved'
+  );
 }
 
 /**
@@ -136,13 +128,9 @@ export function isMemoryItemSavedMessage(
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è una richiesta di eliminazione di un elemento di memoria
  */
-export function isDeleteMemoryItemMessage(
-  message: WebviewMessage<UnknownPayload>
-): message is DeleteMemoryItemMessage {
-  return isMessageOfType<DeleteMemoryItemMessage>(
-    message,
-    AgentMemoryMessageType.DELETE_MEMORY_ITEM
-  ) && validateDeleteMemoryItemPayload(message.payload);
+export function isDeleteMemoryItemMessage(message: unknown): message is DeleteMemoryItemMessage {
+  return isMessageOfType<DeleteMemoryItemMessage>(message, AgentMemoryMessageTypeImport.DELETE_MEMORY_ITEM) &&
+    validateDeleteMemoryItemPayload((message as any).payload);
 }
 
 /**
@@ -150,13 +138,9 @@ export function isDeleteMemoryItemMessage(
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è una conferma di eliminazione di un elemento di memoria
  */
-export function isMemoryItemDeletedMessage(
-  message: WebviewMessage<UnknownPayload>
-): message is MemoryItemDeletedMessage {
-  return isMessageOfType<MemoryItemDeletedMessage>(
-    message,
-    AgentMemoryMessageType.MEMORY_ITEM_DELETED
-  ) && validateMemoryItemDeletedPayload(message.payload);
+export function isMemoryItemDeletedMessage(message: unknown): message is MemoryItemDeletedMessage {
+  return isMessageOfType<MemoryItemDeletedMessage>(message, AgentMemoryMessageTypeImport.MEMORY_ITEM_DELETED) &&
+    validateMemoryItemDeletedPayload((message as any).payload);
 }
 
 // Funzioni di validazione payload
@@ -180,7 +164,7 @@ function validateRequestMemorySnapshotPayload(payload: UnknownPayload): boolean 
  * @param item L'item da validare
  * @returns True se l'item è valido
  */
-function validateMemoryItem(item: UnknownPayload): item is MemoryItem {
+function validateMemoryItem(item: UnknownPayload): boolean {
   return (
     typeof item === 'object' &&
     item !== null &&
@@ -197,13 +181,13 @@ function validateMemoryItem(item: UnknownPayload): item is MemoryItem {
  * @param payload Il payload da validare
  * @returns True se il payload è valido
  */
-function validateAgentMemory(payload: UnknownPayload): payload is AgentMemory {
+function validateAgentMemory(payload: UnknownPayload): boolean {
   return (
     typeof payload === 'object' &&
     payload !== null &&
     typeof payload.agentId === 'string' &&
     Array.isArray(payload.memories) &&
-    payload.memories.every((memory: unknown) => validateMemoryItem(memory as UnknownPayload))
+    payload.memories.every(validateMemoryItem)
   );
 }
 
@@ -261,20 +245,11 @@ function validateSaveMemoryItemPayload(payload: UnknownPayload): boolean {
 }
 
 /**
- * Valida un payload di conferma di salvataggio di un elemento di memoria
+ * Valida un payload di conferma di eliminazione di un elemento di memoria
  * @param payload Il payload da validare
  * @returns True se il payload è valido
  */
-function validateMemoryItemSavedPayload(payload: UnknownPayload): boolean {
-  return validateMemoryItem(payload);
-}
-
-/**
- * Valida un payload di richiesta di eliminazione di un elemento di memoria
- * @param payload Il payload da validare
- * @returns True se il payload è valido
- */
-function validateDeleteMemoryItemPayload(payload: UnknownPayload): boolean {
+function validateMemoryItemDeletedPayload(payload: UnknownPayload): boolean {
   return (
     typeof payload === 'object' &&
     payload !== null &&
@@ -284,11 +259,11 @@ function validateDeleteMemoryItemPayload(payload: UnknownPayload): boolean {
 }
 
 /**
- * Valida un payload di conferma di eliminazione di un elemento di memoria
+ * Valida un payload di richiesta di eliminazione di un elemento di memoria
  * @param payload Il payload da validare
  * @returns True se il payload è valido
  */
-function validateMemoryItemDeletedPayload(payload: UnknownPayload): boolean {
+function validateDeleteMemoryItemPayload(payload: UnknownPayload): boolean {
   return (
     typeof payload === 'object' &&
     payload !== null &&

@@ -5,7 +5,7 @@
 
 import { stringify } from 'yaml';
 import * as vscode from 'vscode';
-import { ChatMessage } from '../shared/types';
+import { ChatMessage } from '../shared/types/chat.types';
 import { ChatSettings } from '../shared/types/settings.types';
 import { ApiConfiguration } from '../shared/types/api.types';
 import { Logger } from './logger';

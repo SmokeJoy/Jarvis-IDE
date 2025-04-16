@@ -1,7 +1,7 @@
 import { OpenRouterRequest, OpenRouterResponse, isOpenRouterRequest } from './openrouter-message';
 import { BaseLLMProvider } from './BaseProvider';
-import { LLMRequest, LLMResponse } from '../../shared/types/llm.types';
-import { createSafeMessage } from "../shared/types/message";
+import { LLMRequest, LLMResponse } from '../src/shared/types/llm.types';
+import { createChatMessage as createChatMessage } from "../src/shared/types/chat.types";
 
 export class OpenRouterProvider extends BaseLLMProvider {
   static providerId = 'openrouter' as const;
@@ -36,7 +36,9 @@ export class OpenRouterProvider extends BaseLLMProvider {
       return {
         success: true,
         choices: parsedResponse.choices.map((choice) => ({
-          message: createSafeMessage({role: choice.message.role, content: choice.message.content}),
+          message: createChatMessage({role: choice.message.role, content: choice.message.content,
+              timestamp: Date.now()
+        }),
           finishReason: choice.finish_reason,
         })),
         usage: parsedResponse.usage,

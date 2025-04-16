@@ -15,7 +15,8 @@ import { VSCodeButton, VSCodeTextArea } from '@vscode/webview-ui-toolkit/react';
 import { vscode } from '@/utils/vscode';
 import type { ErrorMessage, InfoMessage } from '@/types/WebviewMessageType';
 import { MessageList } from './MessageList';
-import { SystemMessage } from './SystemMessage';
+import { useChatContext } from '../hooks/useChatContext.tsx';
+
 
 // Type guard per verificare se un oggetto è un ChatMessage valido
 function isChatMessage(obj: any): obj is ChatMessage {
@@ -273,7 +274,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
 						<p>{t('chat.empty')}</p>
 					</div>
 				) : (
-					<MessageList messages={messages} isLoading={isLoading} />
+					<MessageList messages={messages} isTyping={isTyping} />
 				)}
 				<div ref={messagesEndRef} />
 			</div>
@@ -299,4 +300,22 @@ export const ChatView: React.FC<ChatViewProps> = ({
 	);
 };
 
-export default ChatView; 
+export default function ChatView() {
+  const { messages, isTyping } = useChatContext();
+	return (
+		<div className="chat-container">
+			<div className="messages-list">
+				{messages.map((message, index) => (
+					<ChatMessage
+						key={index}
+						role={message.role}
+						parts={message.parts}
+						timestamp={message.timestamp}
+					/>
+				))}
+				{isTyping && <TypingIndicator />}
+			</div>
+			<div ref={messagesEndRef} />
+		</div>
+	);
+}

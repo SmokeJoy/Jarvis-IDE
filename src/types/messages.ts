@@ -4,7 +4,21 @@
  * @version 1.0.0
  */
 
-import { ApiConfiguration } from '../src/shared/types/api.types';
+import type {
+  ApiConfiguration,
+  ChatLlmConfig,
+  ExtensionSettings,
+  ModelInfo,
+  ModelProvider,
+  TextGenSettings,
+} from '../shared/types/api.types';
+import type {
+  ChatMessage,
+  ChatRole,
+  ContentBlock,
+  ContentType,
+} from '../shared/types/chat.types';
+import type { ErrorMessage } from '../shared/types/error.types';
 import { WebviewMessage, WebviewMessageType } from '../shared/types/webview.types';
 
 export interface WebviewMessageBase {

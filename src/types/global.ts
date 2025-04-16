@@ -32,13 +32,14 @@ export type { WebviewMessage, WebviewMessageBase } from '../shared/types/webview
 
 /**
  * Enum per i livelli di log
+ * SPOSTATO IN src/shared/types/global.ts
  */
-export enum LogLevel {
-  DEBUG = 'DEBUG',
-  INFO = 'INFO',
-  WARN = 'WARN',
-  ERROR = 'ERROR',
-}
+// export enum LogLevel {
+//   DEBUG = 'DEBUG',
+//   INFO = 'INFO',
+//   WARN = 'WARN',
+//   ERROR = 'ERROR',
+// }
 
 // Definizioni di tipi comuni utilizzati nell'applicazione
 export interface ApiKey {

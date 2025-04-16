@@ -1,11 +1,11 @@
 import { Anthropic } from '@anthropic-ai/sdk';
 import OpenAI, { ChatCompletionMessageParam, CompletionUsage } from 'openai';
 import { ApiHandler } from '../index';
-import { ApiHandlerOptions, ModelInfo } from '../../shared/types/api.types';
+import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';
 import { openAiModelInfoSaneDefaults } from '../../shared/api';
 import { convertToOpenAiMessages } from '../transform/openai-format';
-import { ApiStream } from '../transform/stream';
-import { createSafeMessage } from "../../shared/types/message";
+import { ApiStream } from '../../src/shared/types/api.types';
+import { createChatMessage } from '../../src/shared/types/chat.types';
 
 export class RequestyHandler implements ApiHandler {
   private options: ApiHandlerOptions;
@@ -37,7 +37,9 @@ export class RequestyHandler implements ApiHandler {
         const modelId = this.options.requestyModelId ?? '';
 
         const openAiMessages: ChatCompletionMessageParam[] = [
-          createSafeMessage({role: 'system', content: systemPrompt}),
+          createChatMessage({role: 'system', content: systemPrompt,
+              timestamp: Date.now()
+        }),
           ...convertToOpenAiMessages(messages),
         ];
 

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as validators from '../validators';
 import { ChatMessage } from '../types/index';
 import { ChatSettings, ApiConfiguration } from '../../types/extension';
-import { createSafeMessage } from "@/shared/types/message-adapter";
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 // Mock degli schemi JSON
 vi.mock('../../../docs/schemas/ChatMessage.schema.json', () => ({}), { virtual: true });
@@ -74,7 +74,7 @@ describe('Validators', () => {
 
   describe('isValidChatMessage', () => {
     it('dovrebbe identificare un ChatMessage valido', () => {
-      const validMessage: ChatMessage = createSafeMessage('user', 'Messaggio di test');
+      const validMessage: ChatMessage = createChatMessage('user', 'Messaggio di test');
 
       expect(validators.isValidChatMessage(validMessage)).toBe(true);
     });
@@ -100,7 +100,7 @@ describe('Validators', () => {
 
   describe('validateChatMessageOrThrow', () => {
     it('dovrebbe accettare un ChatMessage valido senza lanciare errori', () => {
-      const validMessage: ChatMessage = createSafeMessage('user', 'Messaggio di test');
+      const validMessage: ChatMessage = createChatMessage('user', 'Messaggio di test');
 
       expect(() => validators.validateChatMessageOrThrow(validMessage)).not.toThrow();
     });
@@ -123,14 +123,16 @@ describe('Validators', () => {
 
   describe('isValidChatMessageArray', () => {
     it('dovrebbe identificare un array di ChatMessage valido', () => {
-      const validArray: ChatMessage[] = [createSafeMessage('user', 'Domanda?'), createSafeMessage('assistant', 'Risposta!')];
+      const validArray: ChatMessage[] = [createChatMessage('user', 'Domanda?'), createChatMessage('assistant', 'Risposta!')];
 
       expect(validators.isValidChatMessageArray(validArray)).toBe(true);
     });
 
     it('dovrebbe rifiutare array con elementi non validi', () => {
       const invalidArray = [
-        createSafeMessage({role: 'user', content: 'Valido'}),
+        createChatMessage({role: 'user', content: 'Valido',
+            timestamp: Date.now()
+        }),
         { role: 'assistant' }, // Manca content
       ];
 
@@ -183,7 +185,7 @@ describe('Validators', () => {
 
   describe('getChatMessageErrors', () => {
     it('dovrebbe restituire null per input validi', () => {
-      const validMessage: ChatMessage = createSafeMessage('user', 'Messaggio di test');
+      const validMessage: ChatMessage = createChatMessage('user', 'Messaggio di test');
 
       expect(validators.getChatMessageErrors(validMessage)).toBeNull();
     });
@@ -221,7 +223,7 @@ describe('Validators', () => {
     });
 
     it('dovrebbe usare la validazione di fallback per ChatMessage', () => {
-      const validMessage: ChatMessage = createSafeMessage('user', 'Messaggio di test');
+      const validMessage: ChatMessage = createChatMessage('user', 'Messaggio di test');
 
       // Anche senza schema, dovrebbe funzionare grazie al fallback
       expect(validators.isValidChatMessage(validMessage)).toBe(true);

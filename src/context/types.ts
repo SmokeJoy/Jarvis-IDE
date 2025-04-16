@@ -1,5 +1,5 @@
 import { ExtensionState } from '../types/extension';
-import { ApiConfiguration } from '../types/api.types';
+import { ApiConfiguration } from '../src/shared/types/api.types';
 import { ConfigModelInfo } from '../types/models';
 
 export interface ExtensionStateContextType {

@@ -1,16 +1,16 @@
-import { promises as fs } from 'fs';
+import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { LogLevel } from '../types/global';
+import { LogLevel } from '../shared/types/global';
 
 const LOG_DIR = path.join(__dirname, '..', '..', 'logs');
 let currentLogFilePath: string | null = null;
 
 async function ensureLogDirectory(): Promise<void> {
   try {
-    await fs.access(LOG_DIR);
+    await fs.promises.access(LOG_DIR);
   } catch {
-    await fs.mkdir(LOG_DIR, { recursive: true });
+    await fs.promises.mkdir(LOG_DIR, { recursive: true });
   }
 }
 
@@ -24,7 +24,7 @@ function getLogFilename() {
 export function initLogFile() {
   ensureLogDirectory();
   currentLogFilePath = getLogFilename();
-  fs.writeFile(currentLogFilePath, '').catch((err) => {
+  fs.promises.writeFile(currentLogFilePath, '').catch((err) => {
     vscode.window.showWarningMessage(`Errore inizializzazione file di log: ${err.message}`);
   });
 }
@@ -36,7 +36,7 @@ export function appendLogToFile(level: keyof typeof LogLevel, message: string) {
     level,
     message,
   };
-  fs.appendFile(currentLogFilePath, JSON.stringify(entry) + '\n').catch((err) => {
+  fs.promises.appendFile(currentLogFilePath, JSON.stringify(entry) + '\n').catch((err) => {
     vscode.window.showWarningMessage(`Errore scrittura log su file: ${err.message}`);
   });
 }

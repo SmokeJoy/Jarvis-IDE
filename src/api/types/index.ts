@@ -1,5 +1,5 @@
 import { OpenRouterModelInfo } from '../../types/extension';
-import { ApiStream } from '../../types/global';
+import { ApiStream } from '../../src/shared/types/global';
 import { HistoryItem } from '../../shared/HistoryItem';
 import { ApiProvider } from '../../agent/api/ApiProvider';
 

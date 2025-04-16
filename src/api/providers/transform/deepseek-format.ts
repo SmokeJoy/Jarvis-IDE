@@ -9,8 +9,8 @@ import {
   ContentType,
   isTextBlock,
   isImageBlock,
-} from '../../types/chat.types';
-import { createSafeMessage } from "../../../shared/types/message";
+} from '../../../src/shared/types/chat.types';
+import { createChatMessage } from "../../../src/shared/types/chat.types";
 
 export interface DeepSeekApiOptions {
   model: string;
@@ -151,7 +151,7 @@ export class DeepSeekTransformer {
       logger.error(
         `[DeepSeekTransformer] Errore durante la conversione della risposta: ${error.message}`
       );
-      return createSafeMessage({role: 'assistant', content: [{ type: ContentType.Text, text: '' } as TextBlock], timestamp: new Date().toISOString()});
+      return createChatMessage({role: 'assistant', content: [{ type: ContentType.Text, text: '' } as TextBlock], timestamp: new Date().toISOString()});
     }
   }
 }

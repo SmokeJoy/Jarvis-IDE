@@ -1,3 +1,6 @@
+import type { Settings } from '@shared/types/settings.types';
+import type { AvailableModel } from '@shared/types/settings.types';
+
 interface Settings {
   provider: string;
   model: string;

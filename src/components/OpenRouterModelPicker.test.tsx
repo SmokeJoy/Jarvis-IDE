@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, expect, test } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { OpenRouterModelPicker } from './OpenRouterModelPicker';
-import { OpenAiCompatibleModelInfo } from '../types/global';
+import { OpenAiCompatibleModelInfo } from '../src/shared/types/global';
 
 describe('OpenRouterModelPicker', () => {
   const models: OpenAiCompatibleModelInfo[] = [

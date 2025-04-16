@@ -4,7 +4,7 @@ import * as path from 'path';
 import { JarvisProvider } from '../../core/webview/JarvisProvider';
 import { HistoryItem } from '../../shared/HistoryItem';
 import { JarvisMessage } from '../../shared/ExtensionMessage';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 /**
  * Registers development-only commands for task manipulation.
@@ -56,13 +56,17 @@ export function registerTaskCommands(
               path.join(taskDir, 'api_conversation_history.json'),
               JSON.stringify(
                 [
-                  createSafeMessage({role: 'user', content: [{ type: 'text', text: `<task>\n${taskName}\n</task>` }]}),
-                  createSafeMessage({role: 'assistant', content: [
+                  createChatMessage({role: 'user', content: [{ type: 'text', text: `<task>\n${taskName}\n</task>` }],
+                      timestamp: Date.now()
+                }),
+                  createChatMessage({role: 'assistant', content: [
                                                                                                                     {
                                                                                                                       type: 'text',
                                                                                                                       text: `I'll help you ${taskName.toLowerCase()}. Let me break this down into steps.`,
                                                                                                                     },
-                                                                                                                  ]}),
+                                                                                                                  ],
+                      timestamp: Date.now()
+                }),
                 ],
                 null,
                 2

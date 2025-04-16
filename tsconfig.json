@@ -18,9 +18,18 @@
 		"types": ["node", "vitest", "@testing-library/jest-dom", "vscode"],
 		"typeRoots": ["./node_modules/@types", "./src/types"],
 		"paths": {
-			"@/*": ["./src/*"]
+			"@/*": ["./src/*"],
+			"@shared/*": ["./src/shared/*"],
+			"@types/*": ["./src/types/*"]
 		}
 	},
-	"include": ["src/**/*", "tests/**/*"],
+	"include": ["src/**/*", "tests/**/*", "webview-ui/src/**/*"],
+	"exclude": [
+		"node_modules",
+		"**/*.js",
+		"**/*.test.js",
+		"dist",
+		"build"
+	],
 	"references": [{ "path": "./tsconfig.node.json" }]
 }

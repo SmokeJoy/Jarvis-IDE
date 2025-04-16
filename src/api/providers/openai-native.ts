@@ -1,6 +1,6 @@
 import { Anthropic } from '@anthropic-ai/sdk';
 import { ApiHandler } from '../index';
-import { ApiHandlerOptions, ModelInfo } from '../../shared/types/api.types';
+import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';
 import OpenAI, { CompletionUsage, ChatCompletionChunk, ChatCompletionMessageParam } from 'openai';
 import {
   openAiNativeDefaultModelId,
@@ -10,8 +10,8 @@ import {
 } from '../../shared/api';
 import { convertToOpenAiMessages } from '../transform/openai-format';
 import { calculateApiCostOpenAI } from '../../utils/cost';
-import { ApiStream } from '../transform/stream';
-import { createSafeMessage } from "../../shared/types/message";
+import { ApiStream } from '../../src/shared/types/api.types';
+import { createChatMessage } from '../../src/shared/types/chat.types';
 
 export class OpenAiNativeHandler implements ApiHandler {
   private options: ApiHandlerOptions;
@@ -67,7 +67,9 @@ export class OpenAiNativeHandler implements ApiHandler {
             const stream = await this.client.chat.completions.create({
               model: model.id,
               messages: [
-                createSafeMessage({role: 'user', content: systemPrompt}),
+                createChatMessage({role: 'user', content: systemPrompt,
+                    timestamp: Date.now()
+                }),
                 ...convertToOpenAiMessages(messages),
               ],
               stream: true,
@@ -97,7 +99,9 @@ export class OpenAiNativeHandler implements ApiHandler {
             const stream = await this.client.chat.completions.create({
               model: model.id,
               messages: [
-                createSafeMessage({role: 'system', content: systemPrompt}),
+                createChatMessage({role: 'system', content: systemPrompt,
+                    timestamp: Date.now()
+                }),
                 ...convertToOpenAiMessages(messages),
               ],
               stream: true,
@@ -128,7 +132,9 @@ export class OpenAiNativeHandler implements ApiHandler {
               // max_completion_tokens: this.getModel().info.maxTokens,
               temperature: 0,
               messages: [
-                createSafeMessage({role: 'system', content: systemPrompt}),
+                createChatMessage({role: 'system', content: systemPrompt,
+                    timestamp: Date.now()
+                }),
                 ...convertToOpenAiMessages(messages),
               ],
               stream: true,

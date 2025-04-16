@@ -1,7 +1,7 @@
 import { Anthropic } from '@anthropic-ai/sdk';
 import OpenAI, { ChatCompletionMessageParam } from 'openai';
-import { ChatCompletionContentPartText, ChatCompletionContentPartImage } from '../../types/global';
-import { createSafeMessage } from "../../shared/types/message";
+import { ChatCompletionContentPartText, ChatCompletionContentPartImage } from '../../src/shared/types/global';
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 const o1SystemPrompt = (systemPrompt: string) => `
 # System Prompt
@@ -174,7 +174,9 @@ export function convertToO1Messages(
   const toolsReplaced = openAiMessages.reduce((acc, message) => {
     if (message.role === 'tool') {
       // Convert tool messages to user messages
-      acc.push(createSafeMessage({role: 'user', content: message.content || ''}));
+      acc.push(createChatMessage({role: 'user', content: message.content || '',
+          timestamp: Date.now()
+    }));
     } else if (message.role === 'assistant' && message.tool_calls) {
       // Convert tool calls to content and remove tool_calls
       let content = message.content || '';
@@ -183,7 +185,9 @@ export function convertToO1Messages(
           content += `\nTool Call: ${toolCall.function.name}\nArguments: ${toolCall.function.arguments}`;
         }
       });
-      acc.push(createSafeMessage({role: 'assistant', content: content, tool_calls: undefined}));
+      acc.push(createChatMessage({role: 'assistant', content: content, tool_calls: undefined,
+          timestamp: Date.now()
+    }));
     } else {
       // Keep other messages as they are
       acc.push(message);
@@ -193,7 +197,9 @@ export function convertToO1Messages(
 
   // Create a new array to hold the modified messages
   const messagesWithSystemPrompt = [
-    createSafeMessage({role: 'user', content: o1SystemPrompt(systemPrompt)}) as ChatCompletionMessageParam,
+    createChatMessage({role: 'user', content: o1SystemPrompt(systemPrompt),
+        timestamp: Date.now()
+    }) as ChatCompletionMessageParam,
     ...toolsReplaced,
   ];
 
@@ -342,7 +348,7 @@ export function convertO1ResponseToAnthropicMessage(
   const openAiMessage = completion.choices[0].message;
   const { normalText, toolCalls } = parseAIResponse(openAiMessage.content || '');
 
-  const anthropicMessage: Anthropic.Messages.Message = createSafeMessage({role: openAiMessage.role, content: [
+  const anthropicMessage: Anthropic.Messages.Message = createChatMessage({role: openAiMessage.role, content: [
                 {
                   type: 'text',
                   text: normalText,
@@ -365,7 +371,9 @@ export function convertO1ResponseToAnthropicMessage(
                 output_tokens: completion.usage?.completion_tokens || 0,
                 cache_creation_input_tokens: null,
                 cache_read_input_tokens: null,
-              }});
+              },
+      timestamp: Date.now()
+});
 
   if (toolCalls.length > 0) {
     anthropicMessage.content.push(
@@ -466,7 +474,9 @@ export function convertToR1Format(
       }
     } else {
       // Adds new message with the correct type based on role
-      merged.push(createSafeMessage({role: message.role === 'assistant' ? 'assistant' : 'user', content: messageContent}));
+      merged.push(createChatMessage({role: message.role === 'assistant' ? 'assistant' : 'user', content: messageContent,
+          timestamp: Date.now()
+    }));
     }
     return merged;
   }, []);

@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
-import { ChatHistory } from '../types/chat.types';
+import { ChatHistory } from '../src/shared/types/chat.types';
 import { AIProvider } from '../types/provider.types';
-import { createSafeMessage } from '../shared/types/message-adapter';
+import { createChatMessage as createChatMessage } from '../src/shared/types/chat.types';
 
 export const useJarvisIdeChat = (provider: AIProvider) => {
   const [messages, setMessages] = useState<ChatHistory>([]);
@@ -14,7 +14,7 @@ export const useJarvisIdeChat = (provider: AIProvider) => {
       setError(null);
 
       try {
-        const userMessage = createSafeMessage('user', content, {
+        const userMessage = createChatMessage('user', content, {
           timestamp: new Date().toISOString()
         });
 
@@ -39,7 +39,7 @@ export const useJarvisIdeChat = (provider: AIProvider) => {
         }
 
         const data = await response.json();
-        const assistantMessage = createSafeMessage('assistant', data.choices[0].message.content, {
+        const assistantMessage = createChatMessage('assistant', data.choices[0].message.content, {
           timestamp: new Date().toISOString()
         });
 

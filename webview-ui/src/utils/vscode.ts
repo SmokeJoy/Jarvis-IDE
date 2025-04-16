@@ -12,50 +12,34 @@ import type { WebviewApi } from "vscode-webview"
  * enabled by acquireVsCodeApi.
  */
 
-declare global {
-	interface Window {
-		acquireVsCodeApi: () => {
-			postMessage: (message: WebviewMessage) => void;
-			getState: () => any;
-			setState: (state: any) => void;
-		};
-	}
-}
-
 /**
- * Interfaccia per l'API delle webview VS Code
+ * Gestione dell'API VS Code dal webview.
  */
-interface VSCodeAPI {
-	postMessage(message: any): void;
-	getState(): any;
-	setState(state: any): void;
-}
 
-/**
- * Acquisisce l'API VS Code per la comunicazione con l'estensione
- * Si assicura che venga chiamata una sola volta per la durata della webview
- */
-function getVSCodeAPI(): VSCodeAPI {
-	// Assicuriamoci che l'API VSCode sia disponibile
-	if (typeof acquireVsCodeApi === 'function') {
-		// @ts-ignore - acquireVsCodeApi è una funzione globale iniettata dalla webview di VS Code
-		return acquireVsCodeApi();
-	}
-	
-	// Fallback per quando l'API non è disponibile (es. sviluppo locale)
-	console.warn('VSCode API non disponibile, utilizzo implementazione fittizia');
-	return {
-		postMessage: (message: any) => {
-			console.log('Messaggio (mock):', message);
-		},
-		getState: () => {
-			return JSON.parse(localStorage.getItem('vscode-state') || '{}');
-		},
-		setState: (state: any) => {
-			localStorage.setItem('vscode-state', JSON.stringify(state));
+// Mantengo la funzione getVsCodeApi che fornisce il fallback
+let api: ReturnType<typeof window.acquireVsCodeApi> | null = null;
+
+export function getVsCodeApi<StateType = any>() {
+	if (!api) {
+		if (typeof window.acquireVsCodeApi === 'function') {
+			api = window.acquireVsCodeApi();
+		} else {
+			// Fallback se acquireVsCodeApi non è disponibile (es. test)
+			console.warn('acquireVsCodeApi not found, using fallback mock.');
+			api = {
+				postMessage: (message: any) => console.log('[Mock] postMessage:', message),
+				getState: () => {
+					console.log('[Mock] getState');
+					return undefined as StateType | undefined; // Mantengo il tipo generico
+				},
+				setState: (state: StateType) => {
+					console.log('[Mock] setState:', state);
+				},
+			};
 		}
-	};
+	}
+	return api;
 }
 
 // Esporta una singola istanza dell'API VS Code
-export const vscode = (window as any).vscode || getVSCodeAPI();
+export const vscode = (window as any).vscode || getVsCodeApi();

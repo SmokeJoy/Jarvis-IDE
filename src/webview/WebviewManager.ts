@@ -4,6 +4,7 @@ import { WebviewMessageHandler } from './handlers/WebviewMessageHandler';
 import { TaskQueueMessageHandler } from './handlers/TaskQueueMessageHandler';
 import { Logger } from '../utils/logger';
 import { MasManager } from '../mas/MasManager';
+import { BaseWebviewMessageHandler } from './handlers/BaseWebviewMessageHandler';
 
 /**
  * Gestisce la WebView e i suoi handler di messaggi
@@ -11,7 +12,7 @@ import { MasManager } from '../mas/MasManager';
 export class WebviewManager {
   private static instance: WebviewManager;
   private _panel: vscode.WebviewPanel | undefined;
-  private _handlers: WebviewMessageHandler[] = [];
+  private _handlers: BaseWebviewMessageHandler[] = [];
   private _context: vscode.ExtensionContext;
   private _masManager: MasManager;
   private _logger: Logger;
@@ -40,7 +41,7 @@ export class WebviewManager {
    */
   private _registerMessageHandlers(): void {
     // Aggiungi qui nuovi handler
-    this._handlers.push(new TaskQueueMessageHandler(this._masManager));
+    this._handlers.push(new TaskQueueMessageHandler(this._context, this._masManager));
   }
 
   /**
@@ -72,7 +73,9 @@ export class WebviewManager {
 
     // Inizializza gli handler con la webview
     this._handlers.forEach((handler) => {
-      handler.initialize(this._panel!.webview);
+      if (typeof (handler as any).initialize === 'function') {
+        (handler as any).initialize(this._panel!.webview);
+      }
     });
 
     // Registra il gestore dei messaggi
@@ -109,7 +112,7 @@ export class WebviewManager {
     // Inoltra il messaggio a tutti gli handler registrati
     this._handlers.forEach((handler) => {
       try {
-        handler.handleMessage(message);
+        handler.processMessage(message);
       } catch (error) {
         this._logger.error(`Errore durante la gestione del messaggio: ${error}`);
       }

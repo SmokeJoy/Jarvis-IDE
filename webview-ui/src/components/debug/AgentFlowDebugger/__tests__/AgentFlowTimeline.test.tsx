@@ -147,4 +147,39 @@ describe('AgentFlowTimeline Component', () => {
     // Verifica che venga mostrato il tempo relativo (30 secondi)
     expect(screen.getByText(/\+30s/)).toBeInTheDocument();
   });
-}); 
+
+  test('dovrebbe rendere il badge di typing solo sugli agenti e thread corretti', () => {
+    // Simula agenti e interazioni
+    const threadId1 = 'thread-1';
+    const threadId2 = 'thread-2';
+    const agentA = { id: 'agent-A', name: 'Agent A', type: 'planner', status: 'active' };
+    const agentB = { id: 'agent-B', name: 'Agent B', type: 'searcher', status: 'waiting' };
+    const now = new Date().toISOString();
+    const interactions = [
+      { id: 'int-1', sourceId: 'agent-A', targetId: 'agent-B', type: 'request', label: 'Richiesta', content: 'Msg 1', timestamp: now, threadId: threadId1 },
+      { id: 'int-2', sourceId: 'agent-B', targetId: 'agent-A', type: 'response', label: 'Risposta', content: 'Msg 2', timestamp: now, threadId: threadId2 }
+    ];n  // Stato Typing
+    (useAgentFlow as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      flowData: { agents: [agentA, agentB], interactions },
+      loading: false
+    });
+  
+    // Simula stato Typing su agent-B/thread-2, non su agent-A
+    vi.doMock('../../../hooks/useAgentTypingState', () => ({
+      useAgentTypingState: () => ({
+        [threadId1]: { 'agent-A': false },
+        [threadId2]: { 'agent-B': true }
+      })
+    }));
+  
+    // Reimport del componente con il nuovo mock
+    const Timeline = require('../AgentFlowTimeline').default;
+    render(<Timeline filters={mockFilters} />);
+  
+    // Il badge typing si vede solo per agent-B thread-2
+    const badgeA = screen.getAllByText(/agent-A/i);
+    expect(badgeA[0].querySelector('.agent-badge-typing')).toBeNull();
+    const badgeB = screen.getAllByText(/agent-B/i);
+    expect(badgeB[0].querySelector('.agent-badge-typing')).not.toBeNull();
+  });
+});

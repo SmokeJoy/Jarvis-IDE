@@ -1,6 +1,6 @@
-import { ChatMessage, ContentType, TextContent } from '../../types/chat.types';
+import { ChatMessage, ContentType, TextContent } from '../../src/shared/types/chat.types';
 import { logger } from '../../utils/logger';
-import { createSafeMessage } from "../../shared/types/message";
+import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
 
 interface MistralMessageRole {
   role: string;
@@ -20,7 +20,9 @@ export const MistralTransformer = {
 
     // Aggiungi system prompt se disponibile
     if (systemPrompt) {
-      output.push(createSafeMessage({role: 'system', content: systemPrompt}));
+      output.push(createChatMessage({role: 'system', content: systemPrompt,
+          timestamp: Date.now()
+    }));
     }
 
     // Converti tutti i messaggi nel formato Mistral

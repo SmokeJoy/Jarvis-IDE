@@ -1,4 +1,4 @@
-import { LLMProviderHandler, LLMResponse } from '@/mas/types/llm-provider.types';
+import { LLMProviderHandler, LLMResponse } from '../../src/mas/types/llm-provider.types';
 
 export function createMockProvider(overrides: Partial<LLMProviderHandler> = {}): LLMProviderHandler {
   const handler: LLMProviderHandler = {
