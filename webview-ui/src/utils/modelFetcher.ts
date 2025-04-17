@@ -3,7 +3,7 @@
  * @description Utility per il recupero dei modelli LLM dai vari provider
  */
 
-import type { OpenAiCompatibleModelInfo, LLMProviderId } from '../types/models';
+import type { OpenAiCompatibleModelInfo, LLMProviderId } from '../../../src/shared/types/providers.types';
 import { vscode } from './vscode';
 
 interface FetchModelsResponse {
@@ -123,4 +123,4 @@ export async function getDefaultModel(
     console.error(`[modelFetcher] Errore nel recupero modello predefinito per ${provider}:`, error);
     return undefined;
   }
-} 
+}

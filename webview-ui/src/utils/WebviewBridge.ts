@@ -4,14 +4,11 @@
 
 import { 
   WebviewMessage, 
+  WebviewMessageType,
   ExtensionMessage,
-  WebviewMessageType
-} from '../../../src/shared/types/webview.types';
-import { 
-  getVSCodeAPI, 
-  isValidExtensionMessage,
-  isValidWebviewMessage 
-} from './messageUtils';
+  WebviewMessageUnion
+} from '@shared/types/messages-barrel';
+import { getVSCodeAPI, isValidExtensionMessage, isValidWebviewMessage } from './messageUtils';
 import { t } from '../i18n';
 
 // Logger condiviso per il bridge webview
@@ -185,4 +182,4 @@ class WebviewBridge {
 }
 
 // Esporta l'istanza singleton
-export const webviewBridge = new WebviewBridge(); 
+export const webviewBridge = new WebviewBridge();

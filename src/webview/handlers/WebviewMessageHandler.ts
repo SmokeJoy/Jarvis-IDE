@@ -11,6 +11,7 @@ import {
   InstructionCompletedMessage,
 } from '../../shared/types/webview.types';
 import { BaseWebviewMessageHandler } from './BaseWebviewMessageHandler';
+import { handleIncomingMessage, registerHandler } from '../../core/dispatcher/WebviewDispatcher';
 
 export class WebviewMessageHandler extends BaseWebviewMessageHandler {
   constructor(context: ExtensionContext) {
@@ -29,25 +30,7 @@ export class WebviewMessageHandler extends BaseWebviewMessageHandler {
       return;
     }
 
-    switch (message.type) {
-      case WebviewMessageType.SEND_PROMPT:
-        this._handleSendPrompt(message as any);
-        break;
-      case WebviewMessageType.ACTION:
-        this._handleAction(message as ActionMessage);
-        break;
-      case WebviewMessageType.RESPONSE:
-        this._handleResponse(message as ResponseMessage);
-        break;
-      case WebviewMessageType.STATE_UPDATE:
-        this._handleStateUpdate(message as StateMessage);
-        break;
-      case WebviewMessageType.INSTRUCTION:
-        this._handleInstruction(message as InstructionMessage);
-        break;
-      default:
-        console.warn('Unhandled message type:', message.type);
-    }
+    this.handleIncomingMessage(message);
   }
 
   protected _handleSendPrompt(message: any): void {

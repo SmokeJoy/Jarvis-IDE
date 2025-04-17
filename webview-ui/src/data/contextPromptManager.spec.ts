@@ -1,0 +1,3 @@
+import { MASEvent } from '@core/messages/events';
+// ... existing code ...
+// Test: ricezione di MASEvent.CONTEXT_APPLY e dispatch di MASEvent.CONTEXT_APPLIED 

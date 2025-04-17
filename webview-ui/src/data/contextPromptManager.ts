@@ -11,6 +11,8 @@
 import { webviewBridge } from "../utils/WebviewBridge";
 import { WebviewMessageType } from "../../../src/shared/types/webview.types";
 import type { ContextPrompt } from "../../../src/shared/types/webview.types";
+import { MASEvent } from '@core/messages/events';
+import { isProfileUpdatedMessage, isProfilesListMessage } from '@shared/types/profile-message-guards';
 
 // Chiave per lo storage locale
 const CONTEXT_PROMPT_STORAGE_KEY = 'jarvis.contextPrompts';
@@ -194,16 +196,16 @@ async function loadPromptsFromActiveProfile(): Promise<ContextPrompt> {
 /**
  * Recupera un singolo slot di prompt dal profilo attivo
  * @param slot Tipo di slot da recuperare
+ * @param fallback Facoltativo: fallback custom (per modalità 'coder' resiliente)
  * @returns Contenuto del prompt
  */
-export function getContextPromptSlot(slot: PromptSlotType): string {
-  // Carica i prompt se non in cache
+export function getContextPromptSlot(slot: PromptSlotType, fallback?: string): string {
   if (!promptCache) {
-    // Se chiamato sincronicamente prima dell'inizializzazione, usa i default
+    // fallback resilienza coder-mode
+    if (typeof fallback === 'string') return fallback;
     return DEFAULT_PROMPTS[slot] || '';
   }
-  
-  return promptCache[slot] || DEFAULT_PROMPTS[slot] || '';
+  return promptCache[slot] || fallback || DEFAULT_PROMPTS[slot] || '';
 }
 
 /**
@@ -658,6 +660,32 @@ export type MASPromptContext = {
 // Mappa globale (lifetime sessione webview) per MAS
 const masPromptMap: Record<string, Record<string, string>> = {};
 
+// ----- MAS_CONTEXT_APPLY listener ------
+if (typeof window !== 'undefined' && window.addEventListener) {
+  window.addEventListener('MAS_CONTEXT_APPLY', e => {
+    const detail = (e as CustomEvent).detail;
+    if (detail && typeof detail.contextId === 'string') {
+      // contextId validation logic here if needed
+    }
+    if (detail && detail.agentId && detail.threadId) {
+      // Recupera prompt (qui puoi personalizzare logica recupero, qui base: usa contextPrompt associato già presente o DEFAULT)
+      let contextPrompt = getMASContextPrompt(detail.agentId, detail.threadId);
+      if (typeof contextPrompt !== 'string') {
+        // applichiamo prompt predefinito se assente
+        contextPrompt = DEFAULT_PROMPTS.context;
+      }
+      // Applica il prompt mediante logica già centralizzata
+      applyContextPrompt({
+        agentId: detail.agentId,
+        threadId: detail.threadId,
+        contextPrompt
+      });
+      // Propaga l'evento MAS_CONTEXT_APPLIED agli ascoltatori
+      const appliedEvent = new CustomEvent('MAS_CONTEXT_APPLIED', { detail: { agentId: detail.agentId, threadId: detail.threadId, contextPrompt } });
+      window.dispatchEvent(appliedEvent);
+    }
+  });
+}
 /**
  * Applica un prompt di contesto MAS per una coppia agentId/threadId
  * Se contextPrompt === '', elimina la chiave.
@@ -695,4 +723,16 @@ export function applyContextPrompt(
  */
 export function getMASContextPrompt(agentId: string, threadId: string): string | undefined {
   return masPromptMap[agentId]?.[threadId];
+}
+
+/**
+ * Funzione per fallback resiliente in modalità coder.
+ * Restituisce un prompt customizzato per ambienti codegen o fallback.
+ */
+export function getCoderFallbackPrompt(): string {
+  return (
+    promptCache?.system ||
+    DEFAULT_PROMPTS.system ||
+    'Sei un assistente specializzato nella generazione di codice. Rispondi sempre in sintassi valida per la richiesta.'
+  );
 }

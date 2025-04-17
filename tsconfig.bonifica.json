@@ -1,5 +1,14 @@
 {
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@types/*": ["./src/types/*"],
+      "@core/*": ["src/core/*"]
+    }
+  },
   "exclude": [
     "node_modules",
     "dist",

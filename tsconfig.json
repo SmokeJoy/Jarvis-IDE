@@ -17,10 +17,12 @@
 		"noFallthroughCasesInSwitch": true,
 		"types": ["node", "vitest", "@testing-library/jest-dom", "vscode"],
 		"typeRoots": ["./node_modules/@types", "./src/types"],
+		"baseUrl": ".",
 		"paths": {
 			"@/*": ["./src/*"],
 			"@shared/*": ["./src/shared/*"],
-			"@types/*": ["./src/types/*"]
+			"@types/*": ["./src/types/*"],
+			"@core/*": ["src/core/*"]
 		}
 	},
 	"include": ["src/**/*", "tests/**/*", "webview-ui/src/**/*"],

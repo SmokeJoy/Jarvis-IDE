@@ -18,6 +18,7 @@ import {
 
 import { ZodSchemaMap } from '../../utils/validation';
 import type { LLMStreamToken } from './llm.types';
+import type { ExtensionMessage } from './extensionMessageUnion';
 
 /**
  * Unione discriminata di tutti i tipi di messaggi WebView conosciuti.
@@ -30,10 +31,14 @@ export type WebviewMessageUnion =
   | AgentTypingMessage
   | AgentTypingDoneMessage
   | LlmCancelMessage
+  | LlmRequestMessage
   | DisconnectMessage
   | AgentTaskCreatedMessage
   | AgentTaskDoneMessage
-  | WebSocketErrorMessage;
+  | WebSocketErrorMessage
+  | PingMessage
+  | PongMessage
+  | LlmStatusMessage;
 
 /**
  * Type guard per verificare se un messaggio è un SendPromptMessage
@@ -287,7 +292,22 @@ export type WebSocketErrorMessage = BaseWebviewMessage<'WS_ERROR'> & {
 
 // Type Guards
 export function isWebviewMessage<T extends WebviewMessageUnion>(msg: unknown): msg is T {
-  return typeof (msg as any)?.type === 'string';
+  return typeof (msg as any)?.type === 'string' &&
+         [
+           'INSTRUCTION_COMPLETED',
+           'INSTRUCTION_FAILED',
+           'AGENT_TYPING',
+           'AGENT_TYPING_DONE',
+           'LLM_CANCEL',
+           'LLM_REQUEST',
+           'DISCONNECT',
+           'AGENT_TASK_CREATED',
+           'AGENT_TASK_DONE',
+           'WS_ERROR',
+           'WS_PING',
+           'WS_PONG',
+           'WS_LLM_STATUS'
+         ].includes((msg as any).type);
 }
 
 export function isAgentMessage(
@@ -305,3 +325,26 @@ export function isLlmCancelMessage(
 ): msg is LlmCancelMessage {
   return msg.type === 'LLM_CANCEL';
 }
+
+export type UnifiedWebviewMessageUnion = WebviewMessageUnion | ExtensionMessage;
+
+export function isWebviewMessage(message: unknown): message is UnifiedWebviewMessageUnion {
+  return typeof message === 'object' && message !== null && 'type' in message;
+}
+
+// --- WebSocket Message Types ---
+// export enum WebSocketMessageType {
+//   PING = 'WS_PING',
+//   PONG = 'WS_PONG',
+//   LLM_STATUS = 'WS_LLM_STATUS',
+//   ERROR = 'WS_ERROR',
+//   DISCONNECT = 'WS_DISCONNECT',
+//   CANCEL = 'WS_CANCEL',
+// }
+
+export type PingMessage = WebviewMessage<'WS_PING', { timestamp: number }>;
+export type PongMessage = WebviewMessage<'WS_PONG', { timestamp: number }>;
+export type LlmStatusMessage = WebviewMessage<'WS_LLM_STATUS', { modelId: string; status: 'loading' | 'ready' | 'error'; timestamp: number }>;
+export type WebSocketErrorMessage = WebviewMessage<'WS_ERROR', { error: string; code: number }>;
+export type DisconnectMessage = WebviewMessage<'WS_DISCONNECT', { reason?: string }>;
+export type LlmCancelMessage = WebviewMessage<'WS_CANCEL', { requestId: string }>;

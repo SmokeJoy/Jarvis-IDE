@@ -1,0 +1,3 @@
+import { MASEvent } from '@core/messages/events';
+// ... existing code ...
+// Opzionale: annota i messaggi con masContextId quando ricevi MASEvent.CONTEXT_APPLIED 

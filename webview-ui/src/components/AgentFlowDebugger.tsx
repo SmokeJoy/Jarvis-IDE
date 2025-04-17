@@ -1,0 +1,3 @@
+import { MASEvent } from '@core/messages/events';
+// ... existing code ...
+// Sottoscrivi l'evento MASEvent.CONTEXT_APPLIED e aggiorna la UI del debugger (log/evidenziazione) 

@@ -4,7 +4,7 @@
  * @version 2.0.0
  */
 
-import { WebSocketBridge, WebSocketMessageType } from '../utils/WebSocketBridge';
+import { WebSocketBridge } from '../utils/WebSocketBridge';
 import { getProvider, getDefaultProvider, hasProvider, LLMProviderHandler, LLMProviderId } from '../../src/providers/provider-registry';
 
 /**
@@ -92,7 +92,7 @@ class LLMOrchestrator {
    */
   private setupMessageListeners(): void {
     // Listener per risposte LLM
-    this.webSocketBridge.on(WebSocketMessageType.LLM_RESPONSE, (message) => {
+    this.webSocketBridge.on('llm_response', (message) => {
       const { requestId, token, isComplete, error } = message;
       
       // Ignora messaggi senza requestId
@@ -145,14 +145,12 @@ class LLMOrchestrator {
     });
 
     // Listener per errori
-    this.webSocketBridge.on(WebSocketMessageType.ERROR, (message) => {
+    this.webSocketBridge.on('WS_ERROR', (message) => {
       console.error('Errore nel messaggio WebSocket:', message.error);
-      
       // Gestisci tutti i fallback attivi
       for (const [requestId, request] of this.activeRequests.entries()) {
         // Incrementa i tentativi
         request.retries++;
-        
         // Prova il fallback se possibile
         if (this.shouldAttemptFallback(request)) {
           this.activateFallback(request);
@@ -161,7 +159,6 @@ class LLMOrchestrator {
           if (request.onStream) {
             request.onStream('', true);
           }
-          
           // Rimuovi la richiesta
           this.activeRequests.delete(requestId);
         }
@@ -279,7 +276,7 @@ class LLMOrchestrator {
     
     // Prepara il messaggio WebSocket
     const message = {
-      type: WebSocketMessageType.LLM_REQUEST,
+      type: "WS_LLM_REQUEST",
       input: params.input,
       context: params.context || {},
       requestId: id,
@@ -374,7 +371,7 @@ class LLMOrchestrator {
         
         // Invia messaggio di cancellazione
         this.webSocketBridge.sendLlmMessage({
-          type: WebSocketMessageType.LLM_CANCEL,
+          type: 'llm_cancel',
           requestId,
           payload: {}
         });
@@ -436,4 +433,4 @@ class LLMOrchestrator {
 /**
  * Istanza singleton dell'orchestratore LLM
  */
-export const llmOrchestrator = new LLMOrchestrator(); 
+export const llmOrchestrator = new LLMOrchestrator();

@@ -224,8 +224,7 @@ export type WebviewMessageUnion =
   | ResponseMessage
   | StateMessage
   // Tipi di istruzioni
-  | InstructionMessage
-  | InstructionCompletedMessage;
+  | InstructionMessage;
 
 /**
  * Tipo di unione per tutti i tipi di messaggi WebView
@@ -474,17 +473,6 @@ export interface InstructionMessage extends WebviewMessageBase {
     instruction: string;
     result?: string;
   };
-}
-
-/**
- * Interfaccia per messaggio di istruzione completata
- */
-export interface InstructionCompletedMessage extends WebviewMessage<WebviewMessageType.INSTRUCTION_COMPLETED> {
-  type: WebviewMessageType.INSTRUCTION_COMPLETED;
-  id: string;
-  agentId: string;
-  instruction: string;
-  result: string;
 }
 
 export interface WebviewReadyMessage extends WebviewMessage<WebviewMessageType.READY> {

@@ -1,0 +1,3 @@
+import { MASEvent } from '@core/messages/events';
+// ... existing code ...
+// Test: visualizzazione badge/step marker su MASEvent.CONTEXT_APPLIED 

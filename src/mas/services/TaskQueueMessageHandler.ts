@@ -5,6 +5,7 @@ import { AgentStatus } from '../../shared/types/mas.types';
 import { WebviewMessage } from '../../types/webview.types';
 import { Logger } from '../../utils/logger';
 import { TaskQueueService } from './TaskQueueService';
+import { handleIncomingMessage, registerHandler } from '../../core/dispatcher/WebviewDispatcher';
 
 // Definiamo interfacce per i messaggi specifici se non esistono nei file centralizzati
 interface TaskQueueViewMessage extends WebviewMessage {
@@ -71,6 +72,12 @@ export class TaskQueueMessageHandler {
 
     // Registra i listener per gli eventi del MasManager
     this.registerEventListeners();
+
+    // Registrazione handler centralizzati
+    registerHandler('mas.taskQueue/requestUpdate', () => this.handleRequestUpdate());
+    registerHandler('mas.taskQueue/abortTask', (msg) => this.handleAbortTask(msg));
+    registerHandler('mas.taskQueue/rerunTask', (msg) => this.handleRerunTask(msg));
+    registerHandler('mas.taskQueue/setFilter', (msg) => this.handleSetFilter(msg));
   }
 
   /**
@@ -151,33 +158,9 @@ export class TaskQueueMessageHandler {
     if (!message || !message.type) {
       return;
     }
-
     this.logger.debug(`Ricevuto messaggio WebView: ${message.type}`);
-
     try {
-      const webviewMessage = message as AllWebViewMessages;
-
-      switch (webviewMessage.type) {
-        case 'mas.taskQueue/requestUpdate':
-          this.handleRequestUpdate();
-          break;
-
-        case 'mas.taskQueue/abortTask':
-          this.handleAbortTask(webviewMessage as AbortTaskMessage);
-          break;
-
-        case 'mas.taskQueue/rerunTask':
-          this.handleRerunTask(webviewMessage as RerunTaskMessage);
-          break;
-
-        case 'mas.taskQueue/setFilter':
-          this.handleSetFilter(webviewMessage as SetFilterMessage);
-          break;
-
-        default:
-          this.logger.warn(`Tipo di messaggio non supportato: ${webviewMessage.type}`);
-          break;
-      }
+      handleIncomingMessage(message);
     } catch (error) {
       this.logger.error('Errore durante la gestione del messaggio', error);
     }

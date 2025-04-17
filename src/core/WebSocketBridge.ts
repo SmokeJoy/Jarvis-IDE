@@ -3,25 +3,25 @@ import {
   isWebviewMessage,
   isAgentMessage,
   isLlmCancelMessage
-} from '@shared/types/webviewMessageUnion';
+} from '@shared/types/messages-barrel';
+import { handleIncomingMessage, registerHandler } from './dispatcher/WebviewDispatcher';
+import { LlmCancelMessage, InstructionCompletedMessage } from '@shared/messages';
+
+// Registrazione handler centralizzati (esempio, da eseguire in fase di bootstrap)
+registerHandler('INSTRUCTION_COMPLETED', (msg) => {
+  agentEventBus.emit('INSTRUCTION_COMPLETED', msg);
+});
+registerHandler('AGENT_TYPING', (msg) => {
+  updateTypingState(msg.agentId, true);
+});
+registerHandler('AGENT_TYPING_DONE', (msg) => {
+  updateTypingState(msg.agentId, false);
+});
+registerHandler('LLM_CANCEL', (msg) => {
+  cancelPrompt(msg.payload.requestId);
+});
 
 export function notifySubscribers<T extends WebviewMessageUnion>(msg: unknown): void {
   if (!isWebviewMessage<T>(msg)) return;
-
-  switch (msg.type) {
-    case 'INSTRUCTION_COMPLETED':
-      agentEventBus.emit('INSTRUCTION_COMPLETED', msg);
-      break;
-    case 'AGENT_TYPING':
-      updateTypingState(msg.agentId, true);
-      break;
-    case 'AGENT_TYPING_DONE':
-      updateTypingState(msg.agentId, false);
-      break;
-    case 'LLM_CANCEL':
-      cancelPrompt(msg.payload.requestId);
-      break;
-    default:
-      console.warn('[WebSocketBridge] Messaggio non gestito:', msg);
-  }
-} 
+  handleIncomingMessage(msg as WebviewMessageUnion);
+}

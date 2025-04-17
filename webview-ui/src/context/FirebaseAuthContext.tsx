@@ -9,15 +9,9 @@ import { User, getAuth, signInWithCustomToken, signOut } from "firebase/auth"
 import { initializeApp } from "firebase/app"
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react"
 import { useExtensionMessage } from "../hooks/useExtensionMessage"
-import { 
-	AuthMessageType, 
-	AuthMessageUnion, 
-	AuthStateChangedMessage,
-	RequestAuthTokenMessage,
-	SignOutMessage,
-	SimplifiedUser 
-} from "../types/auth-message"
-import { isAuthCallbackMessage, isAuthErrorMessage, isAuthSignedOutMessage } from "../types/auth-message-guards"
+import { AuthMessageType } from '@shared/messages'
+import type { AuthMessageUnion, AuthStateChangedMessage, RequestAuthTokenMessage, SignOutMessage, SimplifiedUser } from '@shared/messages'
+import { isAuthCallbackMessage, isAuthErrorMessage, isAuthSignedOutMessage } from '@shared/types/auth-message-guards'
 
 // Firebase configuration from extension
 const firebaseConfig = {
@@ -142,10 +136,10 @@ export const FirebaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
 		try {
 			// Invia messaggio di logout all'estensione
 			const message: SignOutMessage = {
-				type: AuthMessageType.SIGN_OUT
+				type: AuthMessageType.SIGN_OUT,
+				payload: undefined
 			}
 			postMessage<AuthMessageUnion>(message)
-			
 			// Esegue logout da Firebase
 			await signOut(auth)
 			console.log("Successfully signed out of Firebase")

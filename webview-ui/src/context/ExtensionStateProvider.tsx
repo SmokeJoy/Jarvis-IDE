@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react'
-import { ApiConfiguration } from '../../types/extension'
+import type { ApiConfiguration } from '@shared/types/api.types'
 
 interface ExtensionStateContextType {
   version: string
