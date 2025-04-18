@@ -3,10 +3,25 @@
   "compilerOptions": {
     "skipLibCheck": false,
     "strict": true,
-    "types": ["jest", "node"],
+    "types": ["node"],
     "paths": {
-      "@shared/*": ["src/shared/*"]
-    }
+      "@shared/*": ["src/shared/*"],
+      "@webview/*": ["webview-ui/src/*"],
+      "@test/*": ["test/*"],
+      "@/*": ["src/*"]
+    },
+    "baseUrl": ".",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "exactOptionalPropertyTypes": true
   },
-  "include": ["src", "webview-ui", "tests", "scripts"]
+  "include": ["src", "webview-ui", "tests", "types"],
+  "exclude": ["scripts/**/*", "**/node_modules/**/*", "**/dist/**/*"],
+  "references": [
+    { "path": "./tsconfig.node.json" }
+  ]
 } 

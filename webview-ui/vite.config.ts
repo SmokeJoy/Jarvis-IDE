@@ -2,24 +2,27 @@
 
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
+import { resolve } from 'path';
 
 export default defineConfig({
 	plugins: [react()],
-	root: path.resolve(__dirname, 'src'),
+	root: resolve(__dirname, 'src'),
 	test: {
-		environment: "jsdom",
+		environment: 'node',
 		globals: true,
 		setupFiles: ["./src/setupTests.ts"],
 		coverage: {
-			provider: "v8",
+			provider: 'c8',
 			reportOnFailure: true,
 		},
 	},
 	build: {
-		outDir: path.resolve(__dirname, 'dist'),
+		outDir: 'dist',
 		emptyOutDir: true,
-		sourcemap: true
+		sourcemap: true,
+		rollupOptions: {
+			external: ['vscode']
+		}
 	},
 	server: {
 		port: 3000
@@ -32,7 +35,10 @@ export default defineConfig({
 	},
 	resolve: {
 		alias: {
-			"@": path.resolve(__dirname, './src')
+			"@": resolve(__dirname, './src'),
+			"@shared": resolve(__dirname, '../src/shared'),
+			"@webview": resolve(__dirname, './src'),
+			"@test": resolve(__dirname, '../test')
 		}
 	}
 });
