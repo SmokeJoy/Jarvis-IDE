@@ -1,0 +1,146 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { WebSocketBridge } from '../../src/utils/WebSocketBridge';
+import { WebSocketMessageType } from '@shared/types/websocket.types';
+import type { WebSocketMessageUnion, PingMessage, PongMessage } from '@shared/types/websocket.types';
+
+// Mock vscode API
+const mockPostMessage = vi.fn();
+const mockVscode = {
+  postMessage: mockPostMessage
+};
+
+vi.mock('../../src/utils/vscode', () => ({
+  vscode: mockVscode
+}));
+
+// Mock logger
+vi.mock('@shared/utils/outputLogger', () => ({
+  default: {
+    createComponentLogger: () => ({
+      debug: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn()
+    })
+  }
+}));
+
+describe('WebSocketBridge', () => {
+  let bridge: WebSocketBridge;
+
+  beforeEach(() => {
+    // Reset mocks
+    vi.clearAllMocks();
+    // Reset timers
+    vi.useFakeTimers();
+    // Get bridge instance
+    bridge = WebSocketBridge.getInstance();
+  });
+
+  afterEach(() => {
+    // Cleanup
+    bridge.dispose();
+    vi.useRealTimers();
+  });
+
+  it('should be a singleton', () => {
+    const instance1 = WebSocketBridge.getInstance();
+    const instance2 = WebSocketBridge.getInstance();
+    expect(instance1).toBe(instance2);
+  });
+
+  it('should send ping message on interval', () => {
+    // Advance timer by ping interval
+    vi.advanceTimersByTime(30000);
+
+    // Verify ping message was sent
+    expect(mockPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: WebSocketMessageType.PING,
+        timestamp: expect.any(Number)
+      })
+    );
+  });
+
+  it('should send pong in response to ping', () => {
+    const pingMessage: PingMessage = {
+      type: WebSocketMessageType.PING,
+      timestamp: Date.now()
+    };
+
+    // Simulate receiving ping message
+    window.dispatchEvent(new MessageEvent('message', {
+      data: pingMessage
+    }));
+
+    // Verify pong was sent
+    expect(mockPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: WebSocketMessageType.PONG,
+        timestamp: expect.any(Number)
+      })
+    );
+  });
+
+  it('should notify registered listeners', () => {
+    const mockListener = vi.fn();
+    const testMessage: WebSocketMessageUnion = {
+      type: WebSocketMessageType.STATUS,
+      status: 'connected',
+      timestamp: Date.now()
+    };
+
+    // Register listener
+    bridge.on('message', mockListener);
+
+    // Simulate receiving message
+    window.dispatchEvent(new MessageEvent('message', {
+      data: testMessage
+    }));
+
+    // Verify listener was called
+    expect(mockListener).toHaveBeenCalledWith(testMessage);
+  });
+
+  it('should remove listeners correctly', () => {
+    const mockListener = vi.fn();
+    const testMessage: WebSocketMessageUnion = {
+      type: WebSocketMessageType.STATUS,
+      status: 'connected',
+      timestamp: Date.now()
+    };
+
+    // Register and then remove listener
+    const removeListener = bridge.on('message', mockListener);
+    removeListener();
+
+    // Simulate receiving message
+    window.dispatchEvent(new MessageEvent('message', {
+      data: testMessage
+    }));
+
+    // Verify listener was not called
+    expect(mockListener).not.toHaveBeenCalled();
+  });
+
+  it('should cleanup resources on dispose', () => {
+    const mockListener = vi.fn();
+    bridge.on('message', mockListener);
+
+    bridge.dispose();
+
+    // Verify ping interval was cleared
+    vi.advanceTimersByTime(30000);
+    expect(mockPostMessage).not.toHaveBeenCalled();
+
+    // Verify listeners were cleared
+    const testMessage: WebSocketMessageUnion = {
+      type: WebSocketMessageType.STATUS,
+      status: 'connected',
+      timestamp: Date.now()
+    };
+    window.dispatchEvent(new MessageEvent('message', {
+      data: testMessage
+    }));
+    expect(mockListener).not.toHaveBeenCalled();
+  });
+}); 
