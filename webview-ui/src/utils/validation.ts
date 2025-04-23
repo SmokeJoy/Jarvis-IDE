@@ -1,4 +1,13 @@
-import { OpenAiCompatibleModelInfo } from '../../../../../src/shared/types';
+// Invece di importare da un percorso che non funziona, definiamo qui lo stesso tipo
+interface OpenAiCompatibleModelInfo {
+  id: string;
+  name: string;
+  contextWindow?: number;
+  trainingCutoff?: string;
+  endpoints?: string[];
+  capabilities?: string[];
+  maxTokens?: number;
+}
 
 export const validateApiConfiguration = (config: any): string[] => {
   const errors: string[] = [];

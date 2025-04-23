@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+import { z } from 'zod';
 import { describe, it, expect, vi } from 'vitest';
 import { JarvisProvider } from '../remote/JarvisProvider';
 import type { PromptPayload, LLMStreamToken } from '@shared/types/llm.types';

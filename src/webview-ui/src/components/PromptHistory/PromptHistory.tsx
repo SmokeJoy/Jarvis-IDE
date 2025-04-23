@@ -24,14 +24,14 @@ export const PromptHistory = () => {
 
     const unsubscribe = onMessage((message: PromptHistoryMessageUnion) => {
       if (isPromptHistoryLoadedMessage(message)) {
-        setHistory(message.payload);
+        setHistory((msg.payload as unknown));
         setError('');
       } else if (isPromptHistoryUpdatedMessage(message)) {
-        if (message.payload?.newEntry) {
-          setHistory((prev) => [message.payload.newEntry!, ...prev]);
+        if ((msg.payload as unknown)?.newEntry) {
+          setHistory((prev) => [(msg.payload as unknown).newEntry!, ...prev]);
         }
       } else if (isPromptHistoryErrorMessage(message)) {
-        setError(`Errore cronologia: ${message.payload?.error ?? 'Unknown error'}`);
+        setError(`Errore cronologia: ${(msg.payload as unknown)?.error ?? 'Unknown error'}`);
       }
     });
 

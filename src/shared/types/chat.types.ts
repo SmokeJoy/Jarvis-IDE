@@ -154,3 +154,35 @@ export function normalizeMessage(message: ChatMessage): ChatMessage {
     timestamp: message.timestamp || new Date().toISOString(),
   };
 }
+
+/**
+ * Tipi per la chat
+ */
+
+export type ChatRole = 'user' | 'assistant' | 'system';
+
+export interface ChatMessage {
+  id: string;
+  role: ChatRole;
+  content: string;
+  timestamp: number;
+  streaming?: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+export interface ChatHistory {
+  messages: ChatMessage[];
+  lastUpdated: number;
+}
+
+export interface ChatExportOptions {
+  format: 'markdown' | 'json' | 'txt';
+  includeMetadata?: boolean;
+  includeTimestamps?: boolean;
+}
+
+export interface ChatState {
+  messages: ChatMessage[];
+  isStreaming: boolean;
+  error?: string;
+}

@@ -1,21 +1,23 @@
 import OpenAI, { AzureOpenAI } from 'openai';
-import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';
+import { ApiHandlerOptions, ModelInfo } from '../../shared/types/api.types';
 import {
   ChatCompletionChunk,
   ChatCompletionMessageParam,
   Stream,
 } from '../../types/provider-types/openai-types';
 import { Anthropic } from '@anthropic-ai/sdk';
-import { azureOpenAiDefaultApiVersion, openAiModelInfoSaneDefaults } from '../../shared/api';
+import { openAiModelInfoSaneDefaults } from '../../shared/api';
 import { ApiHandler } from '../index';
 import { convertToOpenAiMessages } from '../transform/openai-format';
-import { ApiStream, ApiStreamChunk } from '../../src/shared/types/api.types';
+import { ApiStream, ApiStreamChunk } from '../../shared/types/api.types';
 import { convertToR1Format } from '../transform/r1-format';
 import { BaseStreamHandler } from '../handlers/BaseStreamHandler';
 import { logger } from '../../utils/logger';
 import { calculateApiCostOpenAI } from '../../utils/cost';
 import { getOpenAiConfig } from './config/openai-config';
-import { createChatMessage } from '../../src/shared/types/chat.types';
+import { createChatMessage, ChatMessage } from '../../shared/types/chat.types';
+import { createOpenAIClient } from './factories/openai-factory';
+import { OpenAiUsage } from './schemas/openai.schema';
 
 /**
  * Interfaccia per le informazioni di utilizzo delle API OpenAI
@@ -53,13 +55,22 @@ interface OpenAiStreamChunk {
   usage?: OpenAiUsage;
 }
 
+// Schema di validazione per le opzioni OpenAI
+const openAiOptionsSchema = z.object({
+  openAiBaseUrl: z.string().optional(),
+  openAiApiKey: z.string(),
+  azureApiVersion: z.string().optional(),
+  openAiModelId: z.string(),
+  openAiModelInfo: z.any().optional() // TODO: definire schema specifico per ModelInfo
+});
+
 /**
  * Handler per l'API OpenAI che estende BaseStreamHandler
  * per sfruttare la logica comune di streaming e retry
  */
 export class OpenAiHandler extends BaseStreamHandler<ChatCompletionChunk> implements ApiHandler {
-  /** Client OpenAI istanziato durante la costruzione */
-  private client: OpenAI;
+  private readonly client: OpenAI | AzureOpenAI;
+  private readonly isAzure: boolean;
 
   /**
    * Costruisce un nuovo handler per OpenAI
@@ -67,27 +78,19 @@ export class OpenAiHandler extends BaseStreamHandler<ChatCompletionChunk> implem
    */
   constructor(options: ApiHandlerOptions) {
     super(options);
-
-    // Azure API shape slightly differs from the core API shape: https://github.com/openai/openai-node?tab=readme-ov-file#microsoft-azure-openai
-    // Use azureApiVersion to determine if this is an Azure endpoint, since the URL may not always contain 'azure.com'
-    if (
-      this.options.azureApiVersion ||
-      this.options.openAiBaseUrl?.toLowerCase().includes('azure.com')
-    ) {
-      this.client = new AzureOpenAI({
-        baseURL: this.options.openAiBaseUrl,
-        apiKey: this.options.openAiApiKey,
-        apiVersion: this.options.azureApiVersion || azureOpenAiDefaultApiVersion,
-      });
-    } else {
-      this.client = new OpenAI({
-        baseURL: this.options.openAiBaseUrl,
-        apiKey: this.options.openAiApiKey,
-      });
+    
+    try {
+      this.client = createOpenAIClient(options);
+      this.isAzure = !!(options.azureApiVersion || options.openAiBaseUrl?.toLowerCase().includes('azure.com'));
+      
+      logger.debug(
+        `[OpenAiHandler] Initialized with ${this.isAzure ? 'Azure' : 'OpenAI'} configuration. BaseURL: ${options.openAiBaseUrl || 'default'}`
+      );
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(`[OpenAiHandler] Failed to initialize client: ${errorMessage}`);
+      throw error;
     }
-    logger.debug(
-      `[OpenAiHandler] Inizializzato con baseURL: ${this.options.openAiBaseUrl || 'default'}`
-    );
   }
 
   /**
@@ -100,49 +103,60 @@ export class OpenAiHandler extends BaseStreamHandler<ChatCompletionChunk> implem
    */
   protected async fetchAPIResponse(
     systemPrompt: string,
-    messages: Anthropic.Messages.MessageParam[]
+    messages: ChatMessage[]
   ): Promise<Stream<ChatCompletionChunk>> {
-    const modelId = this.options.openAiModelId ?? '';
+    if (!this.options.openAiModelId) {
+      throw new Error('OpenAI model ID is required');
+    }
+
+    const modelId = this.options.openAiModelId;
     const isDeepseekReasoner = modelId.includes('deepseek-reasoner');
     const isR1FormatRequired = this.options.openAiModelInfo?.isR1FormatRequired ?? false;
 
-    logger.debug(`[OpenAiHandler] Preparazione richiesta per modello: ${modelId}`);
+    logger.debug(`[OpenAiHandler] Preparing request for model: ${modelId}`);
 
     let openAiMessages: ChatCompletionMessageParam[] = [
-      createChatMessage({role: 'system', content: systemPrompt,
-          timestamp: Date.now()
-    }),
+      createChatMessage({ role: 'system', content: systemPrompt, timestamp: Date.now() }),
       ...convertToOpenAiMessages(messages),
     ];
 
     if (isDeepseekReasoner || isR1FormatRequired) {
-      logger.debug(`[OpenAiHandler] Conversione messaggio al formato R1 richiesto`);
-      openAiMessages = convertToR1Format([createChatMessage({role: 'user', content: systemPrompt,
-          timestamp: Date.now()
-    }), ...messages]);
+      logger.debug(`[OpenAiHandler] Converting messages to R1 format`);
+      openAiMessages = convertToR1Format([
+        createChatMessage({ role: 'user', content: systemPrompt, timestamp: Date.now() }),
+        ...messages
+      ]);
     }
 
     const config = getOpenAiConfig(modelId, this.options.openAiModelInfo);
 
-    logger.info(`[OpenAiHandler] Inizio chiamata API OpenAI con ${openAiMessages.length} messaggi`);
+    logger.info(`[OpenAiHandler] Starting OpenAI API call with ${openAiMessages.length} messages`);
 
     try {
       const response = await this.client.chat.completions.create({
         model: modelId,
         messages: openAiMessages,
         temperature: config.temperature,
-        ...(config.maxTokens ? { maxTokens: config.maxTokens } : {}),
-        ...(config.reasoningEffort ? { reasoning_effort: config.reasoningEffort } : {}),
+        ...(config.maxTokens && { max_tokens: config.maxTokens }),
+        ...(config.reasoningEffort && { reasoning_effort: config.reasoningEffort }),
         stream: true,
-        stream_options: { include_usage: true },
+        stream_options: { include_usage: true }
       });
 
-      logger.info(`[OpenAiHandler] Risposta API OpenAI ricevuta correttamente`);
+      logger.info(`[OpenAiHandler] OpenAI API response received successfully`);
       return response;
     } catch (error) {
-      logger.error(
-        `[OpenAiHandler] Errore durante la chiamata API OpenAI: ${error instanceof Error ? error.message : String(error)}`
-      );
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(`[OpenAiHandler] Error during OpenAI API call: ${errorMessage}`);
+      
+      if (error instanceof OpenAI.APIError) {
+        if (error.status === 429) {
+          throw new Error('Rate limit exceeded. Please try again later.');
+        }
+        if (error.status === 401) {
+          throw new Error('Invalid API key or unauthorized access.');
+        }
+      }
       throw error;
     }
   }
@@ -172,7 +186,7 @@ export class OpenAiHandler extends BaseStreamHandler<ChatCompletionChunk> implem
    */
   async *createMessage(
     systemPrompt: string,
-    messages: Anthropic.Messages.MessageParam[]
+    messages: ChatMessage[]
   ): ApiStream {
     logger.info(`[OpenAiHandler] Creazione messaggio con modello ${this.getModel().id}`);
 
@@ -223,15 +237,12 @@ export class OpenAiHandler extends BaseStreamHandler<ChatCompletionChunk> implem
   }
 
   /**
-   * Implementazione del metodo getModel
-   * Restituisce l'ID e le informazioni sul modello configurato
-   * 
-   * @returns Oggetto con ID e informazioni sul modello
+   * Restituisce le informazioni sul modello corrente
    */
   getModel(): { id: string; info: ModelInfo } {
     return {
-      id: this.options.openAiModelId ?? '',
-      info: this.options.openAiModelInfo ?? openAiModelInfoSaneDefaults,
+      id: this.options.openAiModelId || '',
+      info: this.options.openAiModelInfo || openAiModelInfoSaneDefaults
     };
   }
 }

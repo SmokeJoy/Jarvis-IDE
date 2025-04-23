@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 /**
  * @file ReliabilityFallbackStrategy.test.ts
  * @description Test per la strategia di fallback basata sull'affidabilità

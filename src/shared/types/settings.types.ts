@@ -1,5 +1,6 @@
 import { ApiConfiguration } from './api.types';
 import { TelemetrySetting } from './telemetry.types';
+import { JarvisSettings } from './global';
 
 /**
  * Rappresenta un modello LLM disponibile
@@ -43,4 +44,63 @@ export interface ChatSettings {
   useStreaming?: boolean;
   functionCall?: boolean;
   [key: string]: unknown;
+}
+
+/**
+ * Interfaccia per il gestore delle impostazioni
+ */
+export interface SettingsManager {
+  getSettings(): JarvisSettings;
+  updateSettings(settings: JarvisSettings): Promise<void>;
+  resetSettings(): Promise<void>;
+  loadSettings(): Promise<JarvisSettings | undefined>;
+  saveSettings(settings: JarvisSettings): Promise<void>;
+  exportToFile(filePath: string): Promise<void>;
+  importFromFile(filePath: string): Promise<void>;
+}
+
+/**
+ * Interfaccia per il profilo del prompt
+ */
+export interface PromptProfile {
+  id: string;
+  name: string;
+  description?: string;
+  contextPrompt: string;
+}
+
+/**
+ * Interfaccia per la risposta delle impostazioni
+ */
+export interface SettingsResponse {
+  success: boolean;
+  settings?: JarvisSettings;
+  error?: string;
+}
+
+/**
+ * Interfaccia per la risposta del profilo del prompt
+ */
+export interface PromptProfileResponse {
+  success: boolean;
+  profile?: PromptProfile;
+  error?: string;
+}
+
+/**
+ * Interfaccia per il payload delle impostazioni
+ */
+export interface SettingsPayload {
+  apiConfiguration?: {
+    provider: string;
+    apiKey: string;
+    modelId: string;
+    baseUrl?: string;
+    temperature?: number;
+    maxTokens?: number;
+  };
+  telemetryEnabled?: boolean;
+  customInstructions?: string;
+  contextPrompt?: string | Record<string, unknown>;
+  planActSeparateModelsSetting?: boolean;
 }

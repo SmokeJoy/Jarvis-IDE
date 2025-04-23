@@ -1,3 +1,4 @@
+import { z } from 'zod';
 /**
  * @file provider-registry.test.ts
  * @description Test unitari per il registry dei provider LLM
@@ -223,8 +224,7 @@ describe('Provider Registry', () => {
 
     test('Dovrebbe rifiutare provider senza nome', () => {
       const mockProvider = new MockProvider();
-      // @ts-ignore: forza l'assegnazione di una proprietà invalida per il test
-      mockProvider.name = '';
+            mockProvider.name = '';
 
       expect(() => {
         registerProvider('mock', mockProvider);
@@ -233,8 +233,7 @@ describe('Provider Registry', () => {
 
     test('Dovrebbe rifiutare provider con validateRequest non funzione', () => {
       const mockProvider = new MockProvider();
-      // @ts-ignore: forza l'assegnazione di una proprietà invalida per il test
-      mockProvider.validateRequest = 'not a function';
+            mockProvider.validateRequest = 'not a function';
 
       expect(() => {
         registerProvider('mock', mockProvider);

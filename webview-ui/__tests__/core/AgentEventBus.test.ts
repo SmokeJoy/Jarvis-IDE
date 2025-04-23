@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AgentEventBus, resetAgentEventBusHandlers, registerAgentHandler } from '@/core/AgentEventBus';
 import { MasMessageType } from '@shared/types/mas-message';

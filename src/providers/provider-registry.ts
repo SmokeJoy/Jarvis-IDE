@@ -8,7 +8,7 @@
 
 import { logger } from '../utils/logger';
 import type { LLMProviderHandler, LLMProviderId } from '@shared/types/llm.types';
-import { OpenAIProvider } from './remote/OpenAIProvider';
+import { OpenAIProvider } from './remote/openai-provider';
 import { JarvisProvider } from './remote/JarvisProvider';
 import { OpenRouterProvider } from './remote/OpenRouterProvider';
 

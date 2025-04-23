@@ -2,7 +2,7 @@
  * Context React e Store Zustand per il componente AgentFlowDebugger
  */
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, Dispatch } from 'react';
 import type { 
   AgentFlow, 
   AgentFlowDebuggerState, 
@@ -14,6 +14,7 @@ import type {
   InteractionStatus
 } from '../types/agentFlow';
 import { vscode } from '../utilities/vscode';
+import type { AgentMessageUnion } from '@shared/messages';
 
 interface AgentFlowStore extends AgentFlowDebuggerState {
   // Dati
@@ -177,7 +178,7 @@ export function AgentFlowProvider({ children, initialFlow }: AgentFlowContextPro
   const store = useAgentFlowStore();
   
   // Imposta il flusso iniziale se fornito
-  useEffect(() => {
+  React.useEffect(() => {
     if (initialFlow) {
       store.setFlow(initialFlow);
     }
@@ -209,7 +210,7 @@ export function useAgentFlowContext() {
 export function useFilteredInteractions() {
   const { flow, filters, selectedAgentId } = useAgentFlowStore();
   
-  return useMemo(() => {
+  return React.useMemo(() => {
     if (!flow?.interactions) return [];
     
     return flow.interactions.filter(interaction => {
@@ -349,6 +350,10 @@ const AgentFlowContext = createContext<AgentFlowContextType | undefined>(undefin
 
 // Provider del contesto
 export const AgentFlowProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [flow, setFlow] = React.useState<AgentFlow>(defaultFlow);
+  const [diagramOptions, setDiagramOptions] = React.useState<DiagramOptions>(defaultOptions);
+  const [zoomLevel, setZoomLevel] = React.useState<number>(1.0);
+  const [filters, setFilters] = React.useState<AgentFlowFilters>(defaultFilters);
   const [flow, setFlow] = useState<AgentFlow>(defaultFlow);
   const [diagramOptions, setDiagramOptions] = useState<DiagramOptions>(defaultOptions);
   const [zoomLevel, setZoomLevel] = useState<number>(1.0);
@@ -741,4 +746,32 @@ export const AgentFlowProvider: React.FC<AgentFlowProviderProps> = ({
   );
 };
 
-export default AgentFlowContext; 
+export default AgentFlowContext;
+
+// --- MAS-compliant Agent State & Reducer ---
+type AgentState = {
+  threadId: string | null;
+  typing: string | null;
+  lastMessage?: unknown;
+};
+
+type AgentAction = AgentMessageUnion;
+
+function agentReducer(state: AgentState, action: AgentAction): AgentState {
+  switch (action.type) {
+    case 'agent.typing/state':
+      return {
+        ...state,
+        typing: (msg.payload as unknown).agentId,
+      };
+    case 'agent.message/received':
+      return {
+        ...state,
+        lastMessage: (msg.payload as unknown).message,
+      };
+    default:
+      return state;
+  }
+}
+
+// TODO: Integrare agentReducer nello store Zustand o nel nuovo context MAS 

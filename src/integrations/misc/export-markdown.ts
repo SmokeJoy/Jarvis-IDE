@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';

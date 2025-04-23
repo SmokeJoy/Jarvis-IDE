@@ -17,33 +17,29 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-vi.mock('vscode', () => {
-  return {
+// Mock di vscode
+vi.mock('vscode', () => ({
+  default: {
     window: {
-      showInformationMessage: vi.fn(),
       showErrorMessage: vi.fn(),
       showWarningMessage: vi.fn(),
       createOutputChannel: vi.fn(),
       createWebviewPanel: vi.fn(),
       createTextDocument: vi.fn(),
-      showTextDocument: vi.fn(),
+      showTextDocument: vi.fn()
     },
     workspace: {
-      getConfiguration: vi.fn(),
       workspaceFolders: [],
       onDidChangeConfiguration: vi.fn(),
       onDidChangeWorkspaceFolders: vi.fn(),
-      onDidChangeTextDocument: vi.fn(),
+      onDidChangeTextDocument: vi.fn()
     },
     commands: {
-      registerCommand: vi.fn(),
-      executeCommand: vi.fn(),
+      executeCommand: vi.fn()
     },
     Uri: {
-      file: vi.fn(),
-      parse: vi.fn(),
+      parse: vi.fn()
     },
-    Position: vi.fn(),
     Range: vi.fn(),
     Selection: vi.fn(),
     TextEdit: vi.fn(),
@@ -51,7 +47,7 @@ vi.mock('vscode', () => {
     ConfigurationTarget: {
       Global: 1,
       Workspace: 2,
-      WorkspaceFolder: 3,
-    },
-  };
-});
+      WorkspaceFolder: 3
+    }
+  }
+}));

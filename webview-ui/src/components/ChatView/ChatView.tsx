@@ -37,7 +37,7 @@ export const ChatView = () => {
       if (event.data.type === 'ASSISTANT_RESPONSE') {
         setMessages(prev => [...prev, {
           id: Date.now().toString(),
-          content: event.data.payload.response,
+          content: (msg.payload as unknown).response,
           role: 'assistant',
           timestamp: Date.now(),
         }]);

@@ -88,7 +88,7 @@ export class MASOrchestrator {
       // Registra l'interazione fallita nella memoria
       await this.memoryManager.append(`agent-interactions-${message.agentId}`, {
         agentId: message.agentId,
-        input: message.payload,
+        input: (msg.payload as unknown),
         error: error,
         timestamp: Date.now(),
       });

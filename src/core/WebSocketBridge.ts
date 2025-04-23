@@ -18,7 +18,7 @@ registerHandler('AGENT_TYPING_DONE', (msg) => {
   updateTypingState(msg.agentId, false);
 });
 registerHandler('LLM_CANCEL', (msg) => {
-  cancelPrompt(msg.payload.requestId);
+  cancelPrompt((msg.payload as unknown).requestId);
 });
 
 export function notifySubscribers<T extends WebviewMessageUnion>(msg: unknown): void {

@@ -1,16 +1,5 @@
-import type { Settings } from '@shared/types/settings.types';
-import type { AvailableModel } from '@shared/types/settings.types';
-
-interface Settings {
-  provider: string;
-  model: string;
-  coder_mode: boolean;
-  use_docs: boolean;
-  contextPrompt: string;
-  systemPrompt: string;
-  systemPromptPath?: string;
-  availableModels?: AvailableModel[];
-}
+import type { Settings, AvailableModel } from '@shared/types/settings.types';
+import { createContext, useState, useCallback, ReactNode } from 'react';
 
 interface SettingsContextType {
   settings: Settings;
@@ -22,16 +11,31 @@ interface SettingsContextType {
 }
 
 const defaultSettings: Settings = {
-  provider: 'local',
-  model: 'deepseek-coder',
-  coder_mode: true,
+  apiConfiguration: {
+    provider: 'local',
+    apiKey: '',
+    modelId: 'deepseek-coder',
+    baseUrl: '',
+    temperature: 0.7,
+    maxTokens: 4096
+  },
+  telemetrySetting: {
+    id: 'default',
+    enabled: true,
+    lastUpdated: Date.now()
+  },
+  customInstructions: '',
+  planActSeparateModelsSetting: false,
   use_docs: false,
+  coder_mode: true,
+  multi_agent: false,
   contextPrompt: '',
-  systemPrompt: '',
+  selectedModel: 'deepseek-coder',
   systemPromptPath: 'config/system_prompt.md',
   availableModels: [
     { label: 'DeepSeek Coder (Local)', value: 'deepseek-coder', provider: 'local', coder: true }
-  ]
+  ],
+  code_style: 'standard'
 };
 
 const openSystemPromptFile = () => {

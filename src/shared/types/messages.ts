@@ -138,3 +138,82 @@ export interface ToolResponse {
   output?: unknown;
   error?: string;
 }
+
+import { ExtensionConfig } from './config';
+import { LLMResponse } from './llm';
+import { ChatMessage } from './chat';
+import { ModelInfo } from './model';
+
+/**
+ * Base message interface for all Jarvis messages
+ */
+export interface JarvisMessage<T = unknown> {
+  type: string;
+  payload: T;
+  timestamp?: number;
+}
+
+/**
+ * Error message interface
+ */
+export interface ErrorMessage extends JarvisMessage<{
+  error: string;
+  stack?: string;
+  code?: string;
+}> {
+  type: 'error';
+}
+
+/**
+ * Init message interface
+ */
+export interface InitMessage extends JarvisMessage<{
+  sessionId: string;
+  timestamp: number;
+  version?: string;
+}> {
+  type: 'init';
+}
+
+/**
+ * Type guard for JarvisMessage
+ */
+export function isJarvisMessage<T = unknown>(value: unknown): value is JarvisMessage<T> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'type' in value &&
+    typeof (value as JarvisMessage).type === 'string' &&
+    'payload' in value
+  );
+}
+
+/**
+ * Type guard for ErrorMessage
+ */
+export function isErrorMessage(value: unknown): value is ErrorMessage {
+  return (
+    isJarvisMessage(value) &&
+    value.type === 'error' &&
+    typeof (msg.payload as unknown) === 'object' &&
+    (msg.payload as unknown) !== null &&
+    'error' in (msg.payload as unknown) &&
+    typeof (msg.payload as unknown).error === 'string'
+  );
+}
+
+/**
+ * Type guard for InitMessage
+ */
+export function isInitMessage(value: unknown): value is InitMessage {
+  return (
+    isJarvisMessage(value) &&
+    value.type === 'init' &&
+    typeof (msg.payload as unknown) === 'object' &&
+    (msg.payload as unknown) !== null &&
+    'sessionId' in (msg.payload as unknown) &&
+    'timestamp' in (msg.payload as unknown) &&
+    typeof (msg.payload as unknown).sessionId === 'string' &&
+    typeof (msg.payload as unknown).timestamp === 'number'
+  );
+}

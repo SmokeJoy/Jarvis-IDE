@@ -1,0 +1,599 @@
+     → fallbackManager.setPreferredProvider is not a function
+   × LLMFallbackManager > dovrebbe eseguire con successo il callback con il primo provider 1ms
+     → Cannot read properties of undefined (reading 'getStats')
+   × LLMFallbackManager > dovrebbe fare fallback al secondo provider quando il primo fallisce 1ms
+     → Cannot read properties of undefined (reading 'getStats')
+   × LLMFallbackManager > dovrebbe preferire l'ultimo provider che ha avuto successo 0ms
+     → Cannot read properties of undefined (reading 'getStats')
+   × LLMFallbackManager > dovrebbe lanciare un errore quando tutti i provider falliscono 8ms
+     → expected [Function] to throw error including 'Tutti i provider LLM hanno fallito' but got 'Cannot read properties of undefined (…'
+   × LLMFallbackManager > non dovrebbe memorizzare il provider quando rememberSuccessful è false 1ms        
+     → Cannot read properties of undefined (reading 'getStats')
+   × LLMFallbackManager > dovrebbe riprovare il numero corretto di volte quando configurato 1ms
+     → Cannot read properties of undefined (reading 'getStats')
+   × LLMFallbackManager > Funzionalità di statistiche > dovrebbe inizializzare le statistiche per tutti i provider 0ms
+     → fallbackManager.getAllStats is not a function
+   × LLMFallbackManager > Funzionalità di statistiche > dovrebbe recuperare le statistiche di un provider specifico 0ms
+     → fallbackManager.getProviderStats is not a function
+   × LLMFallbackManager > Funzionalità di statistiche > dovrebbe aggiornare le statistiche dopo un'esecuzione con successo 1ms
+     → Cannot read properties of undefined (reading 'getStats')
+   × LLMFallbackManager > Funzionalità di statistiche > dovrebbe aggiornare le statistiche dopo un fallimento 1ms
+     → Cannot read properties of undefined (reading 'getStats')
+   × LLMFallbackManager > Funzionalità di statistiche > dovrebbe ordinare i provider per affidabilità 0ms   
+     → fallbackManager.getAllStats is not a function
+   × LLMFallbackManager > Funzionalità di statistiche > non dovrebbe raccogliere statistiche quando collectStats è false 0ms
+     → Cannot read properties of undefined (reading 'getStats')
+   × LLMFallbackManager > Funzionalità di statistiche > dovrebbe inizializzare le statistiche per un nuovo provider aggiunto 1ms
+     → fallbackManager.addProvider is not a function
+   × LLMFallbackManager > Funzionalità di statistiche > dovrebbe rimuovere le statistiche quando viene rimosso un provider 0ms
+     → fallbackManager.removeProvider is not a function
+   × LLMFallbackManager > Integrazione con LLMEventBus > dovrebbe creare un event bus se non fornito 0ms    
+     → managerWithoutEventBus.getEventBus is not a function
+   × LLMFallbackManager > Integrazione con LLMEventBus > dovrebbe permettere di registrare listener e ricevere eventi 1ms
+     → Cannot read properties of undefined (reading 'getStats')
+   × LLMFallbackManager > Integrazione con LLMEventBus > dovrebbe permettere di rimuovere listener 0ms      
+     → Cannot read properties of undefined (reading 'getStats')
+   × LLMFallbackManager > dovrebbe mettere in cooldown un provider dopo un fallimento 1ms
+     → Cannot read properties of undefined (reading 'getStats')
+   × LLMFallbackManager > dovrebbe riprovare un provider dopo il periodo di cooldown 2ms
+     → Cannot read properties of undefined (reading 'getStats')
+   × LLMFallbackManager > dovrebbe accettare una strategia tramite strategyType 0ms
+     → fallbackManager2.getStrategy is not a function
+   × LLMFallbackManager > dovrebbe configurare minimumAttempts per la strategia reliability 1ms
+     → fallbackManager2.getStrategy is not a function
+   × LLMFallbackManager > Adaptive Strategy Integration > should use adaptive strategy when configured 1ms  
+     → Cannot read properties of undefined (reading 'getStats')
+   × LLMFallbackManager > Adaptive Strategy Integration > should handle adaptive strategy with multiple conditions 1ms
+     → Cannot read properties of undefined (reading 'getStats')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Tests 28 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts > LLMFallbackManager > dovrebbe inizializzare correttamente
+TypeError: fallbackManager.getProviders is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:67:28
+     65|   it('dovrebbe inizializzare correttamente', () => {
+     66|     expect(fallbackManager).toBeDefined();
+     67|     expect(fallbackManager.getProviders()).toHaveLength(mockProviders.length);
+       |                            ^
+     68|     expect(fallbackManager.getPreferredProvider()).toBeNull();                                     il provider preferito inizialenager.getEventBus()).toBe(eventBus);
+TypeError: fallbackManagerWithPreferred.getPreferredProvider is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:79:60
+     77|     });
+     78|
+     79|     const preferredProvider = fallbackManagerWithPreferred.getPreferredProvider();
+       |        ^
+     80|     expect(preferredProvider).not.toBeNull();                                               e di impostare il provider preferitoer?.id).toBe('anthropic');
+TypeError: fallbackManager.setPreferredProvider is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:86:21
+     84|   // Test del metodo setPreferredProvider
+     85|   it('dovrebbe permettere di impostare il provider preferito', () => {
+     86|     fallbackManager.setPreferredProvider('mistral');
+       |                     ^
+     87|     const preferredProvider = fallbackManager.getPreferredProvider();                             e di aggiungere e rimuovere provider
+TypeError: fallbackManager.addProvider is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:98:21
+     96| 
+     97|     // Aggiungi provider
+     98|     fallbackManager.addProvider(newProvider);
+       |                     ^
+     99|     expect(fallbackManager.getProviders()).toHaveLength(mockProviders.length + 1);                a rimozione del provider preferito
+TypeError: fallbackManager.setPreferredProvider is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:110:21
+    108|   it('dovrebbe gestire la rimozione del provider preferito', () => {
+    109|     // Imposta un provider preferito
+    110|     fallbackManager.setPreferredProvider('openai');
+       |                     ^
+    111|     expect(fallbackManager.getPreferredProvider()?.id).toBe('openai');                            con successo il callback con il primo provider
+TypeError: Cannot read properties of undefined (reading 'getStats')
+ ❯ LLMFallbackManager.executeWithFallback src/mas/core/fallback/LLMFallbackManager.ts:28:43
+     26|
+     27|     for (const provider of this.providers) {
+     28|       const stats = this.telemetryTracker.getStats(provider.id);
+       |                                           ^
+     29|
+     30|       // Skip providers in cooldown                                               back al secondo provider quando il primo falliscenager.test.ts:126:42
+TypeError: Cannot read properties of undefined (reading 'getStats')
+ ❯ LLMFallbackManager.executeWithFallback src/mas/core/fallback/LLMFallbackManager.ts:28:43
+     26|
+     27|     for (const provider of this.providers) {
+     28|       const stats = this.telemetryTracker.getStats(provider.id);
+       |                                           ^
+     29|
+     30|       // Skip providers in cooldown                                                l'ultimo provider che ha avuto successoallbackManager.test.ts:165:42
+TypeError: Cannot read properties of undefined (reading 'getStats')
+ ❯ LLMFallbackManager.executeWithFallback src/mas/core/fallback/LLMFallbackManager.ts:28:43
+     26|
+     27|     for (const provider of this.providers) {
+     28|       const stats = this.telemetryTracker.getStats(provider.id);
+       |                                           ^
+     29|
+     30|       // Skip providers in cooldown                                               Cannot read properties of undefined (…'sconoackManager.test.ts:238:27
+AssertionError: expected [Function] to throw error including 'Tutti i provider LLM hanno fallito' but got 'C
+Expected: "Tutti i provider LLM hanno fallito"                                               izzare il provider quando rememberSuccessful è falseding 'getStats')"
+TypeError: Cannot read properties of undefined (reading 'getStats')
+ ❯ LLMFallbackManager.executeWithFallback src/mas/core/fallback/LLMFallbackManager.ts:28:43
+     26|
+     27|     for (const provider of this.providers) {
+     28|       const stats = this.telemetryTracker.getStats(provider.id);
+       |                                           ^
+     29|
+     30|       // Skip providers in cooldown                                                il numero corretto di volte quando configuratoManager.test.ts:302:27
+TypeError: Cannot read properties of undefined (reading 'getStats')
+ ❯ LLMFallbackManager.executeWithFallback src/mas/core/fallback/LLMFallbackManager.ts:28:43
+     26|
+     27|     for (const provider of this.providers) {
+     28|       const stats = this.telemetryTracker.getStats(provider.id);
+       |                                           ^
+     29|
+     30|       // Skip providers in cooldown                                               atistiche > dovrebbe inizializzare le statistiche per tutti i provider
+TypeError: fallbackManager.getAllStats is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:339:37
+    337|     // Test di inizializzazione statistiche
+    338|     it('dovrebbe inizializzare le statistiche per tutti i provider', () => {
+    339|       const stats = fallbackManager.getAllStats();
+       |                                     ^
+    340|                                               atistiche > dovrebbe recuperare le statistiche di un provider specifico
+TypeError: fallbackManager.getProviderStats is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:354:37
+    352|     // Test di getProviderStats
+    353|     it('dovrebbe recuperare le statistiche di un provider specifico', () => {
+    354|       const stats = fallbackManager.getProviderStats('openai');
+       |                                     ^
+    355|                                               atistiche > dovrebbe aggiornare le statistiche dopo un'esecuzione con successo
+TypeError: Cannot read properties of undefined (reading 'getStats')
+ ❯ LLMFallbackManager.executeWithFallback src/mas/core/fallback/LLMFallbackManager.ts:28:43
+     26|
+     27|     for (const provider of this.providers) {
+     28|       const stats = this.telemetryTracker.getStats(provider.id);
+       |                                           ^
+     29|
+     30|       // Skip providers in cooldown                                               atistiche > dovrebbe aggiornare le statistiche dopo un fallimento
+TypeError: Cannot read properties of undefined (reading 'getStats')
+ ❯ LLMFallbackManager.executeWithFallback src/mas/core/fallback/LLMFallbackManager.ts:28:43
+     26|
+     27|     for (const provider of this.providers) {
+     28|       const stats = this.telemetryTracker.getStats(provider.id);
+       |                                           ^
+     29|
+     30|       // Skip providers in cooldown                                               atistiche > dovrebbe ordinare i provider per affidabilità
+TypeError: fallbackManager.getAllStats is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:438:40
+    436|
+    437|       // Mock delle statistiche per simulare l'uso nel tempo
+    438|       const statsMap = fallbackManager.getAllStats();
+       |                                        ^
+    439|                                               atistiche > non dovrebbe raccogliere statistiche quando collectStats è false
+TypeError: Cannot read properties of undefined (reading 'getStats')
+ ❯ LLMFallbackManager.executeWithFallback src/mas/core/fallback/LLMFallbackManager.ts:28:43
+     26|
+     27|     for (const provider of this.providers) {
+     28|       const stats = this.telemetryTracker.getStats(provider.id);
+       |                                           ^
+     29|
+     30|       // Skip providers in cooldown                                               atistiche > dovrebbe inizializzare le statistiche per un nuovo provider aggiunto
+TypeError: fallbackManager.addProvider is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:487:23
+    485|
+    486|       // Aggiungi il nuovo provider
+    487|       fallbackManager.addProvider(newProvider);
+       |                       ^
+    488|                                               atistiche > dovrebbe rimuovere le statistiche quando viene rimosso un provider
+TypeError: fallbackManager.removeProvider is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:499:23
+    497|     it('dovrebbe rimuovere le statistiche quando viene rimosso un provider', () => {
+    498|       // Rimuovi un provider
+    499|       fallbackManager.removeProvider('anthropic');
+       |                       ^
+    500|                                               LMEventBus > dovrebbe creare un event bus se non fornito
+TypeError: managerWithoutEventBus.getEventBus is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:515:37
+    513|       });
+    514|
+    515|       expect(managerWithoutEventBus.getEventBus()).toBeInstanceOf(LLMEventBus);
+       |                                     ^
+    516|     });                                               LMEventBus > dovrebbe permettere di registrare listener e ricevere eventi
+TypeError: Cannot read properties of undefined (reading 'getStats')
+ ❯ LLMFallbackManager.executeWithFallback src/mas/core/fallback/LLMFallbackManager.ts:28:43
+     26|
+     27|     for (const provider of this.providers) {
+     28|       const stats = this.telemetryTracker.getStats(provider.id);
+       |                                           ^
+     29|
+     30|       // Skip providers in cooldown                                               LMEventBus > dovrebbe permettere di rimuovere listener
+TypeError: Cannot read properties of undefined (reading 'getStats')
+ ❯ LLMFallbackManager.executeWithFallback src/mas/core/fallback/LLMFallbackManager.ts:28:43
+     26|
+     27|     for (const provider of this.providers) {
+     28|       const stats = this.telemetryTracker.getStats(provider.id);
+       |                                           ^
+     29|
+     30|       // Skip providers in cooldown                                               n cooldown un provider dopo un fallimentollbackManager.test.ts:602:29
+TypeError: Cannot read properties of undefined (reading 'getStats')
+ ❯ LLMFallbackManager.executeWithFallback src/mas/core/fallback/LLMFallbackManager.ts:28:43
+     26|
+     27|     for (const provider of this.providers) {
+     28|       const stats = this.telemetryTracker.getStats(provider.id);
+       |                                           ^
+     29|
+     30|       // Skip providers in cooldown                                                un provider dopo il periodo di cooldownallbackManager.test.ts:633:27
+TypeError: Cannot read properties of undefined (reading 'getStats')
+ ❯ LLMFallbackManager.executeWithFallback src/mas/core/fallback/LLMFallbackManager.ts:28:43
+     26|
+     27|     for (const provider of this.providers) {
+     28|       const stats = this.telemetryTracker.getStats(provider.id);
+       |                                           ^
+     29|
+     30|       // Skip providers in cooldown                                                una strategia tramite strategyType/LLMFallbackManager.test.ts:679:27
+TypeError: fallbackManager2.getStrategy is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:719:28
+    717|
+    718|     // Verifica che la strategia impostata sia RoundRobinFallbackStrategy
+    719|     expect(fallbackManager.getStrategy()).toBeInstanceOf(RoundRobinFallbackStrategy);
+       |                            ^
+    720|   });                                               re minimumAttempts per la strategia reliability
+TypeError: fallbackManager2.getStrategy is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:731:28
+    729|
+    730|     // Verifica che la strategia impostata sia ReliabilityFallbackStrategy
+    731|     expect(fallbackManager.getStrategy()).toBeInstanceOf(ReliabilityFallbackStrategy);
+       |                            ^
+    732|                                               Integration > should use adaptive strategy when configured
+TypeError: Cannot read properties of undefined (reading 'getStats')
+ ❯ LLMFallbackManager.executeWithFallback src/mas/core/fallback/LLMFallbackManager.ts:28:43
+     26|
+     27|     for (const provider of this.providers) {
+     28|       const stats = this.telemetryTracker.getStats(provider.id);
+       |                                           ^
+     29|
+     30|       // Skip providers in cooldown                                               Integration > should handle adaptive strategy with multiple conditions
+TypeError: Cannot read properties of undefined (reading 'getStats')
+ ❯ LLMFallbackManager.executeWithFallback src/mas/core/fallback/LLMFallbackManager.ts:28:43
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/28]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  28 failed (28)
+   Start at  18:26:07
+   Duration  4.30s (transform 235ms, setup 1.08s, collect 146ms, tests 34ms, environment 2.08s, prepare 281ms)
+
+PS E:\cline-main> pnpm exec vitest run src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts
+ Vitest  "deps.inline" is deprecated. If you rely on vite-node directly, use "server.deps.inline" instead. Otherwise, consider using "deps.optimizer.web.include"
+ Vitest  "deps.external" is deprecated. If you rely on vite-node directly, use "server.deps.external" instead. Otherwise, consider using "deps.optimizer.web.exclude"
+
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts (28 tests | 27 failed) 47ms
+   × LLMFallbackManager > dovrebbe inizializzare correttamente 7ms
+     → fallbackManager.getProviders is not a function
+   × LLMFallbackManager > dovrebbe impostare il provider preferito iniziale 1ms
+     → fallbackManagerWithPreferred.getPreferredProvider is not a function
+   × LLMFallbackManager > dovrebbe permettere di impostare il provider preferito 1ms
+     → fallbackManager.setPreferredProvider is not a function
+   × LLMFallbackManager > dovrebbe permettere di aggiungere e rimuovere provider 1ms
+     → fallbackManager.addProvider is not a function
+   × LLMFallbackManager > dovrebbe gestire la rimozione del provider preferito 1ms
+     → fallbackManager.setPreferredProvider is not a function
+   × LLMFallbackManager > dovrebbe eseguire con successo il callback con il primo provider 3ms
+     → fallbackManager.getPreferredProvider is not a function
+   × LLMFallbackManager > dovrebbe fare fallback al secondo provider quando il primo fallisce 1ms
+     → fallbackManager.getPreferredProvider is not a function
+   × LLMFallbackManager > dovrebbe preferire l'ultimo provider che ha avuto successo 1ms
+     → fallbackManager.getPreferredProvider is not a function
+   × LLMFallbackManager > dovrebbe lanciare un errore quando tutti i provider falliscono 8ms
+     → expected [Function] to throw error including 'Tutti i provider LLM hanno fallito' but got 'All providers failed. Last error: Err…'
+   × LLMFallbackManager > non dovrebbe memorizzare il provider quando rememberSuccessful è false 1ms        
+     → noMemoryManager.getPreferredProvider is not a function
+   × LLMFallbackManager > dovrebbe riprovare il numero corretto di volte quando configurato 4ms
+     → expected 2nd "spy" call to have been called with [ { id: 'openai', …(3) } ]
+   × LLMFallbackManager > Funzionalità di statistiche > dovrebbe inizializzare le statistiche per tutti i provider 1ms
+     → fallbackManager.getAllStats is not a function
+   × LLMFallbackManager > Funzionalità di statistiche > dovrebbe recuperare le statistiche di un provider specifico 0ms
+     → fallbackManager.getProviderStats is not a function
+   × LLMFallbackManager > Funzionalità di statistiche > dovrebbe aggiornare le statistiche dopo un'esecuzione con successo 0ms
+     → fallbackManager.getProviderStats is not a function
+   × LLMFallbackManager > Funzionalità di statistiche > dovrebbe aggiornare le statistiche dopo un fallimento 1ms
+     → fallbackManager.getProviderStats is not a function
+   × LLMFallbackManager > Funzionalità di statistiche > dovrebbe ordinare i provider per affidabilità 1ms   
+     → fallbackManager.getAllStats is not a function
+   × LLMFallbackManager > Funzionalità di statistiche > non dovrebbe raccogliere statistiche quando collectStats è false 1ms
+     → noStatsManager.getAllStats is not a function
+   × LLMFallbackManager > Funzionalità di statistiche > dovrebbe inizializzare le statistiche per un nuovo provider aggiunto 1ms
+     → fallbackManager.addProvider is not a function
+   × LLMFallbackManager > Funzionalità di statistiche > dovrebbe rimuovere le statistiche quando viene rimosso un provider 1ms
+     → fallbackManager.removeProvider is not a function
+   × LLMFallbackManager > Integrazione con LLMEventBus > dovrebbe creare un event bus se non fornito 1ms    
+     → managerWithoutEventBus.getEventBus is not a function
+   × LLMFallbackManager > Integrazione con LLMEventBus > dovrebbe permettere di registrare listener e ricevere eventi 1ms
+     → expected "spy" to be called 2 times, but got 0 times
+   ✓ LLMFallbackManager > Integrazione con LLMEventBus > dovrebbe permettere di rimuovere listener 1ms      
+   × LLMFallbackManager > dovrebbe mettere in cooldown un provider dopo un fallimento 1ms
+     → Cannot read properties of undefined (reading 'getStats')
+   × LLMFallbackManager > dovrebbe riprovare un provider dopo il periodo di cooldown 3ms
+     → Cannot read properties of undefined (reading 'getStats')
+   × LLMFallbackManager > dovrebbe accettare una strategia tramite strategyType 1ms
+     → fallbackManager2.getStrategy is not a function
+   × LLMFallbackManager > dovrebbe configurare minimumAttempts per la strategia reliability 1ms
+     → fallbackManager2.getStrategy is not a function
+   × LLMFallbackManager > Adaptive Strategy Integration > should use adaptive strategy when configured 5ms  
+     → expected 'Risultato da openai' to be 'Risultato da mistral' // Object.is equality
+   × LLMFallbackManager > Adaptive Strategy Integration > should handle adaptive strategy with multiple conditions 1ms
+     → expected 'Risultato da openai' to be 'Risultato da mistral' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Tests 27 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts > LLMFallbackManager > dovrebbe inizializzare correttamente
+TypeError: fallbackManager.getProviders is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:95:28
+     93|   it('dovrebbe inizializzare correttamente', () => {
+     94|     expect(fallbackManager).toBeDefined();
+     95|     expect(fallbackManager.getProviders()).toHaveLength(mockProviders.length);
+       |                            ^
+     96|     expect(fallbackManager.getPreferredProvider()).toBeNull();
+     97|     expect(fallbackManager.getEventBus()).toBe(eventBus);
+                                                il provider preferito iniziale⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/27]⎯
+TypeError: fallbackManagerWithPreferred.getPreferredProvider is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:107:60
+    105|     });
+    106|
+    107|     const preferredProvider = fallbackManagerWithPreferred.getPreferredProvider();
+       |        ^
+    108|     expect(preferredProvider).not.toBeNull();
+    109|     expect(preferredProvider?.id).toBe('anthropic');
+                                               e di impostare il provider preferito⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/27]⎯
+TypeError: fallbackManager.setPreferredProvider is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:114:21
+    112|   // Test del metodo setPreferredProvider
+    113|   it('dovrebbe permettere di impostare il provider preferito', () => {
+    114|     fallbackManager.setPreferredProvider('mistral');
+       |                     ^
+    115|     const preferredProvider = fallbackManager.getPreferredProvider();
+    116|
+                                               e di aggiungere e rimuovere provider⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/27]⎯
+TypeError: fallbackManager.addProvider is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:126:21
+    124|
+    125|     // Aggiungi provider
+    126|     fallbackManager.addProvider(newProvider);
+       |                     ^
+    127|     expect(fallbackManager.getProviders()).toHaveLength(mockProviders.length + 1);
+    128|
+                                               a rimozione del provider preferito⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/27]⎯
+TypeError: fallbackManager.setPreferredProvider is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:138:21
+    136|   it('dovrebbe gestire la rimozione del provider preferito', () => {
+    137|     // Imposta un provider preferito
+    138|     fallbackManager.setPreferredProvider('openai');
+       |                     ^
+    139|     expect(fallbackManager.getPreferredProvider()?.id).toBe('openai');
+    140|
+                                               con successo il callback con il primo provider⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/27]⎯
+TypeError: fallbackManager.getPreferredProvider is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:161:28
+    159|
+    160|     // Verifica che il provider usato sia stato memorizzato come preferito
+    161|     expect(fallbackManager.getPreferredProvider()?.id).toBe('openai');
+       |                            ^
+    162|
+    163|     // Verifica che l'evento di successo sia stato emesso
+                                               back al secondo provider quando il primo fallisce⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/27]⎯
+TypeError: fallbackManager.getPreferredProvider is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:201:28
+    199|
+    200|     // Verifica che il provider che ha avuto successo sia memorizzato
+    201|     expect(fallbackManager.getPreferredProvider()?.id).toBe('anthropic');
+       |                            ^
+    202|
+    203|     // Verifica che l'evento di fallimento sia stato emesso
+                                                l'ultimo provider che ha avuto successo⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/27]⎯
+TypeError: fallbackManager.getPreferredProvider is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:271:48
+    269|
+    270|     // Memorizza quale provider ha avuto successo
+    271|     const successfulProvider = fallbackManager.getPreferredProvider();
+       |                                                ^
+    272|     expect(successfulProvider).not.toBeNull();
+    273|
+                                               All providers failed. Last error: Err…'scono⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/27]⎯
+AssertionError: expected [Function] to throw error including 'Tutti i provider LLM hanno fallito' but got 'A
+Expected: "Tutti i provider LLM hanno fallito"
+Received: "All providers failed. Last error: Errore generale"
+
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:289:5
+    287|
+    288|     // L'esecuzione dovrebbe lanciare un errore
+    289|     await expect(fallbackManager.executeWithFallback(callback)).rejects.toThrow(
+       |     ^
+    290|       'Tutti i provider LLM hanno fallito'
+    291|     );
+                                               izzare il provider quando rememberSuccessful è false⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/27]⎯
+TypeError: noMemoryManager.getPreferredProvider is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:335:28
+    333|
+    334|     // Verifica che non ci sia un provider preferito memorizzato
+    335|     expect(noMemoryManager.getPreferredProvider()).toBeNull();
+       |                            ^
+    336|   });
+    337|
+                                                il numero corretto di volte quando configurato⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/27]⎯
+AssertionError: expected 2nd "spy" call to have been called with [ { id: 'openai', …(3) } ]
+ FAIL  src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts > LLMFallbackManager > dovrebbe riprovare 
+- Expected
++ Received
+
+  [
+    {
+      "handle": [Function spy],
+-     "id": "openai",
++     "id": "anthropic",
+      "isEnabled": true,
+-     "name": "Provider openai",
++     "name": "Provider anthropic",
+    },
+  ]
+
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:358:22
+    356|     expect(callback).toHaveBeenCalledTimes(3);
+    357|     expect(callback).toHaveBeenNthCalledWith(1, mockProviders[0]);
+    358|     expect(callback).toHaveBeenNthCalledWith(2, mockProviders[0]);
+       |                      ^
+    359|     expect(callback).toHaveBeenNthCalledWith(3, mockProviders[0]);
+    360|     expect(result).toBe('Successo al terzo tentativo');
+                                               atistiche > dovrebbe inizializzare le statistiche per tutti i provider
+TypeError: fallbackManager.getAllStats is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:367:37
+    365|     // Test di inizializzazione statistiche
+    366|     it('dovrebbe inizializzare le statistiche per tutti i provider', () => {
+    367|       const stats = fallbackManager.getAllStats();
+       |                                     ^
+    368|
+    369|       expect(stats.size).toBe(mockProviders.length);
+                                               atistiche > dovrebbe recuperare le statistiche di un provider specifico
+TypeError: fallbackManager.getProviderStats is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:382:37
+    380|     // Test di getProviderStats
+    381|     it('dovrebbe recuperare le statistiche di un provider specifico', () => {
+    382|       const stats = fallbackManager.getProviderStats('openai');
+       |                                     ^
+    383|
+    384|       expect(stats).not.toBeNull();
+                                               atistiche > dovrebbe aggiornare le statistiche dopo un'esecuzione con successo
+TypeError: fallbackManager.getProviderStats is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:396:37
+    394|
+    395|       // Verifica statistiche del provider usato
+    396|       const stats = fallbackManager.getProviderStats('openai');
+       |                                     ^
+    397|       expect(stats).not.toBeNull();
+    398|       expect(stats!.successCount).toBe(1);
+                                               atistiche > dovrebbe aggiornare le statistiche dopo un fallimento
+TypeError: fallbackManager.getProviderStats is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:427:43
+    425|
+    426|       // Verifica statistiche del primo provider (fallito)
+    427|       const failedStats = fallbackManager.getProviderStats('openai');
+       |                                           ^
+    428|       expect(failedStats).not.toBeNull();
+    429|       expect(failedStats!.successCount).toBe(0);
+                                               atistiche > dovrebbe ordinare i provider per affidabilità
+TypeError: fallbackManager.getAllStats is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:466:40
+    464|
+    465|       // Mock delle statistiche per simulare l'uso nel tempo
+    466|       const statsMap = fallbackManager.getAllStats();
+       |                                        ^
+    467|
+    468|       const openaiStats = statsMap.get('openai')!;
+                                               atistiche > non dovrebbe raccogliere statistiche quando collectStats è false
+TypeError: noStatsManager.getAllStats is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:506:36
+    504|
+    505|       // Verifica che le statistiche siano vuote
+    506|       const stats = noStatsManager.getAllStats();
+       |                                    ^
+    507|       expect(stats.size).toBe(0);
+    508|     });
+                                               atistiche > dovrebbe inizializzare le statistiche per un nuovo provider aggiunto
+TypeError: fallbackManager.addProvider is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:515:23
+    513|
+    514|       // Aggiungi il nuovo provider
+    515|       fallbackManager.addProvider(newProvider);
+       |                       ^
+    516|
+    517|       // Verifica che siano state create le statistiche
+                                               atistiche > dovrebbe rimuovere le statistiche quando viene rimosso un provider
+TypeError: fallbackManager.removeProvider is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:527:23
+    525|     it('dovrebbe rimuovere le statistiche quando viene rimosso un provider', () => {
+    526|       // Rimuovi un provider
+    527|       fallbackManager.removeProvider('anthropic');
+       |                       ^
+    528|
+    529|       // Verifica che le statistiche siano state rimosse
+                                               LMEventBus > dovrebbe creare un event bus se non fornito
+TypeError: managerWithoutEventBus.getEventBus is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:543:37
+    541|       });
+    542|
+    543|       expect(managerWithoutEventBus.getEventBus()).toBeInstanceOf(LLMEventBus);
+       |                                     ^
+    544|     });
+    545|
+                                               LMEventBus > dovrebbe permettere di registrare listener e ricevere eventi
+AssertionError: expected "spy" to be called 2 times, but got 0 times
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:573:29
+    571|
+    572|       // Due volte: una per il fallimento di openai, una per il successo di anthropic
+    573|       expect(statsListener).toHaveBeenCalledTimes(2);
+       |                             ^
+    574|
+    575|       // Verifica il payload dell'evento di fallimento
+                                               n cooldown un provider dopo un fallimento⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/27]⎯
+TypeError: Cannot read properties of undefined (reading 'getStats')
+ ❯ LLMFallbackManager.executeWithFallback src/mas/core/fallback/LLMFallbackManager.ts:28:43
+     26|
+     27|     for (const provider of this.providers) {
+     28|       const stats = this.telemetryTracker.getStats(provider.id);
+       |                                           ^
+     29|
+     30|       // Skip providers in cooldown
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:661:27
+                                                un provider dopo il periodo di cooldown⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/27]⎯
+TypeError: Cannot read properties of undefined (reading 'getStats')
+ ❯ LLMFallbackManager.executeWithFallback src/mas/core/fallback/LLMFallbackManager.ts:28:43
+     26|
+     27|     for (const provider of this.providers) {
+     28|       const stats = this.telemetryTracker.getStats(provider.id);
+       |                                           ^
+     29|
+     30|       // Skip providers in cooldown
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:707:27
+                                                una strategia tramite strategyType⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/27]⎯
+TypeError: fallbackManager2.getStrategy is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:747:28
+    745|
+    746|     // Verifica che la strategia impostata sia RoundRobinFallbackStrategy
+    747|     expect(fallbackManager.getStrategy()).toBeInstanceOf(RoundRobinFallbackStrategy);
+       |                            ^
+    748|   });
+    749|
+                                               re minimumAttempts per la strategia reliability⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/27]⎯
+TypeError: fallbackManager2.getStrategy is not a function
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:759:28
+    757|
+    758|     // Verifica che la strategia impostata sia ReliabilityFallbackStrategy
+    759|     expect(fallbackManager.getStrategy()).toBeInstanceOf(ReliabilityFallbackStrategy);
+       |                            ^
+    760|
+    761|     // Non possiamo verificare direttamente il valore di minimumAttempts perché è privato,
+                                               Integration > should use adaptive strategy when configured
+AssertionError: expected 'Risultato da openai' to be 'Risultato da mistral' // Object.is equality
+ FAIL  src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts > LLMFallbackManager > Adaptive Strategy I
+Expected: "Risultato da mistral"
+Received: "Risultato da openai"
+
+ ❯ src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts:804:23
+    802|         return `Risultato da ${provider.id}`;
+    803|       });
+    804|       expect(result1).toBe('Risultato da mistral');
+       |                       ^
+    805|
+    806|       // Simula un fallimento di Mistral
+                                               Integration > should handle adaptive strategy with multiple conditions
+AssertionError: expected 'Risultato da openai' to be 'Risultato da mistral' // Object.is equality
+ FAIL  src/mas/core/fallback/__tests__/LLMFallbackManager.test.ts > LLMFallbackManager > Adaptive Strategy I
+Expected: "Risultato da mistral"
+Received: "Risultato da openai"
+
+    892|
+    893|       // Simula sia un aumento di costo che un fall    892|
+    893|       // Simula sia un aumento di costo che un fallimento recente
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/27]⎯            
+
+
+ Test Files  1 failed (1)
+      Tests  27 failed | 1 passed (28)
+   Start at  18:34:56
+   Duration  4.26s (transform 229ms, setup 1.07s, collect 152ms, tests 47ms, environment 2.08s, prepare 261ms)
+
+PS E:\cline-main>

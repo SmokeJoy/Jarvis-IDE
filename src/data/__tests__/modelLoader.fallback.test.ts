@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 /**
  * @file modelLoader.fallback.test.ts
  * @description Test per il comportamento di fallback di modelLoader.ts

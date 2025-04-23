@@ -25,3 +25,15 @@ export type { ExtensionSettings, SettingValue, ContextPrompt } from './settings.
 export * from './message';
 export * from './mas-message';
 export * from './mas-message-guards';
+export * from './guards';
+
+// Re-export all types
+export * from './api';
+export * from './llm';
+export * from './chat';
+export * from './model';
+export * from './settings';
+export * from './messages/types/apiMessages';
+
+// Export message guards
+export * from '../messages/guards/apiMessageGuards';

@@ -1,6 +1,6 @@
 /**
  * @file global.ts
- * @description Tipi globali centralizzati per l'applicazione
+ * @description Tipi globali dell'applicazione
  * @version 1.0.0
  */
 
@@ -31,4 +31,30 @@ export enum LogLevel {
   INFO = 'INFO',
   WARN = 'WARN',
   ERROR = 'ERROR',
+}
+
+export interface TelemetrySetting {
+  enabled: boolean;
+}
+
+export interface JarvisSettings {
+  apiConfiguration?: {
+    provider: string;
+    apiKey: string;
+    modelId: string;
+    baseUrl?: string;
+    temperature?: number;
+    maxTokens?: number;
+  };
+  telemetrySetting?: TelemetrySetting;
+  customInstructions?: string;
+  contextPrompt?: string | Record<string, unknown>;
+  planActSeparateModelsSetting?: boolean;
+}
+
+export interface LogEntry {
+  timestamp: string;
+  level: keyof typeof LogLevel;
+  message: string;
+  error?: Error;
 }

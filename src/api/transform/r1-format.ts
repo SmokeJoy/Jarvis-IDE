@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import {
   ChatCompletionMessageParam,
   ChatCompletionContentPartText,

@@ -4,16 +4,16 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "
 import { useEvent, useSize } from "react-use"
 import styled from "styled-components"
 import {
-	JarvisIdeApiReqInfo,
-	JarvisIdeAskQuestion,
-	JarvisIdeAskUseMcpServer,
-	JarvisIdeMessage,
-	JarvisIdePlanModeResponse,
-	JarvisIdeSayTool,
+	JarvisMessage,
+	JarvisApiReqInfo,
+	JarvisAskQuestion,
+	JarvisAskUseMcpServer,
+	JarvisPlanModeResponse,
+	JarvisSayTool,
 	COMPLETION_RESULT_CHANGES_FLAG,
 	ExtensionMessage,
-} from "../../../../src/shared/ExtensionMessage"
-import { COMMAND_OUTPUT_STRING, COMMAND_REQ_APP_STRING } from "../../../../src/shared/combineCommandSequences"
+} from "@shared/messages"
+import { COMMAND_OUTPUT_STRING, COMMAND_REQ_APP_STRING } from "@shared/combineCommandSequences"
 import { useExtensionState } from "../../context/ExtensionStateContext"
 import { findMatchingResourceOrTemplate, getMcpServerDisplayName } from "../../utils/mcp"
 import { vscode } from "../../utils/vscode"
@@ -41,10 +41,10 @@ const ChatRowContainer = styled.div`
 `
 
 interface ChatRowProps {
-	message: JarvisIdeMessage
+	message: JarvisMessage
 	isExpanded: boolean
 	onToggleExpand: () => void
-	lastModifiedMessage?: JarvisIdeMessage
+	lastModifiedMessage?: JarvisMessage
 	isLast: boolean
 	onHeightChange: (isTaller: boolean) => void
 }
@@ -139,7 +139,7 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 
 	const [cost, apiReqCancelReason, apiReqStreamingFailedMessage] = useMemo(() => {
 		if (message.text != null && message.say === "api_req_started") {
-			const info: JarvisIdeApiReqInfo = JSON.parse(message.text)
+			const info: JarvisApiReqInfo = JSON.parse(message.text)
 			return [info.cost, info.cancelReason, info.streamingFailedMessage]
 		}
 		return [undefined, undefined, undefined]
@@ -224,7 +224,7 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 					<span style={{ color: normalColor, fontWeight: "bold" }}>Jarvis IDE wants to execute this command:</span>,
 				]
 			case "use_mcp_server":
-				const mcpServerUse = JSON.parse(message.text || "{}") as JarvisIdeAskUseMcpServer
+				const mcpServerUse = JSON.parse(message.text || "{}") as JarvisAskUseMcpServer
 				return [
 					isMcpServerResponding ? (
 						<ProgressIndicator />
@@ -338,7 +338,7 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 
 	const tool = useMemo(() => {
 		if (message.ask === "tool" || message.say === "tool") {
-			return JSON.parse(message.text || "{}") as JarvisIdeSayTool
+			return JSON.parse(message.text || "{}") as JarvisSayTool
 		}
 		return null
 	}, [message.ask, message.say, message.text])
@@ -614,7 +614,7 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 	}
 
 	if (message.ask === "use_mcp_server" || message.say === "use_mcp_server") {
-		const useMcpServer = JSON.parse(message.text || "{}") as JarvisIdeAskUseMcpServer
+		const useMcpServer = JSON.parse(message.text || "{}") as JarvisAskUseMcpServer
 		const server = mcpServers.find((server) => server.name === useMcpServer.serverName)
 		return (
 			<>
@@ -875,7 +875,7 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 						</div>
 					)
 				case "user_feedback_diff":
-					const tool = JSON.parse(message.text || "{}") as JarvisIdeSayTool
+					const tool = JSON.parse(message.text || "{}") as JarvisSayTool
 					return (
 						<div
 							style={{
@@ -1183,7 +1183,7 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 					let options: string[] | undefined
 					let selected: string | undefined
 					try {
-						const parsedMessage = JSON.parse(message.text || "{}") as JarvisIdeAskQuestion
+						const parsedMessage = JSON.parse(message.text || "{}") as JarvisAskQuestion
 						question = parsedMessage.question
 						options = parsedMessage.options
 						selected = parsedMessage.selected
@@ -1215,7 +1215,7 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 					let options: string[] | undefined
 					let selected: string | undefined
 					try {
-						const parsedMessage = JSON.parse(message.text || "{}") as JarvisIdePlanModeResponse
+						const parsedMessage = JSON.parse(message.text || "{}") as JarvisPlanModeResponse
 						response = parsedMessage.response
 						options = parsedMessage.options
 						selected = parsedMessage.selected

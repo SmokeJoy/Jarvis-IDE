@@ -91,7 +91,7 @@ export const FallbackMonitorPanel: React.FC<FallbackMonitorPanelProps> = ({
                 <span>{event.type}</span>
                 <span>{formatTimestamp(event.timestamp)}</span>
               </div>
-              <div className="mt-1 text-sm">{JSON.stringify(event.payload, null, 2)}</div>
+              <div className="mt-1 text-sm">{JSON.stringify((msg.payload as unknown), null, 2)}</div>
             </div>
           ))}
         </div>

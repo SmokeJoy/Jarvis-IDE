@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 /**
  * @file RoundRobinFallbackStrategy.test.ts
  * @description Test per la strategia di fallback basata su round robin

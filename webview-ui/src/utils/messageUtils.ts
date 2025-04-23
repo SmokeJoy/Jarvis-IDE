@@ -1,4 +1,4 @@
-import { WebviewMessageUnion, isWebviewMessage } from '@shared/types/messages-barrel';
+import { Message as WebviewMessage, isWebviewMessage } from '@shared/messages';
 import { t } from '../i18n';
 
 const logger = {
@@ -36,11 +36,11 @@ export function getVSCodeAPI() {
   return vscode;
 }
 
-export function isValidWebviewMessage(msg: unknown): msg is WebviewMessageUnion {
+export function isValidWebviewMessage(msg: unknown): msg is WebviewMessage {
   return isWebviewMessage(msg);
 }
 
-export function sendMessageToExtension<T extends WebviewMessageUnion>(message: T): void {
+export function sendMessageToExtension<T extends WebviewMessage>(message: T): void {
   try {
     if (!isValidWebviewMessage(message)) {
       throw new Error(t('errors.invalidMessageFormat'));
@@ -54,11 +54,11 @@ export function sendMessageToExtension<T extends WebviewMessageUnion>(message: T
 }
 
 export function createMessageListener(
-  callback: (message: WebviewMessageUnion) => void
+  callback: (message: WebviewMessage) => void
 ): () => void {
   const handler = (event: MessageEvent) => {
     const message = event.data;
-    if (message && isValidWebviewMessage(message)) {
+    if (message && isWebviewMessage(message)) {
       logger.debug(`Messaggio ricevuto dall'estensione di tipo: ${message.type}`);
       callback(message);
     } else {
@@ -74,15 +74,15 @@ export function createMessageListener(
 }
 
 export const createMessage = {
-  getSettings: (): WebviewMessageUnion => ({ type: 'GET_SETTINGS' }),
-  saveSettings: (settings: any): WebviewMessageUnion => ({ type: 'SAVE_SETTINGS', payload: settings }),
-  chatRequest: (prompt: string, options?: any): WebviewMessageUnion => ({ type: 'LLM_REQUEST', payload: { prompt, ...options } }),
-  cancelRequest: (): WebviewMessageUnion => ({ type: 'LLM_CANCEL' }),
-  clearChat: (): WebviewMessageUnion => ({ type: 'CLEAR_CHAT_HISTORY' }),
-  resetApiKey: (): WebviewMessageUnion => ({ type: 'RESET_API_KEY' }),
-  exportChat: (format: 'markdown' | 'html' | 'pdf' | 'json'): WebviewMessageUnion => ({ type: 'EXPORT_CHAT_HISTORY', payload: { format } }),
-  executeCommand: (command: string, args?: any[]): WebviewMessageUnion => ({ type: 'EXECUTE_COMMAND', payload: { command, args } }),
-  selectFiles: (): WebviewMessageUnion => ({ type: 'SELECT_IMAGES' }),
-  loadContext: (path: string, recursive?: boolean): WebviewMessageUnion => ({ type: 'LOAD_CONTEXT', payload: { path, recursive } }),
-  modelSwitch: (modelId: string): WebviewMessageUnion => ({ type: 'MODEL_SWITCH', payload: { modelId } })
+  getSettings: (): WebviewMessage => ({ type: 'GET_SETTINGS' } as unknown as WebviewMessage),
+  saveSettings: (settings: unknown): WebviewMessage => ({ type: 'SAVE_SETTINGS', payload: settings } as unknown as WebviewMessage),
+  chatRequest: (prompt: string, options?: unknown): WebviewMessage => ({ type: 'LLM_REQUEST', payload: { prompt, ...(options as object) } } as unknown as WebviewMessage),
+  cancelRequest: (): WebviewMessage => ({ type: 'LLM_CANCEL' } as unknown as WebviewMessage),
+  clearChat: (): WebviewMessage => ({ type: 'CLEAR_CHAT_HISTORY' } as unknown as WebviewMessage),
+  resetApiKey: (): WebviewMessage => ({ type: 'RESET_API_KEY' } as unknown as WebviewMessage),
+  exportChat: (format: 'markdown' | 'html' | 'pdf' | 'json'): WebviewMessage => ({ type: 'EXPORT_CHAT_HISTORY', payload: { format } } as unknown as WebviewMessage),
+  executeCommand: (command: string, args?: unknown[]): WebviewMessage => ({ type: 'EXECUTE_COMMAND', payload: { command, args } } as unknown as WebviewMessage),
+  selectFiles: (): WebviewMessage => ({ type: 'SELECT_IMAGES' } as unknown as WebviewMessage),
+  loadContext: (path: string, recursive?: boolean): WebviewMessage => ({ type: 'LOAD_CONTEXT', payload: { path, recursive } } as unknown as WebviewMessage),
+  modelSwitch: (modelId: string): WebviewMessage => ({ type: 'MODEL_SWITCH', payload: { modelId } } as unknown as WebviewMessage),
 };

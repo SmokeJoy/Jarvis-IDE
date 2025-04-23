@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+import { z } from 'zod';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { LLMRouter, registerProvider } from '@/providers/LLMRouter';
 import type {

@@ -47,8 +47,8 @@ const TaskQueueView: React.FC = () => {
       if (message.type === 'mas.taskQueue/update') {
         setState(prevState => ({
           ...prevState,
-          queueState: message.payload.queueState,
-          agents: message.payload.agents,
+          queueState: (msg.payload as unknown).queueState,
+          agents: (msg.payload as unknown).agents,
           lastUpdate: new Date().toLocaleTimeString()
         }));
       }

@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+import { z } from 'zod';
 /**
  * @file contextTagHandler.test.ts
  * @description Test per il gestore dei tag di contesto

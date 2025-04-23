@@ -1,3 +1,4 @@
+import { z } from 'zod';
 /**
  * @file modelLoader.test.ts
  * @description Test per il sistema centralizzato di caricamento modelli

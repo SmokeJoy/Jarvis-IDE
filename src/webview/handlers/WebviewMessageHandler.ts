@@ -34,7 +34,7 @@ export class WebviewMessageHandler extends BaseWebviewMessageHandler {
   }
 
   protected _handleSendPrompt(message: any): void {
-    const payload = message.payload as { prompt?: string };
+    const payload = (msg.payload as unknown) as { prompt?: string };
     if (!payload?.prompt) {
       this._sendError({
         error: new Error('Missing prompt in message payload'),
@@ -49,7 +49,7 @@ export class WebviewMessageHandler extends BaseWebviewMessageHandler {
   }
 
   protected _handleAction(message: ActionMessage): void {
-    const payload = message.payload as { action?: ActionType };
+    const payload = (msg.payload as unknown) as { action?: ActionType };
     if (!payload?.action) {
       this._sendError({
         error: new Error('Missing action in message payload'),
@@ -64,7 +64,7 @@ export class WebviewMessageHandler extends BaseWebviewMessageHandler {
   }
 
   protected _handleResponse(message: ResponseMessage): void {
-    const payload = message.payload;
+    const payload = (msg.payload as unknown);
     if (!payload) {
       this._sendError({
         error: new Error('Missing payload in response message'),
@@ -93,7 +93,7 @@ export class WebviewMessageHandler extends BaseWebviewMessageHandler {
   }
 
   protected _handleInstruction(message: InstructionMessage): void {
-    const payload = message.payload as { instruction?: string };
+    const payload = (msg.payload as unknown) as { instruction?: string };
     if (!payload?.instruction) {
       this._sendError({
         error: new Error('Missing instruction in message payload'),

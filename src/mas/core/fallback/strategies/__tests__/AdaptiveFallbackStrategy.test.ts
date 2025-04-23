@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+import { z } from 'zod';
 /**
  * @file AdaptiveFallbackStrategy.test.ts
  * @description Test per la strategia di fallback adattiva

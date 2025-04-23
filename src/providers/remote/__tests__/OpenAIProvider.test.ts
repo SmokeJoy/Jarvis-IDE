@@ -1,5 +1,6 @@
+import { vi } from 'vitest';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { OpenAIProvider } from '../OpenAIProvider';
+import { OpenAIProvider } from '../openai-provider';
 import type { PromptPayload, LLMStreamToken } from '@shared/types/llm.types';
 
 const apiKey = 'test-api-key';

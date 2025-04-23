@@ -1,3 +1,4 @@
+import { z } from 'zod';
 /**
  * @file modelValidator.test.ts
  * @description Test per l'utility di validazione dei modelli

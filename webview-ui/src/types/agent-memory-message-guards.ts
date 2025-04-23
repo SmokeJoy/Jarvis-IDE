@@ -65,7 +65,7 @@ export function isAgentMemoryMessage(message: unknown): message is AgentMemoryMe
  */
 export function isRequestMemorySnapshotMessage(message: unknown): message is RequestMemorySnapshotMessage {
   return isMessageOfType<RequestMemorySnapshotMessage>(message, AgentMemoryMessageTypeImport.REQUEST_MEMORY_SNAPSHOT) &&
-    validateRequestMemorySnapshotPayload((message as any).payload);
+    validateRequestMemorySnapshotPayload((msg.payload as unknown));
 }
 
 /**
@@ -75,7 +75,7 @@ export function isRequestMemorySnapshotMessage(message: unknown): message is Req
  */
 export function isMemorySnapshotReceivedMessage(message: unknown): message is MemorySnapshotReceivedMessage {
   return isMessageOfType<MemorySnapshotReceivedMessage>(message, AgentMemoryMessageTypeImport.MEMORY_SNAPSHOT_RECEIVED) &&
-    validateMemorySnapshotReceivedPayload((message as any).payload);
+    validateMemorySnapshotReceivedPayload((msg.payload as unknown));
 }
 
 /**
@@ -85,7 +85,7 @@ export function isMemorySnapshotReceivedMessage(message: unknown): message is Me
  */
 export function isClearAgentMemoryMessage(message: unknown): message is ClearAgentMemoryMessage {
   return isMessageOfType<ClearAgentMemoryMessage>(message, AgentMemoryMessageTypeImport.CLEAR_AGENT_MEMORY) &&
-    validateClearAgentMemoryPayload((message as any).payload);
+    validateClearAgentMemoryPayload((msg.payload as unknown));
 }
 
 /**
@@ -95,7 +95,7 @@ export function isClearAgentMemoryMessage(message: unknown): message is ClearAge
  */
 export function isAgentMemoryClearedMessage(message: unknown): message is AgentMemoryClearedMessage {
   return isMessageOfType<AgentMemoryClearedMessage>(message, AgentMemoryMessageTypeImport.AGENT_MEMORY_CLEARED) &&
-    validateAgentMemoryClearedPayload((message as any).payload);
+    validateAgentMemoryClearedPayload((msg.payload as unknown));
 }
 
 /**
@@ -105,7 +105,7 @@ export function isAgentMemoryClearedMessage(message: unknown): message is AgentM
  */
 export function isSaveMemoryItemMessage(message: unknown): message is SaveMemoryItemMessage {
   return isMessageOfType<SaveMemoryItemMessage>(message, AgentMemoryMessageTypeImport.SAVE_MEMORY_ITEM) &&
-    validateSaveMemoryItemPayload((message as any).payload);
+    validateSaveMemoryItemPayload((msg.payload as unknown));
 }
 
 /**
@@ -130,7 +130,7 @@ export function isMemoryItemSavedMessage(
  */
 export function isDeleteMemoryItemMessage(message: unknown): message is DeleteMemoryItemMessage {
   return isMessageOfType<DeleteMemoryItemMessage>(message, AgentMemoryMessageTypeImport.DELETE_MEMORY_ITEM) &&
-    validateDeleteMemoryItemPayload((message as any).payload);
+    validateDeleteMemoryItemPayload((msg.payload as unknown));
 }
 
 /**
@@ -140,7 +140,7 @@ export function isDeleteMemoryItemMessage(message: unknown): message is DeleteMe
  */
 export function isMemoryItemDeletedMessage(message: unknown): message is MemoryItemDeletedMessage {
   return isMessageOfType<MemoryItemDeletedMessage>(message, AgentMemoryMessageTypeImport.MEMORY_ITEM_DELETED) &&
-    validateMemoryItemDeletedPayload((message as any).payload);
+    validateMemoryItemDeletedPayload((msg.payload as unknown));
 }
 
 // Funzioni di validazione payload

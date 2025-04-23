@@ -22,18 +22,18 @@ function extensionStateReducer(
     case 'SET_API_CONFIGURATION':
       return {
         ...state,
-        apiConfiguration: { ...state.apiConfiguration, ...action.payload },
+        apiConfiguration: { ...state.apiConfiguration, ...(msg.payload as unknown) },
       };
     case 'SET_TELEMETRY_SETTING':
-      return { ...state, telemetrySetting: action.payload };
+      return { ...state, telemetrySetting: (msg.payload as unknown) };
     case 'SET_CUSTOM_INSTRUCTIONS':
-      return { ...state, customInstructions: action.payload };
+      return { ...state, customInstructions: (msg.payload as unknown) };
     case 'SET_SYSTEM_PROMPT':
-      return { ...state, systemPrompt: action.payload };
+      return { ...state, systemPrompt: (msg.payload as unknown) };
     case 'SET_SYSTEM_PROMPT_PATH':
-      return { ...state, systemPromptPath: action.payload };
+      return { ...state, systemPromptPath: (msg.payload as unknown) };
     case 'SET_AVAILABLE_MODELS':
-      return { ...state, availableModels: action.payload };
+      return { ...state, availableModels: (msg.payload as unknown) };
     default:
       return state;
   }

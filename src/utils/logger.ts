@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { LogLevel } from '../shared/types/global';
 import { JarvisProvider as JarvisProviderType } from '../core/webview/JarvisProvider';
 import { appendLogToFile as appendLogToFileType } from './logStorage';
@@ -243,5 +244,12 @@ export class Logger {
 
   error(message: string, error?: any) {
     Logger.error(`[${this._name}] ${message}`, error);
+  }
+
+  /**
+   * Imposta il livello di log
+   */
+  setLevel(level: LogLevel): void {
+    setLogLevel(level);
   }
 }

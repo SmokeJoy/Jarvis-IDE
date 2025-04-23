@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 /**
  * @file WebSocketBridge.test.ts
  * @description Test per il componente WebSocketBridge

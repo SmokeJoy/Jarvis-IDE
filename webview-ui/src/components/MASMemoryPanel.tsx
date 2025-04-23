@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useExtensionMessage } from '../hooks/useExtensionMessage';
-import { MasMessageType, AgentMemoryRequestMessage, ErrorMessage as ErrorMessageType } from '../types/mas-message';
+import { MasMessageType, AgentMemoryRequestMessage, ErrorMessage as ErrorMessageType } from '@shared/messages';
 import { isAgentMemoryResponseMessage, isErrorMessage } from '../types/mas-message-guards';
 import styled from 'styled-components';
 
@@ -109,14 +109,14 @@ export const MASMemoryPanel: React.FC = () => {
     const handler = (event: MessageEvent) => {
       // Gestione della risposta con i dati di memoria
       if (isAgentMemoryResponseMessage(event.data)) {
-        setMemoryData(event.data.payload || {});
+        setMemoryData((msg.payload as unknown) || {});
         setLoading(false);
         setError(null);
       }
       
       // Gestione dei messaggi di errore
       if (isErrorMessage(event.data)) {
-        setError(event.data.payload.message || 'Errore nel recupero della memoria');
+        setError((msg.payload as unknown).message || 'Errore nel recupero della memoria');
         setLoading(false);
       }
     };

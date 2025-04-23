@@ -9,7 +9,7 @@ import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { MASMemoryPanel } from '../../components/MASMemoryPanel';
 import * as useExtensionMessageModule from '../../hooks/useExtensionMessage';
-import { MasMessageType, AgentMemoryRequestMessage, AgentMemoryResponseMessage } from '../../types/mas-message';
+import { MasMessageType, AgentMemoryRequestMessage, AgentMemoryResponseMessage } from '@shared/messages';
 import { isAgentMemoryResponseMessage } from '../../types/mas-message-guards';
 import '@testing-library/jest-dom/vitest';
 import userEvent from '@testing-library/user-event';

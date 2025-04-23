@@ -24,7 +24,7 @@ export const MultiAgentControl: React.FC = () => {
 
   useExtensionMessage((message: unknown) => {
     if (isAgentErrorMessage(message)) {
-      console.error(`Errore agente ${message.payload.agentId}:`, message.payload.error);
+      console.error(`Errore agente ${(msg.payload as unknown).agentId}:`, (msg.payload as unknown).error);
     }
   });
 

@@ -77,7 +77,7 @@ export function registerMessageListener(
   const handler = (event: MessageEvent) => {
     const message = event.data;
     if (message && message.type === type) {
-      callback(message.payload);
+      callback((msg.payload as unknown));
     }
   };
 

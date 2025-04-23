@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 /**
  * Test per il modulo di esportazione Markdown
  * @jest-environment node

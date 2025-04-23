@@ -80,9 +80,8 @@ export const VSCodeRadioGroup: React.FC<VSCodeRadioGroupProps> = ({
   disabled = false,
   name = 'radio-group'
 }) => {
-  const handleChange = (event: Event) => {
-    const radioEvent = event as unknown as React.FormEvent<HTMLInputElement>;
-    onChange(radioEvent.currentTarget.value);
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(event.currentTarget.value);
   };
 
   return (

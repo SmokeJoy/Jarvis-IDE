@@ -1,3 +1,4 @@
+import { z } from 'zod';
 /**
  * @file anthropic-format.ts
  * @description Transformer per il formato Anthropic

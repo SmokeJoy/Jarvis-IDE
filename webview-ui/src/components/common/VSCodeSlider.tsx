@@ -60,9 +60,8 @@ export const VSCodeSlider: React.FC<VSCodeSliderProps> = ({
   step = 1,
   disabled = false
 }) => {
-  const handleChange = (event: Event) => {
-    const inputEvent = event as unknown as React.FormEvent<HTMLInputElement>;
-    onChange(Number(inputEvent.currentTarget.value));
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(Number(event.currentTarget.value));
   };
 
   return (

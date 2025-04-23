@@ -43,8 +43,7 @@ export class RequestyHandler implements ApiHandler {
           ...convertToOpenAiMessages(messages),
         ];
 
-        // @ts-ignore-next-line
-        const stream = await this.client.chat.completions.create({
+                const stream = await this.client.chat.completions.create({
           model: modelId,
           messages: openAiMessages,
           temperature: 0,

@@ -68,8 +68,7 @@ export async function createOpenRouterStream(
     // Esecuzione della richiesta
     logger.info(`Invio richiesta streaming a OpenRouter con modello: ${model.id}`);
 
-    // @ts-ignore - ignorare errori di tipo sul metodo create
-    const rawStream = await client.chat.completions.create(options);
+        const rawStream = await client.chat.completions.create(options);
 
     // Adatta lo stream per implementare l'interfaccia ApiStream
     const stream: ApiStream<any> = {

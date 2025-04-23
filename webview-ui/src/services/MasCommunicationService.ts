@@ -2,7 +2,6 @@ import { vscode } from '../vscode-api';
 import { AgentStatus, Task, TaskQueueState, AgentMode, CodeStyle } from '../types/mas-types';
 import { useExtensionMessage } from '../hooks/useExtensionMessage';
 import { 
-  AgentMessageUnion, 
   MasMessageType,
   GetAgentsStatusMessage,
   GetTaskQueueStatusMessage,
@@ -17,7 +16,7 @@ import {
   AbortTaskMessage,
   RerunTaskMessage,
   SetTaskQueueFilterMessage
-} from '../types/mas-message';
+} from '@shared/messages';
 import {
   isAgentMessage,
   isAgentsStatusUpdateMessage,
@@ -67,25 +66,25 @@ export class MasCommunicationService {
       if (isAgentMessage(message)) {
         // Notifica i sottoscrittori in base al tipo di messaggio
         if (isAgentsStatusUpdateMessage(message)) {
-          this.notifySubscribers('agentsStatusUpdate', message.payload);
+          this.notifySubscribers('agentsStatusUpdate', (msg.payload as unknown));
         }
         else if (isTaskQueueUpdateMessage(message)) {
-          this.notifySubscribers('taskQueueUpdate', message.payload);
+          this.notifySubscribers('taskQueueUpdate', (msg.payload as unknown));
         }
         else if (isInstructionReceivedMessage(message)) {
-          this.notifySubscribers('instructionReceived', message.payload);
+          this.notifySubscribers('instructionReceived', (msg.payload as unknown));
         }
         else if (isInstructionCompletedMessage(message)) {
-          this.notifySubscribers('instructionCompleted', message.payload);
+          this.notifySubscribers('instructionCompleted', (msg.payload as unknown));
         }
         else if (isInstructionFailedMessage(message)) {
-          this.notifySubscribers('instructionFailed', message.payload);
+          this.notifySubscribers('instructionFailed', (msg.payload as unknown));
         }
         else if (isConfigurationSavedMessage(message)) {
-          this.notifySubscribers('configurationSaved', message.payload);
+          this.notifySubscribers('configurationSaved', (msg.payload as unknown));
         }
         else if (isConfigurationErrorMessage(message)) {
-          this.notifySubscribers('configurationError', message.payload);
+          this.notifySubscribers('configurationError', (msg.payload as unknown));
         }
       }
     });

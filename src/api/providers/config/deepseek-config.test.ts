@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { buildDeepSeekConfig } from './deepseek-config';
 import { openAiModelInfoSaneDefaults } from '../../../shared/api';
 import { ModelInfo } from '../../../src/shared/types/api.types';

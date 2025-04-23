@@ -76,7 +76,7 @@ export class ExecutorAgent {
     try {
       switch (command.type) {
         case 'execute':
-          await this.processExecutionRequest(command.payload as ExecutionRequest);
+          await this.processExecutionRequest((msg.payload as unknown) as ExecutionRequest);
           break;
 
         case 'status':

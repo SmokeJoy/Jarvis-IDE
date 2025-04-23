@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+import { z } from 'zod';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import * as vscode from 'vscode';
 import { WebviewMessageHandler } from '../WebviewMessageHandler';

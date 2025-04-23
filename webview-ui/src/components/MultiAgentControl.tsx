@@ -22,7 +22,7 @@ import {
   GetAgentsStatusMessage,
   SetSystemModeMessage,
   SetDefaultStyleMessage
-} from '../types/mas-message';
+} from '@shared/messages';
 import { 
   isAgentsStatusUpdateMessage, 
   isConfigurationSavedMessage,
@@ -71,7 +71,7 @@ export const MultiAgentControl: React.FC<MultiAgentControlProps> = ({
 
     // Gestione dei diversi tipi di messaggi usando i type guard
     if (isAgentsStatusUpdateMessage(message)) {
-      setAgentsStatus(message.payload);
+      setAgentsStatus((msg.payload as unknown));
       setIsLoading(false);
     } else if (isConfigurationSavedMessage(message)) {
       setStatusMessage({

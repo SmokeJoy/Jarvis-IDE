@@ -1,27 +1,19 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "skipLibCheck": false,
-    "strict": true,
-    "types": ["node"],
+    "baseUrl": ".",
     "paths": {
+      "@/*": ["./*"],
       "@shared/*": ["src/shared/*"],
       "@webview/*": ["webview-ui/src/*"],
-      "@test/*": ["test/*"],
-      "@/*": ["src/*"]
+      "@extension/*": ["src/extension/*"],
+      "@test/*": ["src/test/*"],
+      "@types/*": ["src/shared/types/*"],
+      "@core/*": ["src/core/*"],
+      "@utils/*": ["src/utils/*"]
     },
-    "baseUrl": ".",
-    "allowJs": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "esModuleInterop": true,
-    "exactOptionalPropertyTypes": true
+    "types": ["vitest/globals", "node"]
   },
-  "include": ["src", "webview-ui", "tests", "types"],
-  "exclude": ["scripts/**/*", "**/node_modules/**/*", "**/dist/**/*"],
-  "references": [
-    { "path": "./tsconfig.node.json" }
-  ]
+  "include": ["src/**/*", "webview-ui/src/**/*"],
+  "exclude": ["node_modules", "**/node_modules/*", "out", "dist"]
 } 

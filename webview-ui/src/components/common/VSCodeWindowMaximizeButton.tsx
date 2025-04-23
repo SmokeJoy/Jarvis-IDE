@@ -31,8 +31,8 @@ const Button = styled.button`
 
 interface VSCodeWindowMaximizeButtonProps {
   onClick: () => void;
-  disabled?: boolean;
-  className?: string;
+  disabled: boolean | undefined;
+  className: string | undefined;
 }
 
 export const VSCodeWindowMaximizeButton: React.FC<VSCodeWindowMaximizeButtonProps> = ({

@@ -1,0 +1,11 @@
+{
+  "includeDir": "E:\\cline-main\\documentazione-jarvis-ide",
+  "toolName": "search_local_docs",
+  "toolDescription": "Cerca nella documentazione locale.",
+  "ignorePatterns": [
+    "node_modules",
+    ".git",
+    "build",
+    "*.log"
+  ]
+}

@@ -273,5 +273,21 @@ export interface LLMProviderHandler {
   cancel(requestId: string): void;
 }
 
+/**
+ * Risposta alla richiesta di fetch dei modelli
+ */
+export interface FetchModelsResponse {
+  models: OpenAiCompatibleModelInfo[];
+  error?: string;
+}
+
+/**
+ * Entry della cache dei modelli
+ */
+export interface ModelCacheEntry {
+  timestamp: number;
+  models: OpenAiCompatibleModelInfo[];
+}
+
 // Esporto i tipi principali definiti qui
 export type { MessageParam, LLMOptions, ImageDetail, ChatCompletionContentPartText, ChatCompletionContentPartImage, ChatCompletionContentPart };

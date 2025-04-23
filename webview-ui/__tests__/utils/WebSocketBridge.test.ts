@@ -1,28 +1,32 @@
+import { vi } from 'vitest';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { WebSocketBridge } from '../../src/utils/WebSocketBridge';
 import { WebSocketMessageType } from '@shared/types/websocket.types';
 import type { WebSocketMessageUnion, PingMessage, PongMessage } from '@shared/types/websocket.types';
 
-// Mock vscode API
-const mockPostMessage = vi.fn();
-const mockVscode = {
-  postMessage: mockPostMessage
-};
+// Mock modules
+vi.mock('../../src/utils/vscode', () => {
+  return {
+    vscode: {
+      postMessage: vi.fn()
+    }
+  };
+});
 
-vi.mock('../../src/utils/vscode', () => ({
-  vscode: mockVscode
-}));
+vi.mock('@shared/utils/outputLogger', () => {
+  return {
+    default: {
+      createComponentLogger: () => ({
+        debug: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn()
+      })
+    }
+  };
+});
 
-// Mock logger
-vi.mock('@shared/utils/outputLogger', () => ({
-  default: {
-    createComponentLogger: () => ({
-      debug: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn()
-    })
-  }
-}));
+// Import after mocks
+import { WebSocketBridge } from '../../src/utils/WebSocketBridge';
+import { vscode } from '../../src/utils/vscode';
 
 describe('WebSocketBridge', () => {
   let bridge: WebSocketBridge;
@@ -53,7 +57,7 @@ describe('WebSocketBridge', () => {
     vi.advanceTimersByTime(30000);
 
     // Verify ping message was sent
-    expect(mockPostMessage).toHaveBeenCalledWith(
+    expect(vscode.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: WebSocketMessageType.PING,
         timestamp: expect.any(Number)
@@ -73,7 +77,7 @@ describe('WebSocketBridge', () => {
     }));
 
     // Verify pong was sent
-    expect(mockPostMessage).toHaveBeenCalledWith(
+    expect(vscode.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: WebSocketMessageType.PONG,
         timestamp: expect.any(Number)
@@ -126,11 +130,14 @@ describe('WebSocketBridge', () => {
     const mockListener = vi.fn();
     bridge.on('message', mockListener);
 
+    // Clear mock history from initialization
+    vi.clearAllMocks();
+    
     bridge.dispose();
 
     // Verify ping interval was cleared
     vi.advanceTimersByTime(30000);
-    expect(mockPostMessage).not.toHaveBeenCalled();
+    expect(vscode.postMessage).not.toHaveBeenCalled();
 
     // Verify listeners were cleared
     const testMessage: WebSocketMessageUnion = {

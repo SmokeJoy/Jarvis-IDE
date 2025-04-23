@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { describe, expect, test, beforeEach, afterEach, vi } from 'vitest';
 import { loadModels, fetchModelsFromOpenRouter } from '../../data/modelLoader';
 

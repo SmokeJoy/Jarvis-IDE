@@ -1,3 +1,4 @@
+import { z } from 'zod';
 /**
  * Utility per l'integrazione con l'API del webview di VS Code
  */

@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { DeepSeekHandler } from './deepseek';
 import { createMockStream } from '../transform/stream';
 import { expect } from 'chai';

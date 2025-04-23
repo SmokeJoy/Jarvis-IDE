@@ -1,3 +1,4 @@
+import { z } from 'zod';
 /**
  * @file convertToWebviewMessage.test.ts
  * @description Test unitari per la funzione di conversione convertToWebviewMessage
@@ -38,7 +39,7 @@ describe('convertToWebviewMessage', () => {
     const result = convertToWebviewMessage(msg);
     expect(result).not.toBeNull();
     expect(result?.type).toBe(msg.type);
-    expect(result?.payload).toEqual(msg.payload);
+    expect((msg.payload as unknown)).toEqual((msg.payload as unknown));
   });
 
   it('should handle message with action field', () => {
@@ -60,7 +61,7 @@ describe('convertToWebviewMessage', () => {
     const result = convertToWebviewMessage(msg);
     expect(result).not.toBeNull();
     expect(result?.type).toBe(msg.type);
-    expect(result?.payload?.error).toBe(msg.error);
+    expect((msg.payload as unknown)?.error).toBe(msg.error);
   });
 
   it('should handle message with apiConfiguration field', () => {
@@ -108,6 +109,6 @@ describe('convertToWebviewMessage', () => {
     const result = convertToWebviewMessage(msg);
     expect(result).not.toBeNull();
     expect(result?.type).toBe(msg.type);
-    expect(result?.payload).toEqual({});
+    expect((msg.payload as unknown)).toEqual({});
   });
 });

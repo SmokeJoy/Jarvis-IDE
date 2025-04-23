@@ -7,7 +7,7 @@ import {
   SendCoderInstructionMessage,
   AbortCoderInstructionMessage,
   AgentMessageUnion
-} from '../types/mas-message';
+} from '@shared/messages';
 import './CoderAgentPrompt.css';
 
 interface CoderAgentPromptProps {
@@ -72,7 +72,8 @@ export const CoderAgentPrompt: React.FC<CoderAgentPromptProps> = ({
   const handleAbort = () => {
     // Creazione del messaggio type-safe
     const message: AbortCoderInstructionMessage = {
-      type: MasMessageType.ABORT_CODER_INSTRUCTION
+      type: MasMessageType.ABORT_CODER_INSTRUCTION,
+      payload: {}
     };
     
     // Invio del messaggio tramite il dispatcher type-safe

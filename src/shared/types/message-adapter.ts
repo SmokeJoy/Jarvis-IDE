@@ -8,6 +8,56 @@ import { ChatMessage as SharedChatMessage } from './message.types';
 import { ChatMessage as ExtensionChatMessage } from '../types/extension';
 import { ChatMessage as ChatTypesChatMessage, ContentBlock } from '../../src/shared/types/chat.types';
 import { createChatMessage as createChatMessage } from "../../src/shared/types/chat.types";
+import { type AgentMessageUnion } from './mas-message';
+import { type WebSocketMessageUnion } from './websocketMessageUnion';
+import { type WebviewMessageUnion } from './webview-message';
+import { type ExtensionPromptMessage } from './prompt-message';
+
+/**
+ * Union of all message types supported by the bridge adapters
+ * This allows strongly typed message handling across different system boundaries
+ */
+export type SupportedMessageUnion = 
+  | WebSocketMessageUnion 
+  | WebviewMessageUnion 
+  | AgentMessageUnion
+  | ExtensionPromptMessage;
+
+/**
+ * Type guard to check if a message is of a specific type
+ * @param message The message to check
+ * @param messageType The type to check for
+ * @returns True if the message is of the specified type
+ */
+export function isMessageOfType<T extends SupportedMessageUnion>(
+  message: unknown, 
+  messageType: string
+): message is T {
+  return (
+    typeof message === 'object' && 
+    message !== null && 
+    'type' in message && 
+    typeof message.type === 'string' && 
+    message.type === messageType
+  );
+}
+
+/**
+ * Helper function to get the type of a message safely
+ * @param message The message to get the type from
+ * @returns The message type or undefined if invalid
+ */
+export function getMessageType(message: unknown): string | undefined {
+  if (
+    typeof message === 'object' && 
+    message !== null && 
+    'type' in message && 
+    typeof (message as { type: unknown }).type === 'string'
+  ) {
+    return (message as { type: string }).type;
+  }
+  return undefined;
+}
 
 /**
  * Funzione helper per creare un messaggio ChatMessage compatibile con tutte le interfacce

@@ -162,7 +162,7 @@ export function Webview({ config }: WebviewProps) {
             // Now operates on ChatMessage
             if (lastMessage && lastMessage.role === 'assistant') {
               // Content is string | ContentBlock[]
-              let currentContent = lastMessage.content;
+              const currentContent = lastMessage.content;
               let newContent: string | MessagePart[];
 
               if (typeof currentContent === 'string') {

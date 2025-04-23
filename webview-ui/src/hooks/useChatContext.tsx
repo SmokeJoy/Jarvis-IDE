@@ -15,13 +15,13 @@ const initialState: ChatState = {
   isTyping: false
 };
 
-const ChatContext = createContext<{
+type ChatContextType = {
   state: ChatState;
   dispatch: Dispatch<ChatAction>;
-}>({
-  state: initialState,
-  dispatch: () => null
-});
+};
+
+// Using `undefined` as default to force provider usage
+const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
   switch (action.type) {
@@ -34,7 +34,11 @@ const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
   }
 };
 
-export const ChatProvider = ({ children }: { children: ReactNode }) => {
+interface ChatProviderProps {
+  children: ReactNode;
+}
+
+export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(chatReducer, initialState);
 
   return (
@@ -44,6 +48,10 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useChat = () => {
-  return useContext(ChatContext);
+export const useChat = (): ChatContextType => {
+  const context = useContext(ChatContext);
+  if (!context) {
+    throw new Error('useChat must be used within a ChatProvider');
+  }
+  return context;
 };

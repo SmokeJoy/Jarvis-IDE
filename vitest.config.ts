@@ -1,24 +1,34 @@
 import { defineConfig } from 'vitest/config';
-import path from 'path';
+import { resolve } from 'path';
 
 export default defineConfig({
   test: {
     environment: 'jsdom',
-    include: ['src/**/*.{test,spec}.{js,jsx,ts,tsx}'],
-    setupFiles: ['./src/test/setup.ts'],
+    globals: true,
+    setupFiles: ['./vitest.setup.ts'],
+    include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/.{idea,git,cache,output,temp}/**',
+      '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*',
+      'test/**',
+      'scripts/codemods/__tests__/**'
+    ],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'json-summary', 'lcov', 'html'],
+      reporter: ['text', 'json', 'html'],
       exclude: [
-        'node_modules/**',
-        'dist/**',
         'coverage/**',
+        'dist/**',
+        '**/[.]**',
+        'packages/*/test?(s)/**',
         '**/*.d.ts',
-        'test/**',
-        '**/*.test.{js,jsx,ts,tsx}',
-        '**/*.spec.{js,jsx,ts,tsx}',
-        '**/*.config.{js,ts}',
-        'scripts/codemods/__tests__/**'
+        '**/virtual:*',
+        '**/__mocks__/*',
+        '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*',
+        '**/test/setup.[jt]s',
+        '**/.{eslint,mocha,prettier}rc.{?(c|m)[jt]s,yml}'
       ],
       all: true,
       thresholds: {
@@ -35,15 +45,21 @@ export default defineConfig({
       interopDefault: true,
       inline: [
         '@testing-library/react',
-        '@testing-library/jest-dom',
-      ],
+        '@testing-library/jest-dom'
+      ]
+    },
+    alias: {
+      '@shared': '/src/shared',
+      '@webview': '/webview-ui/src',
+      '@test': resolve(__dirname, './test'),
+      'vscode': resolve(__dirname, 'src/test/__mocks__/vscode.ts'),
+      '@': resolve(__dirname, './src')
     }
   },
   resolve: {
     alias: {
-      'vscode': path.resolve(__dirname, 'src/test/__mocks__/vscode.ts'),
-      '@': path.resolve(__dirname, './src'),
-    },
-    conditions: ['node']
-  },
+      '@shared': '/src/shared',
+      '@webview': '/webview-ui/src'
+    }
+  }
 }); 

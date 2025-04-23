@@ -1,5 +1,5 @@
 import { mentionRegex } from "../../../src/shared/context-mentions"
-import { Fzf } from "fzf"
+import { Fzf, FzfResultItem } from "fzf"
 
 export function insertMention(text: string, position: number, value: string): { newValue: string; mentionIndex: number } {
 	const beforeCursor = text.slice(0, position)
@@ -58,6 +58,11 @@ export interface ContextMenuQueryItem {
 	value?: string
 	label?: string
 	description?: string
+}
+
+interface SearchableItem {
+	original: ContextMenuQueryItem;
+	searchStr: string;
 }
 
 export function getContextMenuOptions(
@@ -147,18 +152,20 @@ export function getContextMenuOptions(
 	}
 
 	// Create searchable strings array for fzf
-	const searchableItems = queryItems.map((item) => ({
+	const searchableItems: SearchableItem[] = queryItems.map((item) => ({
 		original: item,
-		searchStr: [item.value, item.label, item.description].filter(Boolean).join(" "),
+		searchStr: [item.value, item.label, item.description].filter((str): str is string => Boolean(str)).join(" "),
 	}))
 
 	// Initialize fzf instance for fuzzy search
-	const fzf = new Fzf(searchableItems, {
-		selector: (item) => item.searchStr,
+	const fzf = new Fzf<SearchableItem>(searchableItems, {
+		selector: (item: SearchableItem) => item.searchStr,
 	})
 
 	// Get fuzzy matching items
-	const matchingItems = query ? fzf.find(query).map((result) => result.item.original) : []
+	const matchingItems: ContextMenuQueryItem[] = query 
+		? fzf.find(query).map((result: FzfResultItem<SearchableItem>) => result.item.original) 
+		: []
 
 	// Separate matches by type
 	const fileMatches = matchingItems.filter(
@@ -177,8 +184,8 @@ export function getContextMenuOptions(
 		const allItems = [...suggestions, ...fileMatches, ...gitMatches, ...otherMatches]
 
 		// Remove duplicates based on type and value
-		const seen = new Set()
-		const deduped = allItems.filter((item) => {
+		const seen = new Set<string>()
+		const deduped = allItems.filter((item: ContextMenuQueryItem) => {
 			const key = `${item.type}-${item.value}`
 			if (seen.has(key)) {
 				return false

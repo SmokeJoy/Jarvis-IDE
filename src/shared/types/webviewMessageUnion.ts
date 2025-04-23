@@ -5,7 +5,6 @@
  */
 
 import {
-  WebviewMessage,
   WebviewMessageType,
   SendPromptMessage,
   ActionMessage,
@@ -13,7 +12,6 @@ import {
   ResponseMessage,
   StateMessage,
   InstructionMessage,
-  InstructionCompletedMessage,
 } from './webview.types';
 
 import { ZodSchemaMap } from '../../utils/validation';
@@ -26,27 +24,24 @@ import type { ExtensionMessage } from './extensionMessageUnion';
  * automaticamente il tipo specifico basandosi sul campo 'type'.
  */
 export type WebviewMessageUnion =
-  | InstructionCompletedMessage
-  | InstructionFailedMessage
-  | AgentTypingMessage
-  | AgentTypingDoneMessage
-  | LlmCancelMessage
-  | LlmRequestMessage
-  | DisconnectMessage
-  | AgentTaskCreatedMessage
-  | AgentTaskDoneMessage
-  | WebSocketErrorMessage
-  | PingMessage
-  | PongMessage
-  | LlmStatusMessage;
+  | SendPromptMessage
+  | ActionMessage
+  | ErrorMessage
+  | ResponseMessage
+  | StateMessage
+  | InstructionMessage;
 
 /**
  * Type guard per verificare se un messaggio è un SendPromptMessage
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un SendPromptMessage
  */
-export function isSendPromptMessage(message: WebviewMessage<any>): message is SendPromptMessage {
-  return message?.type === WebviewMessageType.SEND_PROMPT;
+export function isSendPromptMessage(message: unknown): message is SendPromptMessage {
+  return (
+    typeof message === 'object' &&
+    message !== null &&
+    (message as { type?: string }).type === WebviewMessageType.SEND_PROMPT
+  );
 }
 
 /**
@@ -54,8 +49,8 @@ export function isSendPromptMessage(message: WebviewMessage<any>): message is Se
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un ActionMessage
  */
-export function isActionMessage(message: WebviewMessage<any>): message is ActionMessage {
-  return message?.type === 'action';
+export function isActionMessage(message: unknown): message is ActionMessage {
+  return typeof message === 'object' && message !== null && (message as { type?: string }).type === 'action';
 }
 
 /**
@@ -63,8 +58,8 @@ export function isActionMessage(message: WebviewMessage<any>): message is Action
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un ErrorMessage
  */
-export function isErrorMessage(message: WebviewMessage<any>): message is ErrorMessage {
-  return message?.type === 'error';
+export function isErrorMessage(message: unknown): message is ErrorMessage {
+  return typeof message === 'object' && message !== null && (message as { type?: string }).type === 'error';
 }
 
 /**
@@ -72,8 +67,10 @@ export function isErrorMessage(message: WebviewMessage<any>): message is ErrorMe
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un ResponseMessage
  */
-export function isResponseMessage(message: WebviewMessage<any>): message is ResponseMessage {
-  return message?.type === 'response';
+export function isResponseMessage(message: unknown): message is ResponseMessage {
+  return (
+    typeof message === 'object' && message !== null && (message as { type?: string }).type === 'response'
+  );
 }
 
 /**
@@ -81,8 +78,8 @@ export function isResponseMessage(message: WebviewMessage<any>): message is Resp
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un StateMessage
  */
-export function isStateMessage(message: WebviewMessage<any>): message is StateMessage {
-  return message?.type === 'state';
+export function isStateMessage(message: unknown): message is StateMessage {
+  return typeof message === 'object' && message !== null && (message as { type?: string }).type === 'state';
 }
 
 /**
@@ -90,23 +87,12 @@ export function isStateMessage(message: WebviewMessage<any>): message is StateMe
  * @param message Il messaggio da verificare
  * @returns True se il messaggio è un InstructionMessage
  */
-export function isInstructionMessage(message: WebviewMessage<any>): message is InstructionMessage {
+export function isInstructionMessage(message: unknown): message is InstructionMessage {
   return (
-    message?.type === WebviewMessageType.INSTRUCTION_RECEIVED ||
-    message?.type === WebviewMessageType.INSTRUCTION_COMPLETED ||
-    message?.type === WebviewMessageType.INSTRUCTION_FAILED
+    typeof message === 'object' &&
+    message !== null &&
+    (message as { type?: string }).type === WebviewMessageType.INSTRUCTION
   );
-}
-
-/**
- * Type guard per verificare se un messaggio è un InstructionCompletedMessage
- * @param message Il messaggio da verificare
- * @returns True se il messaggio è un InstructionCompletedMessage
- */
-export function isInstructionCompletedMessage(
-  message: WebviewMessage<any>
-): message is InstructionCompletedMessage {
-  return message?.type === 'instructionCompleted';
 }
 
 /**
@@ -115,7 +101,7 @@ export function isInstructionCompletedMessage(
  * @param validator Funzione di validazione opzionale
  * @returns Il valore convertito al tipo T o null se la validazione fallisce
  */
-export function safeCastAs<T>(value: unknown, validator?: (val: any) => boolean): T | null {
+export function safeCastAs<T>(value: unknown, validator?: (val: unknown) => boolean): T | null {
   if (validator && !validator(value)) {
     console.warn(`[safeCastAs] Validazione fallita per il tipo: ${typeof value}`);
     return null;
@@ -127,11 +113,11 @@ export function safeCastAs<T>(value: unknown, validator?: (val: any) => boolean)
  * Helpers per validare i tipi di messaggi WebView più comuni
  */
 export const validators = {
-  isSendPrompt: (d: any): d is SendPromptMessage => d?.type === WebviewMessageType.SEND_PROMPT,
-  isAction: (d: any): d is ActionMessage => d?.type === 'action',
-  isError: (d: any): d is ErrorMessage => d?.type === 'error',
-  isResponse: (d: any): d is ResponseMessage => d?.type === 'response',
-  isState: (d: any): d is StateMessage => d?.type === 'state',
+  isSendPrompt: (d: unknown): d is SendPromptMessage => isSendPromptMessage(d),
+  isAction: (d: unknown): d is ActionMessage => isActionMessage(d),
+  isError: (d: unknown): d is ErrorMessage => isErrorMessage(d),
+  isResponse: (d: unknown): d is ResponseMessage => isResponseMessage(d),
+  isState: (d: unknown): d is StateMessage => isStateMessage(d),
 };
 
 /**
@@ -140,7 +126,7 @@ export const validators = {
  * @param schema Schema di validazione
  * @returns true se il messaggio è valido
  */
-export function isWebviewMessage(message: unknown, schema: ZodSchemaMap): boolean {
+export function isWebviewMessageBySchema(message: unknown, schema: ZodSchemaMap): boolean {
   if (!message || typeof message !== 'object') {
     return false;
   }
@@ -155,7 +141,7 @@ export function isWebviewMessage(message: unknown, schema: ZodSchemaMap): boolea
     return false;
   }
 
-  if (!msg.payload) {
+  if (!(msg.payload as unknown)) {
     return false;
   }
 
@@ -291,46 +277,26 @@ export type WebSocketErrorMessage = BaseWebviewMessage<'WS_ERROR'> & {
 };
 
 // Type Guards
-export function isWebviewMessage<T extends WebviewMessageUnion>(msg: unknown): msg is T {
-  return typeof (msg as any)?.type === 'string' &&
-         [
-           'INSTRUCTION_COMPLETED',
-           'INSTRUCTION_FAILED',
-           'AGENT_TYPING',
-           'AGENT_TYPING_DONE',
-           'LLM_CANCEL',
-           'LLM_REQUEST',
-           'DISCONNECT',
-           'AGENT_TASK_CREATED',
-           'AGENT_TASK_DONE',
-           'WS_ERROR',
-           'WS_PING',
-           'WS_PONG',
-           'WS_LLM_STATUS'
-         ].includes((msg as any).type);
-}
-
-export function isAgentMessage(
-  msg: WebviewMessageUnion
-): msg is AgentTypingMessage | AgentTypingDoneMessage | InstructionCompletedMessage {
+export function isWebviewMessage(msg: unknown): msg is WebviewMessageUnion {
+  if (typeof msg !== 'object' || msg === null) return false;
+  const typeVal = (msg as { type?: string }).type;
   return (
-    msg.type.startsWith('AGENT_') ||
-    msg.type === 'INSTRUCTION_COMPLETED' ||
-    msg.type === 'INSTRUCTION_FAILED'
+    typeVal === WebviewMessageType.SEND_PROMPT ||
+    typeVal === 'action' ||
+    typeVal === 'error' ||
+    typeVal === 'response' ||
+    typeVal === 'state' ||
+    typeVal === WebviewMessageType.INSTRUCTION
   );
-}
-
-export function isLlmCancelMessage(
-  msg: WebviewMessageUnion
-): msg is LlmCancelMessage {
-  return msg.type === 'LLM_CANCEL';
 }
 
 export type UnifiedWebviewMessageUnion = WebviewMessageUnion | ExtensionMessage;
 
-export function isWebviewMessage(message: unknown): message is UnifiedWebviewMessageUnion {
-  return typeof message === 'object' && message !== null && 'type' in message;
-}
+// Duplicated utility renamed per #contextPromptManager test fix
+export const isUnifiedWebviewMessage = (
+  message: unknown
+): message is UnifiedWebviewMessageUnion =>
+  typeof message === 'object' && message !== null && 'type' in (message as { type?: string });
 
 // --- WebSocket Message Types ---
 // export enum WebSocketMessageType {
@@ -342,9 +308,10 @@ export function isWebviewMessage(message: unknown): message is UnifiedWebviewMes
 //   CANCEL = 'WS_CANCEL',
 // }
 
-export type PingMessage = WebviewMessage<'WS_PING', { timestamp: number }>;
-export type PongMessage = WebviewMessage<'WS_PONG', { timestamp: number }>;
-export type LlmStatusMessage = WebviewMessage<'WS_LLM_STATUS', { modelId: string; status: 'loading' | 'ready' | 'error'; timestamp: number }>;
-export type WebSocketErrorMessage = WebviewMessage<'WS_ERROR', { error: string; code: number }>;
-export type DisconnectMessage = WebviewMessage<'WS_DISCONNECT', { reason?: string }>;
-export type LlmCancelMessage = WebviewMessage<'WS_CANCEL', { requestId: string }>;
+// Duplicate legacy exports commented out (migrate to earlier declarations)
+// export type PingMessage = WebviewMessage<'WS_PING', { timestamp: number }>;
+// export type PongMessage = WebviewMessage<'WS_PONG', { timestamp: number }>;
+// export type LlmStatusMessage = WebviewMessage<'WS_LLM_STATUS', { modelId: string; status: 'loading' | 'ready' | 'error'; timestamp: number }>;
+// export type WebSocketErrorMessage = WebviewMessage<'WS_ERROR', { error: string; code: number }>;
+// export type DisconnectMessage = WebviewMessage<'WS_DISCONNECT', { reason?: string }>;
+// export type LlmCancelMessage = WebviewMessage<'WS_CANCEL', { requestId: string }>;

@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+import { z } from 'zod';
 /**
  * @file mas-dispatcher.toggle.test.ts
  * @description Test per la funzionalità AGENT_TOGGLE_ENABLE del MasDispatcher

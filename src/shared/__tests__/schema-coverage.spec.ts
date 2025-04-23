@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';

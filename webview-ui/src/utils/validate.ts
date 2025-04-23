@@ -1,126 +1,184 @@
-import { ApiConfiguration, ModelInfo } from "../../../src/shared/types/api.types"
-import { openRouterDefaultModelId } from "../../../src/shared/api"
-export function validateApiConfiguration(apiConfiguration?: ApiConfiguration): string | undefined {
-	if (apiConfiguration) {
-		switch (apiConfiguration.provider) {
-			case "anthropic":
-				if (!apiConfiguration.apiKey) {
-					return "You must provide a valid API key or choose a different provider."
-				}
-				break
-			case "bedrock":
-				if (!apiConfiguration.awsRegion) {
-					return "You must choose a region to use with AWS Bedrock."
-				}
-				break
-			case "openrouter":
-				if (!apiConfiguration.openRouterApiKey) {
-					return "You must provide a valid API key or choose a different provider."
-				}
-				break
-			case "vertex":
-				if (!apiConfiguration.vertexProjectId || !apiConfiguration.vertexRegion) {
-					return "You must provide a valid Google Cloud Project ID and Region."
-				}
-				break
-			case "gemini":
-				if (!apiConfiguration.geminiApiKey) {
-					return "You must provide a valid API key or choose a different provider."
-				}
-				break
-			case "openai-native":
-				if (!apiConfiguration.openAiNativeApiKey) {
-					return "You must provide a valid API key or choose a different provider."
-				}
-				break
-			case "deepseek":
-				if (!apiConfiguration.deepSeekApiKey) {
-					return "You must provide a valid API key or choose a different provider."
-				}
-				break
-			case "xai":
-				if (!apiConfiguration.xaiApiKey) {
-					return "You must provide a valid API key or choose a different provider."
-				}
-				break
-			case "qwen":
-				if (!apiConfiguration.qwenApiKey) {
-					return "You must provide a valid API key or choose a different provider."
-				}
-				break
-			case "mistral":
-				if (!apiConfiguration.mistralApiKey) {
-					return "You must provide a valid API key or choose a different provider."
-				}
-				break
-			case "jarvis-ide":
-				if (!apiConfiguration.jarvisIdeApiKey) {
-					return "API Key non valida o mancante per Jarvis IDE."
-				}
-				break
-			case "openai":
-				if (!apiConfiguration.openAiBaseUrl || !apiConfiguration.openAiApiKey || !apiConfiguration.openAiModelId) {
-					return "You must provide a valid base URL, API key, and model ID."
-				}
-				break
-			case "requesty":
-				if (!apiConfiguration.requestyApiKey || !apiConfiguration.requestyModelId) {
-					return "You must provide a valid API key or choose a different provider."
-				}
-				break
-			case "together":
-				if (!apiConfiguration.togetherApiKey || !apiConfiguration.togetherModelId) {
-					return "You must provide a valid API key or choose a different provider."
-				}
-				break
-			case "ollama":
-				if (!apiConfiguration.ollamaModelId) {
-					return "You must provide a valid model ID."
-				}
-				break
-			case "lmstudio":
-				if (!apiConfiguration.lmStudioModelId) {
-					return "You must provide a valid model ID."
-				}
-				break
-			case "vscode-lm":
-				if (!apiConfiguration.vsCodeLmModelSelector) {
-					return "You must provide a valid model selector."
-				}
-				break
-			case "asksage":
-				if (!apiConfiguration.asksageApiKey) {
-					return "You must provide a valid API key or choose a different provider."
-				}
-				break
-			case "sambanova":
-				if (!apiConfiguration.sambanovaApiKey) {
-					return "You must provide a valid API key or choose a different provider."
-				}
-				break
-		}
-	}
-	return undefined
+import { Logger } from './Logger';
+
+/**
+ * @file validate.ts
+ * @description Funzioni di validazione per il sistema di messaggi tra WebView ed Extension
+ */
+
+const logger = new Logger('Validate');
+
+/**
+ * Interfaccia per il risultato della validazione dei messaggi
+ */
+export interface MessageValidationResult {
+	valid: boolean;
+	error?: string;
 }
 
-export function validateModelId(
-	apiConfiguration?: ApiConfiguration,
-	openRouterModels?: Record<string, ModelInfo>,
-): string | undefined {
-	if (apiConfiguration) {
-		switch (apiConfiguration.provider) {
-			case "openrouter":
-			case "jarvis-ide":
-				const modelId = apiConfiguration.openRouterModelId || openRouterDefaultModelId // in case the user hasn't changed the model id, it will be undefined by default
-				if (!modelId) {
-					return "You must provide a model ID."
+/**
+ * Interfaccia base per i messaggi
+ */
+export interface BaseMessage<T = unknown> {
+	type: string;
+	payload: T;
+	error?: string;
+}
+
+/**
+ * Verifica se il valore è un oggetto
+ * @param value Il valore da controllare
+ * @returns true se è un oggetto
+ */
+export function isObject(value: unknown): value is Record<string, unknown> {
+	return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Verifica se il valore è una stringa non vuota
+ * @param value Il valore da controllare
+ * @returns true se è una stringa non vuota
+ */
+export function isNonEmptyString(value: unknown): value is string {
+	return typeof value === 'string' && value.trim().length > 0;
+}
+
+/**
+ * Verifica se l'oggetto è un BaseMessage
+ * @param message L'oggetto da validare
+ * @returns true se l'oggetto è un BaseMessage
+ */
+export function isBaseMessage(message: unknown): message is BaseMessage {
+	if (!isObject(message)) {
+		return false;
+	}
+
+	// Verifica che sia presente il tipo
+	if (!isNonEmptyString(message.type)) {
+		return false;
+	}
+
+	// Verifica che payload sia un oggetto se presente
+	if ('payload' in message && message.payload !== undefined) {
+		if (!isObject(message.payload) && typeof message.payload !== 'string' && !Array.isArray(message.payload)) {
+			return false;
+		}
+	} else {
+		return false; // payload è obbligatorio
+	}
+
+	// Verifica che error sia una stringa se presente
+	if ('error' in message && message.error !== undefined && !isNonEmptyString(message.error)) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Verifica che il messaggio abbia la struttura corretta
+ * @param message Il messaggio da validare
+ * @returns Il risultato della validazione
+ */
+export function validateMessage(message: unknown): MessageValidationResult {
+	if (!isObject(message)) {
+		return { valid: false, error: 'Il messaggio deve essere un oggetto' };
 				}
-				if (openRouterModels && !Object.keys(openRouterModels).includes(modelId)) {
-					// even if the model list endpoint failed, extensionstatecontext will always have the default model info
-					return "The model ID you provided is not available. Please choose a different model."
+
+	// Verifica il tipo
+	if (!('type' in message) || !isNonEmptyString(message.type)) {
+		return { valid: false, error: 'Tipo di messaggio non valido o mancante' };
 				}
-				break
+
+	// Verifica il payload
+	if (!('payload' in message)) {
+		return { valid: false, error: 'Payload mancante nel messaggio' };
+	}
+
+	// Verifica error se presente
+	if ('error' in message && message.error !== undefined && !isNonEmptyString(message.error)) {
+		return { valid: false, error: 'Campo error deve essere una stringa non vuota' };
+	}
+
+	logger.debug(`Messaggio validato con successo: ${message.type}`);
+	return { valid: true };
+}
+
+/**
+ * Verifica che il messaggio abbia determinati campi nel payload
+ * @param message Il messaggio da validare
+ * @param requiredFields I campi richiesti nel payload
+ * @returns Il risultato della validazione
+ */
+export function validateMessageGeneric(
+	message: unknown,
+	requiredFields: string[] = []
+): MessageValidationResult {
+	// Prima validazione base
+	const baseValidation = validateMessage(message);
+	if (!baseValidation.valid) {
+		return baseValidation;
+	}
+
+	// Cast sicuro dopo la validazione base
+	const typedMessage = message as BaseMessage;
+	const payload = typedMessage.payload;
+
+	// Se non ci sono campi richiesti, la validazione è già completa
+	if (requiredFields.length === 0) {
+		return { valid: true };
+				}
+
+	// Verifica che payload sia un oggetto
+	if (!isObject(payload)) {
+		return { 
+			valid: false, 
+			error: `Il payload deve essere un oggetto per il messaggio di tipo ${typedMessage.type}` 
+		};
+	}
+
+	// Verifica che tutti i campi richiesti siano presenti
+	for (const field of requiredFields) {
+		if (!(field in payload)) {
+			return { 
+				valid: false, 
+				error: `Campo richiesto mancante nel payload: ${field} per il messaggio di tipo ${typedMessage.type}` 
+			};
 		}
 	}
-	return undefined
+
+	logger.debug(`Validazione avanzata completata per il messaggio ${typedMessage.type} con successo`);
+	return { valid: true };
+}
+
+/**
+ * Crea una funzione di validazione per un tipo specifico di messaggio
+ * @param messageType Il tipo di messaggio da validare
+ * @param requiredFields I campi richiesti nel payload
+ * @returns Una funzione per validare messaggi di quel tipo
+ */
+export function createMessageValidator(
+	messageType: string,
+	requiredFields: string[] = []
+): (message: unknown) => MessageValidationResult {
+	return (message: unknown): MessageValidationResult => {
+		// Validazione di base
+		const baseValidation = validateMessage(message);
+		if (!baseValidation.valid) {
+			return baseValidation;
+		}
+
+		// Cast sicuro
+		const typedMessage = message as BaseMessage;
+
+		// Verifica il tipo del messaggio
+		if (typedMessage.type !== messageType) {
+			return { 
+				valid: false, 
+				error: `Tipo di messaggio errato: atteso '${messageType}', ricevuto '${typedMessage.type}'` 
+			};
+		}
+
+		// Validazione dei campi richiesti
+		return validateMessageGeneric(message, requiredFields);
+	};
 }

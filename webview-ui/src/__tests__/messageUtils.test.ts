@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { beforeAll, afterEach, describe, expect, test, vi } from 'vitest';
 import { WebviewMessage, ExtensionMessage, WebviewMessageType } from '../../../src/shared/types/webview.types';
 import { 
@@ -147,8 +148,7 @@ describe('Funzione sendMessageToExtension', () => {
       payload: { prompt: 'Test message' }
     };
     
-    // @ts-ignore - Passiamo volontariamente un messaggio non valido per il test
-    expect(() => sendMessageToExtension(invalidMessage)).toThrow();
+        expect(() => sendMessageToExtension(invalidMessage)).toThrow();
     expect(mockPostMessage).not.toHaveBeenCalled();
   });
   

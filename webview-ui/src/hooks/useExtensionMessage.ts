@@ -1,12 +1,9 @@
 import { useCallback } from 'react'
-import type { WebviewMessage, WebviewMessageType } from '../../../src/shared/types/webview.types'
-import type { WebviewMessageUnion } from '../../../src/shared/types/webviewMessageUnion'
 import { vscode } from '../utilities/vscode'
-import type { ExtensionMessageUnion } from '@shared/types/extension-message'
-import { isExtensionMessage } from '@shared/types/extensionMessageUnion'
-import type { AgentMessageUnion } from '@shared/types/mas-message'
-
-type UnifiedMessage = AgentMessageUnion | ExtensionMessageUnion;
+import {
+  Message as UnifiedMessage,
+  isExtensionMessage,
+} from '@shared/messages'
 
 /**
  * Hook personalizzato per gestire la comunicazione type-safe con l'estensione VS Code
@@ -26,19 +23,19 @@ export const useExtensionMessage = () => {
      * @param type Tipo del messaggio
      * @param payload Payload del messaggio
      */
-    const sendMessageByType = useCallback(<T extends string>(
-        type: T,
-        payload?: Record<string, unknown>
+    const sendMessageByType = useCallback((
+      type: UnifiedMessage['type'],
+      payload?: Record<string, unknown>
     ) => {
-        const message = { type, payload }
-        vscode.postMessage(message)
+      const msg = { type, ...(payload ? { payload } : {}) } as UnifiedMessage;
+      vscode.postMessage(msg);
     }, [])
 
     /**
      * Registra un listener per i messaggi provenienti dall'estensione VS Code
      * @param callback Funzione chiamata con un messaggio validato ExtensionMessageUnion
      */
-    const addMessageListener = useCallback((callback: (message: ExtensionMessageUnion) => void) => {
+    const addMessageListener = useCallback((callback: (message: UnifiedMessage) => void) => {
         const handler = (event: MessageEvent) => {
             const message = event.data;
             if (isExtensionMessage(message)) {
@@ -53,7 +50,7 @@ export const useExtensionMessage = () => {
      * Rimuove un listener per i messaggi provenienti dall'estensione VS Code
      * @param callback Funzione precedentemente registrata
      */
-    const removeMessageListener = useCallback((callback: (message: ExtensionMessageUnion) => void) => {
+    const removeMessageListener = useCallback((callback: (message: UnifiedMessage) => void) => {
         // Per semplicità, non implementiamo la rimozione diretta della callback,
         // ma si può estendere con una mappa interna se necessario.
         // Qui si assume che venga usato il return di addMessageListener per cleanup.

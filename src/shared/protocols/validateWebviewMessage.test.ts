@@ -26,7 +26,7 @@ function validateWebviewMessage(message: unknown): message is WebviewMessage {
   }
 
   // Verifica che il payload sia un oggetto se presente
-  if (msg.payload !== undefined && typeof msg.payload !== 'object') {
+  if ((msg.payload as unknown) !== undefined && typeof (msg.payload as unknown) !== 'object') {
     return false;
   }
 

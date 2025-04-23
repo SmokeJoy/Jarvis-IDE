@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 /**
  * @file AgentManager.test.ts
  * @description Test per la classe AgentManager

@@ -61,32 +61,32 @@ const AgentMemoryPanel: React.FC<AgentMemoryPanelProps> = ({ agentId }) => {
   /**
    * Dispatcher di messaggi type-safe per gestire i messaggi dalla estensione
    * Implementa il pattern Union Dispatcher Type-Safe
-   * @param message Messaggio ricevuto dall'estensione
+   * @param receivedMessage Messaggio ricevuto dall'estensione
    */
-  const messageDispatcher = useCallback((message: unknown): void => {
+  const messageDispatcher = useCallback((receivedMessage: unknown): void => {
     // Verifico prima se è un messaggio di memoria dell'agente usando il type guard appropriato
-    if (!isAgentMemoryMessage(message)) {
+    if (!isAgentMemoryMessage(receivedMessage)) {
       return;
     }
 
     // Gestione dei messaggi in base al tipo utilizzando i type guards specifici
-    if (isMemorySnapshotReceivedMessage(message)) {
-      setMemoryItems(message.payload.memories);
+    if (isMemorySnapshotReceivedMessage(receivedMessage)) {
+      setMemoryItems((msg.payload as unknown).memories);
       setLoading(false);
-    } else if (isMemoryItemSavedMessage(message)) {
+    } else if (isMemoryItemSavedMessage(receivedMessage)) {
       // Aggiornamento della lista di memoria con il nuovo elemento
       setMemoryItems(prevItems => {
         // Verifica se l'elemento esiste già
-        const existingIndex = prevItems.findIndex(item => item.id === message.payload.item.id);
+        const existingIndex = prevItems.findIndex(item => item.id === (msg.payload as unknown).item.id);
         
         if (existingIndex >= 0) {
           // Aggiornamento dell'elemento esistente
           const updatedItems = [...prevItems];
-          updatedItems[existingIndex] = message.payload.item;
+          updatedItems[existingIndex] = (msg.payload as unknown).item;
           return updatedItems;
         } else {
           // Aggiunta del nuovo elemento
-          return [...prevItems, message.payload.item];
+          return [...prevItems, (msg.payload as unknown).item];
         }
       });
       
@@ -94,11 +94,11 @@ const AgentMemoryPanel: React.FC<AgentMemoryPanelProps> = ({ agentId }) => {
       setNewMemoryContent('');
       setNewMemoryTags('');
       message.success('Elemento di memoria salvato con successo');
-    } else if (isMemoryItemDeletedMessage(message)) {
+    } else if (isMemoryItemDeletedMessage(receivedMessage)) {
       // Rimozione dell'elemento dalla lista
-      setMemoryItems(prevItems => prevItems.filter(item => item.id !== message.payload.itemId));
+      setMemoryItems(prevItems => prevItems.filter(item => item.id !== (msg.payload as unknown).itemId));
       message.success('Elemento di memoria eliminato con successo');
-    } else if (isAgentMemoryClearedMessage(message)) {
+    } else if (isAgentMemoryClearedMessage(receivedMessage)) {
       // Pulizia completa della memoria
       setMemoryItems([]);
       message.success('Memoria dell\'agente pulita con successo');
@@ -132,13 +132,13 @@ const AgentMemoryPanel: React.FC<AgentMemoryPanelProps> = ({ agentId }) => {
     setError(null);
     
     try {
-      const message: RequestMemorySnapshotMessage = {
+      const requestMessage: RequestMemorySnapshotMessage = {
         type: AgentMemoryMessageType.REQUEST_MEMORY_SNAPSHOT,
         payload: {
           agentId
         }
       };
-      postMessage<AgentMemoryMessageUnion>(message);
+      postMessage<AgentMemoryMessageUnion>(requestMessage);
     } catch (err) {
       setError('Errore durante la richiesta dello snapshot della memoria');
       setLoading(false);
@@ -161,7 +161,7 @@ const AgentMemoryPanel: React.FC<AgentMemoryPanelProps> = ({ agentId }) => {
       : [];
 
     try {
-      const message: SaveMemoryItemMessage = {
+      const saveMessage: SaveMemoryItemMessage = {
         type: AgentMemoryMessageType.SAVE_MEMORY_ITEM,
         payload: {
           agentId,
@@ -169,7 +169,7 @@ const AgentMemoryPanel: React.FC<AgentMemoryPanelProps> = ({ agentId }) => {
           tags
         }
       };
-      postMessage<AgentMemoryMessageUnion>(message);
+      postMessage<AgentMemoryMessageUnion>(saveMessage);
     } catch (err) {
       setError('Errore durante il salvataggio dell\'elemento di memoria');
       console.error('Errore durante il salvataggio dell\'elemento di memoria:', err);
@@ -182,14 +182,14 @@ const AgentMemoryPanel: React.FC<AgentMemoryPanelProps> = ({ agentId }) => {
    */
   const deleteMemoryItem = useCallback((itemId: string): void => {
     try {
-      const message: DeleteMemoryItemMessage = {
+      const deleteMessage: DeleteMemoryItemMessage = {
         type: AgentMemoryMessageType.DELETE_MEMORY_ITEM,
         payload: {
           agentId,
           itemId
         }
       };
-      postMessage<AgentMemoryMessageUnion>(message);
+      postMessage<AgentMemoryMessageUnion>(deleteMessage);
     } catch (err) {
       setError('Errore durante l\'eliminazione dell\'elemento di memoria');
       console.error('Errore durante l\'eliminazione dell\'elemento di memoria:', err);
@@ -201,13 +201,13 @@ const AgentMemoryPanel: React.FC<AgentMemoryPanelProps> = ({ agentId }) => {
    */
   const clearAgentMemory = useCallback((): void => {
     try {
-      const message: ClearAgentMemoryMessage = {
+      const clearMessage: ClearAgentMemoryMessage = {
         type: AgentMemoryMessageType.CLEAR_AGENT_MEMORY,
         payload: {
           agentId
         }
       };
-      postMessage<AgentMemoryMessageUnion>(message);
+      postMessage<AgentMemoryMessageUnion>(clearMessage);
     } catch (err) {
       setError('Errore durante la pulizia della memoria dell\'agente');
       console.error('Errore durante la pulizia della memoria dell\'agente:', err);

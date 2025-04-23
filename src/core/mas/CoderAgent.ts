@@ -195,12 +195,12 @@ export class CoderAgent implements ICoderAgent {
     switch (message.type) {
       case 'instruction':
         // Converti in istruzione e esegui
-        if (typeof message.payload === 'string') {
-          this.executeInstruction(message.payload).catch((error) =>
+        if (typeof (msg.payload as unknown) === 'string') {
+          this.executeInstruction((msg.payload as unknown)).catch((error) =>
             this.logger.error(`Errore nell'esecuzione: ${error}`)
           );
-        } else if (typeof message.payload === 'object') {
-          this.currentInstruction = message.payload as CoderInstruction;
+        } else if (typeof (msg.payload as unknown) === 'object') {
+          this.currentInstruction = (msg.payload as unknown) as CoderInstruction;
           this.executeInstruction(this.currentInstruction.objective).catch((error) =>
             this.logger.error(`Errore nell'esecuzione: ${error}`)
           );
@@ -209,7 +209,7 @@ export class CoderAgent implements ICoderAgent {
 
       case 'notification':
         // Semplice notifica, nessuna azione richiesta
-        this.logger.info(`Notifica ricevuta: ${message.payload}`);
+        this.logger.info(`Notifica ricevuta: ${(msg.payload as unknown)}`);
         break;
 
       default:

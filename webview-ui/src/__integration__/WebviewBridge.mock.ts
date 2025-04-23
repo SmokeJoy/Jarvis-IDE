@@ -2,6 +2,7 @@
  * Mock semplificato del WebviewBridge per i test di integrazione
  */
 import { WebviewMessage, ExtensionMessage } from './type-validation.mock';
+import { AgentMessageUnionSchema } from '@shared/schemas';
 
 // Logger condiviso per il bridge webview
 interface Logger {
@@ -38,6 +39,10 @@ class WebviewBridgeMock {
     // Inizializza il vscode mock
     this.vscode = {
       postMessage: (msg: WebviewMessage) => {
+        // Validazione opzionale
+        if (!AgentMessageUnionSchema.safeParse(msg).success) {
+          throw new Error('Messaggio non valido secondo AgentMessageUnionSchema');
+        }
         logger.debug(`Messaggio inviato di tipo '${msg.type}'`, msg);
       }
     };
@@ -88,6 +93,11 @@ class WebviewBridgeMock {
       // Validazione del messaggio
       if (!message || typeof message !== 'object' || !message.type) {
         throw new Error('Formato messaggio non valido');
+      }
+      
+      // Validazione opzionale
+      if (!AgentMessageUnionSchema.safeParse(message).success) {
+        throw new Error('Messaggio non valido secondo AgentMessageUnionSchema');
       }
       
       // Invio del messaggio
@@ -160,3 +170,13 @@ class WebviewBridgeMock {
 
 // Esporta l'istanza singleton
 export const webviewBridge = new WebviewBridgeMock(); 
+
+// Esempio di messaggio valido:
+window.postMessage({
+  type: 'instructionReceived',
+  payload: {
+    id: '123',
+    agentId: 'dev',
+    instruction: 'Generate unit tests'
+  }
+}); 

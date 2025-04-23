@@ -25,7 +25,7 @@ import { ModelInfoView } from './ModelInfoView'
 import { normalizeApiConfiguration } from './utils'
 import { ThinkingBudgetSlider } from './ThinkingBudgetSlider'
 import { validateApiConfiguration } from '../utils/validateApiConfiguration'
-import { OpenAiModelPicker } from './OpenAiModelPicker'
+import { OpenAiModelPicker } from './openai-model-picker'
 import { AnthropicModelPicker } from './AnthropicModelPicker'
 import { GeminiModelPicker } from './GeminiModelPicker'
 import { MistralModelPicker } from './MistralModelPicker'
@@ -80,7 +80,7 @@ const ApiOptions = memo(({ showModelOptions, apiErrorMessage, modelIdErrorMessag
 	const [providerSortingSelected, setProviderSortingSelected] = useState(!!apiConfiguration?.openRouterProviderSorting)
 	const [validationErrors, setValidationErrors] = useState<string[]>([])
 
-	const handleInputChange = useCallback((field: keyof ApiConfiguration) => (event: FormEvent<HTMLInputElement>) => {
+	const handleInputChange = useCallback((field: keyof ApiConfiguration) => (event: React.ChangeEvent<HTMLInputElement>) => {
 		const newConfig = {
 			...apiConfiguration,
 			[field]: event.currentTarget.value
@@ -90,7 +90,7 @@ const ApiOptions = memo(({ showModelOptions, apiErrorMessage, modelIdErrorMessag
 		setValidationErrors(errors)
 	}, [apiConfiguration, setApiConfiguration])
 
-	const handleCheckboxChange = useCallback((field: keyof ApiConfiguration) => (event: FormEvent<HTMLInputElement>) => {
+	const handleCheckboxChange = useCallback((field: keyof ApiConfiguration) => (event: React.ChangeEvent<HTMLInputElement>) => {
 		const newConfig = {
 			...apiConfiguration,
 			[field]: event.currentTarget.checked

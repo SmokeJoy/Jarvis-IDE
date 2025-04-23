@@ -12,36 +12,16 @@ import {
   AgentMemoryResponseMessage,
   AgentRetryRequestMessage,
   AgentRetryResultMessage,
-  AgentMessageUnion
+  AgentMessageUnion,
+  AgentMemoryEntry,
+  AgentMemoryResult,
+  AgentId
 } from '@shared/types/mas-message';
 import {
   isMessageOfType,
   isAgentMemoryResponseMessage,
   isAgentRetryResultMessage
 } from '@shared/types/mas-message-guards';
-
-/**
- * Interfaccia per il task dell'agente
- */
-export interface AgentTask {
-  id: string;
-  description: string;
-  parameters?: Record<string, any>;
-  context?: any;
-}
-
-/**
- * Interfaccia per un elemento di memoria dell'agente
- */
-export interface AgentMemoryItem {
-  id: string;
-  agentId: string;
-  task: AgentTask;
-  result?: any;
-  status: 'completed' | 'failed' | 'in_progress';
-  timestamp: number;
-  metadata?: Record<string, any>;
-}
 
 /**
  * Interfaccia per lo stato di retry di un task
@@ -89,7 +69,7 @@ export const useAgentMemory = ({
   limit = 10
 }: UseAgentMemoryOptions) => {
   // State per la memoria dell'agente
-  const [memory, setMemory] = useState<AgentMemoryItem[]>([]);
+  const [memory, setMemory] = useState<AgentMemoryEntry[]>([]);
   // State per il caricamento
   const [isLoading, setIsLoading] = useState<boolean>(false);
   // State per lo stato di retry dei task
@@ -107,15 +87,15 @@ export const useAgentMemory = ({
 
       // Verifica se il messaggio è una risposta di memoria dell'agente
       if (isAgentMemoryResponseMessage(message)) {
-        const payload = message.payload as AgentMemoryResponseMessage['payload'];
-        if (payload.agentId === agentId) {
+        const payload = (msg.payload as unknown) as AgentMemoryResponseMessage['payload'];
+        if (payload.agentId === agentId && Array.isArray(payload.memory)) {
           setMemory(payload.memory);
           setIsLoading(false);
         }
       }
       // Verifica se il messaggio è un risultato di retry di un task
       else if (isAgentRetryResultMessage(message)) {
-        const payload = message.payload as AgentRetryResultMessage['payload'];
+        const payload = (msg.payload as unknown) as AgentRetryResultMessage['payload'];
         if (payload.agentId === agentId) {
           const { taskId, success, result, error } = payload;
           setRetryStatus(prev => ({

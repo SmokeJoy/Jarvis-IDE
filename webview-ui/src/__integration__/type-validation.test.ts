@@ -17,7 +17,7 @@ describe('Validazione tipi Webview ↔ Extension', () => {
     };
 
     expect(validMessage.type).toBe(WebviewMessageType.SEND_PROMPT);
-    expect((validMessage.payload as PromptPayload).prompt).toBe('ciao');
+    expect(((msg.payload as unknown) as PromptPayload).prompt).toBe('ciao');
   });
 
   test('PromptPayload deve avere struttura corretta', () => {
@@ -44,8 +44,8 @@ describe('Validazione tipi Webview ↔ Extension', () => {
     };
 
     expect(message.type).toBe(WebviewMessageType.UPDATE_SETTINGS);
-    expect((message.payload as SettingsPayload).apiKey).toBe('sk-123456');
-    expect((message.payload as SettingsPayload).model).toBe('gpt-4');
+    expect(((msg.payload as unknown) as SettingsPayload).apiKey).toBe('sk-123456');
+    expect(((msg.payload as unknown) as SettingsPayload).model).toBe('gpt-4');
   });
 
   test('ErrorPayload deve contenere un messaggio di errore', () => {
@@ -61,8 +61,8 @@ describe('Validazione tipi Webview ↔ Extension', () => {
     };
 
     expect(message.type).toBe(WebviewMessageType.ERROR);
-    expect((message.payload as ErrorPayload).message).toBe('Si è verificato un errore');
-    expect((message.payload as ErrorPayload).code).toBe(500);
+    expect(((msg.payload as unknown) as ErrorPayload).message).toBe('Si è verificato un errore');
+    expect(((msg.payload as unknown) as ErrorPayload).code).toBe(500);
   });
 
   test('ExtensionMessage deve avere tipo valido', () => {
@@ -80,8 +80,8 @@ describe('Validazione tipi Webview ↔ Extension', () => {
     };
 
     expect(validExtensionResponse.type).toBe('response');
-    expect(validExtensionResponse.payload?.result).toBe('Success');
-    expect(validExtensionResponse.payload?.settings?.theme).toBe('dark');
+    expect((msg.payload as unknown)?.result).toBe('Success');
+    expect((msg.payload as unknown)?.settings?.theme).toBe('dark');
   });
 
   test('Enum WebviewMessageType contiene tutti i tipi previsti', () => {

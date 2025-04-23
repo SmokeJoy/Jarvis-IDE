@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 /**
  * @file CompositeFallbackStrategy.test.ts
  * @description Test per la strategia di fallback composita

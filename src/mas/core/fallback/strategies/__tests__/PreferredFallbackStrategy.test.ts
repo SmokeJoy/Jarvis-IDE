@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 /**
  * @file PreferredFallbackStrategy.test.ts
  * @description Test per la strategia di fallback basata su provider preferito

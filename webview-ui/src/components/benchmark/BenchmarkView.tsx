@@ -64,37 +64,104 @@ const timeframeOptions = [
   { label: 'Ultimi 30 giorni', value: 30 },
   { label: 'Ultimi 90 giorni', value: 90 },
   { label: 'Ultimo anno', value: 365 },
-];
+] as const;
 
 export const BenchmarkView: React.FC = () => {
-  const vscodeApi = useVSCodeApi();
-  const [activeTab, setActiveTab] = useState<string>('sessions');
+  const vscode = useVSCodeApi();
+  const [loading, setLoading] = useState(false);
   const [sessions, setSessions] = useState<BenchmarkSession[]>([]);
   const [selectedSession, setSelectedSession] = useState<BenchmarkSessionDetail | null>(null);
+  const [providers, setProviders] = useState<string[]>(['all']);
   const [selectedProvider, setSelectedProvider] = useState<string>('all');
   const [timeframe, setTimeframe] = useState<number>(30);
+  const [activeTab, setActiveTab] = useState<string>('sessions');
   const [providerStats, setProviderStats] = useState<Record<string, ProviderStats>>({});
   const [timeline, setTimeline] = useState<TimelineStats[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [providers, setProviders] = useState<string[]>([]);
 
-  // Carica le sessioni all'avvio
+  // Load initial data
   useEffect(() => {
     loadSessions();
-    
-    // Ascolta i messaggi dall'estensione
+    loadStats();
+    loadTimeline();
+  }, [selectedProvider, timeframe]);
+
+  const loadSessions = () => {
+    setLoading(true);
+    vscode.postMessage({
+      type: WebviewMessageType.LOAD_BENCHMARK_SESSIONS,
+      provider: selectedProvider,
+      timeframe
+    });
+  };
+
+  const loadStats = () => {
+    setLoading(true);
+    vscode.postMessage({
+      type: WebviewMessageType.LOAD_BENCHMARK_STATS,
+      provider: selectedProvider,
+      timeframe
+    });
+  };
+
+  const loadTimeline = () => {
+    setLoading(true);
+    vscode.postMessage({
+      type: WebviewMessageType.LOAD_BENCHMARK_TIMELINE,
+      provider: selectedProvider,
+      timeframe
+    });
+  };
+
+  const handleSessionSelect = (sessionId: string) => {
+    setLoading(true);
+    vscode.postMessage({
+      type: WebviewMessageType.LOAD_BENCHMARK_SESSION,
+      benchmarkSessionId: sessionId
+    });
+  };
+
+  const handleBackToList = () => {
+    setSelectedSession(null);
+  };
+
+  const exportSession = (sessionId: string) => {
+    vscode.postMessage({
+      type: WebviewMessageType.EXPORT_BENCHMARK_SESSION,
+      benchmarkSessionId: sessionId
+    });
+  };
+
+  const deleteSession = (sessionId: string) => {
+    vscode.postMessage({
+      type: WebviewMessageType.DELETE_BENCHMARK_SESSION,
+      benchmarkSessionId: sessionId
+    });
+  };
+
+  const handleProviderChange = (e: Event) => {
+    const target = e.target as HTMLSelectElement;
+    setSelectedProvider(target.value);
+  };
+
+  const handleTimeframeChange = (e: Event) => {
+    const target = e.target as HTMLSelectElement;
+    setTimeframe(parseInt(target.value, 10));
+  };
+
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+  };
+
+  useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       const message = event.data;
       
       switch (message.type) {
         case WebviewMessageType.BENCHMARK_SESSIONS_LOADED:
           setSessions(message.benchmarkSessions || []);
-          
-          // Estrai l'elenco dei provider da tutte le sessioni
           const providersSet = new Set<string>();
-          message.benchmarkSessions?.forEach(session => {
-            // Non abbiamo i dettagli del provider qui, li avremo nelle statistiche
-            providersSet.add('all');
+          message.benchmarkSessions?.forEach((session: BenchmarkSession) => {
+            providersSet.add(session.provider);
           });
           setProviders(['all', ...Array.from(providersSet)]);
           setLoading(false);
@@ -107,13 +174,10 @@ export const BenchmarkView: React.FC = () => {
           
         case WebviewMessageType.BENCHMARK_STATS_LOADED:
           setProviderStats(message.benchmarkStats || {});
-          
-          // Aggiorna l'elenco dei provider
           if (message.benchmarkStats) {
             const statsProviders = Object.keys(message.benchmarkStats);
             setProviders(['all', ...statsProviders]);
           }
-          
           setLoading(false);
           break;
           
@@ -123,9 +187,7 @@ export const BenchmarkView: React.FC = () => {
           break;
           
         case WebviewMessageType.BENCHMARK_SESSION_DELETED:
-          // Ricarica l'elenco delle sessioni
           loadSessions();
-          // Se la sessione eliminata era quella selezionata, deselezionala
           if (selectedSession && selectedSession.id === message.benchmarkSessionId) {
             setSelectedSession(null);
           }
@@ -134,116 +196,13 @@ export const BenchmarkView: React.FC = () => {
     };
     
     window.addEventListener('message', handleMessage);
-    
-    return () => {
-      window.removeEventListener('message', handleMessage);
-    };
-  }, [vscodeApi]);
-
-  // Carica le sessioni
-  const loadSessions = () => {
-    setLoading(true);
-    vscodeApi.postMessage({
-      type: WebviewMessageType.GET_BENCHMARK_SESSIONS
-    });
-  };
-
-  // Carica le statistiche
-  const loadStats = () => {
-    setLoading(true);
-    vscodeApi.postMessage({
-      type: WebviewMessageType.GET_BENCHMARK_STATS,
-      benchmarkTimeframe: timeframe
-    });
-  };
-
-  // Carica la timeline
-  const loadTimeline = (provider: string) => {
-    if (provider === 'all') return;
-    
-    setLoading(true);
-    vscodeApi.postMessage({
-      type: WebviewMessageType.GET_BENCHMARK_TIMELINE,
-      benchmarkProvider: provider,
-      benchmarkTimeframe: timeframe
-    });
-  };
-
-  // Carica i dettagli di una sessione
-  const loadSessionDetails = (sessionId: string) => {
-    setLoading(true);
-    vscodeApi.postMessage({
-      type: WebviewMessageType.GET_BENCHMARK_SESSION,
-      benchmarkSessionId: sessionId
-    });
-  };
-
-  // Esporta una sessione
-  const exportSession = (sessionId: string) => {
-    vscodeApi.postMessage({
-      type: WebviewMessageType.EXPORT_BENCHMARK_SESSION,
-      benchmarkSessionId: sessionId
-    });
-  };
-
-  // Elimina una sessione
-  const deleteSession = (sessionId: string) => {
-    vscodeApi.postMessage({
-      type: WebviewMessageType.DELETE_BENCHMARK_SESSION,
-      benchmarkSessionId: sessionId
-    });
-  };
-
-  // Gestisce il cambio di provider
-  const handleProviderChange = (e: React.FormEvent<HTMLSelectElement>) => {
-    const provider = e.currentTarget.value;
-    setSelectedProvider(provider);
-    
-    if (provider !== 'all') {
-      loadTimeline(provider);
-    }
-  };
-
-  // Gestisce il cambio di timeframe
-  const handleTimeframeChange = (e: React.FormEvent<HTMLSelectElement>) => {
-    const tf = parseInt(e.currentTarget.value, 10);
-    setTimeframe(tf);
-    
-    // Ricarica statistiche e timeline
-    setTimeout(() => {
-      loadStats();
-      if (selectedProvider !== 'all') {
-        loadTimeline(selectedProvider);
-      }
-    }, 0);
-  };
-
-  // Gestisce il cambio di tab
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    
-    if (tab === 'stats' && Object.keys(providerStats).length === 0) {
-      loadStats();
-    } else if (tab === 'timeline' && timeline.length === 0 && selectedProvider !== 'all') {
-      loadTimeline(selectedProvider);
-    }
-  };
-
-  // Gestisce la selezione di una sessione
-  const handleSessionSelect = (sessionId: string) => {
-    loadSessionDetails(sessionId);
-  };
-
-  // Gestisce il ritorno alla lista delle sessioni
-  const handleBackToList = () => {
-    setSelectedSession(null);
-  };
+    return () => window.removeEventListener('message', handleMessage);
+  }, [selectedSession]);
 
   return (
     <Container>
       <Header>
         <Title>Benchmark LLM</Title>
-        
         <ControlsContainer>
           <DropdownContainer>
             <VSCodeDropdown onChange={handleProviderChange} value={selectedProvider}>
@@ -273,7 +232,7 @@ export const BenchmarkView: React.FC = () => {
       <VSCodeDivider />
       
       <ContentContainer>
-        <VSCodePanels activeId={activeTab} onTabSelect={e => handleTabChange(e.detail.tab.id)}>
+        <VSCodePanels activeid={activeTab} onTabSelect={(e: CustomEvent) => handleTabChange(e.detail.tab.id)}>
           <VSCodePanelTab id="sessions">Sessioni</VSCodePanelTab>
           <VSCodePanelTab id="stats">Statistiche</VSCodePanelTab>
           <VSCodePanelTab id="timeline">Timeline</VSCodePanelTab>
@@ -307,45 +266,11 @@ export const BenchmarkView: React.FC = () => {
           </VSCodePanelView>
           
           <VSCodePanelView id="stats">
-            {loading && Object.keys(providerStats).length === 0 ? (
-              <EmptyState>Caricamento statistiche in corso...</EmptyState>
-            ) : Object.keys(providerStats).length === 0 ? (
-              <EmptyState>
-                <p>Nessuna statistica di benchmark disponibile.</p>
-                <p>Esegui alcuni test ed importali per visualizzare le statistiche.</p>
-              </EmptyState>
-            ) : (
-              <BenchmarkStatsView 
-                stats={providerStats} 
-                selectedProvider={selectedProvider}
-                timeframe={timeframe}
-                onLoadTimeline={(provider) => {
-                  setSelectedProvider(provider);
-                  loadTimeline(provider);
-                  handleTabChange('timeline');
-                }}
-              />
-            )}
+            <BenchmarkStatsView stats={providerStats} provider={selectedProvider} timeframe={timeframe} />
           </VSCodePanelView>
           
           <VSCodePanelView id="timeline">
-            {selectedProvider === 'all' ? (
-              <EmptyState>
-                <p>Seleziona un provider specifico per visualizzare la timeline.</p>
-              </EmptyState>
-            ) : loading && timeline.length === 0 ? (
-              <EmptyState>Caricamento timeline in corso...</EmptyState>
-            ) : timeline.length === 0 ? (
-              <EmptyState>
-                <p>Nessun dato timeline disponibile per il provider selezionato.</p>
-              </EmptyState>
-            ) : (
-              <BenchmarkTimelineView 
-                timeline={timeline} 
-                provider={selectedProvider}
-                timeframe={timeframe}
-              />
-            )}
+            <BenchmarkTimelineView timeline={timeline} provider={selectedProvider} timeframe={timeframe} />
           </VSCodePanelView>
         </VSCodePanels>
       </ContentContainer>

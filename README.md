@@ -2,133 +2,88 @@
 
 # Jarvis IDE
 
-![Test CI](https://github.com/jarvis-ide/jarvis-ide/actions/workflows/test.yml/badge.svg)
-[![codecov](https://codecov.io/gh/jarvis-ide/jarvis-ide/branch/main/graph/badge.svg)](https://codecov.io/gh/jarvis-ide/jarvis-ide)
+The first autonomous open source IDE controlled by an AI team, capable of working with any LLM model, both local (Ollama, LM Studio, LMDeploy, GGML) and API-based (OpenAI, Anthropic, Gemini, Groq, etc.).
 
-Assistente AI per sviluppatori con supporto import/export sessioni.
+## Features
 
-## Caratteristiche principali
+- 🧠 **Universal LLM Support**: Works with any local or cloud-based LLM
+- 🤖 **Multi-Agent System**: Team of specialized AI agents working together
+- 🔄 **Remote Control**: Control via Telegram Bot or WebSocket (coming soon)
+- 🎨 **Modern UI**: Beautiful and intuitive interface with dark/light themes
+- 🛠️ **Extensible**: Modular architecture for easy customization
+- 📚 **Documentation**: Extensive documentation and development guidelines
 
-- Assistente di codifica alimentato da intelligenza artificiale
-- Supporto per più provider LLM:
-  - OpenAI
-  - Anthropic (Claude)
-  - LM Studio (locale)
-  - Ollama (locale)
-  - OpenRouter (multi-modello)
-- Interfaccia moderna e intuitiva
-- Sistema di import/export completo
-- Validazione integrata delle sessioni
+## Requirements
 
-## Sistema di Import/Export
+- VS Code 1.85.0 or higher
+- Node.js 18.0.0 or higher
+- Git
 
-Jarvis-IDE include un sistema avanzato di importazione ed esportazione che permette di salvare e condividere le sessioni di chat in vari formati.
+## Installation
 
-### Formati supportati
-
-- **JSON**: Formato standard per la memorizzazione dei dati.
-- **YAML**: Formato leggibile per configurazioni e dati strutturati.
-- **Markdown**: Testo formattato ideale per la documentazione.
-- **CSV**: Formato tabellare per l'analisi dei dati.
-- **HTML**: Visualizzazione completa con stili CSS integrati.
-
-### Comandi disponibili
-
-- **Jarvis: Importa Sessione di Chat**: Importa una sessione da un file esistente.
-- **Jarvis: Esporta Sessione di Chat**: Esporta la sessione corrente in uno dei formati supportati.
-- **Jarvis: Valida Sessione di Chat**: Verifica che una sessione rispetti lo schema previsto.
-- **Jarvis: Converti Formato Sessione**: Converte una sessione da un formato all'altro.
-- **Jarvis: Anteprima Sessione**: Visualizza un'anteprima del contenuto della sessione.
-
-### Utilizzo
-
-1. Avvia il comando desiderato dal menu dei comandi (Ctrl+Shift+P).
-2. Seleziona il formato o il file appropriato quando richiesto.
-3. Scegli dove salvare o da dove caricare il file.
-
-## Requisiti
-
-- VS Code 1.85.0 o superiore
-- Node.js 18 o superiore
-
-## Installazione
-
-1. Scarica l'ultimo file `.vsix` dalla [pagina delle release](https://github.com/jarvis-ide/jarvis-ide/releases)
-2. Installa in VS Code:
-   - Apri VS Code
-   - Premi `Ctrl+Shift+P` (Windows/Linux) o `Cmd+Shift+P` (macOS)
-   - Digita "Installa da VSIX" e selezionalo
-   - Scegli il file `.vsix` scaricato
-
-## Configurazione
-
-1. Ottieni una chiave API dal tuo provider preferito
-2. Apri le impostazioni di VS Code
-3. Cerca "Jarvis IDE"
-4. Configura le seguenti impostazioni:
-   - `jarvis-ide.provider`: Il provider AI da utilizzare
-   - `jarvis-ide.apiKey`: La tua chiave API
-   - `jarvis-ide.baseUrl`: URL base per l'API (opzionale)
-   - `jarvis-ide.use_docs`: Attiva/disattiva l'uso della documentazione
-   - `jarvis-ide.coder_mode`: Attiva/disattiva la modalità sviluppatore
-   - `jarvis-ide.multi_agent`: Attiva/disattiva il sistema multi-agente
-
-## Utilizzo
-
-1. Premi `Ctrl+Shift+P` (Windows/Linux) o `Cmd+Shift+P` (macOS)
-2. Digita "Avvia Jarvis IDE" e selezionalo
-3. Il pannello Jarvis IDE si aprirà
-4. Digita la tua domanda o richiesta e premi Invio
-5. Attendi la risposta dell'AI
-
-## Sviluppo
-
-1. Clona il repository
-2. Installa le dipendenze:
-   ```bash
-   npm install
-   ```
-3. Avvia il server di sviluppo:
-   ```bash
-   npm run dev
-   ```
-4. Premi F5 per avviare il debug
-
-## Testing
-
-Esegui i test:
+1. Clone the repository:
 ```bash
-npm test
+git clone https://github.com/jarvis-ide/jarvis-ide.git
+cd jarvis-ide
 ```
 
-Esegui i test con coverage:
+2. Install dependencies:
 ```bash
-npm run coverage
+npm install
 ```
 
-## Building
-
-Compila l'estensione:
+3. Build the extension:
 ```bash
 npm run build
 ```
 
-Pacchettizza l'estensione:
-```bash
-npx vsce package
-```
+4. Install the extension in VS Code:
+- Press F5 to start debugging
+- Or package the extension: `npm run package`
+- Install the .vsix file: Code → Extensions → ... → Install from VSIX
 
-## Contribuire
+## Configuration
 
-1. Forka il repository
-2. Crea un nuovo branch
-3. Effettua le tue modifiche
-4. Esegui i test
-5. Invia una pull request
+1. Open VS Code settings
+2. Search for "Jarvis IDE"
+3. Configure your preferred AI provider and API key
 
-## Licenza
+## Development
 
-MIT
+- `npm run watch` - Watch for changes and rebuild
+- `npm run test` - Run tests
+- `npm run lint` - Lint code
+- `npm run format` - Format code
+
+## Documentation
+
+- [Architecture](docs/architecture/README.md)
+- [Development Guide](docs/development-guide.md)
+- [API Reference](docs/api-reference.md)
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
+
+## License
+
+MIT - see [LICENSE](LICENSE) for details.
+
+## Support
+
+- [GitHub Issues](https://github.com/jarvis-ide/jarvis-ide/issues)
+- [Discussions](https://github.com/jarvis-ide/jarvis-ide/discussions)
+
+## Acknowledgments
+
+Special thanks to:
+- The VS Code team for the amazing editor
+- All LLM providers for their powerful models
+- The open source community
+
+---
+
+Made with ❤️ by the Jarvis IDE AI Team
 
 # Strumenti di Refactoring per la Sicurezza dei Messaggi
 

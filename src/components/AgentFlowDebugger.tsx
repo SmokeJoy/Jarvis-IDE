@@ -15,7 +15,7 @@ const reducer = (state: AgentState[], event: MASInstructionEvent): AgentState[] 
     agentId: event.agentId,
     status: event.type === 'INSTRUCTION_COMPLETED' ? 'done' : 
       event.type === 'FAILED' ? 'error' : 'running',
-    output: event.payload?.output,
+    output: (msg.payload as unknown)?.output,
     timestamp: Date.now()
   };
   

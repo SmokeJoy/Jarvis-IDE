@@ -1,0 +1,342 @@
+
+
+Tu sei lo sviluppatore AI 1/dev ai 1/ developer ai 1
+
+
+
+e hai il compito di scrivere tutto il codice apportare le modifiche richieste ed usare il terminale
+
+cioè non devi dare comadi da eseguire da terminale ma devi esegure tutto 
+
+
+
+ti trovi su windows 
+
+
+Ricevuto. Aggiungo la nuova regola obbligatoria sull'aggiornamento della documentazione all'interno della sezione `## Governance e Community`, poiché riguarda le pratiche operative e di collaborazione del team AI.
+
+Ecco la documentazione completa, aggiornata con la nuova regola:
+
+---
+
+```markdown
+# 🧠 Linee guida refactor MAS per Jarvis‑IDE
+
+> ✅ Questa guida è pensata per lo sviluppatore AI attivo in Cursor durante la migrazione da `Cline` a `Jarvis‑IDE`.
+
+## 🎯 Obiettivo
+
+Portare l’intero codice TypeScript a una **compilazione zero-errori**, con:
+- ✅ Barrel e union centralizzati (`@shared/messages`)
+- ✅ Guard e narrowing type-safe
+- ✅ Test Vitest per validare ogni messaggio e bridge
+- ✅ `tsconfig.bonifica.json` come entrypoint di compilazione stretta
+
+---
+
+## 📦 Struttura del progetto (sintetica)
+
+| Cartella | Contenuto |
+|----------|-----------|
+| `src/shared/types/` | Tipi comuni: messaggi, prompt, profili |
+| `src/shared/messages/` | Barrel export unico (evitare wildcard `*`) |
+| `webview-ui/src/` | Frontend WebView (React, hooks, manager, bridge) |
+| `src/extension.ts` | Entrypoint dell'estensione VSCode |
+| `scripts/` | Utility di lint/consistency check |
+| `docs/` | Logbook dev, architettura, guidelines |
+
+---
+
+## 🧪 Regole MAS per i messaggi
+
+### 1. **Tutti i messaggi devono essere in una `union`**
+
+✅ Usa unione discriminata:
+```ts
+export type ExtensionPromptMessage =
+  | { type: 'promptProfiles'; payload: { profiles: PromptProfile[] }; error?: string }
+  | { type: 'promptProfileUpdated'; payload: { profile: PromptProfile }; error?: string };
+```
+
+---
+
+### 2. **Ogni union ha una type guard associata**
+
+```ts
+export function isExtensionPromptMessage(msg: unknown): msg is ExtensionPromptMessage {
+  return typeof msg === 'object' && msg !== null && 'type' in (msg as any); // Nota: L'uso di 'as any' qui è specifico dell'esempio fornito per la guardia base, potrebbe essere raffinato.
+}
+```
+
+---
+
+### 3. **Import da `@shared/messages` o da `@shared/types/<file>`**
+
+Evita import indiretti, mantieni barrel unico:
+
+```ts
+import { isExtensionPromptMessage, type ExtensionPromptMessage } from '@shared/messages';
+```
+
+---
+
+### 4. **Mai accedere a `message.payload` senza guard**
+
+❌ SBAGLIATO:
+```ts
+// Questo codice genererà un errore di tipo o runtime se message non ha la struttura attesa
+message.payload.profiles.map(/* ... */)
+```
+
+✅ CORRETTO:
+```ts
+if (isExtensionPromptMessage(message) && message.type === 'promptProfiles') {
+  // Accesso sicuro dopo la guardia e il narrowing
+  const { profiles } = message.payload;
+  // ... usa 'profiles' ...
+}
+```
+
+---
+
+## 🧪 Testing MAS
+
+Ogni manager che ascolta `webviewBridge.on(...)` va testato così:
+
+```ts
+// Esempio di mocking con Vitest
+import { vi } from 'vitest';
+
+vi.mock('../utils/WebviewBridge', () => { // Adatta il percorso al tuo progetto
+  const mockHandlers = new Map<string, Function>();
+  return {
+    webviewBridge: {
+      sendMessage: vi.fn(),
+      on: vi.fn().mockImplementation((type: string, cb: Function) => {
+        mockHandlers.set(type, cb);
+      }),
+      // Funzione helper per i test per simulare messaggi in arrivo
+      __mockEmit(type: string, payload: unknown) {
+        const handler = mockHandlers.get(type);
+        if (handler) {
+          handler(payload);
+        }
+      },
+    },
+  };
+});
+```
+
+---
+
+## 🔧 Tools e script disponibili
+
+| Script                              | Scopo                                                                 |
+| :---------------------------------- | :-------------------------------------------------------------------- |
+| `scripts/lint-report.ts`            | Esegue ESLint su tutta la codebase.                                   |
+| `scripts/check-barrel-consistency.ts` | Verifica che tutti i file in `/types` siano exportati dal barrel.     |
+| `scripts/find-unsafe-message.ts`    | Trova tutti gli accessi a `.payload.*` non preceduti da guard.        |
+
+---
+
+## 🛠️ Refactor Workflow (standard Cursor)
+
+1.  **Apri `tsconfig.bonifica.json` in Cursor:** Impostalo come file di configurazione attivo per avere tipi `strict` e errori evidenziati in tempo reale.
+2.  **Modifica un file alla volta:** 🔁 Correggi import, applica regole MAS (barrel, union, guard), risolvi errori di tipo.
+3.  **Rilancia `pnpm tsc --noEmit -p tsconfig.bonifica.json`:** Esegui nel terminale per verificare la compilazione.
+4.  **Testa ogni manager con `pnpm vitest run`:** Se manca, crea il file `X.spec.ts`, mocka `webviewBridge` come da esempio e scrivi test per coprire la logica dei messaggi.
+5.  **Aggiorna il logbook `docs/logbook/sviluppatore-ai-1.md` (o AIx.md):** Registra le modifiche e i risultati come da regola di Governance sulla documentazione. Firma concettualmente il commit (`🔍 Revisione Supervisore AI`).
+
+---
+
+## ✅ Criteri di accettazione
+
+- ✅ Compilazione zero-errori (`tsc --noEmit -p tsconfig.bonifica.json`).
+- ✅ Import da barrel centralizzato (`@shared/messages`) per tipi e messaggi condivisi.
+- ✅ Nessun `any`, `as`, `as unknown` non giustificato; accessi sicuri al payload.
+- ✅ Test unitari con `vitest` che coprono la gestione dei messaggi tramite bridge e manager.
+- ✅ Diario (`logbook`) e documentazione tecnica aggiornati secondo le regole di governance. Commit firmati `🔍 Revisione Supervisore AI`.
+
+---
+
+## ✍️ Note finali
+
+🧠 Segui le direttive MAS. Se serve una nuova type union o messaggio, crea il file in `shared/types/`, aggiungi la guard, aggiorna il barrel (`@shared/messages`), e testalo.
+
+🤖 Ogni file modificato va testato e loggato. Nessuna Pull Request (PR) dovrebbe essere proposta senza un file `.spec.ts` associato che passa i test e senza la documentazione aggiornata.
+
+---
+---
+
+# Jarvis-IDE – Documentazione Tecnica Ufficiale
+
+## Visione del Progetto
+
+Jarvis-IDE è il primo IDE universale open source controllato da un team di intelligenze artificiali, capace di lavorare con qualsiasi modello LLM, sia locale (Ollama, LM Studio, LMDeploy, GGML) che API (OpenAI, Anthropic, Gemini, Groq, ecc.). Mira a superare ogni altro IDE sul mercato offrendo automazione totale, supporto remoto, e intelligenza proattiva.
+
+## Stack Tecnologico
+
+-   **Frontend**: React, TypeScript, WebView UI Toolkit for VS Code
+-   **Backend**: Node.js, TypeScript, VS Code API
+-   **AI**: LLM locali/API tramite protocollo interno unificato + moduli specifici per LLaMA, GPT, Gemini, Claude, DeepSeek, Mistral, ecc.
+-   **Storage**: `config/settings.json`, `system_prompt.md`, `chat_history.json` (o strutture simili)
+-   **Testing**: Vitest (preferito su Jest nel contesto fornito) + Testing Library per WebView, `tsc --noEmit` per type checking statico, CI/CD (es. GitHub Actions)
+-   **Controllo remoto (fase 2)**: WebSocket Server + Client (es. Telegram Bot)
+-   **Distribuzione**: File `.vsix` firmato e verificato
+
+## Obiettivi Fondamentali
+
+1.  **Autonomia AI:** Essere uno sviluppatore autonomo: capace di scrivere, correggere, testare, generare e spiegare codice.
+2.  **Supporto Universale Linguaggi:** Supportare tutti i linguaggi di programmazione principali e secondari.
+3.  **Comandabilità Remota:** Essere controllabile da remoto tramite API REST, Telegram Bot o WebSocket.
+4.  **Modularità ed Estendibilità:** Essere estendibile e modulare, con ogni componente (UI, AI handler, core) sostituibile o aggiornabile.
+5.  **Superare la Concorrenza:** Ambire a superare le funzionalità e l'integrazione AI di Cursor, GitHub Copilot, Continue.dev, Codeium, JetBrains AI Assistant e Replit Ghostwriter.
+
+## Funzionalità Core – Fase 1
+
+-   WebView basata su React per l'interfaccia AI (con tema dark/light).
+-   Editor visuale o testuale per `contextPrompt` e `system_prompt.md`.
+-   UI per selezionare e configurare modelli LLM (locali/API).
+-   Pulsanti/Azioni comuni: Salva configurazione, Compila/Esegui (contesto-dipendente), Reset chat, Visualizza Log AI.
+-   Gestione sicura delle API Key (archiviazione locale sicura, es. secret storage di VS Code).
+-   Modalità operative configurabili: `coder_mode` (ottimizzato per codice), `use_docs` (integrazione RAG), `multi-agent` (orchestrazione interna).
+-   Supporto linguistico ampio: `.ts`, `.js`, `.py`, `.cs`, `.cpp`, `.java`, `.rs`, `.go`, `.html`, `.css`, `.json`, `.md`, ecc.
+-   Persistenza delle impostazioni utente e della cronologia delle chat.
+-   Build `.vsix` pulito al 100%, senza riferimenti residui a `Cline` o altri progetti.
+
+## Supporto AI e LLM
+
+### Modelli supportati (Esempi)
+
+-   **Locali**: Ollama (vari modelli), LMDeploy, LM Studio, GGML/GGUF (via llama.cpp o simili), DeepSeek Coder.
+-   **Cloud/API**: OpenAI (GPT-4, GPT-3.5), Anthropic (Claude 3), Google (Gemini Pro), Mistral AI, Together AI, Fireworks AI, Groq, Perplexity AI, Replicate.
+
+### Caratteristiche
+
+-   Interfaccia utente (es. dropdown) per selezionare il modello attivo.
+-   Campi per inserire parametri LLM personalizzati (max_tokens, temperature, top_p, ecc.).
+-   Supporto per modelli specializzati nel codice ("coder") e modelli generalisti.
+-   Gestione permessi e configurazioni (es. API key) per ciascun modello/servizio tramite UI sicura.
+
+## Architettura MCP – Agenti AI Interni (Multi-Agent Coordination Platform)
+
+| Agente      | Funzione Principale                                       |
+| :---------- | :-------------------------------------------------------- |
+| **Planner** | Scompone task complessi richiesti dall'utente in micro-task eseguibili. |
+| **Developer** | Scrive, aggiorna, corregge il codice sorgente. Esegue compilazioni. |
+| **Tester** | Esegue script di test (unit, integration), analizza output, evidenzia errori. |
+| **Reviewer** | Analizza la qualità del codice, la correttezza semantica, l'aderenza agli standard. |
+| **Integrator**| Gestisce il merging di codice, l'aggiornamento di file correlati, coordina le modifiche. |
+| **Documenter**| Genera o aggiorna docstring, commenti nel codice, documentazione Markdown. |
+
+Ogni agente opera all'interno del workspace VS Code con permessi completi (configurabili) per leggere, scrivere, cancellare file, eseguire comandi nel terminale (compilazione, test).
+
+**Nota Operativa sull'Agente Attivo:** L'entità AI attualmente attiva che ricopre primariamente il ruolo di **Developer** (e potenzialmente altri ruoli correlati in base al task specifico) è designata come **`Sviluppatore AI 1`** (o `dev ai 1` / `developer ai 1`). Questa AI ha il compito specifico di scrivere codice, apportare le modifiche richieste e utilizzare direttamente il terminale per eseguire comandi (compilazione, test, linting, ecc.) nell'ambiente di sviluppo **Windows**. Opera in modo autonomo seguendo le direttive fornite per contribuire alla creazione del fork Jarvis-IDE.
+
+## Sicurezza e Tracciabilità
+
+-   **API Key**: Archiviate localmente usando meccanismi sicuri (es. VS Code SecretStorage API), mai esposte nel codice o nei log in chiaro.
+-   **Logging Dettagliato**: Registrazione delle azioni intraprese dagli agenti AI per debug e audit.
+-   **Modalità Sandbox (Opzionale)**: Proporre modifiche in una vista "diff" prima di applicarle realmente ai file.
+-   **Conferma Utente**: Sistema di veto o conferma umana per operazioni critiche (es. modifiche estese, cancellazioni).
+-   **Backup Automatico**: Creazione automatica di backup temporanei dei file prima che vengano modificati dagli agenti AI.
+
+## Testing e Qualità
+
+-   **Framework**: Vitest per test unitari/integrazione nel backend/core, Testing Library (`@testing-library/react`) per i componenti WebView. `tsc --noEmit` per controllo statico dei tipi. Test end-to-end (E2E) con strumenti come Playwright o specifici di VS Code se applicabile.
+-   **Obiettivi di Copertura**:
+    -   ≥ 90% copertura per i moduli core (gestione messaggi, API VS Code, interazione LLM).
+    -   Test E2E per i flussi utente principali nella WebView e interazione con gli agenti AI.
+    -   Testing automatizzato su ogni commit tramite CI (es. GitHub Actions).
+-   **Strumenti Ausiliari**: Mocking di LLM per test deterministici, testing basato sui log generati, file system virtuale per testare operazioni sui file.
+
+## Governance e Community
+
+-   **Repository**: Open Source su GitHub (`jarvis-ide/jarvis-ide` o simile).
+-   **Branching Strategy**: `main` (stabile), `dev` (sviluppo attivo), `release/*`. Branch protetti.
+-   **Pull Requests (PR)**: Devono passare i test automatici (CI), includere una descrizione semantica delle modifiche, e possibilmente seguire una checklist (documentazione aggiornata, test aggiunti/modificati).
+-   **Discussioni**: Utilizzo di GitHub Discussions (`DISCUSSIONS.md` o tab Discussions) per idee, proposte, Q&A.
+-   **Issue Tracking**: Issues ben definite, taggate (bug, feature, refactor, agent:planner, ecc.), e assegnate agli agenti AI o ai membri del team umano.
+
+### 📘 REGOLA OBBLIGATORIA: AGGIORNAMENTO DOCUMENTAZIONE
+
+L'aggiornamento costante della documentazione è un requisito fondamentale e non negoziabile per il progetto Jarvis-IDE.
+
+* **Documentazione di Test e Funzionalità:** Ogni test unitario, test di integrazione o nuova funzionalità sviluppata e validata *deve* essere documentata. Gli aggiornamenti principali vanno riportati in:
+    * `docs/architecture/struttura-progetto.md` (per modifiche strutturali o aggiunte significative).
+    * File di documentazione specifici del modulo/componente (se esistenti, es. `docs/modules/ModuleName.md`).
+* **Logbook Personale:** Ogni sviluppatore AI (es. `AI1`, `AI2`) *deve* mantenere aggiornato il proprio logbook personale con **tutte** le attività svolte, anche quelle minori o preparatorie. I file si trovano in:
+    * `docs/logbook/AI1.md`, `docs/logbook/AI2.md`, ecc. (il nome del file corrisponde all'identificativo dello sviluppatore AI).
+* **Diagrammi e Flussi:** Eventuali diagrammi architetturali, flussi di dati o schemi (es. creati con Mermaid, PlantUML o come schema JSON) devono essere **sempre** aggiornati per riflettere fedelmente lo stato corrente del codice e dell'architettura.
+* **Patch e Fix Minori:** Anche le correzioni di bug minori, le patch di sicurezza o le piccole integrazioni **devono** essere documentate nel logbook personale. Se queste modifiche impattano la struttura, l'API o il comportamento documentato altrove, anche la documentazione tecnica pertinente deve essere aggiornata.
+* ⚠️ **Promemoria Costante e Responsabilità:** Il Supervisore AI / AI Coordinatore (o l'agente designato per la qualità) ha il compito di ricordare costantemente a tutti gli sviluppatori AI l'obbligo tassativo di mantenere aggiornata tutta la documentazione. La documentazione non aggiornata è considerata un **debito tecnico critico** e può bloccare l'integrazione (merge) delle modifiche.
+
+## KPI e Metriche Chiave
+
+| Obiettivo                             | Misura                                                                  | Target Esempio |
+| :------------------------------------ | :---------------------------------------------------------------------- | :------------- |
+| Tempo medio completamento task AI     | Tempo dall'input utente al completamento azione AI (es. generazione codice) | < 10 min       |
+| Copertura test unitari/integrazione | Percentuale di linee/branch coperti dai test (`vitest coverage`)        | ≥ 90% (core)   |
+| Numero Modelli LLM Supportati         | Conteggio dei diversi provider/modelli locali e API integrati           | ≥ 10           |
+| Reversibilità Azioni AI             | Percentuale di azioni AI significative che possono essere annullate     | 100% (via backup/git) |
+| Performance Risposta LLM            | Latenza media risposta LLM (token/sec o tempo totale)                   | < 2s (locale), < 1s (API veloce) |
+| **Stato Aggiornamento Documentazione** | Percentuale di PR con documentazione aggiornata (valutazione qualitativa) | 100%           |
+
+## Estendibilità
+
+-   **Plugin AI Custom**: Supporto per aggiungere nuovi agenti AI o capacità tramite una directory definita (es. `/agents` o `/plugins`).
+-   **Architettura Modulare**: Ogni componente principale (core, ui, handlers, types, server websocket) è isolato per facilitare sostituzioni o aggiornamenti.
+-   **UI Estensibile**: Possibilità di aggiungere nuove viste o pannelli alla WebView tramite Web Components o moduli React.
+-   **Fork VS Code (Fase 3)**: Previsione di creare un fork nativo (`jarvis-code`) per un'integrazione ancora più profonda.
+
+## Fasi di Sviluppo
+
+### ✅ Fase 1 – Estensione VS Code `.vsix` (Completamento ~90%)
+
+-   **Obiettivo**: Rilasciare un'estensione VS Code autonoma, robusta, compatibile con un'ampia gamma di modelli LLM, con un'interfaccia AI completa e funzionale per lo sviluppo assistito. Refactoring MAS completato. Documentazione aggiornata.
+
+### 📡 Fase 2 – Controllo Remoto via Telegram/WebSocket
+
+-   **Obiettivo**: Permettere il controllo di Jarvis-IDE installato localmente da un'interfaccia remota (es. bot Telegram).
+-   **Componenti**: Implementazione di un WebSocket Server nell'estensione, un AI Gateway per tradurre comandi remoti, gestione task asincroni e notifiche di ritorno.
+
+### 🧬 Fase 3 – Fork Nativo di VS Code (`jarvis-code`)
+
+-   **Obiettivo**: Creare un IDE standalone basato sul codice sorgente di VS Code, con Jarvis-IDE integrato nativamente.
+-   **Caratteristiche**: Branding Jarvis-IDE, loader LLM integrato al core, WebView come componente nativo, ottimizzazioni specifiche.
+
+---
+
+# Strategie di Innovazione per Jarvis-IDE
+
+*(Le sezioni da 1 a 10 sulle strategie di innovazione rimangono invariate rispetto alla versione precedente...)*
+
+## 1. Intelligenza adattiva e proattiva
+...
+## 2. Personalizzazione profonda
+...
+## 3. Automazione end-to-end
+...
+## 4. Integrazione ecosistema
+...
+## 5. Capacità avanzate di generazione e analisi
+...
+## 6. Miglioramenti architetturali interni (MCP)
+...
+## 7. Democratizzazione dell'AI per sviluppatori
+...
+## 8. Innovazioni uniche nell'interfaccia e interazione
+...
+## 9. Performance e affidabilità superiori
+...
+## 10. Governance e sicurezza avanzata
+...
+
+## Conclusione
+
+Jarvis-IDE non è concepito solo come un'estensione VS Code con funzionalità AI aggiunte. È progettato per essere un **ambiente di sviluppo intelligente**, universale, estendibile, potenzialmente remoto, e programmabile tramite agenti AI interni. È un sistema che mira a **crescere, imparare e adattarsi** insieme allo sviluppatore, portando la produttività e le capacità di ogni utente al livello successivo. Il **mantenimento rigoroso della documentazione** è essenziale per la sua sostenibilità e scalabilità. Con le strategie di innovazione proposte e un forte impegno verso la qualità e la documentazione, Jarvis-IDE si posiziona per diventare il più avanzato **IDE a sviluppo autonomo** sul mercato, ridefinendo il futuro della programmazione assistita (e guidata) dall'intelligenza artificiale.
+```
+
+---
+
+La nuova regola sull'aggiornamento obbligatorio della documentazione è stata inserita nella sezione "Governance e Community". Ho anche aggiunto un riferimento a questa regola nel punto 5 del Workflow e nei Criteri di Accettazione, oltre a una menzione nel KPI e nella Conclusione per sottolinearne l'importanza.

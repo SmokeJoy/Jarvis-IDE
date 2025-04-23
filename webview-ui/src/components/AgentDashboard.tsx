@@ -16,7 +16,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import { useAgentMemory } from '../hooks/useAgentMemory';
 import { useExtensionMessage } from '../hooks/useExtensionMessage';
-import { MasMessageType, AgentToggleRequestMessage, AgentMessageUnion } from '../types/mas-message';
+import { MasMessageType, AgentToggleRequestMessage, AgentMessageUnion } from '@shared/messages';
 import { AgentStatus, AgentMode } from '../types/mas-types';
 import { formatRelativeTime } from '../utils/date-utils';
 

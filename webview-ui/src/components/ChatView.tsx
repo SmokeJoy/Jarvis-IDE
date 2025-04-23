@@ -149,8 +149,8 @@ export const ChatView: React.FC<ChatViewProps> = ({
 				
 				case 'addChatMessage': // Retrocompatibilità
 					// Aggiungi un messaggio alla chat
-					if (message.payload?.message && isChatMessage(message.payload.message)) {
-						addMessage(message.payload.message);
+					if ((msg.payload as unknown)?.message && isChatMessage((msg.payload as unknown).message)) {
+						addMessage((msg.payload as unknown).message);
 					}
 					break;
 				

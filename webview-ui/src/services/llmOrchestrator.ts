@@ -5,7 +5,10 @@
  */
 
 import { WebSocketBridge } from '../utils/WebSocketBridge';
-import { getProvider, getDefaultProvider, hasProvider, LLMProviderHandler, LLMProviderId } from '../../src/providers/provider-registry';
+import { getProvider, getDefaultProvider, hasProvider, LLMProviderHandler, LLMProviderId } from '@shared/messages';
+import { PromptRunMode, PromptResult } from '@shared/messages';
+import { PromptEngine, PromptStrategy } from '../../../src/mas/engine/PromptEngine';
+import { engine } from '@/mas/engine/PromptEngine';
 
 /**
  * Configurazione per il fallback tra provider
@@ -434,3 +437,13 @@ class LLMOrchestrator {
  * Istanza singleton dell'orchestratore LLM
  */
 export const llmOrchestrator = new LLMOrchestrator();
+
+// Example: add a type guard for prompt input messages if not present
+export function isPromptInputMessage(msg: unknown): msg is { type: 'SEND_PROMPT'; payload: { input: string } } {
+  return typeof msg === 'object' && msg !== null && (msg as any).type === 'SEND_PROMPT';
+}
+
+// Example usage of engine.run in a handler (add or refactor as needed)
+async function handleLLMInput(input: string, mode: PromptRunMode): Promise<PromptResult> {
+  return engine.run(input, mode);
+}

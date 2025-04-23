@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+import { z } from 'zod';
 /**
  * @file contextNavigateHandler.test.ts
  * @description Test per l'handler di navigazione tra contesti

@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+import { z } from 'zod';
 /**
  * Test avanzati per i validatori
  */

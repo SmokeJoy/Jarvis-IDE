@@ -1,3 +1,4 @@
+import { z } from 'zod';
 /**
  * @file webview.types.test.ts
  * @description Test unitari per i type guards e le funzioni di conversione in webview.types.ts
@@ -75,7 +76,7 @@ describe('Type guards per messaggi', () => {
 
       expect(result).not.toBeNull();
       expect(result?.type).toBe('test');
-      expect(result?.payload).toEqual({ foo: 'bar' });
+      expect((msg.payload as unknown)).toEqual({ foo: 'bar' });
       expect(result?.action).toBe('chatButtonClicked');
     });
 
@@ -89,7 +90,7 @@ describe('Type guards per messaggi', () => {
 
       expect(result).not.toBeNull();
       expect(result?.type).toBe('error');
-      expect(result?.payload).toHaveProperty('error', 'Something went wrong');
+      expect((msg.payload as unknown)).toHaveProperty('error', 'Something went wrong');
     });
 
     it('dovrebbe gestire il caso di apiConfiguration nel messaggio', () => {

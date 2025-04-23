@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import * as vscode from 'vscode';
 import { HandlerFunction } from '../types';
 import { readFile } from 'fs/promises';

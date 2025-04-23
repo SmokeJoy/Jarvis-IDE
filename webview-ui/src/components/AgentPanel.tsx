@@ -20,7 +20,7 @@ import {
   AgentMessageUnion,
   AgentsStatusUpdateMessage,
   TaskQueueUpdateMessage
-} from '../types/mas-message';
+} from '@shared/messages';
 import { 
   isAgentsStatusUpdateMessage, 
   isTaskQueueUpdateMessage,
@@ -58,11 +58,11 @@ export const AgentPanel: React.FC = () => {
     
     // Implementazione del pattern Union Dispatcher Type-Safe
     if (isAgentsStatusUpdateMessage(message)) {
-      setAgentsStatus(message.payload);
+      setAgentsStatus((msg.payload as unknown));
       setIsLoading(false);
     }
     else if (isTaskQueueUpdateMessage(message)) {
-      setTaskQueue(message.payload);
+      setTaskQueue((msg.payload as unknown));
       setIsLoading(false);
     }
   }, []);

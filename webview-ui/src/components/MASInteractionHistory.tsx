@@ -21,8 +21,8 @@ export const MASInteractionHistory: React.FC<Props> = ({ agentId }) => {
 
     const handler = (event: MessageEvent) => {
       if (event.data.type === 'mas/history-update' && 
-          event.data.payload.agentId === agentId) {
-        setHistory(event.data.payload.history);
+          (msg.payload as unknown).agentId === agentId) {
+        setHistory((msg.payload as unknown).history);
       }
     };
 

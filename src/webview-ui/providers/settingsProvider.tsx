@@ -69,20 +69,20 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         case 'settings':
           setSettings((prev) => ({
             ...prev,
-            ...message.payload,
+            ...(msg.payload as unknown),
           }));
           break;
         case 'systemPrompt':
           setSettings((prev) => ({
             ...prev,
-            systemPrompt: message.payload.content,
+            systemPrompt: (msg.payload as unknown).content,
           }));
           break;
         case 'systemPromptSaved':
           // Aggiorna lo stato dopo il salvataggio
           setSettings((prev) => ({
             ...prev,
-            systemPrompt: message.payload.content,
+            systemPrompt: (msg.payload as unknown).content,
           }));
           break;
       }

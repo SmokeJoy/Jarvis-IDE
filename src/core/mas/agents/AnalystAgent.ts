@@ -82,7 +82,7 @@ export class AnalystAgent {
     try {
       switch (command.type) {
         case 'analyze':
-          await this.processAnalysisRequest(command.payload as AnalysisRequest);
+          await this.processAnalysisRequest((msg.payload as unknown) as AnalysisRequest);
           break;
 
         case 'status':

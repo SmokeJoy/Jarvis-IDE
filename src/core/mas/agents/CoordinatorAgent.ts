@@ -123,15 +123,15 @@ export class CoordinatorAgent {
     try {
       switch (command.type) {
         case 'create-task':
-          await this.createTask(command.payload as CreateTaskRequest, command.source);
+          await this.createTask((msg.payload as unknown) as CreateTaskRequest, command.source);
           break;
 
         case 'cancel-task':
-          await this.cancelTask(command.payload.taskId, command.source);
+          await this.cancelTask((msg.payload as unknown).taskId, command.source);
           break;
 
         case 'get-task':
-          await this.getTask(command.payload.taskId, command.source);
+          await this.getTask((msg.payload as unknown).taskId, command.source);
           break;
 
         case 'list-tasks':
@@ -198,7 +198,7 @@ export class CoordinatorAgent {
    * Gestisce i risultati delle analisi
    */
   private handleAnalysisResult(command: Command): void {
-    const result = command.payload;
+    const result = (msg.payload as unknown);
 
     if (!result || !result.requestId) {
       return;
@@ -224,7 +224,7 @@ export class CoordinatorAgent {
    * Gestisce i risultati delle esecuzioni
    */
   private handleExecutionResult(command: Command): void {
-    const result = command.payload;
+    const result = (msg.payload as unknown);
 
     if (!result || !result.requestId) {
       return;

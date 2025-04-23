@@ -34,12 +34,12 @@ export type { WebviewMessage, WebviewMessageBase } from '../shared/types/webview
  * Enum per i livelli di log
  * SPOSTATO IN src/shared/types/global.ts
  */
-// export enum LogLevel {
-//   DEBUG = 'DEBUG',
-//   INFO = 'INFO',
-//   WARN = 'WARN',
-//   ERROR = 'ERROR',
-// }
+export enum LogLevel {
+  DEBUG = 0,
+  INFO = 1,
+  WARN = 2,
+  ERROR = 3
+}
 
 // Definizioni di tipi comuni utilizzati nell'applicazione
 export interface ApiKey {
@@ -107,9 +107,9 @@ export interface CacheConfig {
 
 export interface LogEntry {
   timestamp: string;
-  level: 'debug' | 'info' | 'warn' | 'error';
+  level: keyof typeof LogLevel;
   message: string;
-  context?: Record<string, unknown>;
+  error?: Error;
 }
 
 export interface ErrorResponse {
@@ -171,4 +171,23 @@ export interface VersionInfo {
   build: string;
   environment: string;
   timestamp: string;
+}
+
+export interface TelemetrySetting {
+  enabled: boolean;
+}
+
+export interface JarvisSettings {
+  apiConfiguration?: {
+    provider: string;
+    apiKey: string;
+    modelId: string;
+    baseUrl?: string;
+    temperature?: number;
+    maxTokens?: number;
+  };
+  telemetrySetting?: TelemetrySetting;
+  customInstructions?: string;
+  contextPrompt?: string | Record<string, unknown>;
+  planActSeparateModelsSetting?: boolean;
 }

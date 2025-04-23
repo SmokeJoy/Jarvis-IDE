@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { AgentStatus } from '../types/mas-types';
 import { useExtensionMessage } from '../hooks/useExtensionMessage';
-import { MasMessageType, AgentToggleEnableMessage, AgentsStatusUpdateMessage } from '../types/mas-message';
+import { MasMessageType, AgentToggleEnableMessage, AgentsStatusUpdateMessage } from '@shared/messages';
 import { isAgentMessage, isAgentsStatusUpdateMessage } from '../types/mas-message-guards';
 
 const PanelContainer = styled.div`
@@ -169,7 +169,7 @@ export const AgentTogglePanel: React.FC<AgentTogglePanelProps> = ({ initialAgent
       
       // Aggiorna lo stato degli agenti se ricevi un aggiornamento
       if (isAgentsStatusUpdateMessage(message)) {
-        setAgents(message.payload);
+        setAgents((msg.payload as unknown));
       }
     };
     

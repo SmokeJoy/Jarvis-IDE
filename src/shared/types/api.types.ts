@@ -6,6 +6,7 @@
 // Importo tipi necessari da altri moduli
 import type { LLMProviderId, ModelInfo as LLMModelInfo, MessageParam, ApiError as CommonApiError } from './llm.types'; // Importo LLMProviderId come tipo, Rinomino ModelInfo per evitare clash
 import type { TelemetrySetting } from './telemetry.types';
+import { z } from 'zod';
 
 // Esporto i tipi importati che servono all'esterno
 export type { LLMProviderId, LLMModelInfo, MessageParam, TelemetrySetting };
@@ -144,3 +145,242 @@ export interface OpenAiCompatibleModelInfo extends ModelInfo {
   // apiVersion?: string;
   // deploymentId?: string; // Per Azure
 }
+
+/**
+ * Tipi per l'API di Jarvis
+ */
+
+export interface ModelInfo {
+  id: string;
+  name: string;
+  provider: string;
+  maxTokens: number;
+  temperature?: number;
+  baseUrl?: string;
+}
+
+export enum LLMProviderId {
+  OpenAI = 'openai',
+  Anthropic = 'anthropic',
+  Google = 'google',
+  Local = 'local'
+}
+
+export interface APIConfiguration {
+  provider: string;
+  apiKey: string;
+  modelId: string;
+  baseUrl?: string;
+  temperature?: number;
+  maxTokens?: number;
+}
+
+export interface APIResponse<T = unknown> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
+export interface APIError {
+  code: string;
+  message: string;
+  details?: unknown;
+}
+
+// API Message Types Enum
+export enum ApiMessageType {
+  // Configuration
+  SET_CONFIGURATION = 'set_configuration',
+  GET_CONFIGURATION = 'get_configuration',
+  
+  // Models
+  LOAD_MODELS = 'load_models',
+  FETCH_MODELS = 'fetch_models',
+  CLEAR_MODEL_CACHE = 'clear_model_cache',
+  
+  // Chat/Messages
+  SEND_MESSAGE = 'send_message',
+  RESET = 'reset',
+  
+  // Navigation/UI
+  NAVIGATE = 'navigate',
+  OPEN_ROUTE = 'open_route',
+  TOGGLE_SIDEBAR = 'toggle_sidebar', 
+  TOGGLE_TERMINAL = 'toggle_terminal',
+  SET_THEME = 'set_theme',
+  SET_FONT_SIZE = 'set_font_size',
+  
+  // Prompt Profiles
+  PROMPT_PROFILES = 'prompt_profiles',
+  PROMPT_PROFILE_UPDATED = 'prompt_profile_updated',
+  
+  // Telemetry
+  TELEMETRY_ERROR = 'telemetry_error',
+  TELEMETRY_EVENT = 'telemetry_event',
+  TELEMETRY_METRIC = 'telemetry_metric',
+  
+  // Errors
+  API_ERROR = 'api_error'
+}
+
+// Base Message Interface
+export interface ApiMessageBase<T extends ApiMessageType> {
+  type: T;
+  payload: Record<string, unknown>;
+  error?: string;
+  timestamp?: number;
+}
+
+// Configuration Messages
+export interface SetConfigurationMessage extends ApiMessageBase<ApiMessageType.SET_CONFIGURATION> {
+  payload: {
+    config: APIConfiguration;
+  };
+}
+
+export interface GetConfigurationMessage extends ApiMessageBase<ApiMessageType.GET_CONFIGURATION> {
+  payload: Record<string, never>;
+}
+
+// Model Messages
+export interface LoadModelsMessage extends ApiMessageBase<ApiMessageType.LOAD_MODELS> {
+  payload: {
+    models: ModelInfo[];
+  };
+}
+
+export interface FetchModelsMessage extends ApiMessageBase<ApiMessageType.FETCH_MODELS> {
+  payload: {
+    force?: boolean;
+  };
+}
+
+export interface ClearModelCacheMessage extends ApiMessageBase<ApiMessageType.CLEAR_MODEL_CACHE> {
+  payload: Record<string, never>;
+}
+
+// Chat Messages
+export interface SendMessageMessage extends ApiMessageBase<ApiMessageType.SEND_MESSAGE> {
+  payload: {
+    message: string;
+    modelId?: string;
+    apiKey?: string;
+  };
+}
+
+export interface ResetMessage extends ApiMessageBase<ApiMessageType.RESET> {
+  payload: Record<string, never>;
+}
+
+// Navigation/UI Messages
+export interface NavigateMessage extends ApiMessageBase<ApiMessageType.NAVIGATE> {
+  payload: {
+    route: string;
+    params?: Record<string, unknown>;
+  };
+}
+
+export interface OpenRouteMessage extends ApiMessageBase<ApiMessageType.OPEN_ROUTE> {
+  payload: {
+    route: string;
+  };
+}
+
+export interface ToggleSidebarMessage extends ApiMessageBase<ApiMessageType.TOGGLE_SIDEBAR> {
+  payload: {
+    visible: boolean;
+  };
+}
+
+export interface ToggleTerminalMessage extends ApiMessageBase<ApiMessageType.TOGGLE_TERMINAL> {
+  payload: {
+    visible: boolean;
+  };
+}
+
+export interface SetThemeMessage extends ApiMessageBase<ApiMessageType.SET_THEME> {
+  payload: {
+    theme: 'light' | 'dark';
+  };
+}
+
+export interface SetFontSizeMessage extends ApiMessageBase<ApiMessageType.SET_FONT_SIZE> {
+  payload: {
+    size: number;
+  };
+}
+
+// Prompt Profile Messages
+export interface PromptProfilesMessage extends ApiMessageBase<ApiMessageType.PROMPT_PROFILES> {
+  payload: {
+    profiles: PromptProfile[];
+  };
+}
+
+export interface PromptProfileUpdatedMessage extends ApiMessageBase<ApiMessageType.PROMPT_PROFILE_UPDATED> {
+  payload: {
+    profile: PromptProfile;
+  };
+}
+
+// Telemetry Messages
+export interface TelemetryErrorMessage extends ApiMessageBase<ApiMessageType.TELEMETRY_ERROR> {
+  payload: {
+    error: string;
+    details?: Record<string, unknown>;
+  };
+}
+
+export interface TelemetryEventMessage extends ApiMessageBase<ApiMessageType.TELEMETRY_EVENT> {
+  payload: {
+    event: string;
+    properties?: Record<string, unknown>;
+  };
+}
+
+export interface TelemetryMetricMessage extends ApiMessageBase<ApiMessageType.TELEMETRY_METRIC> {
+  payload: {
+    name: string;
+    value: number;
+    tags?: Record<string, string>;
+  };
+}
+
+// Error Messages
+export interface ApiErrorMessage extends ApiMessageBase<ApiMessageType.API_ERROR> {
+  payload: {
+    error: string;
+    details?: unknown;
+  };
+}
+
+// Union type for all API messages
+export type ApiMessageUnion =
+  | SetConfigurationMessage
+  | GetConfigurationMessage
+  | LoadModelsMessage
+  | FetchModelsMessage
+  | ClearModelCacheMessage
+  | SendMessageMessage
+  | ResetMessage
+  | NavigateMessage
+  | OpenRouteMessage
+  | ToggleSidebarMessage
+  | ToggleTerminalMessage
+  | SetThemeMessage
+  | SetFontSizeMessage
+  | PromptProfilesMessage
+  | PromptProfileUpdatedMessage
+  | TelemetryErrorMessage
+  | TelemetryEventMessage
+  | TelemetryMetricMessage
+  | ApiErrorMessage;
+
+// Type alias for any API message
+export type ApiMessage = ApiMessageUnion;
+
+// Helper type to extract payload type from message type
+export type ApiMessagePayload<T extends ApiMessageType> = Extract<ApiMessageUnion, { type: T }>['payload'];
+
+// Helper type to extract message interface from message type
+export type ApiMessageInterface<T extends ApiMessageType> = Extract<ApiMessageUnion, { type: T }>;

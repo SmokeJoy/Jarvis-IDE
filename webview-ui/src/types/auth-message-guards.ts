@@ -56,8 +56,8 @@ export function isAuthStateChangedMessage(message: unknown): message is AuthStat
     'type' in message &&
     (message as { type?: unknown }).type === AuthMessageType.AUTH_STATE_CHANGED &&
     'payload' in message &&
-    typeof (message as { payload?: unknown }).payload === 'object' &&
-    'user' in (message as { payload: { user?: unknown } }).payload
+    typeof (msg.payload as unknown) === 'object' &&
+    'user' in (msg.payload as unknown)
   );
 }
 
@@ -73,7 +73,7 @@ export function isSignOutMessage(message: unknown): message is SignOutMessage {
     'type' in message &&
     (message as { type?: unknown }).type === AuthMessageType.SIGN_OUT &&
     'payload' in message &&
-    typeof (message as { payload?: unknown }).payload === 'object'
+    typeof (msg.payload as unknown) === 'object'
   );
 }
 
@@ -89,9 +89,9 @@ export function isAuthCallbackMessage(message: unknown): message is AuthCallback
     'type' in message &&
     (message as { type?: unknown }).type === AuthMessageType.AUTH_CALLBACK &&
     'payload' in message &&
-    typeof (message as { payload?: unknown }).payload === 'object' &&
-    'customToken' in (message as { payload: { customToken?: unknown } }).payload &&
-    typeof (message as { payload: { customToken?: unknown } }).payload.customToken === 'string'
+    typeof (msg.payload as unknown) === 'object' &&
+    'customToken' in (msg.payload as unknown) &&
+    typeof (msg.payload as unknown).customToken === 'string'
   );
 }
 
@@ -107,9 +107,9 @@ export function isAuthErrorMessage(message: unknown): message is AuthErrorMessag
     'type' in message &&
     (message as { type?: unknown }).type === AuthMessageType.AUTH_ERROR &&
     'payload' in message &&
-    typeof (message as { payload?: unknown }).payload === 'object' &&
-    'error' in (message as { payload: { error?: unknown } }).payload &&
-    typeof (message as { payload: { error?: unknown } }).payload.error === 'string'
+    typeof (msg.payload as unknown) === 'object' &&
+    'error' in (msg.payload as unknown) &&
+    typeof (msg.payload as unknown).error === 'string'
   );
 }
 
@@ -125,7 +125,7 @@ export function isAuthSignedOutMessage(message: unknown): message is AuthSignedO
     'type' in message &&
     (message as { type?: unknown }).type === AuthMessageType.AUTH_SIGNED_OUT &&
     'payload' in message &&
-    typeof (message as { payload?: unknown }).payload === 'object'
+    typeof (msg.payload as unknown) === 'object'
   );
 }
 

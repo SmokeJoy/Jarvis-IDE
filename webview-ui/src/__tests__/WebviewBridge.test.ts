@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { WebviewMessage, ExtensionMessage } from '../../../src/shared/types/webview.types';
 import { webviewBridge } from '../utils/WebviewBridge';
 

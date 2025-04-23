@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { AgentTogglePanel } from '../../components/AgentTogglePanel';
 import * as useExtensionMessageModule from '../../hooks/useExtensionMessage';
-import { MasMessageType, AgentToggleEnableMessage, AgentsStatusUpdateMessage } from '../../types/mas-message';
+import { MasMessageType, AgentToggleEnableMessage, AgentsStatusUpdateMessage } from '@shared/messages';
 import { mockVSCodeAPI } from '../setupWebviewMocks';
 import { isAgentsStatusUpdateMessage } from '../../types/mas-message-guards';
 import '@testing-library/jest-dom/vitest';

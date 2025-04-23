@@ -12,19 +12,17 @@ export const ModelInfoView: React.FC<ModelInfoViewProps> = ({
   modelInfo,
   onChange
 }) => {
-  const handleInputChange = (field: keyof OpenAiCompatibleModelInfo) => (event: Event) => {
-    const target = event.target as HTMLInputElement | HTMLTextAreaElement;
+  const handleInputChange = (field: keyof OpenAiCompatibleModelInfo) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     onChange({
       ...modelInfo,
-      [field]: target.value
+      [field]: event.target.value
     });
   };
 
-  const handleCheckboxChange = (field: keyof OpenAiCompatibleModelInfo) => (event: Event) => {
-    const target = event.target as HTMLInputElement;
+  const handleCheckboxChange = (field: keyof OpenAiCompatibleModelInfo) => (event: React.ChangeEvent<HTMLInputElement>) => {
     onChange({
       ...modelInfo,
-      [field]: target.checked
+      [field]: event.target.checked
     });
   };
 

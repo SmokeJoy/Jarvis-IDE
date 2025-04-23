@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { LLMFallbackManager } from '../../../../src/mas/core/fallback/LLMFallbackManager';
 import { LLMEventType } from '../../../../src/mas/types/llm-events';

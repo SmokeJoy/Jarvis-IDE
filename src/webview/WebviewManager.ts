@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { WebviewMessageHandler } from './handlers/WebviewMessageHandler';

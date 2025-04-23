@@ -168,15 +168,15 @@ export const SuggestionsPanel: React.FC<SuggestionsPanelProps> = ({
     const message = event.data;
     
     if (isSuggestionsUpdatedMessage(message)) {
-      setSuggestions(message.payload.suggestions);
+      setSuggestions((msg.payload as unknown).suggestions);
       setIsLoading(false);
       setError(null);
     } else if (isSuggestionAcceptedMessage(message)) {
       // Aggiorna lo stato locale quando un suggerimento viene accettato
-      setSuggestions(prev => prev.filter(s => s.id !== message.payload.suggestionId));
+      setSuggestions(prev => prev.filter(s => s.id !== (msg.payload as unknown).suggestionId));
     } else if (isSuggestionRejectedMessage(message)) {
       // Aggiorna lo stato locale quando un suggerimento viene rifiutato
-      setSuggestions(prev => prev.filter(s => s.id !== message.payload.suggestionId));
+      setSuggestions(prev => prev.filter(s => s.id !== (msg.payload as unknown).suggestionId));
     } else if (isSuggestionsClearedMessage(message)) {
       // Pulisci i suggerimenti quando richiesto
       setSuggestions([]);

@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import AnthropicBedrock from '@anthropic-ai/bedrock-sdk';
 import { ApiHandler } from '../index';
 import { convertToR1Format } from '../transform/r1-format';
@@ -758,15 +759,11 @@ ${combinedContent}
                   const base64Data = item.source.data.replace(/^data:image\/\w+;base64,/, '');
                   imageData = new Uint8Array(Buffer.from(base64Data, 'base64'));
                 } else if (item.source.type === 'url') {
-                  // @ts-ignore - URLImageSource can have data in runtime
-                  if (typeof item.source.data === 'string') {
-                    // @ts-ignore - URLImageSource can have data in runtime
-                    const base64Data = item.source.data.replace(/^data:image\/\w+;base64,/, '');
+                                    if (typeof item.source.data === 'string') {
+                                        const base64Data = item.source.data.replace(/^data:image\/\w+;base64,/, '');
                     imageData = new Uint8Array(Buffer.from(base64Data, 'base64'));
-                    // @ts-ignore - URLImageSource can have data in runtime
-                  } else if (item.source.data && typeof item.source.data === 'object') {
-                    // @ts-ignore - URLImageSource can have data in runtime
-                    imageData = new Uint8Array(Buffer.from(item.source.data as any));
+                                      } else if (item.source.data && typeof item.source.data === 'object') {
+                                        imageData = new Uint8Array(Buffer.from(item.source.data as any));
                   } else {
                     console.error('URL image source without usable data');
                     return null;

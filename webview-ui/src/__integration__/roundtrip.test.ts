@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { describe, expect, test, beforeEach, afterEach, vi } from 'vitest';
 import { webviewBridge } from '../utils/WebviewBridge';
 import { WebviewMessageType, ExtensionMessage } from '../../../src/shared/types/webview.types';

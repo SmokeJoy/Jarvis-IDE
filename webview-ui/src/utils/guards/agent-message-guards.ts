@@ -6,6 +6,6 @@ export function isAgentErrorMessage(message: unknown): message is {
     typeof message === 'object' &&
     message !== null &&
     (message as any).type === 'agentError' &&
-    typeof (message as any).payload?.agentId === 'string'
+    typeof (msg.payload as unknown)?.agentId === 'string'
   );
 } 

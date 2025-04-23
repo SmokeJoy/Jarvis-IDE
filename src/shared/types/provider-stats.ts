@@ -28,4 +28,8 @@ export interface ProviderStats {
   lastUsed?: number;
   /** Cost per token (if applicable) */
   costPerToken?: number;
+  /** Exponential Moving Average of response time */
+  emaResponseTime: number;
+  /** Simple Moving Average of success rate (0-1) */
+  smaSuccessRate: number;
 }

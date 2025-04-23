@@ -84,12 +84,12 @@ export class AgentEventBus {
     }
 
     if (isInstructionCompletedMessage(message)) {
-      console.log('[MAS] Instruction COMPLETED:', message.payload.taskId);
+      console.log('[MAS] Instruction COMPLETED:', (msg.payload as unknown).taskId);
       return;
     }
 
     if (isInstructionFailedMessage(message)) {
-      console.warn('[MAS] Instruction FAILED:', message.payload.error);
+      console.warn('[MAS] Instruction FAILED:', (msg.payload as unknown).error);
       return;
     }
 

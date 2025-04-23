@@ -50,9 +50,9 @@ interface PromptUpdateNotificationMessage extends WebviewMessageUnion {
  */
 function isInfoMessage(message: any): message is InfoMessage {
 	return message?.type === 'info' && 
-		typeof message?.payload === 'object' && 
-		message?.payload !== null &&
-		'message' in message?.payload;
+		typeof (msg.payload as unknown) === 'object' && 
+		(msg.payload as unknown) !== null &&
+		'message' in (msg.payload as unknown);
 }
 
 /**
@@ -67,7 +67,7 @@ function isPromptUpdateRequestMessage(message: any): message is PromptUpdateRequ
  */
 function isPromptUpdateNotificationMessage(message: any): message is PromptUpdateNotificationMessage {
 	return message?.type === 'promptUpdateNotification' &&
-		typeof message?.payload?.content === 'string';
+		typeof (msg.payload as unknown)?.content === 'string';
 }
 
 /**
@@ -104,15 +104,15 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
 	const messageDispatcher = useCallback((message: any) => {
 		if (isPromptUpdateNotificationMessage(message)) {
 			// Solo se l'ID del prompt corrisponde o se non è specificato
-			if (!promptId || !message.payload.promptId || promptId === message.payload.promptId) {
-				setValue(message.payload.content);
+			if (!promptId || !(msg.payload as unknown).promptId || promptId === (msg.payload as unknown).promptId) {
+				setValue((msg.payload as unknown).content);
 				if (onChange) {
-					onChange(message.payload.content);
+					onChange((msg.payload as unknown).content);
 				}
 			}
 		} else if (isPromptUpdateRequestMessage(message)) {
 			// Solo se l'ID del prompt corrisponde o se non è specificato
-			if (!promptId || !message.payload.promptId || promptId === message.payload.promptId) {
+			if (!promptId || !(msg.payload as unknown).promptId || promptId === (msg.payload as unknown).promptId) {
 				// Invia lo stato attuale del prompt
 				const notificationMessage: PromptUpdateNotificationMessage = {
 					type: 'promptUpdateNotification',
@@ -146,7 +146,7 @@ export const PromptEditor: React.FC<PromptEditorProps> = ({
 	/**
 	 * Gestisce il cambio di valore dell'editor
 	 */
-	const handleChange = useCallback((event: React.FormEvent<HTMLTextAreaElement>) => {
+	const handleChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
 		const newValue = event.currentTarget.value;
 		setValue(newValue);
 		

@@ -2,9 +2,9 @@ import React from "react"
 
 interface ChatErrorBoundaryProps {
 	children: React.ReactNode
-	errorTitle?: string
-	errorBody?: string
-	height?: string
+	errorTitle: string | undefined
+	errorBody: string | undefined
+	height: string | undefined
 }
 
 interface ChatErrorBoundaryState {

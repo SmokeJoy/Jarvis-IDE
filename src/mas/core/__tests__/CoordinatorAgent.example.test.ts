@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 /**
  * @file CoordinatorAgent.example.test.ts
  * @description Esempio di test per CoordinatorAgent (modello per futura implementazione)

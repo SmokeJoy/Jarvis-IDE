@@ -207,3 +207,48 @@ Per ogni file refactorizzato:
 ```bash
 git commit -m "chore(refactor): removed X any from src/path/file.ts [REFACTOR-XX]"
 ```
+
+# Struttura del Progetto
+
+## Directory Layout
+
+```
+jarvis-ide/
+├── src/
+│   ├── shared/
+│   │   ├── types/
+│   │   │   ├── api.types.ts       # Tipi e interfacce API
+│   │   │   ├── llm.types.ts       # Tipi per modelli LLM
+│   │   │   └── ...
+│   │   └── messages/
+│   │       └── index.ts           # Barrel file per export
+│   ├── tests/
+│   │   ├── unit/                  # Test unitari
+│   │   │   └── ...
+│   │   └── e2e/                   # Test end-to-end
+│   │       ├── JarvisAPI.test.ts  # Test E2E per JarvisAPI
+│   │       └── ...
+│   └── ...
+├── docs/
+│   ├── architecture/
+│   │   ├── testing-strategy.md    # Strategia di testing
+│   │   └── struttura-progetto.md  # Questo file
+│   └── logbook/
+│       └── AI1.md                 # Log sviluppatore AI
+└── ...
+```
+
+## Componenti Principali
+
+### Tests
+
+#### Unit Tests
+Test unitari per singoli componenti e funzioni.
+
+#### E2E Tests
+Test end-to-end per validare l'integrazione tra componenti:
+- **JarvisAPI**: Test completi per il modulo API
+  - Flusso messaggi
+  - Gestione errori
+  - Configurazione provider
+  - Metriche e telemetria

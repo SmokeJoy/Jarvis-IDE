@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["src/shared/*"],
+      "@webview/*": ["webview-ui/src/*"],
+      "@test/*": ["src/__tests__/*"]
+    }
+  }
+} 
+ 

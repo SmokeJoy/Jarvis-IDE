@@ -9,7 +9,7 @@ import type {
   AgentRetryResultMessage,
   AgentToggleDashboardMessage
 } from '../types/mas-message';
-import { MasMessageType } from '../types/mas-message';
+import { MasMessageType } from '@shared/messages';
 
 /**
  * Mappa type-safe degli handler per ogni tipo di messaggio MAS gestito dall'AgentEventBus.

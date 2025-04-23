@@ -231,11 +231,11 @@ export class TaskQueueService {
   private handleWebviewMessage(message: any): void {
     switch (message.type) {
       case 'mas.taskQueue/abortTask':
-        this.handleAbortTask(message.payload.taskId);
+        this.handleAbortTask((msg.payload as unknown).taskId);
         break;
 
       case 'mas.taskQueue/rerunTask':
-        this.handleRerunTask(message.payload.task);
+        this.handleRerunTask((msg.payload as unknown).task);
         break;
 
       case 'mas.taskQueue/requestUpdate':

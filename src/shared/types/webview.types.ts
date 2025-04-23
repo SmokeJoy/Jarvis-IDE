@@ -354,8 +354,8 @@ export function convertToWebviewMessage(
   if ('action' in message && message.action) baseMessage.action = message.action;
   if ('message' in message && message.message) baseMessage.message = message.message;
   if ('error' in message && message.error)
-    baseMessage.payload = {
-      ...(typeof baseMessage.payload === 'object' && baseMessage.payload !== null ? baseMessage.payload : {}),
+    (msg.payload as unknown) = {
+      ...(typeof (msg.payload as unknown) === 'object' && (msg.payload as unknown) !== null ? (msg.payload as unknown) : {}),
       error: message.error,
     };
 

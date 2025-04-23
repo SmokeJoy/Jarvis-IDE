@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+import { z } from 'zod';
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import * as vscode from 'vscode';
 import { JarvisProvider } from '../JarvisProvider';

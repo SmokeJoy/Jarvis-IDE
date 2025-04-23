@@ -442,12 +442,12 @@ export class MasManager extends EventEmitter {
     // Questo metodo verrà utilizzato per la comunicazione tra agenti
     // o per inviare notifiche dal frontend
 
-    if (message.to && message.payload) {
+    if (message.to && (msg.payload as unknown)) {
       const agent = this.agents.get(message.to);
 
       if (agent) {
         // Gestisci notifiche specifiche
-        if (message.payload === 'abort' && agent.currentTask) {
+        if ((msg.payload as unknown) === 'abort' && agent.currentTask) {
           // Annulla il task corrente
           const activeTask = this.taskQueue.getActiveTask();
 
@@ -464,9 +464,9 @@ export class MasManager extends EventEmitter {
             // Processa il prossimo task
             this.processNextTask();
           }
-        } else if (message.payload === 'activate') {
+        } else if ((msg.payload as unknown) === 'activate') {
           this.setAgentActive(agent.id, true);
-        } else if (message.payload === 'deactivate') {
+        } else if ((msg.payload as unknown) === 'deactivate') {
           this.setAgentActive(agent.id, false);
         }
       }

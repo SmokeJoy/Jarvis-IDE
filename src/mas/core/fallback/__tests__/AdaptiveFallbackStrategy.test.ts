@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AdaptiveFallbackStrategy } from '../AdaptiveFallbackStrategy';
 import { createMockEventBus } from '../../../../tests/mocks/mock-event-bus';

@@ -1,5 +1,15 @@
 {
 	// See http://go.microsoft.com/fwlink/?LinkId=827846
 	// for the documentation about the extensions.json format
-	"recommendations": ["dbaeumer.vscode-eslint", "connor4312.esbuild-problem-matchers", "ms-vscode.extension-test-runner"]
+	"recommendations": [
+		"dbaeumer.vscode-eslint",
+		"esbenp.prettier-vscode",
+		"ms-vscode.vscode-typescript-tslint-plugin",
+		"streetsidesoftware.code-spell-checker",
+		"eamodio.gitlens",
+		"github.vscode-pull-request-github",
+		"ms-vscode.test-adapter-converter",
+		"hbenl.vscode-test-explorer",
+		"ms-vscode.vscode-js-profile-flame"
+	]
 }

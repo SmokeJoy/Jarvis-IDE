@@ -3,7 +3,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { MultiAgentControl } from '../../components/MultiAgentControl';
 import * as useExtensionMessageModule from '../../hooks/useExtensionMessage';
-import { MasMessageType } from '../../types/mas-message';
+import { MasMessageType } from '@shared/messages';
 import { mockVSCodeAPI } from '../setupWebviewMocks';
 
 // Mock per useExtensionMessage

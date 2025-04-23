@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { Anthropic } from '@anthropic-ai/sdk';
 import { ApiHandler } from '../index';
 import { ApiHandlerOptions, ModelInfo } from '../../src/shared/types/api.types';

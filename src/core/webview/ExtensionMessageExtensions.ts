@@ -3,11 +3,11 @@
  * @description Estensioni per l'interfaccia ExtensionMessage per supportare i messaggi MAS
  */
 
-import { ExtensionMessage } from '../../shared/ExtensionMessage';
+import { ExtensionMessage } from '@shared/messages/extension-messages';
 import { AgentStatus } from '../../shared/types/mas.types';
 import { TaskQueueState } from '../../shared/types/mas.types';
 
-declare module '../../shared/ExtensionMessage' {
+declare module '@shared/messages/extension-messages' {
   interface ExtensionMessage {
     type: string;
   }

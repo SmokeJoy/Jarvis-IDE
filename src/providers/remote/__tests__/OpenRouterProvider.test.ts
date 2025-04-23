@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { OpenRouterProvider } from '../OpenRouterProvider';
 import type { PromptPayload, LLMStreamToken } from '@shared/types/llm.types';

@@ -274,7 +274,7 @@ export class SupervisorAgent implements ISupervisorAgent {
 
     // Gestisci il messaggio in base al tipo
     if (message.type === 'instruction' && message.to === 'coder-agent') {
-      this.queueInstruction(message.to, message.payload);
+      this.queueInstruction(message.to, (msg.payload as unknown));
     }
   }
 

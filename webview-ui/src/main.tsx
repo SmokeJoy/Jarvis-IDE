@@ -5,6 +5,8 @@ import './index.css'
 import "../../node_modules/@vscode/codicons/dist/codicon.css"
 import { ExtensionStateProvider } from './context/ExtensionStateContext'
 import { ThemeProvider } from 'styled-components'
+// Importa il dispatcher
+import './index';
 
 // Carica i dati iniziali forniti dall'estensione
 const initialData = (window as any).initialData || {};

@@ -1,45 +1,65 @@
-import type { WebviewMessage } from "@/shared/types"
-import type { ApiConfiguration } from "@/shared/types/api.types"
-import type { WebviewApi } from "vscode-webview"
-
 /**
- * A utility wrapper around the acquireVsCodeApi() function, which enables
- * message passing and state management between the webview and extension
- * contexts.
- *
- * This utility also enables webview code to be run in a web browser-based
- * dev server by using native web browser features that mock the functionality
- * enabled by acquireVsCodeApi.
+ * @file vscode.ts
+ * @description Utility per interagire con l'API acquireVsCodeApi di VS Code
  */
 
+import { Logger } from './Logger';
+
+// Definizione del tipo per l'API VS Code
+type VsCodeAPI = {
+	postMessage: (message: unknown) => void;
+	getState: () => unknown;
+	setState: (state: unknown) => void;
+};
+
 /**
- * Gestione dell'API VS Code dal webview.
+ * Ottiene l'API VS Code, assicurandosi che acquireVsCodeApi() venga chiamata solo una volta
+ * Come richiesto dalla documentazione di VS Code API
+ * @returns L'istanza dell'API VS Code
  */
-
-// Mantengo la funzione getVsCodeApi che fornisce il fallback
-let api: ReturnType<typeof window.acquireVsCodeApi> | null = null;
-
-export function getVsCodeApi<StateType = any>() {
-	if (!api) {
-		if (typeof window.acquireVsCodeApi === 'function') {
-			api = window.acquireVsCodeApi();
-		} else {
-			// Fallback se acquireVsCodeApi non è disponibile (es. test)
-			console.warn('acquireVsCodeApi not found, using fallback mock.');
-			api = {
-				postMessage: (message: any) => console.log('[Mock] postMessage:', message),
-				getState: () => {
-					console.log('[Mock] getState');
-					return undefined as StateType | undefined; // Mantengo il tipo generico
+const getVSCodeAPI = (): VsCodeAPI => {
+	const logger = new Logger('vscode');
+	
+	// Utilizziamo un approccio cache per garantire che acquireVsCodeApi() 
+	// venga chiamata solo una volta durante il ciclo di vita della WebView
+	try {
+		if (!(window as any).__vscodeApiCache) {
+			logger.debug('Inizializzazione API VS Code');
+			
+			// Verifica che siamo in un contesto VS Code
+			if (typeof acquireVsCodeApi === 'undefined') {
+				throw new Error('acquireVsCodeApi non disponibile: non siamo in un contesto VS Code');
+			}
+			
+			// Ottieni l'API VS Code e memorizzala nella cache
+			(window as any).__vscodeApiCache = acquireVsCodeApi();
+		}
+		
+		return (window as any).__vscodeApiCache as VsCodeAPI;
+	} catch (error) {
+		logger.error('Errore durante l\'acquisizione dell\'API VS Code:', error);
+		
+		// Fallback: se siamo in un contesto di sviluppo, fornisci una mock implementation
+		if (process.env.NODE_ENV === 'development') {
+			logger.warn('Utilizzando mock API VS Code per ambiente di sviluppo');
+			return {
+				postMessage: (message: unknown) => {
+					console.log('[Mock VS Code API] postMessage:', message);
 				},
-				setState: (state: StateType) => {
-					console.log('[Mock] setState:', state);
+				getState: () => {
+					console.log('[Mock VS Code API] getState chiamato');
+					return {};
+				},
+				setState: (state: unknown) => {
+					console.log('[Mock VS Code API] setState:', state);
 				},
 			};
 		}
+		
+		// Se non siamo in modalità sviluppo, lancia un errore
+		throw new Error('Impossibile inizializzare l\'API VS Code e non è disponibile un fallback');
 	}
-	return api;
-}
+};
 
-// Esporta una singola istanza dell'API VS Code
-export const vscode = (window as any).vscode || getVsCodeApi();
+// Esporta l'istanza dell'API VS Code
+export const vscode = getVSCodeAPI();

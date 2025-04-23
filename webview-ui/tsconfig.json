@@ -1,18 +1,16 @@
 {
-	"extends": "../tsconfig.json",
+	"extends": "../tsconfig.bonifica.json",
 	"compilerOptions": {
 		"outDir": "../dist/webview-ui",
-		"rootDir": "src",
+		"rootDir": ".",
 		"module": "ESNext",
 		"moduleResolution": "bundler",
 		"jsx": "react-jsx",
 		"baseUrl": ".",
 		"paths": {
-			"@/*": ["src/*"],
+			"@webview-ui/*": ["src/*"],
 			"@shared/*": ["../src/shared/*"],
-			"@components/*": ["src/components/*"],
-			"@utils/*": ["src/utils/*"],
-			// "@types/*": ["src/types/*"] // Commentato/Rimosso - verificare se necessario
+			"@utils/*": ["../src/utils/*"]
 		},
 		"strict": true,
 		"verbatimModuleSyntax": true,
@@ -22,8 +20,17 @@
 		"resolveJsonModule": true,
 		"allowSyntheticDefaultImports": true,
 		"forceConsistentCasingInFileNames": true,
-		"types": ["node", "vscode-webview", "vitest/globals", "@testing-library/jest-dom"] // Aggiunti tipi per test
+		"types": ["node", "vscode-webview", "vitest/globals"],
+		"target": "ES2020",
+		"lib": ["ES2020", "DOM", "DOM.Iterable"],
+		"allowImportingTsExtensions": true,
+		"isolatedModules": true,
+		"noEmit": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noFallthroughCasesInSwitch": true,
+		"jsxImportSource": "react"
 	},
-	"include": ["src/**/*", "../src/shared/**/*"],
-	"exclude": ["node_modules", "dist"]
+	"include": ["src", "vite.config.ts"],
+	"exclude": ["node_modules"]
 }

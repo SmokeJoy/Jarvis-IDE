@@ -9,7 +9,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { RetryPanel } from '../../components/RetryPanel';
-import { MasMessageType } from '../../types/mas-message';
+import { MasMessageType } from '@shared/messages';
 import * as useExtensionMessageModule from '../../hooks/useExtensionMessage';
 import { setupMessageMock, createTestMessage } from '../test-utils/setupMessageMock';
 import '@testing-library/jest-dom/vitest';

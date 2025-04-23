@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { Logger } from '../utils/logger';
 import { 
   ModelInfo, 
@@ -85,7 +86,7 @@ export class JarvisAPI {
       }
 
       if (isSetConfigurationMessage(message)) {
-        return await this.setConfiguration(message.payload.config);
+        return await this.setConfiguration((msg.payload as unknown).config);
       }
       
       if (isGetConfigurationMessage(message)) {
@@ -93,11 +94,11 @@ export class JarvisAPI {
       }
       
       if (isLoadModelsMessage(message)) {
-        return await this.loadModels(message.payload.apiKey);
+        return await this.loadModels((msg.payload as unknown).apiKey);
       }
       
       if (isSendMessageMessage(message)) {
-        const { message: text, modelId, apiKey } = message.payload;
+        const { message: text, modelId, apiKey } = (msg.payload as unknown);
         return await this.sendMessage(text, modelId, apiKey);
       }
       

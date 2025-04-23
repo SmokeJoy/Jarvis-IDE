@@ -3,25 +3,19 @@
  * @description Utility per il recupero dei modelli LLM dai vari provider
  */
 
-import type { OpenAiCompatibleModelInfo, LLMProviderId } from '../../../src/shared/types/providers.types';
+import { LLMProviderId } from '@shared/types/providers.types';
+import { OpenAiCompatibleModelInfo, FetchModelsResponse, ModelCacheEntry } from '@shared/types/llm.types';
 import { vscode } from './vscode';
-
-interface FetchModelsResponse {
-  models: OpenAiCompatibleModelInfo[];
-  error?: string;
-}
+import { webviewBridge } from './WebviewBridge';
 
 /**
  * Cache locale dei modelli per provider
  * Riduce le chiamate ripetute all'extension
  */
-const modelCache = new Map<string, {
-  timestamp: number;
-  models: OpenAiCompatibleModelInfo[];
-}>();
+const modelCache: ModelCacheEntry | null = null;
 
-// Durata della cache (10 minuti)
-const CACHE_DURATION = 10 * 60 * 1000;
+// Durata della cache (5 minuti)
+const CACHE_TIMEOUT = 5 * 60 * 1000;
 
 /**
  * Recupera i modelli disponibili per un provider specifico
@@ -31,76 +25,31 @@ const CACHE_DURATION = 10 * 60 * 1000;
  * @param apiKey Chiave API opzionale per il provider
  * @returns Promise con array di modelli compatibili
  */
-export async function fetchModels(
-  provider: LLMProviderId,
-  apiKey?: string
-): Promise<OpenAiCompatibleModelInfo[]> {
-  // Chiave di cache: provider + primi 5 caratteri dell'apiKey (se presente)
-  const cacheKey = `${provider}_${apiKey ? apiKey.substring(0, 5) : 'default'}`;
-  
-  // Controlla se c'è una cache valida
-  const cachedData = modelCache.get(cacheKey);
-  if (cachedData && (Date.now() - cachedData.timestamp < CACHE_DURATION)) {
-    console.debug(`[modelFetcher] Utilizzando cache per ${provider}`);
-    return cachedData.models;
+export async function fetchModels(forceRefresh = false): Promise<OpenAiCompatibleModelInfo[]> {
+  // Return cached models if available and not expired
+  if (!forceRefresh && modelCache && Date.now() - modelCache.timestamp < CACHE_TIMEOUT) {
+    return modelCache.models;
   }
-  
+
   try {
-    // Richiedi i modelli all'extension tramite una promessa
-    return await new Promise<OpenAiCompatibleModelInfo[]>((resolve, reject) => {
-      // ID univoco per questa richiesta
-      const requestId = `fetch_models_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-      
-      // Handler per la risposta
-      const messageHandler = (event: MessageEvent) => {
-        const message = event.data;
-        if (message.requestId === requestId) {
-          // Rimuovi l'handler una volta ricevuta la risposta
-          window.removeEventListener('message', messageHandler);
-          
-          if (message.error) {
-            reject(new Error(message.error));
-          } else if (Array.isArray(message.models)) {
-            // Salva nella cache
-            modelCache.set(cacheKey, {
-              timestamp: Date.now(),
-              models: message.models
-            });
-            
-            resolve(message.models);
-          } else {
-            reject(new Error('Formato risposta non valido'));
-          }
-        }
-      };
-      
-      // Registra l'handler
-      window.addEventListener('message', messageHandler);
-      
-      // Invia richiesta all'extension
-      vscode.postMessage({
-        command: 'fetch_models',
-        provider,
-        apiKey,
-        requestId
-      });
-      
-      // Timeout dopo 5 secondi
-      setTimeout(() => {
-        window.removeEventListener('message', messageHandler);
-        reject(new Error('Timeout nella richiesta modelli'));
-      }, 5000);
+    const response = await webviewBridge.sendMessage<FetchModelsResponse>({
+      type: 'requestModels',
     });
-  } catch (error) {
-    console.error(`[modelFetcher] Errore nel recupero modelli per ${provider}:`, error);
-    
-    // Restituisci la cache se disponibile, anche se scaduta
-    if (cachedData) {
-      console.warn(`[modelFetcher] Utilizzando cache scaduta per ${provider}`);
-      return cachedData.models;
+
+    if (response.error) {
+      throw new Error(response.error);
     }
-    
-    // Se non c'è cache, propaga l'errore
+
+    // Update cache
+    modelCache = {
+      timestamp: Date.now(),
+      models: response.models,
+    };
+
+    return response.models;
+  } catch (error) {
+    // Clear cache on error
+    modelCache = null;
     throw error;
   }
 }
@@ -117,10 +66,17 @@ export async function getDefaultModel(
   apiKey?: string
 ): Promise<OpenAiCompatibleModelInfo | undefined> {
   try {
-    const models = await fetchModels(provider, apiKey);
+    const models = await fetchModels(false);
     return models.length > 0 ? models[0] : undefined;
   } catch (error) {
     console.error(`[modelFetcher] Errore nel recupero modello predefinito per ${provider}:`, error);
     return undefined;
   }
+}
+
+/**
+ * Clears the model cache, forcing next fetch to get fresh data
+ */
+export function clearModelCache(): void {
+  modelCache = null;
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useExtensionMessage } from '../hooks/useExtensionMessage';
-import { MasMessageType, AgentRetryRequestMessage, AgentRetryResultMessage } from '../types/mas-message';
+import { MasMessageType, AgentRetryRequestMessage, AgentRetryResultMessage } from '@shared/messages';
 import { isAgentRetryResultMessage } from '../types/mas-message-guards';
 
 interface RetryPanelProps {
@@ -25,11 +25,11 @@ export const RetryPanel: React.FC<RetryPanelProps> = ({ agentId = 'default' }) =
     const handler = (event: MessageEvent) => {
       if (isAgentRetryResultMessage(event.data)) {
         // Verifichiamo che il messaggio sia per l'agente corretto
-        if (event.data.payload.agentId === agentId) {
+        if ((msg.payload as unknown).agentId === agentId) {
           setRetryHistory(prev => [...prev, {
             timestamp: Date.now(),
-            status: event.data.payload.success ? 'Successo' : 'Fallito',
-            message: event.data.payload.message || ''
+            status: (msg.payload as unknown).success ? 'Successo' : 'Fallito',
+            message: (msg.payload as unknown).message || ''
           }]);
           setPending(false);
         }

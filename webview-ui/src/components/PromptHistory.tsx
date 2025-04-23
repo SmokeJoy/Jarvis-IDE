@@ -146,10 +146,10 @@ function isPromptHistoryResponseMessage(message: unknown): message is PromptHist
   return (
     message.type === PromptHistoryMessageType.HISTORY_RESPONSE &&
     'payload' in message &&
-    message.payload !== null &&
-    typeof message.payload === 'object' &&
-    'items' in message.payload &&
-    Array.isArray(message.payload.items)
+    (msg.payload as unknown) !== null &&
+    typeof (msg.payload as unknown) === 'object' &&
+    'items' in (msg.payload as unknown) &&
+    Array.isArray((msg.payload as unknown).items)
   );
 }
 
@@ -164,10 +164,10 @@ function isDeletePromptHistoryItemMessage(message: unknown): message is DeletePr
   return (
     message.type === PromptHistoryMessageType.DELETE_ITEM &&
     'payload' in message &&
-    message.payload !== null &&
-    typeof message.payload === 'object' &&
-    'id' in message.payload &&
-    typeof message.payload.id === 'string'
+    (msg.payload as unknown) !== null &&
+    typeof (msg.payload as unknown) === 'object' &&
+    'id' in (msg.payload as unknown) &&
+    typeof (msg.payload as unknown).id === 'string'
   );
 }
 
@@ -208,15 +208,15 @@ export const PromptHistory: React.FC<PromptHistoryProps> = ({
 
     // Poi gestisce i tipi specifici di messaggi utilizzando i type guards
     if (isPromptHistoryResponseMessage(message)) {
-      setHistoryItems(message.payload.items);
+      setHistoryItems((msg.payload as unknown).items);
       setIsLoading(false);
       setError(null);
     } else if (isDeletePromptHistoryItemMessage(message)) {
       // Potremmo ricevere una conferma di eliminazione, aggiorniamo lo stato di conseguenza
-      setHistoryItems(prev => prev.filter(item => item.id !== message.payload.id));
+      setHistoryItems(prev => prev.filter(item => item.id !== (msg.payload as unknown).id));
       
       // Deseleziona l'elemento se era selezionato
-      if (selectedItem === message.payload.id) {
+      if (selectedItem === (msg.payload as unknown).id) {
         setSelectedItem(null);
       }
     }

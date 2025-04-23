@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 /**
  * Test per il modulo di esportazione CSV
  * @jest-environment node

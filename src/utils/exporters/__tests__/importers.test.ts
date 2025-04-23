@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 /**
  * Test per le funzionalità di importazione
  * @jest-environment node

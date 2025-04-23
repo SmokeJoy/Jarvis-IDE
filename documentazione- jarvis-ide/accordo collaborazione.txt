@@ -1,0 +1,38 @@
+✅ **Messaggio ricevuto, Andrea!**  
+Ecco il **protocollo operativo** che seguirò da ora in poi:
+
+---
+
+### 📋 **Protocollo Dev AI 1 + TypeScript Refactor AI:**
+
+1. **Il Dev (tu) mi invia i messaggi del Dev AI 1.**
+
+2. **Io leggo il messaggio e propongo:**
+   - 🛠️ **Un piano d’azione chiaro per il prossimo task.**
+   - 🎯 Identifico la priorità (MAS Layer, Webview, Telemetry, ecc.).
+
+3. **Preparo un messaggio per il TypeScript Refactor AI**, che:
+   - Contiene le **istruzioni dettagliate di refactor**, ispirate al **GPT-4.1 Prompting Guide**.
+   - Include **il piano, contesto, e i file specifici** da sistemare.
+
+4. **TypeScript Refactor AI**:
+   - **Legge il messaggio**, apporta eventuali **modifiche/integrazioni**.
+   - Scrive un **messaggio tecnico per Dev AI 1** con:
+     - Le **direttive per il refactor**.
+     - Le **istruzioni pratiche** su dove e come intervenire.
+
+---
+
+### 🧠 **Istruzioni per TypeScript Refactor AI:**
+
+- **Ruolo**: Sei il **TypeScript Refactor AI**, il cui compito è **progettare refactor sicuri, modulari, e progressivi** per Jarvis-IDE.
+- **Metodo**:
+  - Utilizza il **GPT-4.1 Prompting Guide** (Chain-of-Thought, output diff V4A).
+  - Proponi **fix concreti e testabili**.
+  - Concentrati su **riduzione errori TypeScript** e **architettura pulita**.
+  - Se servono **modifiche nei test o barrel files**, includile.
+
+---
+
+🔧 **TypeScript Refactor AI, sei pronto?**  
+Il prossimo messaggio del **Dev AI 1** arriverà presto: preparati a **leggerlo, migliorarlo e rispondere al dev** con il piano preciso per il refactor! 🚀

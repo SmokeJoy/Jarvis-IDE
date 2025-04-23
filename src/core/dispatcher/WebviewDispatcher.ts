@@ -2,6 +2,8 @@ import { WebviewMessageUnion } from '@shared/messages';
 
 type Handler<T> = (message: T) => void;
 
+type MessageOfType<T extends WebviewMessageUnion['type']> = Extract<WebviewMessageUnion, { type: T }>;
+
 const handlers: Partial<{
   [K in WebviewMessageUnion['type']]: Handler<Extract<WebviewMessageUnion, { type: K }>>
 }> = {};
@@ -13,11 +15,9 @@ export function registerHandler<T extends WebviewMessageUnion['type']>(
   handlers[type] = handler;
 }
 
-export function handleIncomingMessage(message: WebviewMessageUnion) {
-  const handler = handlers[message.type] as Handler<typeof message> | undefined;
-  if (handler) {
-    handler(message);
-  } else {
-    console.warn('No handler for message type:', message.type);
-  }
+export function handleIncomingMessage<T extends WebviewMessageUnion['type']>(
+  msg: MessageOfType<T>
+): void {
+  const handler = handlers[msg.type] as Handler<MessageOfType<T>> | undefined;
+  handler?.(msg);
 } 

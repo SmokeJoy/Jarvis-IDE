@@ -9,12 +9,12 @@ import { BrowserSettingsMessageType, UpdateBrowserSettingsMessage } from "../../
 import { CODE_BLOCK_BG_COLOR } from "../common/CodeBlock"
 
 interface BrowserSettingsMenuProps {
-	disabled?: boolean
-	maxWidth?: number
+	disabled: boolean | undefined
+	maxWidth: number | undefined
 }
 
 export const BrowserSettingsMenu: React.FC<BrowserSettingsMenuProps> = ({ disabled = false, maxWidth }) => {
-	const { browserSettings } = useExtensionState()
+	const { browserSettings, setBrowserSettings } = useExtensionState()
 	const { postMessage } = useExtensionMessage()
 	const [showMenu, setShowMenu] = useState(false)
 	const [hasMouseEntered, setHasMouseEntered] = useState(false)
@@ -60,17 +60,17 @@ export const BrowserSettingsMenu: React.FC<BrowserSettingsMenuProps> = ({ disabl
 		setHasMouseEntered(false)
 	}
 
-	const handleViewportChange = (event: Event) => {
-		const target = event.target as HTMLSelectElement
-		const selectedSize = BROWSER_VIEWPORT_PRESETS[target.value as keyof typeof BROWSER_VIEWPORT_PRESETS]
-		if (selectedSize) {
-			postMessage<UpdateBrowserSettingsMessage>({
-				type: BrowserSettingsMessageType.UPDATE_BROWSER_SETTINGS,
-				browserSettings: {
-					...browserSettings,
-					viewport: selectedSize,
-				},
-			})
+	const handleViewportChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+		const selectedPreset = BROWSER_VIEWPORT_PRESETS[event.target.value];
+		if (selectedPreset) {
+			const updatedSettings = {
+				...browserSettings,
+				viewport: {
+					width: selectedPreset.width,
+					height: selectedPreset.height
+				}
+			};
+			setBrowserSettings(updatedSettings);
 		}
 	}
 
@@ -154,17 +154,14 @@ export const BrowserSettingsMenu: React.FC<BrowserSettingsMenuProps> = ({ disabl
 						<SettingsHeader>Viewport Size</SettingsHeader>
 						<VSCodeDropdown
 							style={{ width: "100%" }}
-							value={
-								Object.entries(BROWSER_VIEWPORT_PRESETS).find(
-									([_, size]) =>
-										size.width === browserSettings.viewport.width &&
-										size.height === browserSettings.viewport.height,
-								)?.[0]
-							}
-							onChange={(event) => handleViewportChange(event as Event)}>
-							{Object.entries(BROWSER_VIEWPORT_PRESETS).map(([name]) => (
-								<VSCodeOption key={name} value={name}>
-									{name}
+							value={Object.entries(BROWSER_VIEWPORT_PRESETS).find(
+								([, preset]) =>
+									preset.width === browserSettings.viewport.width && preset.height === browserSettings.viewport.height
+							)?.[0] || ''}
+							onChange={handleViewportChange}>
+							{Object.entries(BROWSER_VIEWPORT_PRESETS).map(([key, preset]) => (
+								<VSCodeOption key={key} value={key}>
+									{preset.width}x{preset.height}
 								</VSCodeOption>
 							))}
 						</VSCodeDropdown>

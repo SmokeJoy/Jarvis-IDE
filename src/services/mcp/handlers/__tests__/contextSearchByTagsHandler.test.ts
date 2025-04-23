@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+import { z } from 'zod';
 /**
  * @file contextSearchByTagsHandler.test.ts
  * @description Test per il gestore di ricerca per tag

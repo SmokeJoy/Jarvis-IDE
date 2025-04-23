@@ -4,9 +4,9 @@ import { vscode } from "../../utils/vscode"
 
 interface ThumbnailsProps {
 	images: string[]
-	style?: React.CSSProperties
-	setImages?: React.Dispatch<React.SetStateAction<string[]>>
-	onHeightChange?: (height: number) => void
+	style: React.CSSProperties | undefined
+	setImages: React.Dispatch<React.SetStateAction<string[]>> | undefined
+	onHeightChange: ((height: number) => void) | undefined
 }
 
 const Thumbnails = ({ images, style, setImages, onHeightChange }: ThumbnailsProps) => {

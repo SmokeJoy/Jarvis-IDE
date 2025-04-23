@@ -27,10 +27,33 @@ export function getAsVar(varName: string): string {
 	return `var(${varName})`
 }
 
-export function hexToRGB(hexColor: string): { r: number; g: number; b: number } {
-	const hex = hexColor.replace(/^#/, "").slice(0, 6)
-	const [r, g, b] = [0, 2, 4].map((offset) => parseInt(hex.slice(offset, offset + 2), 16))
-	return { r, g, b }
+/**
+ * Converte i colori da hex a RGB
+ */
+export function hexToRGB(hex?: string): { r: number, g: number, b: number } | undefined {
+	if (!hex) {
+		return undefined;
+	}
+	
+	// Rimuovi il cancelletto se presente
+	const cleanHex = hex.charAt(0) === '#' ? hex.substring(1) : hex;
+	
+	// Controlla che sia un hex valido (3 o 6 caratteri)
+	if (!/^([A-Fa-f0-9]{3}){1,2}$/.test(cleanHex)) {
+		return undefined;
+	}
+	
+	// Se è un hex a 3 caratteri, duplica ogni carattere
+	const finalHex = cleanHex.length === 3 
+		? cleanHex.split('').map(char => char + char).join('') 
+		: cleanHex;
+	
+	// Estrai i valori RGB
+	const r = parseInt(finalHex.substring(0, 2), 16);
+	const g = parseInt(finalHex.substring(2, 4), 16);
+	const b = parseInt(finalHex.substring(4, 6), 16);
+	
+	return { r, g, b };
 }
 
 export function colorToHex(colorVar: string): string {

@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+import { z } from 'zod';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { WebviewBridge } from '../webviewBridge';
 import { WebviewMessageType } from '@shared/types/webview.types';

@@ -138,19 +138,19 @@ export const ChatHistoryView: React.FC = () => {
 
       switch (message.type) {
         case 'chatHistory':
-          setMessages(message.payload);
+          setMessages((msg.payload as unknown));
           setIsLoading(false);
           break;
         case 'chatHistoryCleared':
           setMessages([]);
           break;
         case 'chatHistoryError':
-          setError(message.payload);
+          setError((msg.payload as unknown));
           setIsLoading(false);
           break;
         case 'chatExport':
           // Gestione esportazione
-          const blob = new Blob([message.payload], { type: 'text/markdown' });
+          const blob = new Blob([(msg.payload as unknown)], { type: 'text/markdown' });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;

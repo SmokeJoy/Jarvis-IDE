@@ -8,7 +8,7 @@ import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { AgentPanel } from '../components/AgentPanel';
 import { useExtensionMessage } from '../hooks/useExtensionMessage';
-import { MasMessageType } from '../types/mas-message';
+import { MasMessageType } from '@shared/messages';
 import '@testing-library/jest-dom/vitest';
 import { vi, describe, test, beforeAll, beforeEach, expect } from 'vitest';
 

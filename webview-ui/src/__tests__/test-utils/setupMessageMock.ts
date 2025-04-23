@@ -6,7 +6,7 @@
 
 import { vi } from 'vitest';
 import { act } from '@testing-library/react';
-import type { MasMessageUnion } from '../../types/mas-message';
+import type { MasMessageUnion } from '@shared/messages';
 import type { WebviewMessageUnion } from '../../../../src/shared/types/webviewMessageUnion';
 
 type Handler = (event: MessageEvent) => void;

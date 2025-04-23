@@ -38,6 +38,7 @@ import type {
   AgentToggleEnableMessage,
   ErrorMessage
 } from './mas-message';
+import type { AgentMessageUnion as SharedAgentMessageUnion } from '@shared/messages';
 
 /**
  * Type guard generico per verificare se un messaggio è di un tipo specifico MAS
@@ -199,4 +200,8 @@ export function isMasMessage(message: unknown): message is AgentMessageUnion {
     'type' in message &&
     Object.values(MasMessageType).includes((message as { type: unknown }).type as MasMessageType)
   );
+}
+
+export function isAgentMessage(msg: unknown): msg is AgentMessageUnion {
+  return typeof msg === 'object' && msg !== null && 'type' in msg;
 } 

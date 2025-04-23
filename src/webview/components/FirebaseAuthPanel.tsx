@@ -42,7 +42,7 @@ export const FirebaseAuthPanel = ({ dispatch }: FirebaseAuthPanelProps) => {
       const message = event.data as Partial<FirebaseAuthMessage>;
 
       if (message && isAuthStateChangedMessage(message as FirebaseAuthMessage)) {
-        const payload = message.payload;
+        const payload = (msg.payload as unknown);
         if (payload &&
             'userId' in payload && typeof payload.userId === 'string' &&
             'email' in payload && typeof payload.email === 'string' &&

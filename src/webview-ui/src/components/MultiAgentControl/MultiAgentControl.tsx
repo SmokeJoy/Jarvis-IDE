@@ -21,10 +21,10 @@ export const MultiAgentControl = () => {
 
     const unsubscribe = onMessage((message: MultiAgentMessage) => {
       if (isAgentStatusUpdateMessage(message)) {
-        setAgents(message.payload.agents);
+        setAgents((msg.payload as unknown).agents);
         setError('');
       } else if (isAgentErrorMessage(message)) {
-        setError(`Errore agente ${message.payload.agentId}: ${message.payload.error}`);
+        setError(`Errore agente ${(msg.payload as unknown).agentId}: ${(msg.payload as unknown).error}`);
       }
     });
 

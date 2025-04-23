@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { OpenAiCompatibleModelInfo } from '../../src/shared/types/api.types';
 import { ApiConfiguration } from '../../src/shared/types/api.types';
-import { ExtensionState, ExtensionMessage } from '../../shared/ExtensionMessage';
+import { ExtensionState, ExtensionMessage } from '@shared/messages/extension-messages';
 import {
   AutoApprovalSettings,
   ChatSettings,

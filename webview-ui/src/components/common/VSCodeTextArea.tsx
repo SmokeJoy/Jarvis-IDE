@@ -31,9 +31,9 @@ const TextArea = styled.textarea`
 interface VSCodeTextAreaProps {
   value: string;
   onChange: (value: string) => void;
-  placeholder?: string;
-  disabled?: boolean;
-  rows?: number;
+  placeholder: string | undefined;
+  disabled: boolean | undefined;
+  rows: number | undefined;
 }
 
 export const VSCodeTextArea: React.FC<VSCodeTextAreaProps> = ({

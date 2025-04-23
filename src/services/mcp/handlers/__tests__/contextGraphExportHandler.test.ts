@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+import { z } from 'zod';
 /**
  * @file contextGraphExportHandler.test.ts
  * @description Test per l'handler di esportazione del grafo

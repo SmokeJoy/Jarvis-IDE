@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+import { z } from 'zod';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { JarvisAPI } from '../JarvisAPI';
 import { LLMProviderId, type APIConfiguration } from '@shared/types/api.types';

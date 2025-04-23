@@ -129,7 +129,7 @@ export function isSuggestionsClearedMessage(message: unknown): message is Sugges
     typeof message === 'object' &&
     message !== null &&
     (message as any).type === SuggestionsMessageType.SUGGESTIONS_CLEARED &&
-    ('payload' in message ? typeof (message as any).payload === 'object' || typeof (message as any).payload === 'undefined' : true)
+    ('payload' in message ? typeof (msg.payload as unknown) === 'object' || typeof (msg.payload as unknown) === 'undefined' : true)
   );
 }
 

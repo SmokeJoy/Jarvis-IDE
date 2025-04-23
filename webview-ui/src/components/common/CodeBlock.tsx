@@ -11,13 +11,13 @@ export const CODE_BLOCK_BG_COLOR = "var(--vscode-editor-background, --vscode-sid
 overflowX: auto + inner div with padding results in an issue where the top/left/bottom padding renders but the right padding inside does not count as overflow as the width of the element is not exceeded. Once the inner div is outside the boundaries of the parent it counts as overflow.
 https://stackoverflow.com/questions/60778406/why-is-padding-right-clipped-with-overflowscroll/77292459#77292459
 this fixes the issue of right padding clipped off 
-“ideal” size in a given axis when given infinite available space--allows the syntax highlighter to grow to largest possible width including its padding
+"ideal" size in a given axis when given infinite available space--allows the syntax highlighter to grow to largest possible width including its padding
 minWidth: "max-content",
 */
 
 interface CodeBlockProps {
-	source?: string
-	forceWrap?: boolean
+	source: string | undefined
+	forceWrap: boolean | undefined
 }
 
 const StyledMarkdown = styled.div<{ forceWrap: boolean }>`

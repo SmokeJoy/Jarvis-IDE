@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 /**
  * @file LLMEventBus.test.ts
  * @description Test per il sistema di event bus per provider LLM

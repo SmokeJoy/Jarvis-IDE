@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { vi, describe, it, expect, beforeEach, afterEach, test } from 'vitest';
 import { WebSocketBridge } from '../utils/WebSocketBridge';
 import { llmOrchestrator } from '../services/llmOrchestrator';

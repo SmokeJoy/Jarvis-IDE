@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 /**
  * @file fix-import-type.test.ts
  * @description Test per lo script di correzione degli import type

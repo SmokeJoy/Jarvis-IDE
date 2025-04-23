@@ -3,8 +3,8 @@ import deepEqual from "fast-deep-equal"
 import React, { memo, useEffect, useMemo, useRef, useState } from "react"
 import { useSize } from "react-use"
 import styled from "styled-components"
-import { BROWSER_VIEWPORT_PRESETS } from "../../../../src/shared/BrowserSettings"
-import { BrowserAction, BrowserActionResult, JarvisIdeMessage, JarvisIdeSayBrowserAction } from "../../../../src/shared/ExtensionMessage"
+import { BROWSER_VIEWPORT_PRESETS } from "@shared/BrowserSettings"
+import { BrowserAction, BrowserActionResult, JarvisMessage, JarvisSayBrowserAction } from "@shared/messages"
 import { useExtensionState } from "../../context/ExtensionStateContext"
 import { vscode } from "../../utils/vscode"
 import { BrowserSettingsMenu } from "../browser/BrowserSettingsMenu"
@@ -13,10 +13,10 @@ import CodeBlock, { CODE_BLOCK_BG_COLOR } from "../common/CodeBlock"
 import { ChatRowContent, ProgressIndicator } from "./ChatRow"
 
 interface BrowserSessionRowProps {
-	messages: JarvisIdeMessage[]
+	messages: JarvisMessage[]
 	isExpanded: (messageTs: number) => boolean
 	onToggleExpand: (messageTs: number) => void
-	lastModifiedMessage?: JarvisIdeMessage
+	lastModifiedMessage?: JarvisMessage
 	isLast: boolean
 	onHeightChange: (isTaller: boolean) => void
 }
@@ -56,15 +56,15 @@ const BrowserSessionRow = memo((props: BrowserSessionRowProps) => {
 				screenshot?: string
 				mousePosition?: string
 				consoleLogs?: string
-				messages: JarvisIdeMessage[] // messages up to and including the result
+				messages: JarvisMessage[] // messages up to and including the result
 			}
 			nextAction?: {
-				messages: JarvisIdeMessage[] // messages leading to next result
+				messages: JarvisMessage[] // messages leading to next result
 			}
 		}[] = []
 
-		let currentStateMessages: JarvisIdeMessage[] = []
-		let nextActionMessages: JarvisIdeMessage[] = []
+		let currentStateMessages: JarvisMessage[] = []
+		let nextActionMessages: JarvisMessage[] = []
 
 		messages.forEach((message) => {
 			if (message.ask === "browser_action_launch" || message.say === "browser_action_launch") {
@@ -218,7 +218,7 @@ const BrowserSessionRow = memo((props: BrowserSessionRowProps) => {
 		for (let i = actions.length - 1; i >= 0; i--) {
 			const message = actions[i]
 			if (message.say === "browser_action") {
-				const browserAction = JSON.parse(message.text || "{}") as JarvisIdeSayBrowserAction
+				const browserAction = JSON.parse(message.text || "{}") as JarvisSayBrowserAction
 				if (browserAction.action === "click" && browserAction.coordinate) {
 					return browserAction.coordinate
 				}
@@ -441,7 +441,7 @@ const BrowserSessionRow = memo((props: BrowserSessionRowProps) => {
 }, deepEqual)
 
 interface BrowserSessionRowContentProps extends Omit<BrowserSessionRowProps, "messages"> {
-	message: JarvisIdeMessage
+	message: JarvisMessage
 	setMaxActionHeight: (height: number) => void
 }
 
@@ -502,7 +502,7 @@ const BrowserSessionRowContent = ({
 					)
 
 				case "browser_action":
-					const browserAction = JSON.parse(message.text || "{}") as JarvisIdeSayBrowserAction
+					const browserAction = JSON.parse(message.text || "{}") as JarvisSayBrowserAction
 					return (
 						<BrowserActionBox
 							action={browserAction.action}

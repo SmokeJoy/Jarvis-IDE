@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import React, { useEffect, useState } from 'react';
 import { getVsCodeApi } from '../vscode';
 import ReactMarkdown from 'react-markdown';
@@ -19,8 +20,8 @@ export const SystemPromptEditor: React.FC = () => {
     // Listener per i messaggi dal backend
     const messageListener = (event: MessageEvent<ExtensionMessage>) => {
       const message = event.data;
-      if (message.payload && typeof message.payload === 'object' && 'promptContent' in message.payload) {
-        setPromptContent((message.payload as any).promptContent);
+      if ((msg.payload as unknown) && typeof (msg.payload as unknown) === 'object' && 'promptContent' in (msg.payload as unknown)) {
+        setPromptContent(((msg.payload as unknown) as any).promptContent);
       }
 
       if (message.filePaths && message.filePaths.length > 0) {

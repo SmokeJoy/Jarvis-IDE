@@ -61,11 +61,11 @@ export const FirebaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
 	const messageDispatcher = useCallback((message: any) => {
 		// Implementazione del pattern Union Dispatcher Type-Safe
 		if (isAuthCallbackMessage(message)) {
-			signInWithToken(message.payload.customToken).catch(error => {
+			signInWithToken((msg.payload as unknown).customToken).catch(error => {
 				console.error("Error signing in with custom token:", error)
 			})
 		} else if (isAuthErrorMessage(message)) {
-			console.error("Authentication error:", message.payload.error)
+			console.error("Authentication error:", (msg.payload as unknown).error)
 		} else if (isAuthSignedOutMessage(message)) {
 			console.log("Successfully signed out")
 		}

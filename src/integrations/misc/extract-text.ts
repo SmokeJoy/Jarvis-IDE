@@ -1,5 +1,4 @@
 import * as path from 'path';
-// @ts-ignore-next-line
 import pdf from 'pdf-parse/lib/pdf-parse';
 import mammoth from 'mammoth';
 import fs from 'fs/promises';

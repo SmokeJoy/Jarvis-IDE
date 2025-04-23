@@ -48,12 +48,12 @@ export function convertToWebviewMessage(message: unknown): WebviewMessage | null
   };
 
   // Se esiste un payload, lo copia
-  if (legacyMessage.payload !== undefined) {
-    newMessage.payload = legacyMessage.payload || {};
+  if ((msg.payload as unknown) !== undefined) {
+    (msg.payload as unknown) = (msg.payload as unknown) || {};
   }
   // Se non esiste, crea un oggetto vuoto
   else {
-    newMessage.payload = {};
+    (msg.payload as unknown) = {};
   }
 
   // Copia l'ID se esiste
@@ -66,29 +66,29 @@ export function convertToWebviewMessage(message: unknown): WebviewMessage | null
     newMessage.error = String(legacyMessage.error);
 
     // Aggiunge anche al payload per compatibilità
-    if (newMessage.payload) {
-      newMessage.payload.error = legacyMessage.error;
+    if ((msg.payload as unknown)) {
+      (msg.payload as unknown).error = legacyMessage.error;
     }
   }
 
   // Gestione stato
   if (legacyMessage.state && typeof legacyMessage.state === 'object') {
-    if (newMessage.payload) {
-      newMessage.payload = { ...newMessage.payload, ...legacyMessage.state };
+    if ((msg.payload as unknown)) {
+      (msg.payload as unknown) = { ...(msg.payload as unknown), ...legacyMessage.state };
     }
 
     // Gestione configurazione API nello stato
     if (legacyMessage.state.apiConfiguration) {
-      if (newMessage.payload) {
-        newMessage.payload.apiConfiguration = legacyMessage.state.apiConfiguration;
+      if ((msg.payload as unknown)) {
+        (msg.payload as unknown).apiConfiguration = legacyMessage.state.apiConfiguration;
       }
     }
   }
 
   // Gestione diretta di apiConfiguration
   if (legacyMessage.apiConfiguration) {
-    if (newMessage.payload) {
-      newMessage.payload.apiConfiguration = legacyMessage.apiConfiguration;
+    if ((msg.payload as unknown)) {
+      (msg.payload as unknown).apiConfiguration = legacyMessage.apiConfiguration;
     }
   }
 
@@ -96,8 +96,8 @@ export function convertToWebviewMessage(message: unknown): WebviewMessage | null
   const skipFields = ['type', 'payload', 'id', 'requestId', 'source', 'error', 'state'];
   for (const key in legacyMessage) {
     if (Object.prototype.hasOwnProperty.call(legacyMessage, key) && !skipFields.includes(key)) {
-      if (newMessage.payload) {
-        newMessage.payload[key] = legacyMessage[key];
+      if ((msg.payload as unknown)) {
+        (msg.payload as unknown)[key] = legacyMessage[key];
       }
     }
   }

@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, act } from "@testing-library/react";
 import { ChatView } from "../ChatView";
 import { agentEventToChatMessage } from "../AgentMessageFactory";
+import { createFakeResponseMessage, createFakeTypingMessage, createFakeTypingDoneMessage } from '../../../../test/__factories__/messages';
 
 describe("ChatView MAS end-to-end events", () => {
   it("should render a MAS event badge and content when MAS event is dispatched", async () => {
@@ -67,8 +68,7 @@ describe("ChatView MAS end-to-end events", () => {
         hideAnnouncement={hideAnnouncement}
         showHistoryView={showHistoryView}
         isEnabled={true}
-        // @ts-ignore simulate injected messages
-        messages={multiThreadMessages}
+                messages={multiThreadMessages}
       />
     );
     expect(screen.getAllByText(/Thread:/i).length).toBeGreaterThan(1);
@@ -105,10 +105,8 @@ describe("ChatView MAS end-to-end events", () => {
         hideAnnouncement={hideAnnouncement}
         showHistoryView={showHistoryView}
         isEnabled={true}
-        // @ts-ignore
-        messages={messaggi}
-        // @ts-ignore for test inject typing state
-        agentTypingState={agentTypingState}
+                messages={messaggi}
+                agentTypingState={agentTypingState}
       />
     );
     // Verifica indicatori
@@ -133,8 +131,7 @@ describe("ChatView MAS end-to-end events", () => {
         hideAnnouncement={hideAnnouncement}
         showHistoryView={showHistoryView}
         isEnabled={true}
-        // @ts-ignore
-        messages={messaggi}
+                messages={messaggi}
         agentTypingState={agentTypingState}
       />
     );
@@ -149,8 +146,7 @@ describe("ChatView MAS end-to-end events", () => {
         hideAnnouncement={hideAnnouncement}
         showHistoryView={showHistoryView}
         isEnabled={true}
-        // @ts-ignore
-        messages={messaggi}
+                messages={messaggi}
         agentTypingState={agentTypingState}
       />
     );

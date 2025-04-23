@@ -120,26 +120,26 @@ export class TaskQueueMessageHandler extends BaseWebviewMessageHandler {
         break;
       case 'taskQueue:retry':
         if (
-          message.payload &&
-          typeof message.payload === 'object' &&
-          'taskId' in message.payload &&
-          typeof (message.payload as { taskId?: unknown }).taskId === 'string'
+          (msg.payload as unknown) &&
+          typeof (msg.payload as unknown) === 'object' &&
+          'taskId' in (msg.payload as unknown) &&
+          typeof ((msg.payload as unknown) as { taskId?: unknown }).taskId === 'string'
         ) {
-          this._handleRetryRequest((message.payload as { taskId: string }).taskId);
+          this._handleRetryRequest(((msg.payload as unknown) as { taskId: string }).taskId);
         }
         break;
       case 'taskQueue:remove':
         if (
-          message.payload &&
-          typeof message.payload === 'object' &&
-          'taskId' in message.payload &&
-          typeof (message.payload as { taskId?: unknown }).taskId === 'string'
+          (msg.payload as unknown) &&
+          typeof (msg.payload as unknown) === 'object' &&
+          'taskId' in (msg.payload as unknown) &&
+          typeof ((msg.payload as unknown) as { taskId?: unknown }).taskId === 'string'
         ) {
-          this._handleRemoveRequest((message.payload as { taskId: string }).taskId);
+          this._handleRemoveRequest(((msg.payload as unknown) as { taskId: string }).taskId);
         }
         break;
       case 'taskQueue:update': {
-        const updatePayload = message.payload as { taskId?: string; status?: unknown };
+        const updatePayload = (msg.payload as unknown) as { taskId?: string; status?: unknown };
         if (updatePayload && typeof updatePayload.taskId === 'string' && updatePayload.status) {
           this._handleUpdateRequest(updatePayload.taskId, updatePayload.status as TaskStatus);
         }

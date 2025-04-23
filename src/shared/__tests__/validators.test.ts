@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as validators from '../validators';
 import { ChatMessage } from '../types/index';

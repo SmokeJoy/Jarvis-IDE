@@ -24,7 +24,7 @@ export async function testMcpDispatcher() {
         response.type === 'llm.streaming' ||
         response.type === 'llm.error'
       ) {
-        const payload = response.payload;
+        const payload = (msg.payload as unknown);
         const output =
           typeof payload.result === 'string'
             ? payload.result

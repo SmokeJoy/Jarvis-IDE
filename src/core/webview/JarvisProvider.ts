@@ -29,6 +29,7 @@ import { ExportableSession } from '../../utils/exporters/types';
 // Importo la nuova union discriminata e la sua type guard
 import {
   ExtensionMessage,
+  ExtensionState,
   ExtensionMessageType,
   isExtensionMessage,
   LogUpdatePayload,
@@ -37,7 +38,7 @@ import {
   ModelUpdatePayload,
   SettingsUpdatePayload,
   ChatUpdatePayload,
-} from '../../shared/types/extensionMessageUnion';
+} from '@shared/messages/extension-messages';
 
 // Importazioni concrete
 import { SettingsManager } from '../../services/settings/SettingsManager';
@@ -708,7 +709,7 @@ export class JarvisProvider implements IJarvisProvider {
             break;
 
           case 'sendCoderInstruction':
-            const instruction = message.payload?.instruction as string;
+            const instruction = (msg.payload as unknown)?.instruction as string;
             if (instruction) {
               await this.handleSendCoderInstruction(instruction);
             }
@@ -727,9 +728,9 @@ export class JarvisProvider implements IJarvisProvider {
             break;
 
           case 'toggleAgentActive':
-            const agentId = message.payload?.agentId as string;
+            const agentId = (msg.payload as unknown)?.agentId as string;
             if (agentId) {
-              this.handleToggleAgentActive(agentId, message.payload.active as boolean);
+              this.handleToggleAgentActive(agentId, (msg.payload as unknown).active as boolean);
             }
             break;
 
@@ -942,13 +943,11 @@ export class JarvisProvider implements IJarvisProvider {
     if (key === 'selectedModel') {
       this.apiConfiguration.modelId = value as string;
     } else if (key in this) {
-      // @ts-ignore - Uso any per aggirare la verifica delle chiavi
-      this[key] = value;
+            this[key] = value;
     }
 
     // Aggiorna le impostazioni nel servizio
-    // @ts-ignore - Uso any per aggirare la verifica delle chiavi
-    await this.settingsManager.updateSetting(key, value);
+        await this.settingsManager.updateSetting(key, value);
 
     // Invia un aggiornamento alla webview
     this._view?.webview.postMessage({
@@ -1461,15 +1460,15 @@ export class JarvisProvider implements IJarvisProvider {
   }
 
   private handleLogUpdate(message: Extract<ExtensionMessage, { type: 'log.update' }>): void {
-    const { level, message: logMessage, context } = message.payload;
+    const { level, message: logMessage, context } = (msg.payload as unknown);
     console.log(`[${level}] ${logMessage}`, context);
   }
 
   private handleChatUpdate(message: Extract<ExtensionMessage, { type: 'chat.update' }>): void {
-    const { threadId, messages, status } = message.payload;
+    const { threadId, messages, status } = (msg.payload as unknown);
 
     if (status === 'error') {
-      console.error(`Errore nella chat ${threadId}:`, message.payload.error);
+      console.error(`Errore nella chat ${threadId}:`, (msg.payload as unknown).error);
       return;
     }
 
@@ -1477,7 +1476,7 @@ export class JarvisProvider implements IJarvisProvider {
   }
 
   private handleModelUpdate(message: Extract<ExtensionMessage, { type: 'model.update' }>): void {
-    const { modelId, modelInfo, status } = message.payload;
+    const { modelId, modelInfo, status } = (msg.payload as unknown);
 
     // Aggiorniamo il modello corrente
     this.state.currentModel = modelInfo;
@@ -1496,12 +1495,12 @@ export class JarvisProvider implements IJarvisProvider {
   ): void {
     this.state.settings = {
       ...this.state.settings,
-      ...message.payload.settings,
+      ...(msg.payload as unknown).settings,
     };
   }
 
   private handleError(message: Extract<ExtensionMessage, { type: 'error' }>): void {
-    const { code, message: errorMessage, details } = message.payload;
+    const { code, message: errorMessage, details } = (msg.payload as unknown);
     console.error(`[${code}] ${errorMessage}`, details);
 
     // Salviamo l'ultimo errore nello stato
@@ -1512,7 +1511,7 @@ export class JarvisProvider implements IJarvisProvider {
   }
 
   private handleInfo(message: Extract<ExtensionMessage, { type: 'info' }>): void {
-    const { message: infoMessage, severity = 'info' } = message.payload;
+    const { message: infoMessage, severity = 'info' } = (msg.payload as unknown);
     console.log(`[${severity}] ${infoMessage}`);
 
     // Opzionalmente, mostriamo un messaggio informativo all'utente in base alla severità

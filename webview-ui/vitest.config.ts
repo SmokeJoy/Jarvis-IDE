@@ -10,10 +10,13 @@ import { resolve } from 'path';
 export default defineConfig({
   plugins: [react()],
   test: {
-    environment: 'node',
+    environment: 'jsdom',
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
     setupFiles: ['./setup.ts'],
     coverage: {
-      provider: 'c8',
+      provider: 'v8',
+      reporter: ['text', 'json', 'json-summary', 'lcov', 'html'],
+      include: ['src/**/*.{ts,tsx}'],
       exclude: [
         'coverage/**',
         'dist/**',
@@ -25,13 +28,34 @@ export default defineConfig({
         '**/*{.,-}spec.{js,cjs,mjs,ts,tsx,jsx}',
         '**/__tests__/**',
         '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc}.config.*',
-        '**/.{eslint,mocha,prettier}rc.{js,cjs,yml}'
-      ]
+        '**/.{eslint,mocha,prettier}rc.{js,cjs,yml}',
+        'src/**/*.test.{ts,tsx}',
+        'src/tests/**',
+        'src/**/*.d.ts',
+        'node_modules/**',
+        'src/vite-env.d.ts'
+      ],
+      all: true,
+      thresholds: {
+        lines: 70,
+        functions: 70,
+        branches: 60,
+        statements: 70
+      }
     },
+    testTimeout: 10000,
+    hookTimeout: 10000,
     alias: {
       '@shared': resolve(__dirname, '../src/shared'),
       '@webview': resolve(__dirname, 'src'),
       '@test': resolve(__dirname, 'tests')
-    }
+    },
+    globals: true
   },
-}); 
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, './src'),
+      '@shared': resolve(__dirname, '../src/shared')
+    }
+  }
+});

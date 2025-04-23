@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+import { z } from 'zod';
 /**
  * 🛠️ Test per i validatori di contesto
  * - Validazione input/output

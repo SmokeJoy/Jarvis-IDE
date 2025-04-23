@@ -1,9 +1,8 @@
 {
   "name": "jarvis-ide",
-  "displayName": "Jarvis IDE MAS",
-  "description": "Assistente AI per sviluppatori con supporto import/export sessioni",
-  "version": "1.0.0-mas",
-  "type": "commonjs",
+  "displayName": "Jarvis IDE",
+  "description": "The first autonomous open source IDE controlled by an AI team",
+  "version": "0.1.0",
   "publisher": "jarvis-ide",
   "private": true,
   "license": "MIT",
@@ -13,444 +12,100 @@
   },
   "engines": {
     "vscode": "^1.85.0",
-    "node": ">=18"
+    "node": ">=18.0.0"
   },
-  "author": {
-    "name": "Jarvis IDE Team"
-  },
-  "homepage": "https://github.com/jarvis-ide/jarvis-ide",
   "categories": [
-    "Other"
-  ],
-  "keywords": [
-    "ai",
-    "llm",
-    "openrouter",
-    "ollama",
-    "lmstudio",
-    "chat",
-    "development",
-    "assistant"
+    "Other",
+    "Programming Languages",
+    "Machine Learning",
+    "Snippets",
+    "Education"
   ],
   "activationEvents": [
-    "onCommand:jarvis-ide.start",
     "onStartupFinished"
   ],
   "main": "./dist/extension.js",
-  "scripts": {
-    "vscode:prepublish": "npm run package",
-    "compile": "webpack",
-    "watch": "webpack --watch",
-    "package": "webpack --mode production --devtool hidden-source-map",
-    "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
-    "lint": "eslint \"src/**/*.{ts,tsx}\" --fix",
-    "test": "vitest run",
-    "test:watch": "vitest watch",
-    "test:coverage": "vitest run --coverage",
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "test:providers": "tsx scripts/test-providers.ts",
-    "test:providers:openai": "tsx scripts/test-providers.ts openai",
-    "test:providers:groq": "tsx scripts/test-providers.ts groq",
-    "test:providers:anthropic": "tsx scripts/test-providers.ts anthropic",
-    "analyze:results": "tsx scripts/analyze-results.ts",
-    "benchmark:import": "ts-node src/scripts/benchmark-import.ts",
-    "benchmark:analyze": "tsx scripts/analyze-benchmark.ts",
-    "benchmark:test-import": "tsx scripts/quick-test.ts && tsx scripts/import-benchmark.ts",
-    "mcp-server": "node --experimental-specifier-resolution=node --loader ts-node/esm src/services/mcp/run-server.ts",
-    "mcp-server:debug": "node --trace-warnings --experimental-specifier-resolution=node --loader ts-node/esm src/services/mcp/run-server.ts",
-    "test:mcp": "vitest --config=vitest.config.cjs src/services/mcp/__tests__/mcp-server.test.js --detectOpenHandles",
-    "test:mcp:coverage": "vitest --config=vitest.config.cjs src/services/mcp/__tests__/mcp-server.test.js --coverage --detectOpenHandles",
-    "fix-imports": "ts-node scripts/fix-js-imports.ts",
-    "fix-imports:dry": "node scripts/fix-imports.js --dry-run",
-    "fix-imports:ts": "node --loader ts-node/esm src/scripts/fix-imports.ts",
-    "fix-double-js": "node scripts/fix-double-js.js",
-    "schema:webview": "ts-node scripts/generate-schema.ts",
-    "schema:all": "ts-node scripts/generate-schema-extended.ts",
-    "test:payload": "ts-node scripts/test-payloads.ts",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
-    "fix:imports": "ts-node -P tsconfig.node.json scripts/fix-imports.ts",
-    "test:codemods": "vitest run",
-    "test:codemods:watch": "vitest watch",
-    "changelog:imports": "ts-node scripts/codemods/generate-import-fix-changelog.ts",
-    "fix:imports:ast": "ts-node scripts/codemods/fix-import-type-ast.ts",
-    "verify:imports": "node scripts/verify-imports.js",
-    "verify:all": "pnpm verify:imports && pnpm lint && pnpm tsc --noEmit && pnpm vitest run",
-    "type:analyze": "ts-node scripts/type-analyzer.ts",
-    "type:migrate": "ts-node -P tsconfig.node.json scripts/type-migrate.ts",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
-    "lint:all": "pnpm lint && pnpm format",
-    "fix": "pnpm lint && pnpm format && pnpm type:analyze && pnpm refactor:report",
-    "refactor:compile": "tsc -p tsconfig.scripts.json",
-    "refactor:fix-nested": "pnpm refactor:compile && node dist-scripts/fixes/fix-nested-safe-message.js",
-    "refactor:add-imports": "pnpm refactor:compile && node dist-scripts/fixes/add-missing-imports.js",
-    "refactor:chat": "pnpm refactor:compile && node dist-scripts/fixes/transform-chat-message.js",
-    "refactor:check-safety": "pnpm refactor:compile && node dist-scripts/checks/verify-all-safety.js",
-    "refactor:fix-all": "pnpm refactor:fix-nested && pnpm refactor:add-imports && pnpm refactor:check-safety",
-    "refactor:badge": "pnpm refactor:compile && node dist-scripts/dashboard/badge-generator.js",
-    "refactor:report": "pnpm refactor:compile && node dist-scripts/dashboard/generate-report.js",
-    "refactor:verify": "pnpm refactor:compile && node dist-scripts/checks/verify-safe-messages.js",
-    "refactor:all": "pnpm refactor:verify && pnpm refactor:fix-nested && pnpm refactor:add-imports && pnpm tsc --noEmit && pnpm refactor:report",
-    "dashboard": "ts-node --esm tools/run-dashboard.ts",
-    "dashboard:trend": "ts-node --esm tools/jarvis-refactor.ts --generate-trend",
-    "dashboard:detailed": "ts-node --esm tools/jarvis-refactor.ts --detailed-report",
-    "dashboard:fix": "ts-node --esm tools/jarvis-refactor.ts --auto-fix",
-    "dashboard:priority": "ts-node --esm tools/jarvis-refactor.ts --priority-report",
-    "refactor:js-imports": "ts-node --esm -P tsconfig.node.json tools/jarvis-refactor.ts --find-js-imports",
-    "refactor:rename-js": "ts-node --esm -P tsconfig.node.json tools/jarvis-refactor.ts --rename-js-to-ts",
-    "refactor:map": "ts-node --esm -P tsconfig.node.json tools/jarvis-refactor.ts --generate-map",
-    "type:audit": "pnpm type:analyze && pnpm refactor:report && pnpm refactor:js-imports",
-    "dashboard:dev": "vite --config refactor-dashboard/vite.config.ts refactor-dashboard",
-    "audit:refactor": "ts-node scripts/refactor-assistant.ts"
-  },
   "contributes": {
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "aiDeveloper",
-          "title": "AI Developer",
-          "icon": "assets/icons/icon.svg"
-        },
-        {
-          "id": "jarvis-ide",
-          "title": "Jarvis IDE",
-          "icon": "resources/icon.svg"
-        },
-        {
-          "id": "jarvis-refactor",
-          "title": "Jarvis Refactor",
-          "icon": "assets/icons/refactor.svg"
-        }
-      ]
-    },
-    "views": {
-      "aiDeveloper": [
-        {
-          "id": "chatView",
-          "name": "Chat",
-          "type": "webview"
-        }
-      ],
-      "jarvis-ide": [
-        {
-          "type": "webview",
-          "id": "jarvis.settingsView",
-          "name": "Impostazioni"
-        }
-      ],
-      "jarvis-refactor": [
-        {
-          "type": "webview",
-          "id": "jarvis.refactorOverlay",
-          "name": "Refactor Tracker",
-          "visibility": "visible"
-        }
-      ]
-    },
     "commands": [
       {
         "command": "jarvis-ide.start",
-        "title": "Avvia Jarvis IDE"
+        "title": "Start Jarvis IDE",
+        "category": "Jarvis IDE"
       },
       {
-        "command": "jarvis-ide.openInNewTab",
-        "title": "Apri Jarvis IDE in una Nuova Scheda"
-      },
-      {
-        "command": "jarvis-ide.setLogLevel",
-        "title": "Imposta Livello Log"
-      },
-      {
-        "command": "jarvis-ide.exportLogFile",
-        "title": "Esporta Log Corrente"
-      },
-      {
-        "command": "jarvis-ide.openLogFolder",
-        "title": "Apri Cartella Log"
-      },
-      {
-        "command": "jarvis-ide.getSystemPrompt",
-        "title": "Ottieni System Prompt"
-      },
-      {
-        "command": "jarvis-ide.saveSystemPrompt",
-        "title": "Salva System Prompt"
-      },
-      {
-        "command": "jarvis-ide.updateSetting",
-        "title": "Aggiorna Impostazione"
-      },
-      {
-        "command": "jarvis-ide.readFile",
-        "title": "Leggi Contenuto File"
-      },
-      {
-        "command": "jarvis-ide.editFile",
-        "title": "Modifica File"
-      },
-      {
-        "command": "jarvis-ide.createFile",
-        "title": "Crea Nuovo File"
-      },
-      {
-        "command": "jarvis-ide.deleteFile",
-        "title": "Elimina File"
-      },
-      {
-        "command": "jarvis-ide.listFiles",
-        "title": "Elenca File in Directory"
-      },
-      {
-        "command": "jarvis-ide.listFilesRecursive",
-        "title": "Elenca File Ricorsivamente"
-      },
-      {
-        "command": "jarvis.readSystemPrompt",
-        "title": "Jarvis: Leggi System Prompt"
-      },
-      {
-        "command": "jarvis.saveSystemPrompt",
-        "title": "Jarvis: Salva System Prompt"
-      },
-      {
-        "command": "jarvis-ide.openSystemPromptFile",
-        "title": "Jarvis-IDE: Apri File System Prompt"
-      },
-      {
-        "command": "jarvis-ide.setSystemPromptPath",
-        "title": "Jarvis-IDE: Imposta Percorso System Prompt"
-      },
-      {
-        "command": "jarvis.runAgent",
-        "title": "Jarvis: Esegui Agente Autonomo"
-      },
-      {
-        "command": "jarvis.analyzeFile",
-        "title": "Jarvis: Analizza File Corrente"
-      },
-      {
-        "command": "jarvis-ide.mas.saveQueueNow",
-        "title": "MAS: Salva Task Queue"
-      },
-      {
-        "command": "jarvis-ide.mas.exportState",
-        "title": "MAS: Esporta Task Queue"
-      },
-      {
-        "command": "jarvis-ide.mas.importState",
-        "title": "MAS: Importa Task Queue"
-      },
-      {
-        "command": "jarvis-ide.mas.showTaskQueue",
-        "title": "MAS: Visualizza Task Queue"
-      },
-      {
-        "command": "jarvis-ide.mas.addInstruction",
-        "title": "MAS: Aggiungi Istruzione"
-      },
-      {
-        "command": "jarvis-ide.mas.abortTask",
-        "title": "MAS: Annulla Task"
-      },
-      {
-        "command": "jarvis-ide.mas.toggleAgent",
-        "title": "MAS: Attiva/Disattiva Agente"
-      },
-      {
-        "command": "jarvis.importSession",
-        "title": "Jarvis: Importa Sessione di Chat"
-      },
-      {
-        "command": "jarvis.exportSession",
-        "title": "Jarvis: Esporta Sessione di Chat"
-      },
-      {
-        "command": "jarvis.validateSession",
-        "title": "Jarvis: Valida Sessione di Chat"
-      },
-      {
-        "command": "jarvis.convertFormat",
-        "title": "Jarvis: Converti Formato Sessione"
-      },
-      {
-        "command": "jarvis.previewSession",
-        "title": "Jarvis: Anteprima Sessione"
-      },
-      {
-        "command": "jarvis.openRefactorDashboard",
-        "title": "Jarvis: Apri Dashboard Refactoring",
-        "category": "Jarvis Refactor"
-      },
-      {
-        "command": "jarvis.refreshRefactorData",
-        "title": "Jarvis: Aggiorna Dati Refactoring",
-        "category": "Jarvis Refactor"
-      },
-      {
-        "command": "jarvis.showCriticalFiles",
-        "title": "Jarvis: Mostra File Critici",
-        "category": "Jarvis Refactor"
+        "command": "jarvis-ide.stop",
+        "title": "Stop Jarvis IDE",
+        "category": "Jarvis IDE"
       }
     ],
     "configuration": {
       "title": "Jarvis IDE",
       "properties": {
-        "jarvis-ide.provider": {
+        "jarvis-ide.aiProvider": {
           "type": "string",
-          "default": "openai",
+          "default": "anthropic",
           "enum": [
+            "anthropic",
             "openai",
-            "openrouter",
             "local"
           ],
-          "description": "Provider LLM da utilizzare"
+          "description": "The AI provider to use"
         },
-        "jarvis-ide.use_docs": {
-          "type": "boolean",
-          "default": false,
-          "description": "Abilita l'uso della documentazione durante l'analisi del codice"
-        },
-        "jarvis-ide.coder_mode": {
-          "type": "boolean",
-          "default": true,
-          "description": "Abilita la modalità coder per ottimizzare le risposte per il codice"
-        },
-        "jarvis-ide.contextPrompt": {
+        "jarvis-ide.apiKey": {
           "type": "string",
           "default": "",
-          "description": "Prompt di contesto personalizzato da utilizzare nelle conversazioni"
-        },
-        "jarvis-ide.refactor.autoScanOnOpen": {
-          "type": "boolean",
-          "default": true,
-          "description": "Esegui automaticamente una scansione del codice all'apertura dell'editor"
-        },
-        "jarvis-ide.refactor.showDecorations": {
-          "type": "boolean",
-          "default": true,
-          "description": "Mostra decorazioni nell'editor per 'any' e import .js"
-        },
-        "jarvis-ide.refactor.refreshInterval": {
-          "type": "number",
-          "default": 300,
-          "description": "Intervallo in secondi per l'aggiornamento automatico dei dati di refactoring"
+          "description": "API key for the selected AI provider"
         }
       }
     }
   },
-  "dependencies": {
-    "@anthropic-ai/bedrock-sdk": "^0.12.4",
-    "@anthropic-ai/sdk": "^0.17.2",
-    "@anthropic-ai/vertex-sdk": "^0.7.0",
-    "@aws-sdk/client-bedrock-runtime": "^3.511.0",
-    "@google-cloud/vertexai": "^1.9.3",
-    "@google/generative-ai": "^0.24.0",
-    "@microsoft/signalr": "^8.0.0",
-    "@mistralai/mistralai": "^1.5.2",
-    "@radix-ui/react-icons": "^1.3.2",
-    "@radix-ui/react-select": "^2.1.6",
-    "@radix-ui/react-switch": "^1.1.3",
-    "@radix-ui/react-tabs": "^1.1.3",
-    "@radix-ui/react-tooltip": "^1.2.0",
-    "@types/express": "^5.0.1",
-    "@types/globby": "^8.0.0",
-    "@types/uuid": "^10.0.0",
-    "chai": "^5.2.0",
-    "clsx": "^2.1.1",
-    "express": "^5.1.0",
-    "framer-motion": "^12.6.5",
-    "get-folder-size": "^5.0.0",
-    "globby": "^14.1.0",
-    "html-to-image": "^1.11.13",
-    "monaco-vscode-textmate-theme-converter": "^0.1.7",
-    "ollama": "^0.5.14",
-    "openai": "^4.91.1",
-    "p-wait-for": "^5.0.2",
-    "posthog-node": "^3.6.3",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-markdown": "^10.1.0",
-    "react-syntax-highlighter": "^15.5.0",
-    "recharts": "^2.15.2",
-    "styled-components": "^6.1.8",
-    "tailwind-merge": "^3.2.0",
-    "typescript-json-schema": "^0.65.1",
-    "uuid": "^11.1.0",
-    "yaml": "^2.7.1"
+  "scripts": {
+    "vscode:prepublish": "pnpm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "test:websocket": "vitest run webview-ui/__tests__/utils/WebSocketBridge.test.ts",
+    "test:board": "vitest run webview-ui/src/data/board/__tests__/state.test.ts"
   },
   "devDependencies": {
-    "@babel/core": "^7.26.10",
-    "@babel/parser": "^7.27.0",
-    "@babel/preset-env": "^7.26.9",
-    "@babel/preset-typescript": "^7.27.0",
-    "@babel/traverse": "^7.23.2",
-    "@babel/types": "^7.27.0",
-    "@eslint/js": "^9.0.0",
-    "@playwright/test": "^1.51.1",
     "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^14.0.0",
-    "@testing-library/user-event": "^14.0.0",
-    "@types/cheerio": "^0.22.35",
-    "@types/jest": "^29.5.14",
-    "@types/json2csv": "^5.0.7",
-    "@types/node": "^20.17.30",
-    "@types/puppeteer": "^7.0.4",
-    "@types/puppeteer-core": "^5.4.0",
-    "@types/react": "^18.3.20",
-    "@types/react-dom": "^18.3.6",
-    "@types/react-syntax-highlighter": "^15.5.13",
-    "@types/sinon": "^17.0.4",
-    "@types/styled-components": "^5.1.34",
-    "@types/supertest": "^6.0.3",
+    "@testing-library/react": "^16.3.0",
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "18.x",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
     "@types/testing-library__jest-dom": "^6.0.0",
-    "@types/turndown": "^5.0.5",
-    "@types/vscode": "^1.99.1",
-    "@types/vscode-webview": "^1.57.5",
-    "@types/ws": "^8.18.1",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
-    "@typescript-eslint/typescript-estree": "^8.29.1",
-    "@vitejs/plugin-react": "^4.2.1",
-    "@vitest/coverage-v8": "^1.0.0",
-    "@vscode/test-electron": "^2.4.1",
+    "@types/vscode": "^1.85.0",
+    "@types/vscode-webview": "^1.57.4",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "@vitest/coverage-v8": "^3.1.1",
+    "@vscode/test-electron": "^2.3.8",
     "@vscode/webview-ui-toolkit": "^1.4.0",
-    "babel-jest": "^29.7.0",
-    "chalk": "^5.4.1",
-    "eslint": "^8.57.1",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-react": "^7.37.5",
+    "eslint": "^8.56.0",
     "fast-glob": "^3.3.3",
     "glob": "^10.3.10",
-    "globals": "^16.0.0",
-    "isbinaryfile": "^5.0.4",
-    "jest": "^29.7.0",
-    "jest-environment-jsdom": "^29.7.0",
-    "jsdom": "^22.0.0",
-    "json2csv": "6.0.0-alpha.2",
-    "mammoth": "^1.9.0",
-    "open-graph-scraper": "^6.9.0",
-    "os-name": "^6.0.0",
-    "prettier": "^3.5.3",
-    "puppeteer": "^24.6.1",
-    "puppeteer-core": "^24.6.0",
-    "simple-git": "^3.27.0",
-    "supertest": "^7.1.0",
-    "ts-jest": "^29.3.1",
+    "jsdom": "^26.1.0",
+    "mocha": "^10.2.0",
     "ts-loader": "^9.5.1",
     "ts-morph": "^25.0.1",
     "ts-node": "^10.9.2",
-    "tsup": "^8.4.0",
-    "typescript": "^5.8.3",
-    "typescript-eslint": "^7.0.0",
-    "vite": "^5.4.18",
-    "vitest": "^1.6.1",
-    "vscode": "^1.1.37",
-    "web-tree-sitter": "^0.25.3",
-    "webpack": "^5.90.1",
+    "typescript": "^5.3.3",
+    "vitest": "^3.1.1",
+    "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.10.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "vscode-uri": "^3.0.8",
+    "zod": "^3.24.3"
   }
 }

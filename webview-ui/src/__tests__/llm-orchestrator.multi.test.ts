@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 /**
  * @file llm-orchestrator.multi.test.ts
  * @description Test per l'orchestratore LLM con supporto multi-provider
@@ -152,8 +153,7 @@ describe('LLM Orchestrator (Multi-Provider)', () => {
     
     // Crea l'orchestratore
     orchestrator = new NewLLMOrchestrator();
-    // @ts-ignore: per accedere a proprietà private per test
-    orchestrator.logger = mockLogger;
+        orchestrator.logger = mockLogger;
   });
   
   // Cleanup dopo ogni test
@@ -163,8 +163,7 @@ describe('LLM Orchestrator (Multi-Provider)', () => {
   
   // Test per verificare l'inizializzazione con tutti i provider
   it('Dovrebbe utilizzare tutti i provider supportati', async () => {
-    // @ts-ignore: accesso a proprietà private per test
-    const supportedProviders = await orchestrator.getSupportedProviders();
+        const supportedProviders = await orchestrator.getSupportedProviders();
     
     // Verifica che siano stati identificati correttamente
     expect(supportedProviders).toHaveLength(3);

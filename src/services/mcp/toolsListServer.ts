@@ -93,18 +93,18 @@ app.post('/tools/call', async (req, res) => {
       console.log(`Risposta dal dispatcher per ${tool}:`, response.type);
 
       if (response.type === 'llm.error') {
-        console.log(`Errore nel tool ${tool}:`, response.payload.error);
+        console.log(`Errore nel tool ${tool}:`, (msg.payload as unknown).error);
         return res.status(400).json({
           status: 'error',
-          error: response.payload.error,
-          requestId: response.payload.requestId,
+          error: (msg.payload as unknown).error,
+          requestId: (msg.payload as unknown).requestId,
         });
       }
 
       return res.json({
         status: 'success',
-        result: response.payload.result,
-        requestId: response.payload.requestId,
+        result: (msg.payload as unknown).result,
+        requestId: (msg.payload as unknown).requestId,
       });
     };
 
@@ -113,8 +113,8 @@ app.post('/tools/call', async (req, res) => {
       console.log(`Risposta dal code.generate:`, response.type);
       return res.json({
         status: 'success',
-        result: response.payload.result,
-        requestId: response.payload.requestId,
+        result: (msg.payload as unknown).result,
+        requestId: (msg.payload as unknown).requestId,
       });
     };
 

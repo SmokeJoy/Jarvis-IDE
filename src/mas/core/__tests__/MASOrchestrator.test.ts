@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+import { z } from 'zod';
 /**
  * @file MASOrchestrator.test.ts
  * @description Test E2E per l'orchestratore Multi-Agent System
